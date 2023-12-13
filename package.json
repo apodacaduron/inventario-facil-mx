@@ -18,6 +18,8 @@
     "@tailwindcss/typography": "^0.5.10",
     "@vorms/core": "^1.1.0",
     "@vorms/resolvers": "^1.1.0",
+    "@vueuse/core": "^10.7.0",
+    "oh-vue-icons": "^1.0.0-rc3",
     "pinia": "^2.1.7",
     "vue": "^3.3.11",
     "vue-router": "4",
