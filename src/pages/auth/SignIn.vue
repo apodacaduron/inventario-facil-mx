@@ -22,17 +22,17 @@ const { register, handleSubmit, errors } = useForm({
     z.object({
       email: z
         .string()
-        .min(1, "Email is required!")
-        .email("Must be a valid email"),
-      password: z.string().min(1, "Password is required!"),
+        .min(1, "Correo es requerido")
+        .email("Ingresa un correo válido"),
+      password: z.string().min(1, "Contraseña es requerida"),
     })
   ),
   async onSubmit(formValues) {
     const response = await asyncSignInWithPassword.execute(0, formValues);
-    if (response?.data.session) {
-      router.push("/dashboard");
-    } else {
+    if (response?.error) {
       alert(response?.error?.message);
+    } else {
+      router.push("/dashboard");
     }
   },
 });
@@ -43,30 +43,37 @@ const { value: password, attrs: passwordAttrs } = register("password");
 <template>
   <AuthLayout>
     <div class="w-full max-w-md mx-auto px-6 py-3.5">
-      <h1 class="mt-8 mb-2 text-2xl lg:text-3xl">Welcome back</h1>
-      <span class="text-sm"> Sign in to your account </span>
+      <h1 class="mt-8 mb-2 text-2xl lg:text-3xl">Bienvenido</h1>
+      <span class="text-sm"> Inicia sesión con tu cuenta </span>
     </div>
     <div class="divide-y w-full max-w-md mx-auto">
       <div class="pb-4">
         <InputGroup>
-          <Button label="Sign in with Google">
+          <Button
+            @click="
+              supabase.auth.signInWithOAuth({
+                provider: 'google',
+              })
+            "
+            label="Inicia sesión con Google"
+          >
             <template #icon><v-icon name="fc-google" /></template>
           </Button>
         </InputGroup>
       </div>
       <form @submit="handleSubmit" class="pt-4">
-        <InputGroup label="Email" name="email">
+        <InputGroup label="Correo electrónico" name="email">
           <Input
-            placeholder="Your email"
+            placeholder="Ingresa tu correo"
             type="email"
             v-model="email"
             :errors="errors.email"
             v-bind="emailAttrs"
           />
         </InputGroup>
-        <InputGroup label="Password" name="password">
+        <InputGroup label="Contraseña" name="password">
           <Input
-            placeholder="Your password"
+            placeholder="Ingresa tu contraseña"
             type="password"
             v-model="password"
             :errors="errors.password"
@@ -77,18 +84,18 @@ const { value: password, attrs: passwordAttrs } = register("password");
           <Button
             :loading="asyncSignInWithPassword.isLoading.value"
             :disabled="asyncSignInWithPassword.isLoading.value"
-            label="Submit"
+            label="Iniciar sesión"
             variant="primary"
             type="submit"
           />
         </InputGroup>
         <InputGroup>
           <div class="text-center">
-            Don't have an account yet?
+            Aún no tienes una cuenta?
             <router-link
               to="/auth/sign-up"
               class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
-              >Sign up now</router-link
+              >Regístrate ahora</router-link
             >
           </div>
         </InputGroup>

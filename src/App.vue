@@ -17,6 +17,5 @@ onMounted(() => {
 </script>
 
 <template>
-  {{ authStore.session }}
   <router-view />
 </template>
