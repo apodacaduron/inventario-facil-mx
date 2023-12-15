@@ -2,8 +2,10 @@
 import { onMounted } from "vue";
 import { supabase } from "./config/supabase";
 import { useAuthStore } from "@/stores";
+import { useOrganizationList } from "@/features/organizations";
 
 const authStore = useAuthStore();
+useOrganizationList();
 
 onMounted(() => {
   supabase.auth.getSession().then(({ data }) => {
