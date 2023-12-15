@@ -1,5 +1,9 @@
 <script setup lang="ts">
+import { useAuthStore, useOrganizationStore } from "@/stores";
 import { Button } from "@flavorly/vanilla-components";
+
+const authStore = useAuthStore();
+const organizationStore = useOrganizationStore();
 </script>
 
 <template>
@@ -9,7 +13,25 @@ import { Button } from "@flavorly/vanilla-components";
         class="mx-auto max-w-7xl px-4 h-[64px] flex items-center justify-center md:justify-between"
       >
         <img src="/inventariofacilmx.svg" class="w-[200px]" />
-        <div class="hidden gap-4 md:flex">
+        <div v-if="authStore.isLoggedIn" class="hidden gap-4 md:flex">
+          <router-link
+            :to="`/org/${
+              organizationStore.organizations?.find(Boolean)?.org_id
+            }/dashboard`"
+            :class="{
+              'pointer-events-none': !organizationStore.hasOrganizations,
+              'opacity-80': !organizationStore.hasOrganizations,
+            }"
+          >
+            <Button
+              :loading="!organizationStore.hasOrganizations"
+              :disabled="!organizationStore.hasOrganizations"
+              label="Dashboard"
+              variant="default"
+            />
+          </router-link>
+        </div>
+        <div v-else class="hidden gap-4 md:flex">
           <router-link to="/auth/sign-in">
             <Button label="Iniciar sesión" variant="default" />
           </router-link>

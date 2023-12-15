@@ -1,6 +1,6 @@
 import type { useOrganizationList } from "@/features/organizations";
 import { defineStore } from "pinia";
-import { ref } from "vue";
+import { computed, ref } from "vue";
 
 type Organizations = Awaited<
   ReturnType<ReturnType<typeof useOrganizationList>["load"]>
@@ -9,9 +9,11 @@ type Organizations = Awaited<
 export const useOrganizationStore = defineStore("organization", () => {
   const organizations = ref<Organizations | null>(null);
 
+  const hasOrganizations = computed(() => Boolean(organizations.value?.length));
+
   function setOrganizations(nextOrganizations: Organizations) {
     organizations.value = nextOrganizations;
   }
 
-  return { organizations, setOrganizations };
+  return { organizations, hasOrganizations, setOrganizations };
 });

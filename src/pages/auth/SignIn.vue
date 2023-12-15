@@ -32,7 +32,7 @@ const { register, handleSubmit, errors } = useForm({
     if (response?.error) {
       alert(response?.error?.message);
     } else {
-      router.push("/dashboard");
+      router.push("/");
     }
   },
 });
