@@ -5,9 +5,13 @@ import { router } from "@/config/router";
 import { createPinia } from "pinia";
 import { VanillaComponents } from "@flavorly/vanilla-components";
 import { OhVueIcon, addIcons } from "oh-vue-icons";
-import { FcGoogle } from "oh-vue-icons/icons";
+import {
+  FcGoogle,
+  MdLightmodeOutlined,
+  MdDarkmodeOutlined,
+} from "oh-vue-icons/icons";
 
-addIcons(FcGoogle);
+addIcons(FcGoogle, MdLightmodeOutlined, MdDarkmodeOutlined);
 const pinia = createPinia();
 const app = createApp(App);
 

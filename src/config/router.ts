@@ -19,46 +19,50 @@ type RouteWithMeta = RouteRecordRaw & {
   };
 };
 
+const organizationMeta: RouteWithMeta["meta"] = {
+  requiresAuth: true,
+  requiresOrganization: true,
+  belongsToOrganization: true,
+};
+const authMeta: RouteWithMeta["meta"] = {
+  redirectIfLoggedIn: true,
+};
+
 export const routes: RouteWithMeta[] = [
   { path: "/", component: () => import("@/pages/Home.vue") },
   {
     path: "/org/:orgId",
-    meta: {
-      requiresAuth: true,
-      requiresOrganization: true,
-      belongsToOrganization: true,
-    },
+    meta: organizationMeta,
+    component: () =>
+      import("@/features/organizations/components/OrgLayout.vue"),
     children: [
       {
         path: "dashboard",
-        meta: {
-          requiresAuth: true,
-          requiresOrganization: true,
-          belongsToOrganization: true,
-        },
+        name: "dashboard",
+        meta: organizationMeta,
         component: () => import("@/pages/org/Dashboard.vue"),
+      },
+      {
+        path: "products",
+        name: "products",
+        meta: organizationMeta,
+        component: () => import("@/pages/org/Products.vue"),
       },
     ],
   },
   {
     path: "/auth",
     redirect: "/auth/sign-in",
-    meta: {
-      redirectIfLoggedIn: true,
-    },
+    meta: authMeta,
     children: [
       {
         path: "sign-in",
-        meta: {
-          redirectIfLoggedIn: true,
-        },
+        meta: authMeta,
         component: () => import("@/pages/auth/SignIn.vue"),
       },
       {
         path: "sign-up",
-        meta: {
-          redirectIfLoggedIn: true,
-        },
+        meta: authMeta,
         component: () => import("@/pages/auth/SignUp.vue"),
       },
     ],
