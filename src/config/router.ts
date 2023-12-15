@@ -135,7 +135,7 @@ const navigationGuards: Record<string, RouteGuard> = {
       next();
     }
   },
-  belongsToOrganization: async (to, from, next) => {
+  belongsToOrganization: async (to, _from, next) => {
     if (to.matched.some((record) => record.meta.belongsToOrganization)) {
       const orgId = to.params.orgId;
 
