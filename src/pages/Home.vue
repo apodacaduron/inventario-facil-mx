@@ -12,7 +12,12 @@ const organizationStore = useOrganizationStore();
       <nav
         class="mx-auto max-w-7xl px-4 h-[64px] flex items-center justify-center md:justify-between"
       >
-        <img src="/inventariofacilmx.svg" class="w-[200px]" />
+        <a href="https://flowbite.com">
+          <span
+            class="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap dark:text-white"
+            >inventariofacil.mx</span
+          >
+        </a>
         <div v-if="authStore.isLoggedIn" class="hidden gap-4 md:flex">
           <router-link
             :to="`/org/${

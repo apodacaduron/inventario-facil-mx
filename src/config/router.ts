@@ -38,15 +38,33 @@ export const routes: RouteWithMeta[] = [
     children: [
       {
         path: "dashboard",
-        name: "dashboard",
         meta: organizationMeta,
         component: () => import("@/pages/org/Dashboard.vue"),
       },
       {
         path: "products",
-        name: "products",
         meta: organizationMeta,
         component: () => import("@/pages/org/Products.vue"),
+      },
+      {
+        path: "inventory",
+        meta: organizationMeta,
+        component: () => import("@/pages/org/Inventory.vue"),
+      },
+      {
+        path: "sales",
+        meta: organizationMeta,
+        component: () => import("@/pages/org/Sales.vue"),
+      },
+      {
+        path: "purchases",
+        meta: organizationMeta,
+        component: () => import("@/pages/org/Purchases.vue"),
+      },
+      {
+        path: "customers",
+        meta: organizationMeta,
+        component: () => import("@/pages/org/Customers.vue"),
       },
     ],
   },

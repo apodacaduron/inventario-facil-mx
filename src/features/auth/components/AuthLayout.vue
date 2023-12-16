@@ -6,11 +6,12 @@ const componentName = "auth-layout";
   <div :class="componentName">
     <main :class="`${componentName}__form`">
       <router-link to="/">
-        <img
-          :class="`${componentName}__logo`"
-          src="/inventariofacilmx.svg"
-          alt="inventariofacil.mx"
-        />
+        <a href="https://flowbite.com">
+          <span
+            class="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap dark:text-white"
+            >inventariofacil.mx</span
+          >
+        </a>
       </router-link>
       <slot />
     </main>

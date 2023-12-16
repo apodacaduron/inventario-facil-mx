@@ -57,7 +57,7 @@ const { value: password, attrs: passwordAttrs } = register("password");
             "
             label="Inicia sesión con Google"
           >
-            <template #icon><v-icon name="fc-google" /></template>
+            <template #icon><img src="/google-logo.svg" /></template>
           </Button>
         </InputGroup>
       </div>

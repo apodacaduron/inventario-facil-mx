@@ -1,3 +1,4 @@
+import { supabase } from "@/config/supabase";
 import { Session } from "@supabase/supabase-js";
 import { defineStore } from "pinia";
 import { computed, ref } from "vue";
@@ -13,5 +14,10 @@ export const useAuthStore = defineStore("auth", () => {
     session.value = nextSession;
   }
 
-  return { session, isLoggedIn, user, avatar, setSession };
+  async function signOut() {
+    await supabase.auth.signOut();
+    setSession(null);
+  }
+
+  return { session, isLoggedIn, user, avatar, setSession, signOut };
 });
