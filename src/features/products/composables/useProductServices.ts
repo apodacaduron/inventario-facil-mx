@@ -1,5 +1,5 @@
 import { supabase } from "@/config/supabase";
-import { useAsyncState } from "@vueuse/core";
+import { useOrganizationStore } from "@/stores";
 import { useRoute } from "vue-router";
 
 type CreateProduct = {
@@ -10,17 +10,28 @@ type CreateProduct = {
 };
 
 export function useProductServices() {
+  const organizationStore = useOrganizationStore();
   const route = useRoute();
   const orgId = route.params.orgId;
 
   async function loadList() {
+    const organization = organizationStore.findOrganizationById(
+      orgId.toString()
+    );
+    if (!organization?.org_id)
+      throw new Error("Organization is required to get product list");
     return await supabase
       .from("i_products")
-      .select()
-      .eq("org_id", orgId.toString());
+      .select("*, i_stock(current_stock)")
+      .eq("org_id", organization.org_id);
   }
 
   async function createProduct(formValues: CreateProduct) {
+    const organization = organizationStore.findOrganizationById(
+      orgId.toString()
+    );
+    if (!organization?.org_id)
+      throw new Error("Organization is required to create a product");
     const createdProductResponse = await supabase
       .from("i_products")
       .insert([
@@ -28,7 +39,7 @@ export function useProductServices() {
           name: formValues.name,
           description: formValues.description,
           image_url: formValues.image_url,
-          org_id: orgId,
+          org_id: organization.org_id,
         },
       ])
       .select()
@@ -36,11 +47,23 @@ export function useProductServices() {
     await supabase.from("i_stock").insert([
       {
         product_id: createdProductResponse.data.id,
-        org_id: orgId,
+        org_id: organization.org_id,
         current_stock: formValues.current_stock,
       },
     ]);
   }
 
-  return { loadList, createProduct };
+  async function deleteProduct(productId: string | null) {
+    const organization = organizationStore.findOrganizationById(
+      orgId.toString()
+    );
+    if (!organization?.org_id)
+      throw new Error("Organization is required to delete a product");
+    if (!productId)
+      throw new Error("Product id is required to delete a product");
+
+    await supabase.from("i_products").delete().eq("id", productId);
+  }
+
+  return { loadList, createProduct, deleteProduct };
 }

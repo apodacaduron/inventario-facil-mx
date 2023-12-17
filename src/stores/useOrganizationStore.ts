@@ -15,5 +15,14 @@ export const useOrganizationStore = defineStore("organization", () => {
     organizations.value = nextOrganizations;
   }
 
-  return { organizations, hasOrganizations, setOrganizations };
+  function findOrganizationById(id: string) {
+    return organizations.value?.find((org) => org.org_id === id);
+  }
+
+  return {
+    organizations,
+    hasOrganizations,
+    setOrganizations,
+    findOrganizationById,
+  };
 });
