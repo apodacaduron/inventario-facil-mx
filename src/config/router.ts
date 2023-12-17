@@ -113,86 +113,61 @@ async function isUserAllowedInOrganization(orgId: string | undefined) {
 }
 
 const navigationGuards: Record<string, RouteGuard> = {
-  requiresAuth: (to, _from, next) => {
+  requiresAuth: async (to, _from, next) => {
     if (to.matched.some((record) => record.meta.requiresAuth)) {
       if (!isLoggedIn()) {
-        console.log(1);
         next("/auth/sign-in");
         return;
-      } else {
-        console.log(2);
-        next();
       }
-    } else {
-      console.log(3);
-      next();
     }
+    next();
   },
-  redirectIfLoggedIn: (to, _from, next) => {
+  redirectIfLoggedIn: async (to, _from, next) => {
     if (to.matched.some((record) => record.meta.redirectIfLoggedIn)) {
       if (isLoggedIn()) {
-        console.log(4);
         next("/");
-      } else {
-        console.log(5);
-        next();
+        return;
       }
-    } else {
-      console.log(6);
-      next();
     }
+    next();
   },
   requiresOrganization: async (to, _from, next) => {
     if (to.matched.some((record) => record.meta.requiresOrganization)) {
       const userHasOrganizations = await hasOrganizations();
-
       if (!userHasOrganizations) {
-        console.log(7);
         next("/no-organizations");
-      } else {
-        console.log(8);
-        next();
+        return;
       }
-    } else {
-      console.log(9);
-      next();
     }
+    next();
   },
   belongsToOrganization: async (to, _from, next) => {
     if (to.matched.some((record) => record.meta.belongsToOrganization)) {
       const orgId = to.params.orgId;
-
       const userBelongsToOrganization = await isUserAllowedInOrganization(
         orgId.toString()
       );
-
       if (!userBelongsToOrganization) {
-        console.log(10);
         next("/unauthorized");
-      } else {
-        console.log(11);
-        next();
+        return;
       }
-    } else {
-      console.log(12);
-      next();
     }
+    next();
   },
 };
 
-router.beforeEach((to, from, next) => {
-  const {
-    requiresAuth,
-    redirectIfLoggedIn,
-    requiresOrganization,
-    belongsToOrganization,
-  } = navigationGuards;
+router.beforeEach(async (to, _from, next) => {
+  const guards = [
+    navigationGuards.requiresAuth,
+    navigationGuards.redirectIfLoggedIn,
+    navigationGuards.requiresOrganization,
+    navigationGuards.belongsToOrganization,
+  ];
 
-  requiresAuth(to, from, () => {
-    redirectIfLoggedIn(to, from, async () => {
-      await requiresOrganization(to, from, async () => {
-        await belongsToOrganization(to, from, next);
-      });
-    });
-  });
+  for (const guard of guards) {
+    await guard(to, _from, next);
+    if (to !== router.currentRoute.value) return;
+  }
+
+  next();
 });
