@@ -47,11 +47,6 @@ export const routes: RouteWithMeta[] = [
         component: () => import("@/pages/org/Products.vue"),
       },
       {
-        path: "inventory",
-        meta: organizationMeta,
-        component: () => import("@/pages/org/Inventory.vue"),
-      },
-      {
         path: "sales",
         meta: organizationMeta,
         component: () => import("@/pages/org/Sales.vue"),
@@ -121,22 +116,29 @@ const navigationGuards: Record<string, RouteGuard> = {
   requiresAuth: (to, _from, next) => {
     if (to.matched.some((record) => record.meta.requiresAuth)) {
       if (!isLoggedIn()) {
+        console.log(1);
         next("/auth/sign-in");
+        return;
       } else {
+        console.log(2);
         next();
       }
     } else {
+      console.log(3);
       next();
     }
   },
   redirectIfLoggedIn: (to, _from, next) => {
     if (to.matched.some((record) => record.meta.redirectIfLoggedIn)) {
       if (isLoggedIn()) {
+        console.log(4);
         next("/");
       } else {
+        console.log(5);
         next();
       }
     } else {
+      console.log(6);
       next();
     }
   },
@@ -145,11 +147,14 @@ const navigationGuards: Record<string, RouteGuard> = {
       const userHasOrganizations = await hasOrganizations();
 
       if (!userHasOrganizations) {
+        console.log(7);
         next("/no-organizations");
       } else {
+        console.log(8);
         next();
       }
     } else {
+      console.log(9);
       next();
     }
   },
@@ -162,11 +167,14 @@ const navigationGuards: Record<string, RouteGuard> = {
       );
 
       if (!userBelongsToOrganization) {
+        console.log(10);
         next("/unauthorized");
       } else {
+        console.log(11);
         next();
       }
     } else {
+      console.log(12);
       next();
     }
   },

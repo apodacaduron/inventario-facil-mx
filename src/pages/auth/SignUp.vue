@@ -9,10 +9,7 @@ import { useRouter } from "vue-router";
 import z from "zod";
 
 const router = useRouter();
-const asyncSignUp = useAsyncState(
-  (formValues) => supabase.auth.signUp(formValues),
-  null
-);
+const asyncSignUp = useAsyncState(supabase.auth.signUp, null);
 const { register, handleSubmit, errors } = useForm({
   initialValues: {
     email: "",

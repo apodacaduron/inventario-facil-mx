@@ -10,7 +10,7 @@ import z from "zod";
 
 const router = useRouter();
 const asyncSignInWithPassword = useAsyncState(
-  (formValues) => supabase.auth.signInWithPassword(formValues),
+  supabase.auth.signInWithPassword,
   null
 );
 const { register, handleSubmit, errors } = useForm({

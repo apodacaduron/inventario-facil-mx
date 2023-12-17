@@ -15,7 +15,6 @@ import {
   ClipboardDocumentCheckIcon,
   HomeIcon,
   MoonIcon,
-  RectangleStackIcon,
   ShoppingBagIcon,
   SunIcon,
   UserGroupIcon,
@@ -38,11 +37,6 @@ const menuList = [
     path: `/org/${route.params.orgId}/dashboard`,
     text: "Inicio",
     icon: HomeIcon,
-  },
-  {
-    path: `/org/${route.params.orgId}/inventory`,
-    text: "Inventario",
-    icon: RectangleStackIcon,
   },
   {
     path: `/org/${route.params.orgId}/products`,

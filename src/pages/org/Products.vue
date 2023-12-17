@@ -1,17 +1,52 @@
 <script setup lang="ts">
 import { useProductServices } from "@/features/products";
 import { onMounted, ref } from "vue";
-import { Button, Input, Slideover } from "@flavorly/vanilla-components";
+import {
+  Button,
+  Input,
+  Slideover,
+  InputGroup,
+} from "@flavorly/vanilla-components";
 import {
   EllipsisVerticalIcon,
   MagnifyingGlassIcon,
   PlusIcon,
 } from "@heroicons/vue/24/outline";
+import { useForm } from "@vorms/core";
+import { zodResolver } from "@vorms/resolvers/zod";
+import { z } from "zod";
+import { useAsyncState } from "@vueuse/core";
 
 const productSearch = ref("");
 const isCreateProductSidebarOpen = ref(false);
 const productList = ref<Awaited<ReturnType<typeof productServices.loadList>>>();
 const productServices = useProductServices();
+const asyncCreateProduct = useAsyncState(productServices.createProduct, null);
+
+const { register, handleSubmit, errors } = useForm({
+  initialValues: {
+    name: "",
+    description: "",
+    image_url: "",
+    current_stock: 0,
+  },
+  validate: zodResolver(
+    z.object({
+      name: z.string().min(1, "Nombre de producto es requerido"),
+      description: z.string(),
+      image_url: z.string(),
+      current_stock: z.number().int().nonnegative().finite().safe(),
+    })
+  ),
+  async onSubmit(formValues) {
+    asyncCreateProduct.execute(0, formValues);
+  },
+});
+const { value: name, attrs: nameAttrs } = register("name");
+const { value: description, attrs: descriptionAttrs } = register("description");
+const { value: imageUrl, attrs: imageUrlAttrs } = register("image_url");
+const { value: currentStock, attrs: currentStockAttrs } =
+  register("current_stock");
 
 onMounted(async () => {
   productList.value = await productServices.loadList();
@@ -134,6 +169,57 @@ onMounted(async () => {
     title="Crear producto"
     subtitle="Crea rápidamente un nuevo producto para tu inventario."
   >
-    <div class="space-y-6 pb-16"></div>
+    <div class="space-y-6 pb-16">
+      <form @submit="handleSubmit">
+        <InputGroup label="Imagen de producto" name="image_url">
+          <Input
+            placeholder="URL de la imagen de tu producto"
+            v-model="imageUrl"
+            :errors="errors.image_url"
+            v-bind="imageUrlAttrs"
+          />
+        </InputGroup>
+        <InputGroup label="Nombre de producto" name="name">
+          <Input
+            placeholder="Ingresa el nombre de producto"
+            v-model="name"
+            :errors="errors.name"
+            v-bind="nameAttrs"
+          />
+        </InputGroup>
+        <InputGroup label="Descripción de producto" name="description">
+          <Input
+            placeholder="Ingresa la descripción de producto"
+            v-model="description"
+            :errors="errors.description"
+            v-bind="descriptionAttrs"
+          />
+        </InputGroup>
+        <InputGroup label="Cantidad de producto" name="current_stock">
+          <Input
+            placeholder="Ingresa la cantidad de producto"
+            type="number"
+            v-model="currentStock"
+            :errors="errors.current_stock"
+            v-bind="currentStockAttrs"
+          />
+        </InputGroup>
+        <InputGroup>
+          <div class="flex flex-col gap-4">
+            <Button
+              :loading="asyncCreateProduct.isLoading.value"
+              :disabled="asyncCreateProduct.isLoading.value"
+              label="Guardar"
+              variant="primary"
+              type="submit"
+            />
+            <Button
+              :disabled="asyncCreateProduct.isLoading.value"
+              label="Cancelar"
+            />
+          </div>
+        </InputGroup>
+      </form>
+    </div>
   </Slideover>
 </template>
