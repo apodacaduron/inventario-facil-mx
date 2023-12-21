@@ -157,7 +157,7 @@ async function deleteProduct() {
       >
         <tr>
           <th scope="col" class="px-6 py-3">Nombre</th>
-          <th scope="col" class="px-6 py-3">Cantidad</th>
+          <th scope="col" class="px-6 py-3 text-center">Cantidad</th>
           <th scope="col" class="px-6 py-3">Acción</th>
         </tr>
       </thead>
