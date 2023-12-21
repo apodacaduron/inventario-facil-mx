@@ -115,6 +115,7 @@ watch(
           <Input
             placeholder="Ingresa el telefono del cliente"
             v-model="phone"
+            type="number"
             :errors="formInstance.errors.value.phone"
             v-bind="phoneAttrs"
           />
