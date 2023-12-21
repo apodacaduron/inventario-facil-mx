@@ -8,6 +8,9 @@ export function useOrganizationList() {
   const organizationStore = useOrganizationStore();
 
   async function load() {
+    if (!authStore.session?.user.id)
+      throw new Error("User id is required to load organizations");
+
     const response = await supabase
       .from("i_user_organization_roles")
       .select("id, org_id, i_organizations(name), i_roles(role_name)")
