@@ -104,7 +104,7 @@ export function useProductServices() {
       orgId.toString()
     );
     if (!organization?.org_id)
-      throw new Error("Organization is required to create a product");
+      throw new Error("Organization is required to update a product");
     await supabase
       .from("i_products")
       .update({
@@ -125,11 +125,6 @@ export function useProductServices() {
   }
 
   async function deleteProduct(productId: DeleteProduct) {
-    const organization = organizationStore.findOrganizationById(
-      orgId.toString()
-    );
-    if (!organization?.org_id)
-      throw new Error("Organization is required to delete a product");
     if (!productId)
       throw new Error("Product id is required to delete a product");
 
