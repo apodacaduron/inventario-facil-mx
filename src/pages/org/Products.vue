@@ -1,11 +1,16 @@
 <script setup lang="ts">
-import { useProductServices } from "@/features/products";
+import {
+  CreateOrEditSidebar,
+  CreateProduct,
+  Product,
+  UpdateProduct,
+  productServicesTypeguards,
+  useProductServices,
+} from "@/features/products";
 import { ref, watch } from "vue";
 import {
   Button,
   Input,
-  Slideover,
-  InputGroup,
   DropdownMenu,
   DropdownOption,
   Dialog,
@@ -17,67 +22,74 @@ import {
   PlusIcon,
   TrashIcon,
 } from "@heroicons/vue/24/outline";
-import { useForm } from "@vorms/core";
-import { zodResolver } from "@vorms/resolvers/zod";
-import { z } from "zod";
 import { useAsyncState } from "@vueuse/core";
 import { useOrganizationStore } from "@/stores";
 
 const productSearch = ref("");
-const isCreateOrUpdateProductSidebarOpen = ref(false);
+const productSidebarMode = ref<"create" | "update" | null>(null);
 const isDeleteProductDialogOpen = ref(false);
-const selectedProductIdFromActions = ref<string | null>(null);
+const selectedProductFromActions = ref<Product | null>(null);
 const productServices = useProductServices();
 const asyncCreateProduct = useAsyncState(productServices.createProduct, null);
 const asyncLoadProducts = useAsyncState(productServices.loadList, null);
-const asyncDeleteProducts = useAsyncState(productServices.deleteProduct, null);
+const asyncDeleteProduct = useAsyncState(productServices.deleteProduct, null);
+const asyncUpdateProduct = useAsyncState(productServices.updateProduct, null);
 const organizationStore = useOrganizationStore();
 
-const { register, handleSubmit, errors, resetForm } = useForm({
-  initialValues: {
-    name: "",
-    description: "",
-    image_url: "",
-    current_stock: 0,
-  },
-  validate: zodResolver(
-    z.object({
-      name: z.string().min(1, "Nombre de producto es requerido"),
-      description: z.string(),
-      image_url: z.string(),
-      current_stock: z.number().int().nonnegative().finite().safe(),
-    })
-  ),
-  async onSubmit(formValues) {
-    await asyncCreateProduct.execute(0, formValues);
-    await asyncLoadProducts.execute();
-  },
-});
-const { value: name, attrs: nameAttrs } = register("name");
-const { value: description, attrs: descriptionAttrs } = register("description");
-const { value: imageUrl, attrs: imageUrlAttrs } = register("image_url");
-const { value: currentStock, attrs: currentStockAttrs } =
-  register("current_stock");
-
-function closeProductSidebar() {
-  isCreateOrUpdateProductSidebarOpen.value = false;
-  resetForm();
-}
-
-function openDeleteProductDialog(productId: string | null) {
-  selectedProductIdFromActions.value = productId;
+function openDeleteProductDialog(product: Product) {
+  selectedProductFromActions.value = product;
   isDeleteProductDialogOpen.value = true;
 }
 
-function openUpdateProductDialog(productId: string | null) {
-  selectedProductIdFromActions.value = productId;
-  isCreateOrUpdateProductSidebarOpen.value = true;
+function closeSidebar() {
+  productSidebarMode.value = null;
+  selectedProductFromActions.value = null;
+}
+
+const productHandlers = {
+  async create(formValues: CreateProduct) {
+    await asyncCreateProduct.execute(0, formValues);
+    productSidebarMode.value = null;
+    selectedProductFromActions.value = null;
+    await asyncLoadProducts.execute();
+  },
+  async update(formValues: UpdateProduct) {
+    const productId = selectedProductFromActions.value?.id;
+    const stockId = selectedProductFromActions.value?.i_stock.find(Boolean)?.id;
+    if (!productId) throw new Error("Product id required to perform update");
+    if (!stockId) throw new Error("Stock id required to perform update");
+    await asyncUpdateProduct.execute(0, {
+      ...formValues,
+      product_id: productId,
+      stock_id: stockId,
+    });
+    productSidebarMode.value = null;
+    selectedProductFromActions.value = null;
+    await asyncLoadProducts.execute();
+  },
+};
+
+async function handleSaveSidebar(formValues: CreateProduct | UpdateProduct) {
+  if (!productSidebarMode.value)
+    throw new Error("productSidebarMode must not be null");
+  if (productServicesTypeguards.isCreateProduct(formValues)) {
+    await productHandlers.create(formValues);
+  } else {
+    await productHandlers.update(formValues);
+  }
+}
+
+function openUpdateProductSidebar(product: Product) {
+  selectedProductFromActions.value = product;
+  productSidebarMode.value = "update";
 }
 
 async function deleteProduct() {
-  await asyncDeleteProducts.execute(0, selectedProductIdFromActions.value);
+  const productId = selectedProductFromActions.value?.id;
+  if (!productId) throw new Error("Product id required to perform delete");
+  await asyncDeleteProduct.execute(0, productId);
   isDeleteProductDialogOpen.value = false;
-  selectedProductIdFromActions.value = null;
+  selectedProductFromActions.value = null;
   await asyncLoadProducts.execute();
 }
 
@@ -105,7 +117,7 @@ const cleanHasOrganizations = watch(
     </div>
     <div>
       <Button
-        @click="isCreateOrUpdateProductSidebarOpen = true"
+        @click="productSidebarMode = 'create'"
         label="Crear producto"
         variant="primary"
       >
@@ -191,7 +203,7 @@ const cleanHasOrganizations = watch(
             </div>
           </th>
           <td>
-            {{ product.i_stock.find(Boolean).current_stock }}
+            {{ product.i_stock.find(Boolean)?.current_stock }}
           </td>
           <td class="px-6 py-4">
             <DropdownMenu>
@@ -203,11 +215,11 @@ const cleanHasOrganizations = watch(
                 </Button>
               </template>
 
-              <DropdownOption @click="openUpdateProductDialog(product.id)">
+              <DropdownOption @click="openUpdateProductSidebar(product)">
                 <PencilIcon class="w-5 h-5 mr-2" />
                 <span>Actualizar</span>
               </DropdownOption>
-              <DropdownOption @click="openDeleteProductDialog(product.id)">
+              <DropdownOption @click="openDeleteProductDialog(product)">
                 <TrashIcon class="w-5 h-5 mr-2" />
                 <span>Eliminar</span>
               </DropdownOption>
@@ -243,64 +255,14 @@ const cleanHasOrganizations = watch(
     </template>
   </Dialog>
 
-  <Slideover
-    v-model="isCreateOrUpdateProductSidebarOpen"
-    position="right"
-    title="Crear producto"
-    subtitle="Crea rápidamente un nuevo producto para tu inventario."
-  >
-    <div class="space-y-6 pb-16">
-      <form @submit="handleSubmit">
-        <InputGroup label="Imagen de producto" name="image_url">
-          <Input
-            placeholder="URL de la imagen de tu producto"
-            v-model="imageUrl"
-            :errors="errors.image_url"
-            v-bind="imageUrlAttrs"
-          />
-        </InputGroup>
-        <InputGroup label="Nombre de producto" name="name">
-          <Input
-            placeholder="Ingresa el nombre de producto"
-            v-model="name"
-            :errors="errors.name"
-            v-bind="nameAttrs"
-          />
-        </InputGroup>
-        <InputGroup label="Descripción de producto" name="description">
-          <Input
-            placeholder="Ingresa la descripción de producto"
-            v-model="description"
-            :errors="errors.description"
-            v-bind="descriptionAttrs"
-          />
-        </InputGroup>
-        <InputGroup label="Cantidad de producto" name="current_stock">
-          <Input
-            placeholder="Ingresa la cantidad de producto"
-            type="number"
-            v-model="currentStock"
-            :errors="errors.current_stock"
-            v-bind="currentStockAttrs"
-          />
-        </InputGroup>
-        <InputGroup>
-          <div class="flex flex-col gap-4">
-            <Button
-              :loading="asyncCreateProduct.isLoading.value"
-              :disabled="asyncCreateProduct.isLoading.value"
-              label="Guardar"
-              variant="primary"
-              type="submit"
-            />
-            <Button
-              :disabled="asyncCreateProduct.isLoading.value"
-              label="Cancelar"
-              @click="closeProductSidebar"
-            />
-          </div>
-        </InputGroup>
-      </form>
-    </div>
-  </Slideover>
+  <CreateOrEditSidebar
+    :open="Boolean(productSidebarMode)"
+    :mode="productSidebarMode ?? undefined"
+    :product="selectedProductFromActions"
+    :isLoading="
+      asyncUpdateProduct.isLoading.value || asyncCreateProduct.isLoading.value
+    "
+    @close="closeSidebar"
+    @save="handleSaveSidebar"
+  />
 </template>
