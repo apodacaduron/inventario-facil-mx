@@ -39,21 +39,35 @@ export const productServicesTypeguards = {
   },
 };
 
+export const PAGINATION_LIMIT = 30;
+
 export function useProductServices() {
   const organizationStore = useOrganizationStore();
   const route = useRoute();
   const orgId = route.params.orgId;
 
-  async function loadList() {
+  async function loadList(options?: { offset?: number; search?: string }) {
+    const offset = options?.offset ?? 0;
+    const from = offset * PAGINATION_LIMIT;
+    const to = from + PAGINATION_LIMIT - 1;
+
     const organization = organizationStore.findOrganizationById(
       orgId.toString()
     );
     if (!organization?.org_id)
       throw new Error("Organization is required to get product list");
-    return await supabase
+
+    const productSearch = supabase
       .from("i_products")
       .select("*, i_stock(current_stock, id)")
-      .eq("org_id", organization.org_id);
+      .eq("org_id", organization.org_id)
+      .range(from, to);
+
+    if (options?.search) {
+      return await productSearch.textSearch("name", options.search);
+    }
+
+    return await productSearch;
   }
 
   async function createProduct(formValues: CreateProduct) {

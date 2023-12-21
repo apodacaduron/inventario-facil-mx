@@ -7,7 +7,7 @@ import {
   productServicesTypeguards,
   useProductServices,
 } from "@/features/products";
-import { ref, watch } from "vue";
+import { computed, ref } from "vue";
 import {
   Button,
   Input,
@@ -22,19 +22,37 @@ import {
   PlusIcon,
   TrashIcon,
 } from "@heroicons/vue/24/outline";
-import { useAsyncState } from "@vueuse/core";
+import { refDebounced, useAsyncState, useInfiniteScroll } from "@vueuse/core";
 import { useOrganizationStore } from "@/stores";
+import { useProductsQuery } from "@/features/products/composables/useProductQueries";
+import { useQueryClient } from "@tanstack/vue-query";
 
+const tableRef = ref<HTMLElement | null>(null);
 const productSearch = ref("");
+const productSearchDebounced = refDebounced(productSearch, 400);
 const productSidebarMode = ref<"create" | "update" | null>(null);
 const isDeleteProductDialogOpen = ref(false);
 const selectedProductFromActions = ref<Product | null>(null);
+const queryClient = useQueryClient();
+const organizationStore = useOrganizationStore();
 const productServices = useProductServices();
 const asyncCreateProduct = useAsyncState(productServices.createProduct, null);
-const asyncLoadProducts = useAsyncState(productServices.loadList, null);
+const productsQuery = useProductsQuery({
+  options: {
+    enabled: computed(() => organizationStore.hasOrganizations),
+    search: productSearchDebounced,
+  },
+});
 const asyncDeleteProduct = useAsyncState(productServices.deleteProduct, null);
 const asyncUpdateProduct = useAsyncState(productServices.updateProduct, null);
-const organizationStore = useOrganizationStore();
+useInfiniteScroll(
+  tableRef,
+  () => {
+    if (productsQuery.isFetching.value) return;
+    productsQuery.fetchNextPage();
+  },
+  { distance: 10 }
+);
 
 function openDeleteProductDialog(product: Product) {
   selectedProductFromActions.value = product;
@@ -51,7 +69,7 @@ const productHandlers = {
     await asyncCreateProduct.execute(0, formValues);
     productSidebarMode.value = null;
     selectedProductFromActions.value = null;
-    await asyncLoadProducts.execute();
+    await queryClient.invalidateQueries({ queryKey: ["products"] });
   },
   async update(formValues: UpdateProduct) {
     const productId = selectedProductFromActions.value?.id;
@@ -65,7 +83,7 @@ const productHandlers = {
     });
     productSidebarMode.value = null;
     selectedProductFromActions.value = null;
-    await asyncLoadProducts.execute();
+    await queryClient.invalidateQueries({ queryKey: ["products"] });
   },
 };
 
@@ -90,17 +108,8 @@ async function deleteProduct() {
   await asyncDeleteProduct.execute(0, productId);
   isDeleteProductDialogOpen.value = false;
   selectedProductFromActions.value = null;
-  await asyncLoadProducts.execute();
+  await queryClient.invalidateQueries({ queryKey: ["products"] });
 }
-
-const cleanHasOrganizations = watch(
-  () => organizationStore.hasOrganizations,
-  async (nextHasOrganizations) => {
-    if (!nextHasOrganizations) return;
-    await asyncLoadProducts.execute();
-    cleanHasOrganizations();
-  }
-);
 </script>
 
 <template>
@@ -140,6 +149,7 @@ const cleanHasOrganizations = watch(
 
   <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
     <table
+      ref="tableRef"
       class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400"
     >
       <thead
@@ -162,70 +172,75 @@ const cleanHasOrganizations = watch(
         </tr>
       </thead>
       <tbody>
-        <tr
-          v-for="(product, index) in asyncLoadProducts.state.value?.data"
-          :key="index"
-          class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
-        >
-          <td class="w-4 p-4">
-            <div class="flex items-center">
-              <input
-                id="checkbox-table-search-1"
-                type="checkbox"
-                class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-              />
-              <label for="checkbox-table-search-1" class="sr-only"
-                >checkbox</label
-              >
-            </div>
-          </td>
-          <th
-            scope="row"
-            class="flex items-center px-6 py-4 text-gray-900 whitespace-nowrap dark:text-white"
+        <template v-for="page in productsQuery.data.value?.pages">
+          <tr
+            v-for="(product, index) in page.data"
+            :key="index"
+            class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
           >
-            <img
-              v-if="product.image_url"
-              class="w-12 h-12 rounded-full"
-              :src="product.image_url"
-              alt="Rounded avatar"
-            />
-            <img
-              v-else
-              class="w-12 h-12 rounded-full"
-              src="/product-placeholder.png"
-              alt="Rounded avatar"
-            />
-            <div class="ps-3">
-              <div class="text-base font-semibold">{{ product.name }}</div>
-              <div v-if="product.description" class="font-normal text-gray-500">
-                {{ product.description }}
+            <td class="w-4 p-4">
+              <div class="flex items-center">
+                <input
+                  id="checkbox-table-search-1"
+                  type="checkbox"
+                  class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                />
+                <label for="checkbox-table-search-1" class="sr-only"
+                  >checkbox</label
+                >
               </div>
-            </div>
-          </th>
-          <td>
-            {{ product.i_stock.find(Boolean)?.current_stock }}
-          </td>
-          <td class="px-6 py-4">
-            <DropdownMenu>
-              <template #trigger>
-                <Button>
-                  <template #default>
-                    <EllipsisVerticalIcon class="w-5 h-5 stroke-[2px]" />
-                  </template>
-                </Button>
-              </template>
+            </td>
+            <th
+              scope="row"
+              class="flex items-center px-6 py-4 text-gray-900 whitespace-nowrap dark:text-white"
+            >
+              <img
+                v-if="product.image_url"
+                class="w-12 h-12 rounded-full"
+                :src="product.image_url"
+                alt="Rounded avatar"
+              />
+              <img
+                v-else
+                class="w-12 h-12 rounded-full"
+                src="/product-placeholder.png"
+                alt="Rounded avatar"
+              />
+              <div class="ps-3">
+                <div class="text-base font-semibold">{{ product.name }}</div>
+                <div
+                  v-if="product.description"
+                  class="font-normal text-gray-500"
+                >
+                  {{ product.description }}
+                </div>
+              </div>
+            </th>
+            <td>
+              {{ product.i_stock.find(Boolean)?.current_stock }}
+            </td>
+            <td class="px-6 py-4">
+              <DropdownMenu>
+                <template #trigger>
+                  <Button>
+                    <template #default>
+                      <EllipsisVerticalIcon class="w-5 h-5 stroke-[2px]" />
+                    </template>
+                  </Button>
+                </template>
 
-              <DropdownOption @click="openUpdateProductSidebar(product)">
-                <PencilIcon class="w-5 h-5 mr-2" />
-                <span>Actualizar</span>
-              </DropdownOption>
-              <DropdownOption @click="openDeleteProductDialog(product)">
-                <TrashIcon class="w-5 h-5 mr-2" />
-                <span>Eliminar</span>
-              </DropdownOption>
-            </DropdownMenu>
-          </td>
-        </tr>
+                <DropdownOption @click="openUpdateProductSidebar(product)">
+                  <PencilIcon class="w-5 h-5 mr-2" />
+                  <span>Actualizar</span>
+                </DropdownOption>
+                <DropdownOption @click="openDeleteProductDialog(product)">
+                  <TrashIcon class="w-5 h-5 mr-2" />
+                  <span>Eliminar</span>
+                </DropdownOption>
+              </DropdownMenu>
+            </td>
+          </tr>
+        </template>
       </tbody>
     </table>
   </div>
