@@ -82,12 +82,7 @@ const customerHandlers = {
     await queryClient.invalidateQueries({ queryKey: ["customers"] });
   },
   async update(formValues: UpdateCustomer) {
-    const customerId = selectedCustomerFromActions.value?.id;
-    if (!customerId) throw new Error("Customer id required to perform update");
-    await asyncUpdateCustomer.execute(0, {
-      ...formValues,
-      customer_id: customerId,
-    });
+    await asyncUpdateCustomer.execute(0, formValues);
     customerSidebarMode.value = null;
     selectedCustomerFromActions.value = null;
     await queryClient.invalidateQueries({ queryKey: ["customers"] });
