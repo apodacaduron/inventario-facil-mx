@@ -69,13 +69,13 @@ const saleHandlers = {
     await asyncCreateSale.execute(0, formValues);
     saleSidebarMode.value = null;
     selectedSaleFromActions.value = null;
-    await queryClient.invalidateQueries({ queryKey: ["sales"] });
+    await queryClient.removeQueries({ queryKey: ["sales"] });
   },
   async update(formValues: UpdateSale) {
     await asyncUpdateSale.execute(0, formValues);
     saleSidebarMode.value = null;
     selectedSaleFromActions.value = null;
-    await queryClient.invalidateQueries({ queryKey: ["sales"] });
+    await queryClient.removeQueries({ queryKey: ["sales"] });
   },
 };
 
@@ -100,7 +100,7 @@ async function deleteSale() {
   await asyncDeleteSale.execute(0, saleId);
   isDeleteSaleDialogOpen.value = false;
   selectedSaleFromActions.value = null;
-  await queryClient.invalidateQueries({ queryKey: ["sales"] });
+  await queryClient.removeQueries({ queryKey: ["sales"] });
 }
 </script>
 

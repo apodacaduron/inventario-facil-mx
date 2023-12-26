@@ -14,29 +14,39 @@ import {
   DropdownMenu,
   DropdownOption,
   Dialog,
+  Textarea,
 } from "@flavorly/vanilla-components";
 import {
   EllipsisVerticalIcon,
   MagnifyingGlassIcon,
   PencilIcon,
   PlusIcon,
+  ShareIcon,
   TrashIcon,
 } from "@heroicons/vue/24/outline";
-import { refDebounced, useAsyncState, useInfiniteScroll } from "@vueuse/core";
+import {
+  refDebounced,
+  useAsyncState,
+  useClipboard,
+  useInfiniteScroll,
+} from "@vueuse/core";
 import { useOrganizationStore } from "@/stores";
 import { useProductsQuery } from "@/features/products/composables/useProductQueries";
 import { useQueryClient } from "@tanstack/vue-query";
 
 const tableRef = ref<HTMLElement | null>(null);
+const shareText = ref("");
 const productSearch = ref("");
 const productSearchDebounced = refDebounced(productSearch, 400);
 const productSidebarMode = ref<"create" | "update" | null>(null);
 const isDeleteProductDialogOpen = ref(false);
+const isShareProductsDialogOpen = ref(false);
 const selectedProductFromActions = ref<Product | null>(null);
 const queryClient = useQueryClient();
 const organizationStore = useOrganizationStore();
 const productServices = useProductServices();
 const asyncCreateProduct = useAsyncState(productServices.createProduct, null);
+const clipboard = useClipboard();
 const productsQuery = useProductsQuery({
   options: {
     enabled: computed(() => organizationStore.hasOrganizations),
@@ -69,7 +79,7 @@ const productHandlers = {
     await asyncCreateProduct.execute(0, formValues);
     productSidebarMode.value = null;
     selectedProductFromActions.value = null;
-    await queryClient.invalidateQueries({ queryKey: ["products"] });
+    await queryClient.removeQueries({ queryKey: ["products"] });
   },
   async update(formValues: UpdateProduct) {
     const productId = selectedProductFromActions.value?.id;
@@ -83,7 +93,7 @@ const productHandlers = {
     });
     productSidebarMode.value = null;
     selectedProductFromActions.value = null;
-    await queryClient.invalidateQueries({ queryKey: ["products"] });
+    await queryClient.removeQueries({ queryKey: ["products"] });
   },
 };
 
@@ -108,7 +118,43 @@ async function deleteProduct() {
   await asyncDeleteProduct.execute(0, productId);
   isDeleteProductDialogOpen.value = false;
   selectedProductFromActions.value = null;
-  await queryClient.invalidateQueries({ queryKey: ["products"] });
+  await queryClient.removeQueries({ queryKey: ["products"] });
+}
+
+async function shareExistingInventory() {
+  const existingProducts =
+    productsQuery.data.value?.pages.reduce<Product[]>((acc, page) => {
+      const filteredProducts = page.data?.filter((product) =>
+        product.i_stock.some((stock) => (stock.current_stock ?? 0) > 0)
+      );
+      return [...acc, ...(filteredProducts ?? [])];
+    }, []) ?? [];
+  const inventoryString = existingProducts
+    .map(
+      (product) =>
+        `${product.name}: ${product.i_stock.find(Boolean)?.current_stock ?? 0}`
+    )
+    .join("\r\n");
+
+  // @ts-ignore
+  if (navigator.share) {
+    await navigator.share({
+      title: "Productos disponibles",
+      text: inventoryString,
+    });
+  } else {
+    isShareProductsDialogOpen.value = true;
+    shareText.value = inventoryString;
+  }
+}
+
+function copyTextShareModal() {
+  clipboard.copy(shareText.value);
+  closeShareModal();
+}
+function closeShareModal() {
+  isShareProductsDialogOpen.value = false;
+  shareText.value = "";
 }
 </script>
 
@@ -124,13 +170,16 @@ async function deleteProduct() {
         Tus productos, tu control. Gestiona fácilmente tu inventario.
       </p>
     </div>
-    <div>
+    <div class="flex gap-2">
       <Button
         @click="productSidebarMode = 'create'"
         label="Crear producto"
         variant="primary"
       >
         <template #icon><PlusIcon class="w-5 h-5 stroke-[2px]" /></template>
+      </Button>
+      <Button @click="shareExistingInventory" variant="default">
+        <template #default><ShareIcon class="w-5 h-5 stroke-[2px]" /></template>
       </Button>
     </div>
   </div>
@@ -246,6 +295,52 @@ async function deleteProduct() {
         Cancelar
       </Button>
     </template>
+  </Dialog>
+
+  <Dialog v-model="isShareProductsDialogOpen">
+    <div>
+      <div
+        class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100"
+      >
+        <ShareIcon
+          class="h-6 w-6 stroke-[2px] text-green-600"
+          aria-hidden="true"
+        />
+      </div>
+      <div class="mt-3 text-center sm:mt-5">
+        <h3 class="text-lg font-medium leading-6 text-gray-900 dark:text-white">
+          🎉 Thank you for testing Vanilla!
+        </h3>
+        <div class="mt-2">
+          <p class="text-sm text-gray-500 dark:text-gray-400">
+            Lorem ipsum dolor sit amet consectetur adipisicing elit. Consequatur
+            amet labore.
+          </p>
+        </div>
+
+        <div class="my-2">
+          <Textarea autosize v-model="shareText" />
+        </div>
+      </div>
+    </div>
+    <div class="mt-5 sm:mt-6 flex flex-col gap-3">
+      <Button
+        type="button"
+        class="w-full"
+        variant="primary"
+        @click="copyTextShareModal"
+      >
+        Copy
+      </Button>
+      <Button
+        type="button"
+        class="w-full"
+        variant="default"
+        @click="closeShareModal"
+      >
+        Close
+      </Button>
+    </div>
   </Dialog>
 
   <CreateOrEditSidebar

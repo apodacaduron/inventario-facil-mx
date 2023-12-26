@@ -79,13 +79,13 @@ const customerHandlers = {
     await asyncCreateCustomer.execute(0, formValues);
     customerSidebarMode.value = null;
     selectedCustomerFromActions.value = null;
-    await queryClient.invalidateQueries({ queryKey: ["customers"] });
+    await queryClient.removeQueries({ queryKey: ["customers"] });
   },
   async update(formValues: UpdateCustomer) {
     await asyncUpdateCustomer.execute(0, formValues);
     customerSidebarMode.value = null;
     selectedCustomerFromActions.value = null;
-    await queryClient.invalidateQueries({ queryKey: ["customers"] });
+    await queryClient.removeQueries({ queryKey: ["customers"] });
   },
 };
 
@@ -110,7 +110,7 @@ async function deleteCustomer() {
   await asyncDeleteCustomer.execute(0, customerId);
   isDeleteCustomerDialogOpen.value = false;
   selectedCustomerFromActions.value = null;
-  await queryClient.invalidateQueries({ queryKey: ["customers"] });
+  await queryClient.removeQueries({ queryKey: ["customers"] });
 }
 </script>
 
