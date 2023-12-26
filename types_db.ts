@@ -104,6 +104,8 @@ export interface Database {
           image_url: string | null
           name: string | null
           org_id: string | null
+          retail_price: number | null
+          unit_price: number | null
         }
         Insert: {
           created_at?: string
@@ -112,6 +114,8 @@ export interface Database {
           image_url?: string | null
           name?: string | null
           org_id?: string | null
+          retail_price?: number | null
+          unit_price?: number | null
         }
         Update: {
           created_at?: string
@@ -120,6 +124,8 @@ export interface Database {
           image_url?: string | null
           name?: string | null
           org_id?: string | null
+          retail_price?: number | null
+          unit_price?: number | null
         }
         Relationships: [
           {
@@ -194,36 +200,72 @@ export interface Database {
         }
         Relationships: []
       }
+      i_sale_products: {
+        Row: {
+          created_at: string
+          id: string
+          price: number | null
+          product_id: string | null
+          qty: number | null
+          sale_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          price?: number | null
+          product_id?: string | null
+          qty?: number | null
+          sale_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          price?: number | null
+          product_id?: string | null
+          qty?: number | null
+          sale_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "i_sale_products_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "i_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "i_sale_products_sale_id_fkey"
+            columns: ["sale_id"]
+            isOneToOne: false
+            referencedRelation: "i_sales"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       i_sales: {
         Row: {
           created_at: string
           customer_id: string | null
           id: string
           org_id: string | null
-          product_id: string | null
-          qty_sold: number | null
           sale_date: string | null
-          sale_price: number | null
+          status: Database["public"]["Enums"]["sale_status"] | null
         }
         Insert: {
           created_at?: string
           customer_id?: string | null
           id?: string
           org_id?: string | null
-          product_id?: string | null
-          qty_sold?: number | null
           sale_date?: string | null
-          sale_price?: number | null
+          status?: Database["public"]["Enums"]["sale_status"] | null
         }
         Update: {
           created_at?: string
           customer_id?: string | null
           id?: string
           org_id?: string | null
-          product_id?: string | null
-          qty_sold?: number | null
           sale_date?: string | null
-          sale_price?: number | null
+          status?: Database["public"]["Enums"]["sale_status"] | null
         }
         Relationships: [
           {
@@ -238,13 +280,6 @@ export interface Database {
             columns: ["org_id"]
             isOneToOne: false
             referencedRelation: "i_organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "i_sales_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "i_products"
             referencedColumns: ["id"]
           }
         ]
@@ -523,6 +558,12 @@ export interface Database {
       organization_roles: "admin" | "user"
       pricing_plan_interval: "day" | "week" | "month" | "year"
       pricing_type: "one_time" | "recurring"
+      sale_status:
+        | "pending"
+        | "in_progress"
+        | "completed"
+        | "cancelled"
+        | "returned"
       subscription_status:
         | "trialing"
         | "active"

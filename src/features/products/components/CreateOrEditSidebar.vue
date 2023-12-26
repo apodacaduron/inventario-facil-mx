@@ -53,7 +53,7 @@ const formInstance = useForm<CreateProduct | UpdateProduct>({
       name: z.string().min(1, "Nombre de producto es requerido"),
       description: z.string(),
       image_url: z.string(),
-      current_stock: z.number().int().nonnegative().finite().safe(),
+      current_stock: z.number().int().positive().finite().safe(),
     })
   ),
   async onSubmit(formValues) {
