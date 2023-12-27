@@ -57,15 +57,42 @@ export function useProductServices() {
     if (!organization?.org_id)
       throw new Error("Organization is required to get product list");
 
+    let productSearch = supabase
+      .from("i_products")
+      .select("*, i_stock(current_stock, id)")
+      .eq("org_id", organization.org_id)
+      .range(from, to)
+      .order("created_at", { ascending: false });
+
+    if (options?.search) {
+      productSearch = productSearch.textSearch("name", options.search, {
+        type: "plain",
+      });
+    }
+
+    return await productSearch;
+  }
+
+  async function loadListByIds(options?: {
+    offset?: number;
+    productIds: string[];
+  }) {
+    const offset = options?.offset ?? 0;
+    const from = offset * PAGINATION_LIMIT;
+    const to = from + PAGINATION_LIMIT - 1;
+
+    const organization = organizationStore.findOrganizationById(
+      orgId.toString()
+    );
+    if (!organization?.org_id)
+      throw new Error("Organization is required to get product list");
+
     const productSearch = supabase
       .from("i_products")
       .select("*, i_stock(current_stock, id)")
       .eq("org_id", organization.org_id)
+      .in("id", options?.productIds ?? [])
       .range(from, to);
-
-    if (options?.search) {
-      return await productSearch.textSearch("name", options.search);
-    }
 
     return await productSearch;
   }
@@ -131,5 +158,11 @@ export function useProductServices() {
     await supabase.from("i_products").delete().eq("id", productId);
   }
 
-  return { loadList, createProduct, deleteProduct, updateProduct };
+  return {
+    loadList,
+    loadListByIds,
+    createProduct,
+    deleteProduct,
+    updateProduct,
+  };
 }

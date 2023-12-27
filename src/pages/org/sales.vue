@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import {
-  CreateOrEditSidebar,
+  CreateSidebar,
   CreateSale,
   Sale,
   UpdateSale,
   saleServicesTypeguards,
   useSaleServices,
+  UpdateSidebar,
 } from "@/features/sales";
 import { computed, ref } from "vue";
 import {
@@ -152,6 +153,8 @@ async function deleteSale() {
           <th scope="col" class="px-6 py-3">Productos</th>
           <th scope="col" class="px-6 py-3">Cantidad</th>
           <th scope="col" class="px-6 py-3">Total</th>
+          <th scope="col" class="px-6 py-3">Estatus</th>
+          <th scope="col" class="px-6 py-3">Creado</th>
           <th scope="col" class="px-6 py-3">Acción</th>
         </tr>
       </thead>
@@ -190,7 +193,56 @@ async function deleteSale() {
                 </div>
               </div>
             </th>
-            <td></td>
+            <td>
+              <div class="flex -space-x-4 rtl:space-x-reverse w-fit mx-auto">
+                <img
+                  v-for="saleProduct in sale.i_sale_products.slice(0, 3)"
+                  :key="saleProduct.id"
+                  class="w-10 h-10 border-2 border-white rounded-full dark:border-gray-800"
+                  :src="
+                    saleProduct.i_products?.image_url ??
+                    '/product-placeholder.png'
+                  "
+                />
+                <div
+                  v-if="sale.i_sale_products.length > 3"
+                  class="flex items-center justify-center w-10 h-10 text-xs font-medium text-white bg-gray-700 border-2 border-white rounded-full hover:bg-gray-600 dark:border-gray-800"
+                >
+                  {{ sale.i_sale_products.length - 3 }}
+                </div>
+              </div>
+            </td>
+            <td class="text-center">
+              {{
+                sale.i_sale_products.reduce(
+                  (acc, saleProduct) => acc + (saleProduct.qty ?? 0),
+                  0
+                )
+              }}
+            </td>
+            <td class="text-center">
+              {{
+                sale.i_sale_products.reduce(
+                  (acc, saleProduct) => acc + (saleProduct.price ?? 0),
+                  0
+                )
+              }}
+            </td>
+            <td class="text-center">
+              <span
+                class="bg-blue-100 text-blue-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300"
+                >{{ sale.status?.toLocaleUpperCase() }}
+              </span>
+            </td>
+            <td>
+              {{
+                new Date(sale.created_at).toLocaleDateString("es-MX", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })
+              }}
+            </td>
             <td class="px-6 py-4">
               <DropdownMenu>
                 <template #trigger>
@@ -246,13 +298,16 @@ async function deleteSale() {
     </template>
   </Dialog>
 
-  <CreateOrEditSidebar
-    :open="Boolean(saleSidebarMode)"
-    :mode="saleSidebarMode ?? undefined"
+  <CreateSidebar
+    :open="saleSidebarMode === 'create'"
+    :isLoading="asyncCreateSale.isLoading.value"
+    @close="closeSidebar"
+    @save="handleSaveSidebar"
+  />
+  <UpdateSidebar
+    :open="saleSidebarMode === 'update'"
+    :isLoading="asyncUpdateSale.isLoading.value"
     :sale="selectedSaleFromActions"
-    :isLoading="
-      asyncUpdateSale.isLoading.value || asyncCreateSale.isLoading.value
-    "
     @close="closeSidebar"
     @save="handleSaveSidebar"
   />

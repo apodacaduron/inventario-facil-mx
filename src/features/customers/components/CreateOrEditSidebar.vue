@@ -50,7 +50,7 @@ const formInstance = useForm<CreateCustomer | UpdateCustomer>({
   validate: zodResolver(
     z.object({
       name: z.string().min(1, "Nombre de cliente es requerido"),
-      phone: z.string().length(10, "Telefono es requerido"),
+      phone: z.coerce.string().length(10, "Telefono es requerido"),
       email: z.string().email("Debe ser un correo valido").or(z.literal("")),
     })
   ),
@@ -103,7 +103,7 @@ watch(
   >
     <div class="space-y-6 pb-16">
       <form @submit="formInstance.handleSubmit">
-        <InputGroup label="Nombre de cliente" name="name">
+        <InputGroup label="Nombre de cliente" name="name" class="px-0">
           <Input
             placeholder="Ingresa el nombre de cliente"
             v-model="name"
@@ -111,7 +111,7 @@ watch(
             v-bind="nameAttrs"
           />
         </InputGroup>
-        <InputGroup label="Teléfono de cliente" name="phone">
+        <InputGroup label="Teléfono de cliente" name="phone" class="px-0">
           <Input
             placeholder="Ingresa el telefono del cliente"
             v-model="phone"
@@ -120,7 +120,7 @@ watch(
             v-bind="phoneAttrs"
           />
         </InputGroup>
-        <InputGroup label="Correo de cliente" name="email">
+        <InputGroup label="Correo de cliente" name="email" class="px-0">
           <Input
             placeholder="Ingresa el correo del cliente"
             v-model="email"
@@ -128,7 +128,7 @@ watch(
             v-bind="emailAttrs"
           />
         </InputGroup>
-        <InputGroup>
+        <InputGroup class="px-0">
           <div class="flex flex-col gap-4">
             <Button
               :loading="isLoading"

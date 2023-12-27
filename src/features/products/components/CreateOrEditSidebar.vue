@@ -53,7 +53,7 @@ const formInstance = useForm<CreateProduct | UpdateProduct>({
       name: z.string().min(1, "Nombre de producto es requerido"),
       description: z.string(),
       image_url: z.string(),
-      current_stock: z.number().int().positive().finite().safe(),
+      current_stock: z.number().int().nonnegative().finite().safe(),
     })
   ),
   async onSubmit(formValues) {
@@ -119,7 +119,7 @@ watch(
   >
     <div class="space-y-6 pb-16">
       <form @submit="formInstance.handleSubmit">
-        <InputGroup label="Imagen de producto" name="image_url">
+        <InputGroup label="Imagen de producto" name="image_url" class="px-0">
           <Input
             placeholder="URL de la imagen de tu producto"
             v-model="imageUrl"
@@ -127,7 +127,7 @@ watch(
             v-bind="imageUrlAttrs"
           />
         </InputGroup>
-        <InputGroup label="Nombre de producto" name="name">
+        <InputGroup label="Nombre de producto" name="name" class="px-0">
           <Input
             placeholder="Ingresa el nombre de producto"
             v-model="name"
@@ -135,7 +135,11 @@ watch(
             v-bind="nameAttrs"
           />
         </InputGroup>
-        <InputGroup label="Descripción de producto" name="description">
+        <InputGroup
+          label="Descripción de producto"
+          name="description"
+          class="px-0"
+        >
           <Input
             placeholder="Ingresa la descripción de producto"
             v-model="description"
@@ -143,7 +147,11 @@ watch(
             v-bind="descriptionAttrs"
           />
         </InputGroup>
-        <InputGroup label="Cantidad de producto" name="current_stock">
+        <InputGroup
+          label="Cantidad de producto"
+          name="current_stock"
+          class="px-0"
+        >
           <Input
             placeholder="Ingresa la cantidad de producto"
             type="number"
@@ -152,7 +160,7 @@ watch(
             v-bind="currentStockAttrs"
           />
         </InputGroup>
-        <InputGroup>
+        <InputGroup class="px-0">
           <div class="flex flex-col gap-4">
             <Button
               :loading="isLoading"

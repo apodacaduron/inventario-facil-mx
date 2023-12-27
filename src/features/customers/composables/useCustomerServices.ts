@@ -57,10 +57,13 @@ export function useCustomerServices() {
       .from("i_customers")
       .select("*")
       .eq("org_id", organization.org_id)
-      .range(from, to);
+      .range(from, to)
+      .order("created_at", { ascending: false });
 
     if (options?.search) {
-      return await customerSearch.textSearch("name", options.search);
+      return await customerSearch.textSearch("name", options.search, {
+        type: "plain",
+      });
     }
 
     return await customerSearch;

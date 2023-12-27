@@ -14,13 +14,7 @@ export type CreateSale = {
 };
 export type UpdateSale = {
   sale_id: Sale["id"];
-  products: {
-    sale_detail_id: SaleProduct["id"];
-    product_id: SaleProduct["product_id"];
-    price: SaleProduct["price"];
-    qty: SaleProduct["qty"];
-  }[];
-} & CreateSale;
+} & Pick<CreateSale, "status">;
 export type DeleteSale = Sale["id"];
 
 export type SaleList = Awaited<
@@ -72,7 +66,8 @@ export function useSaleServices() {
       .from("i_sales")
       .select("*, i_sale_products(*, i_products(*)), i_customers(*)")
       .eq("org_id", organization.org_id)
-      .range(from, to);
+      .range(from, to)
+      .order("created_at", { ascending: false });
 
     return await saleSearch;
   }
@@ -117,20 +112,8 @@ export function useSaleServices() {
       .from("i_sales")
       .update({
         status: formValues.status,
-        sale_date: formValues.sale_date,
-        customer_id: formValues.customer_id,
-        org_id: organization.org_id,
       })
       .eq("id", formValues.sale_id);
-    await supabase.from("i_sale_products").upsert(
-      formValues.products.map((product) => ({
-        id: product.sale_detail_id,
-        sale_id: formValues.sale_id,
-        product_id: product.product_id,
-        qty: product.qty,
-        price: product.price,
-      }))
-    );
   }
 
   async function deleteSale(saleId: DeleteSale) {

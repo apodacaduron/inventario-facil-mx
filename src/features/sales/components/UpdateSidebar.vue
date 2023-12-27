@@ -8,32 +8,26 @@ import {
 } from "@flavorly/vanilla-components";
 import { useForm } from "@vorms/core";
 import { zodResolver } from "@vorms/resolvers/zod";
-import { ref, watch } from "vue";
+import { watch } from "vue";
 import { z } from "zod";
-import { CreateSale, SALE_STATUS, Sale, UpdateSale } from "../composables";
+import { SALE_STATUS, Sale, UpdateSale } from "../composables";
 
-type CreateOrEditSidebarProps = {
-  mode?: "create" | "update";
-  open?: boolean;
+type UpdateSidebarProps = {
+  open: boolean;
   isLoading?: boolean;
   sale?: Sale | null;
 };
 
-const props = withDefaults(defineProps<CreateOrEditSidebarProps>(), {
-  mode: "create",
+const props = withDefaults(defineProps<UpdateSidebarProps>(), {
   open: false,
   isLoading: false,
 });
 const emit = defineEmits<{
   (e: "close"): void;
-  (e: "save", formValues: CreateSale | UpdateSale): void;
+  (e: "save", formValues: UpdateSale): void;
 }>();
 
 const locale = {
-  create: {
-    title: "Crear venta",
-    subtitle: "Crea rápidamente una nueva venta para tu inventario.",
-  },
   update: {
     title: "Actualizar venta",
     subtitle: "Actualiza rápidamente una venta de tu inventario.",
@@ -77,39 +71,24 @@ const statusOptions = [
   },
 ];
 
-const test = ref("");
-const initialForm: CreateSale | UpdateSale = {
+const initialForm: UpdateSale = {
+  sale_id: props.sale?.id ?? "",
   status: "pending",
-  sale_date: "",
-  products: [],
-  customer_id: "",
 };
-const formInstance = useForm<CreateSale | UpdateSale>({
+const formInstance = useForm<UpdateSale>({
   initialValues: initialForm,
   validate: zodResolver(
     z.object({
-      sale_id: z.string().uuid().optional(),
+      sale_id: z.string().uuid(),
       status: z.enum(SALE_STATUS),
-      sale_date: z.coerce.date(),
-      customer_id: z.string().uuid(),
-      products: z.array(
-        z.object({
-          sale_detail_id: z.string().uuid().optional(),
-          product_id: z.string().uuid(),
-          price: z.number().positive().finite().safe(),
-          qty: z.number().int().positive().finite().safe(),
-        })
-      ),
     })
   ),
   async onSubmit(formValues) {
-    console.log(formValues);
     emit("save", formValues);
   },
 });
+
 const { value: status, attrs: statusAttrs } = formInstance.register("status");
-// const { value: saleDate, attrs: saleDateAttrs } =
-//   formInstance.register("sale_date");
 
 function closeSidebar(isOpen: boolean) {
   if (isOpen) return;
@@ -117,28 +96,14 @@ function closeSidebar(isOpen: boolean) {
   emit("close");
 }
 
-const fetchOptions = (query?: string, nextPage?: number) => {
-  const url = `https://www.omdbapi.com/?apikey=dac6304b&s=${query}&page=${
-    nextPage || 1
-  }`;
-  return fetch(url)
-    .then((response) => response.json())
-    .then((data) => {
-      return {
-        results: data.Search as Record<string, any>[],
-        hasMorePages:
-          data.Search &&
-          data.totalResults > data.Search.length * (nextPage || 1) * 10,
-      };
-    });
-};
-
 watch(
   () => props.open,
-  (nextIsOpen) => {
-    if (nextIsOpen) return;
+  () => {
     formInstance.resetForm({
-      values: initialForm,
+      values: {
+        sale_id: props.sale?.id ?? "",
+        status: "pending",
+      },
     });
   }
 );
@@ -149,12 +114,13 @@ watch(
     :modelValue="open"
     @update:modelValue="closeSidebar"
     position="right"
-    :title="locale[mode].title"
-    :subtitle="locale[mode].subtitle"
+    :title="locale.update.title"
+    :subtitle="locale.update.subtitle"
   >
+    {{ formInstance.errors }}
     <div class="space-y-6 pb-16">
       <form @submit="formInstance.handleSubmit">
-        <InputGroup label="Status de venta" name="status">
+        <InputGroup label="Status de venta" name="status" class="px-0">
           <RichSelect
             v-model="status"
             :options="statusOptions"
@@ -189,53 +155,8 @@ watch(
             </template>
           </RichSelect>
         </InputGroup>
-        <InputGroup label="Status de venta" name="status">
-          {{ test }}
-          {{ formInstance.values }}
-          <RichSelect
-            v-model="test"
-            feedback="Type a movie name to search"
-            placeholder="Ex: Search for the Matrix or Pokemon"
-            :fetch-options="fetchOptions"
-            :minimum-input-length="3"
-            value-attribute="imdbID"
-            text-attribute="Title"
-            multiple
-          >
-            <template
-              #option="{ option: { raw: movie }, className, isSelected }"
-            >
-              <div class="px-3 py-2" :class="className">
-                <div class="relative">
-                  <div
-                    :class="[isSelected ? 'font-medium' : 'font-normal']"
-                    class="flex items-center space-x-2 text-sm block"
-                  >
-                    <div
-                      class="flex-shrink-0 w-10 h-10 bg-gray-500 bg-center bg-cover rounded-lg"
-                      :style="{ backgroundImage: `url(${movie?.Poster})` }"
-                    />
-                    <span
-                      class="block whitespace-nowrap truncate"
-                      v-html="`${movie?.imdbID} - ${movie?.Title}`"
-                    />
-                  </div>
-                </div>
-                <div
-                  v-if="movie?.Year"
-                  class="w-100 text-xs text-left mt-1"
-                  :class="[
-                    isSelected ? 'font-normal opacity-60' : 'opacity-60',
-                  ]"
-                  v-html="
-                    `This movie was released in the year of ${movie?.Year}`
-                  "
-                />
-              </div>
-            </template>
-          </RichSelect>
-        </InputGroup>
-        <InputGroup>
+
+        <InputGroup class="px-0">
           <div class="flex flex-col gap-4">
             <Button
               :loading="isLoading"

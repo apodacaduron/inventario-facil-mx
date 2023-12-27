@@ -39,27 +39,27 @@ export const routes: RouteWithMeta[] = [
       {
         path: "dashboard",
         meta: organizationMeta,
-        component: () => import("@/pages/org/Dashboard.vue"),
+        component: () => import("@/pages/org/dashboard.vue"),
       },
       {
         path: "products",
         meta: organizationMeta,
-        component: () => import("@/pages/org/Products.vue"),
+        component: () => import("@/pages/org/products.vue"),
       },
       {
         path: "sales",
         meta: organizationMeta,
-        component: () => import("@/pages/org/Sales.vue"),
+        component: () => import("@/pages/org/sales.vue"),
       },
       {
         path: "purchases",
         meta: organizationMeta,
-        component: () => import("@/pages/org/Purchases.vue"),
+        component: () => import("@/pages/org/purchases.vue"),
       },
       {
         path: "customers",
         meta: organizationMeta,
-        component: () => import("@/pages/org/Customers.vue"),
+        component: () => import("@/pages/org/customers.vue"),
       },
     ],
   },
@@ -71,12 +71,12 @@ export const routes: RouteWithMeta[] = [
       {
         path: "sign-in",
         meta: authMeta,
-        component: () => import("@/pages/auth/SignIn.vue"),
+        component: () => import("@/pages/auth/sign-in.vue"),
       },
       {
         path: "sign-up",
         meta: authMeta,
-        component: () => import("@/pages/auth/SignUp.vue"),
+        component: () => import("@/pages/auth/sign-up.vue"),
       },
     ],
   },

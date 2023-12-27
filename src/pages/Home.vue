@@ -1,16 +1,20 @@
 <script setup lang="ts">
 import { useAuthStore, useOrganizationStore } from "@/stores";
 import { Button } from "@flavorly/vanilla-components";
+import { MoonIcon, SunIcon } from "@heroicons/vue/24/outline";
+import { useDark, useToggle } from "@vueuse/core";
 
 const authStore = useAuthStore();
 const organizationStore = useOrganizationStore();
+const isDark = useDark();
+const toggleDark = useToggle(isDark);
 </script>
 
 <template>
   <main>
     <section class="h-screen overflow-hidden">
       <nav
-        class="mx-auto max-w-7xl px-4 h-[64px] flex items-center justify-center md:justify-between"
+        class="mx-auto max-w-7xl px-4 h-[64px] flex items-center justify-between"
       >
         <a href="https://flowbite.com">
           <span
@@ -18,31 +22,39 @@ const organizationStore = useOrganizationStore();
             >inventariofacil.mx</span
           >
         </a>
-        <div v-if="authStore.isLoggedIn" class="hidden gap-4 md:flex">
-          <router-link
-            :to="`/org/${
-              organizationStore.organizations?.find(Boolean)?.org_id
-            }/dashboard`"
-            :class="{
-              'pointer-events-none': !organizationStore.hasOrganizations,
-              'opacity-80': !organizationStore.hasOrganizations,
-            }"
-          >
-            <Button
-              :loading="!organizationStore.hasOrganizations"
-              :disabled="!organizationStore.hasOrganizations"
-              label="Dashboard"
-              variant="primary"
-            />
-          </router-link>
-        </div>
-        <div v-else class="hidden gap-4 md:flex">
-          <router-link to="/auth/sign-in">
-            <Button label="Iniciar sesión" variant="default" />
-          </router-link>
-          <router-link to="/auth/sign-up">
-            <Button label="Regístrate" variant="primary" />
-          </router-link>
+        <div class="gap-4 flex">
+          <Button @click="toggleDark()">
+            <MoonIcon class="w-4 h-4 stroke-[2px]" v-if="isDark" />
+            <SunIcon class="w-4 h-4 stroke-[2px]" v-else />
+          </Button>
+          <div v-if="authStore.isLoggedIn" class="hidden gap-4 md:flex">
+            <router-link
+              :to="`/org/${
+                organizationStore.organizations?.find(Boolean)?.org_id
+              }/dashboard`"
+              :class="[
+                {
+                  'pointer-events-none': !organizationStore.hasOrganizations,
+                  'opacity-80': !organizationStore.hasOrganizations,
+                },
+              ]"
+            >
+              <Button
+                :loading="!organizationStore.hasOrganizations"
+                :disabled="!organizationStore.hasOrganizations"
+                label="Dashboard"
+                variant="primary"
+              />
+            </router-link>
+          </div>
+          <div v-else class="hidden gap-4 md:flex">
+            <router-link to="/auth/sign-in">
+              <Button label="Iniciar sesión" variant="default" />
+            </router-link>
+            <router-link to="/auth/sign-up">
+              <Button label="Regístrate" variant="primary" />
+            </router-link>
+          </div>
         </div>
       </nav>
       <div class="text-center max-w-5xl mx-auto mt-[10vh]">

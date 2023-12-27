@@ -101,10 +101,8 @@ const menuList = [
         <div class="flex items-center">
           <div class="flex items-center ms-3 gap-4">
             <Button @click="toggleDark()">
-              <MoonIcon class="w-4 h-4 stroke-[2px]" v-if="isDark" /><SunIcon
-                class="w-4 h-4 stroke-[2px]"
-                v-else
-              />
+              <MoonIcon class="w-4 h-4 stroke-[2px]" v-if="isDark" />
+              <SunIcon class="w-4 h-4 stroke-[2px]" v-else />
             </Button>
             <div>
               <DropdownMenu>
