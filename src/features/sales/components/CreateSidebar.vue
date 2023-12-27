@@ -17,6 +17,7 @@ import { useCustomerServices } from "@/features/customers";
 import { CheckIcon } from "@heroicons/vue/24/outline";
 import {
   Product,
+  useCurrencyFormatter,
   useProductServices,
   useProductsByIdsQuery,
 } from "@/features/products";
@@ -83,6 +84,7 @@ const statusOptions = [
 const productIds = ref<string[]>([]);
 const productServices = useProductServices();
 const customerServices = useCustomerServices();
+const currencyFormatter = useCurrencyFormatter();
 const initialForm: CreateSale = {
   status: "pending",
   sale_date: new Date().toISOString(),
@@ -110,7 +112,17 @@ const formInstance = useForm<CreateSale>({
     })
   ),
   async onSubmit(formValues) {
-    emit("save", formValues);
+    const modifiedProducts = formValues.products.map((formProduct) => ({
+      ...formProduct,
+      price: currencyFormatter.toCents(formProduct.price),
+    }));
+
+    const modifiedFormValues = {
+      ...formValues,
+      products: modifiedProducts,
+    };
+
+    emit("save", modifiedFormValues);
   },
 });
 const productsByIdsQuery = useProductsByIdsQuery({
@@ -135,8 +147,8 @@ function updateProductIds(nextProductIds: string[]) {
 
   const basicFormProducts = nextProductIds.map((productId) => ({
     product_id: productId,
-    price: 0,
-    qty: 0,
+    price: null,
+    qty: null,
   }));
 
   formInstance.setFieldValue("products", basicFormProducts);
@@ -202,6 +214,39 @@ watch(
     productIds.value = [];
   }
 );
+watch(
+  () => productsByIdsQuery.data.value,
+  (nextProductsByIdsQueryData) => {
+    const formProductsWithPricing: CreateSale["products"] = [];
+    const formProductsWithoutPricing: CreateSale["products"] = [];
+
+    formInstance.values.products.forEach((formProduct) => {
+      if (formProduct.price === null) {
+        formProductsWithoutPricing.push(formProduct);
+      } else {
+        formProductsWithPricing.push(formProduct);
+      }
+    });
+
+    const nextFormProducts = formProductsWithoutPricing.map((formProduct) => {
+      const matchingProduct = nextProductsByIdsQueryData?.pages
+        .flatMap((page) => page.data)
+        .find((product) => product?.id === formProduct.product_id);
+
+      return {
+        ...formProduct,
+        price: currencyFormatter.parseRaw(
+          matchingProduct?.retail_price ?? null
+        ),
+      };
+    });
+
+    formInstance.setFieldValue("products", [
+      ...formProductsWithPricing,
+      ...nextFormProducts,
+    ]);
+  }
+);
 </script>
 
 <template>
@@ -212,6 +257,7 @@ watch(
     :title="locale.create.title"
     :subtitle="locale.create.subtitle"
   >
+    {{ formInstance.values.products }}
     <div class="space-y-6 pb-16">
       <form @submit="formInstance.handleSubmit">
         <InputGroup label="Status de venta" name="status" class="px-0">
@@ -391,6 +437,7 @@ watch(
                           required
                           step=".01"
                           type="number"
+                          :errors="formInstance.errors.value.products"
                         />
                       </div>
                     </td>

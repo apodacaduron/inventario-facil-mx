@@ -9,7 +9,12 @@ import { useForm } from "@vorms/core";
 import { zodResolver } from "@vorms/resolvers/zod";
 import { watch } from "vue";
 import { z } from "zod";
-import { CreateProduct, Product, UpdateProduct } from "../composables";
+import {
+  CreateProduct,
+  Product,
+  UpdateProduct,
+  useCurrencyFormatter,
+} from "../composables";
 
 type CreateOrEditSidebarProps = {
   mode?: "create" | "update";
@@ -48,6 +53,7 @@ const initialForm = {
   retail_price: null,
 };
 
+const currencyFormatter = useCurrencyFormatter();
 const formInstance = useForm<CreateProduct | UpdateProduct>({
   initialValues: initialForm,
   validate: zodResolver(
@@ -73,8 +79,8 @@ const formInstance = useForm<CreateProduct | UpdateProduct>({
     })
   ),
   async onSubmit(formValues) {
-    const nextUnitPrice = Math.trunc((formValues.unit_price ?? 0) * 100);
-    const nextRetailPrice = Math.trunc((formValues.retail_price ?? 0) * 100);
+    const nextUnitPrice = currencyFormatter.toCents(formValues.unit_price);
+    const nextRetailPrice = currencyFormatter.toCents(formValues.retail_price);
 
     const modifiedFormValues = {
       ...formValues,

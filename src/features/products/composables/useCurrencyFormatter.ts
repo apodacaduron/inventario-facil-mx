@@ -8,5 +8,17 @@ export function useCurrencyFormatter() {
     });
   }
 
-  return { parse };
+  function parseRaw(cents: number | null) {
+    if (!cents) return cents;
+
+    return cents / 100;
+  }
+
+  function toCents(price: number | null) {
+    if (!price) return price;
+
+    return Math.trunc((price ?? 0) * 100);
+  }
+
+  return { parse, parseRaw, toCents };
 }

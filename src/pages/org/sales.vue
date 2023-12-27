@@ -28,6 +28,7 @@ import { useAsyncState, useInfiniteScroll } from "@vueuse/core";
 import { useOrganizationStore } from "@/stores";
 import { useSalesQuery } from "@/features/sales/composables/useSaleQueries";
 import { useQueryClient } from "@tanstack/vue-query";
+import { useCurrencyFormatter } from "@/features/products";
 
 const WHATSAPP_URL = import.meta.env.VITE_WHATSAPP_URL;
 const tableRef = ref<HTMLElement | null>(null);
@@ -39,6 +40,7 @@ const queryClient = useQueryClient();
 const organizationStore = useOrganizationStore();
 const saleServices = useSaleServices();
 const asyncCreateSale = useAsyncState(saleServices.createSale, null);
+const currencyFormatter = useCurrencyFormatter();
 const salesQuery = useSalesQuery({
   options: {
     enabled: computed(() => organizationStore.hasOrganizations),
@@ -222,9 +224,11 @@ async function deleteSale() {
             </td>
             <td class="text-center">
               {{
-                sale.i_sale_products.reduce(
-                  (acc, saleProduct) => acc + (saleProduct.price ?? 0),
-                  0
+                currencyFormatter.parse(
+                  sale.i_sale_products.reduce(
+                    (acc, saleProduct) => acc + (saleProduct.price ?? 0),
+                    0
+                  )
                 )
               }}
             </td>
