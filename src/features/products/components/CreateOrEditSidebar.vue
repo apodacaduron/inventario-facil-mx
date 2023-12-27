@@ -43,7 +43,9 @@ const initialForm = {
   name: "",
   description: "",
   image_url: "",
-  current_stock: 0,
+  current_stock: null,
+  unit_price: null,
+  retail_price: null,
 };
 
 const formInstance = useForm<CreateProduct | UpdateProduct>({
@@ -53,11 +55,33 @@ const formInstance = useForm<CreateProduct | UpdateProduct>({
       name: z.string().min(1, "Nombre de producto es requerido"),
       description: z.string(),
       image_url: z.string(),
-      current_stock: z.number().int().nonnegative().finite().safe(),
+      current_stock: z
+        .number({ invalid_type_error: "Ingresa un número válido" })
+        .nonnegative()
+        .finite()
+        .safe(),
+      unit_price: z
+        .number({ invalid_type_error: "Ingresa un número válido" })
+        .nonnegative()
+        .finite()
+        .safe(),
+      retail_price: z
+        .number({ invalid_type_error: "Ingresa un número válido" })
+        .nonnegative()
+        .finite()
+        .safe(),
     })
   ),
   async onSubmit(formValues) {
-    emit("save", formValues);
+    const nextUnitPrice = Math.trunc((formValues.unit_price ?? 0) * 100);
+    const nextRetailPrice = Math.trunc((formValues.retail_price ?? 0) * 100);
+
+    const modifiedFormValues = {
+      ...formValues,
+      unit_price: nextUnitPrice,
+      retail_price: nextRetailPrice,
+    };
+    emit("save", modifiedFormValues);
   },
 });
 const { value: name, attrs: nameAttrs } = formInstance.register("name");
@@ -67,6 +91,10 @@ const { value: imageUrl, attrs: imageUrlAttrs } =
   formInstance.register("image_url");
 const { value: currentStock, attrs: currentStockAttrs } =
   formInstance.register("current_stock");
+const { value: unitPrice, attrs: unitPriceAttrs } =
+  formInstance.register("unit_price");
+const { value: retailPrice, attrs: retailPriceAttrs } =
+  formInstance.register("retail_price");
 
 function closeSidebar(isOpen: boolean) {
   if (isOpen) return;
@@ -103,6 +131,8 @@ watch(
         current_stock: currentStock,
         product_id: nextProduct.id,
         stock_id: stockId,
+        unit_price: nextProduct.unit_price,
+        retail_price: nextProduct.retail_price,
       },
     });
   }
@@ -158,6 +188,24 @@ watch(
             v-model="currentStock"
             :errors="formInstance.errors.value.current_stock"
             v-bind="currentStockAttrs"
+          />
+        </InputGroup>
+        <InputGroup label="Precio unitario" name="unit_price" class="px-0">
+          <Input
+            placeholder="Ingresa el costo unitario de producto"
+            type="number"
+            v-model="unitPrice"
+            :errors="formInstance.errors.value.unit_price"
+            v-bind="unitPriceAttrs"
+          />
+        </InputGroup>
+        <InputGroup label="Precio de venta" name="retail_price" class="px-0">
+          <Input
+            placeholder="Ingresa el precio de venta del producto"
+            type="number"
+            v-model="retailPrice"
+            :errors="formInstance.errors.value.retail_price"
+            v-bind="retailPriceAttrs"
           />
         </InputGroup>
         <InputGroup class="px-0">

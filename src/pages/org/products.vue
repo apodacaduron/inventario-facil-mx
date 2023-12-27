@@ -5,6 +5,7 @@ import {
   Product,
   UpdateProduct,
   productServicesTypeguards,
+  useCurrencyFormatter,
   useProductServices,
 } from "@/features/products";
 import { computed, ref } from "vue";
@@ -47,6 +48,7 @@ const organizationStore = useOrganizationStore();
 const productServices = useProductServices();
 const asyncCreateProduct = useAsyncState(productServices.createProduct, null);
 const clipboard = useClipboard();
+const currencyFormatter = useCurrencyFormatter();
 const productsQuery = useProductsQuery({
   options: {
     enabled: computed(() => organizationStore.hasOrganizations),
@@ -207,6 +209,8 @@ function closeShareModal() {
         <tr>
           <th scope="col" class="px-6 py-3">Nombre</th>
           <th scope="col" class="px-6 py-3 text-center">Cantidad</th>
+          <th scope="col" class="px-6 py-3 text-center">Precio unitario</th>
+          <th scope="col" class="px-6 py-3 text-center">Precio de venta</th>
           <th scope="col" class="px-6 py-3">Acción</th>
         </tr>
       </thead>
@@ -245,6 +249,12 @@ function closeShareModal() {
             </th>
             <td class="text-center">
               {{ product.i_stock.find(Boolean)?.current_stock }}
+            </td>
+            <td class="text-center">
+              {{ currencyFormatter.parse(product.unit_price) ?? "-" }}
+            </td>
+            <td class="text-center">
+              {{ currencyFormatter.parse(product.retail_price) ?? "-" }}
             </td>
             <td class="px-6 py-4">
               <DropdownMenu>

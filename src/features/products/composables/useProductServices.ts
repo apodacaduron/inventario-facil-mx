@@ -7,6 +7,8 @@ export type CreateProduct = {
   description: Product["description"];
   image_url: Product["image_url"];
   current_stock: Product["i_stock"][number]["current_stock"];
+  retail_price: Product["retail_price"];
+  unit_price: Product["unit_price"];
 };
 export type UpdateProduct = {
   product_id: Product["id"];
@@ -110,6 +112,8 @@ export function useProductServices() {
           name: formValues.name,
           description: formValues.description,
           image_url: formValues.image_url,
+          unit_price: formValues.unit_price,
+          retail_price: formValues.retail_price,
           org_id: organization.org_id,
         },
       ])
@@ -138,6 +142,8 @@ export function useProductServices() {
         name: formValues.name,
         description: formValues.description,
         image_url: formValues.image_url,
+        unit_price: formValues.unit_price,
+        retail_price: formValues.retail_price,
         org_id: organization.org_id,
       })
       .eq("id", formValues.product_id);
