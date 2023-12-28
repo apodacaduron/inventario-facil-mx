@@ -43,6 +43,8 @@ const initialForm = {
   name: "",
   phone: "",
   email: "",
+  address: "",
+  map_url: "",
 };
 
 const formInstance = useForm<CreateCustomer | UpdateCustomer>({
@@ -52,15 +54,21 @@ const formInstance = useForm<CreateCustomer | UpdateCustomer>({
       name: z.string().min(1, "Nombre de cliente es requerido"),
       phone: z.coerce.string().length(10, "Telefono es requerido"),
       email: z.string().email("Debe ser un correo valido").or(z.literal("")),
+      address: z.string().or(z.literal("")),
+      map_url: z.string().url("Debe ser un url valido").or(z.literal("")),
     })
   ),
   async onSubmit(formValues) {
+    console.log(formValues);
     emit("save", formValues);
   },
 });
 const { value: name, attrs: nameAttrs } = formInstance.register("name");
 const { value: phone, attrs: phoneAttrs } = formInstance.register("phone");
 const { value: email, attrs: emailAttrs } = formInstance.register("email");
+const { value: address, attrs: addressAttrs } =
+  formInstance.register("address");
+const { value: mapUrl, attrs: mapUrlAttrs } = formInstance.register("map_url");
 
 function closeSidebar(isOpen: boolean) {
   if (isOpen) return;
@@ -83,9 +91,11 @@ watch(
     if (!nextCustomer) return;
     formInstance.resetForm({
       values: {
-        name: nextCustomer.name,
-        phone: nextCustomer.phone,
-        email: nextCustomer.email,
+        name: nextCustomer.name ?? "",
+        phone: nextCustomer.phone ?? "",
+        email: nextCustomer.email ?? "",
+        address: nextCustomer.address ?? "",
+        map_url: nextCustomer.map_url ?? "",
         customer_id: nextCustomer.id,
       },
     });
@@ -126,6 +136,22 @@ watch(
             v-model="email"
             :errors="formInstance.errors.value.email"
             v-bind="emailAttrs"
+          />
+        </InputGroup>
+        <InputGroup label="Dirección de cliente" name="address" class="px-0">
+          <Input
+            placeholder="Ingresa la dirección del cliente"
+            v-model="address"
+            :errors="formInstance.errors.value.address"
+            v-bind="addressAttrs"
+          />
+        </InputGroup>
+        <InputGroup label="URL de mapa" name="map_url" class="px-0">
+          <Input
+            placeholder="Ingresa la dirección del cliente"
+            v-model="mapUrl"
+            :errors="formInstance.errors.value.map_url"
+            v-bind="mapUrlAttrs"
           />
         </InputGroup>
         <InputGroup class="px-0">

@@ -18,6 +18,7 @@ import {
 import {
   EllipsisVerticalIcon,
   MagnifyingGlassIcon,
+  MapIcon,
   PencilIcon,
   PlusIcon,
   TrashIcon,
@@ -160,6 +161,8 @@ async function deleteCustomer() {
         <tr>
           <th scope="col" class="px-6 py-3">Nombre</th>
           <th scope="col" class="px-6 py-3">Telefono</th>
+          <th scope="col" class="px-6 py-3">Dirección</th>
+          <th scope="col" class="px-6 py-3">Mapa</th>
           <th scope="col" class="px-6 py-3">Acción</th>
         </tr>
       </thead>
@@ -194,6 +197,20 @@ async function deleteCustomer() {
                 class="block"
               >
                 {{ customer.phone }}
+              </a>
+            </td>
+            <td>
+              {{ customer.address || "-" }}
+            </td>
+            <td>
+              <a
+                v-if="customer.map_url"
+                :href="customer.map_url"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="block"
+              >
+                <MapIcon class="w-6 h-6 stroke-[2px]" />
               </a>
             </td>
             <td class="px-6 py-4">

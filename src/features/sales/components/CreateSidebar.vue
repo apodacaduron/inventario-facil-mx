@@ -46,13 +46,6 @@ const locale = {
 
 const statusOptions = [
   {
-    value: "pending",
-    text: "Pendiente",
-    description:
-      "El estado inicial cuando se crea una venta pero aún no se ha procesado o confirmado.",
-    status: "blue",
-  },
-  {
     value: "in_progress",
     text: "En progreso",
     description:
@@ -72,13 +65,6 @@ const statusOptions = [
       "La venta fue anulada antes de completarse, posiblemente a solicitud del cliente u otras razones.",
     status: "red",
   },
-  {
-    value: "returned",
-    text: "Regresada",
-    description:
-      "Los artículos de la venta fueron devueltos por el cliente después de completarse la venta.",
-    status: "yellow",
-  },
 ];
 
 const productIds = ref<string[]>([]);
@@ -86,7 +72,7 @@ const productServices = useProductServices();
 const customerServices = useCustomerServices();
 const currencyFormatter = useCurrencyFormatter();
 const initialForm: CreateSale = {
-  status: "pending",
+  status: "in_progress",
   sale_date: new Date().toISOString(),
   products: [],
   customer_id: "",
@@ -260,7 +246,6 @@ watch(
     :title="locale.create.title"
     :subtitle="locale.create.subtitle"
   >
-    {{ formInstance.values.products }}
     <div class="space-y-6 pb-16">
       <form @submit="formInstance.handleSubmit">
         <InputGroup label="Status de venta" name="status" class="px-0">
@@ -304,7 +289,7 @@ watch(
             v-bind="customerAttrs"
             placeholder="Seleccione un cliente"
             :fetchOptions="debouncedFetchCustomerOptions"
-            :minimum-input-length="3"
+            :minimum-input-length="2"
             value-attribute="id"
             text-attribute="name"
             :errors="formInstance.errors.value.customer_id"
@@ -331,7 +316,7 @@ watch(
             @update:modelValue="updateProductIds"
             placeholder="Seleccione productos"
             :fetchOptions="debouncedFetchProductsOptions"
-            :minimum-input-length="3"
+            :minimum-input-length="2"
             value-attribute="id"
             text-attribute="name"
             multiple

@@ -226,7 +226,8 @@ async function deleteSale() {
               {{
                 currencyFormatter.parse(
                   sale.i_sale_products.reduce(
-                    (acc, saleProduct) => acc + (saleProduct.price ?? 0),
+                    (acc, saleProduct) =>
+                      acc + (saleProduct.qty ?? 0) * (saleProduct.price ?? 0),
                     0
                   )
                 )

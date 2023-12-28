@@ -6,6 +6,8 @@ export type CreateCustomer = {
   name: Customer["name"];
   phone: Customer["phone"];
   email: Customer["email"];
+  address: Customer["address"];
+  map_url: Customer["map_url"];
 };
 export type UpdateCustomer = {
   customer_id: Customer["id"];
@@ -82,6 +84,8 @@ export function useCustomerServices() {
           name: formValues.name,
           phone: formValues.phone,
           email: formValues.email,
+          address: formValues.address,
+          map_url: formValues.map_url,
           org_id: organization.org_id,
         },
       ])
@@ -101,6 +105,8 @@ export function useCustomerServices() {
         name: formValues.name,
         phone: formValues.phone,
         email: formValues.email,
+        address: formValues.address,
+        map_url: formValues.map_url,
         org_id: organization.org_id,
       })
       .eq("id", formValues.customer_id);

@@ -22,13 +22,7 @@ export type SaleList = Awaited<
   ReturnType<ReturnType<typeof useSaleServices>["loadList"]>
 >["data"];
 export type Sale = NonNullable<SaleList>[number];
-export const SALE_STATUS = [
-  "pending",
-  "in_progress",
-  "completed",
-  "cancelled",
-  "returned",
-] as const;
+export const SALE_STATUS = ["in_progress", "completed", "cancelled"] as const;
 export type SaleProduct = Sale["i_sale_products"][number];
 
 export const saleServicesTypeguards = {

@@ -36,13 +36,6 @@ const locale = {
 
 const statusOptions = [
   {
-    value: "pending",
-    text: "Pendiente",
-    description:
-      "El estado inicial cuando se crea una venta pero aún no se ha procesado o confirmado.",
-    status: "blue",
-  },
-  {
     value: "in_progress",
     text: "En progreso",
     description:
@@ -62,18 +55,11 @@ const statusOptions = [
       "La venta fue anulada antes de completarse, posiblemente a solicitud del cliente u otras razones.",
     status: "red",
   },
-  {
-    value: "returned",
-    text: "Regresada",
-    description:
-      "Los artículos de la venta fueron devueltos por el cliente después de completarse la venta.",
-    status: "yellow",
-  },
 ];
 
 const initialForm: UpdateSale = {
   sale_id: props.sale?.id ?? "",
-  status: "pending",
+  status: "in_progress",
 };
 const formInstance = useForm<UpdateSale>({
   initialValues: initialForm,
@@ -102,7 +88,7 @@ watch(
     formInstance.resetForm({
       values: {
         sale_id: props.sale?.id ?? "",
-        status: "pending",
+        status: "in_progress",
       },
     });
   }
