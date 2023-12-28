@@ -105,6 +105,7 @@ const formInstance = useForm<CreateSale>({
             sale_detail_id: z.string().uuid().optional(),
             product_id: z.string().uuid(),
             price: z.number().positive().finite().safe(),
+            unit_price: z.number().positive().finite().safe(),
             qty: z.number().int().positive().finite().safe(),
           })
         )
@@ -148,6 +149,7 @@ function updateProductIds(nextProductIds: string[]) {
   const basicFormProducts = nextProductIds.map((productId) => ({
     product_id: productId,
     price: null,
+    unit_price: null,
     qty: null,
   }));
 
@@ -235,6 +237,7 @@ watch(
 
       return {
         ...formProduct,
+        unit_price: matchingProduct?.unit_price ?? null,
         price: currencyFormatter.parseRaw(
           matchingProduct?.retail_price ?? null
         ),

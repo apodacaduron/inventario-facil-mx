@@ -9,6 +9,7 @@ export type CreateSale = {
   products: {
     product_id: SaleProduct["product_id"];
     price: SaleProduct["price"];
+    unit_price: SaleProduct["unit_price"];
     qty: SaleProduct["qty"];
   }[];
 };
@@ -98,6 +99,7 @@ export function useSaleServices() {
         product_id: product.product_id,
         qty: product.qty,
         price: product.price,
+        unit_price: product.unit_price,
       }))
     );
   }

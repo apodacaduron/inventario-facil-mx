@@ -208,6 +208,7 @@ export interface Database {
           product_id: string | null
           qty: number | null
           sale_id: string | null
+          unit_price: number | null
         }
         Insert: {
           created_at?: string
@@ -216,6 +217,7 @@ export interface Database {
           product_id?: string | null
           qty?: number | null
           sale_id?: string | null
+          unit_price?: number | null
         }
         Update: {
           created_at?: string
@@ -224,6 +226,7 @@ export interface Database {
           product_id?: string | null
           qty?: number | null
           sale_id?: string | null
+          unit_price?: number | null
         }
         Relationships: [
           {
