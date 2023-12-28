@@ -103,7 +103,6 @@ watch(
     :title="locale.update.title"
     :subtitle="locale.update.subtitle"
   >
-    {{ formInstance.errors }}
     <div class="space-y-6 pb-16">
       <form @submit="formInstance.handleSubmit">
         <InputGroup label="Status de venta" name="status" class="px-0">

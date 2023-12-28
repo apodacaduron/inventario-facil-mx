@@ -77,7 +77,7 @@ export function useSaleServices() {
       .from("i_sales")
       .insert([
         {
-          status: formValues.status,
+          status: "in_progress",
           sale_date: formValues.sale_date,
           customer_id: formValues.customer_id,
           org_id: organization.org_id,
@@ -87,15 +87,33 @@ export function useSaleServices() {
       .single();
     if (!createdSaleResponse.data?.id)
       throw new Error("Sale id is required to add to sale detail");
-    await supabase.from("i_sale_products").insert(
-      formValues.products.map((product) => ({
-        sale_id: createdSaleResponse.data.id,
-        product_id: product.product_id,
-        qty: product.qty,
-        price: product.price,
-        unit_price: product.unit_price,
-      }))
-    );
+
+    const formattedSaleProducts = formValues.products.map((product) => ({
+      sale_id: createdSaleResponse.data.id,
+      product_id: product.product_id,
+      qty: product.qty,
+      price: product.price,
+      unit_price: product.unit_price,
+    }));
+    await supabase.from("i_sale_products").insert(formattedSaleProducts);
+    formValues.products.map(async ({ product_id, qty }) => {
+      if (!product_id) return;
+      const productResponse = await supabase
+        .from("i_products")
+        .select("current_stock")
+        .eq("id", product_id)
+        .single();
+
+      let nextCurrentStock = productResponse.data?.current_stock ?? 0;
+      let formQty = qty ?? 0;
+      if (formValues.status === "in_progress") {
+        nextCurrentStock = nextCurrentStock - formQty;
+      }
+      await supabase
+        .from("i_products")
+        .update({ current_stock: nextCurrentStock })
+        .eq("id", product_id);
+    });
   }
 
   async function updateSale(formValues: UpdateSale) {
@@ -104,12 +122,44 @@ export function useSaleServices() {
     );
     if (!organization?.org_id)
       throw new Error("Organization is required to update a sale");
+    const saleResponse = await supabase
+      .from("i_sales")
+      .select()
+      .eq("id", formValues.sale_id)
+      .single();
     await supabase
       .from("i_sales")
       .update({
         status: formValues.status,
       })
       .eq("id", formValues.sale_id);
+
+    if (saleResponse.data?.status === formValues.status) return;
+    const saleProductsResponse = await supabase
+      .from("i_sale_products")
+      .select()
+      .eq("sale_id", formValues.sale_id);
+
+    saleProductsResponse.data?.map(async ({ product_id, qty }) => {
+      if (!product_id) return;
+      const productResponse = await supabase
+        .from("i_products")
+        .select("current_stock")
+        .eq("id", product_id)
+        .single();
+
+      let nextCurrentStock = productResponse.data?.current_stock ?? 0;
+      let formQty = qty ?? 0;
+      if (formValues.status === "in_progress") {
+        nextCurrentStock = nextCurrentStock - formQty;
+      } else if (formValues.status === "cancelled") {
+        nextCurrentStock = nextCurrentStock + formQty;
+      }
+      await supabase
+        .from("i_products")
+        .update({ current_stock: nextCurrentStock })
+        .eq("id", product_id);
+    });
   }
 
   async function deleteSale(saleId: DeleteSale) {

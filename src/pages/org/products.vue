@@ -63,7 +63,7 @@ useInfiniteScroll(
     if (productsQuery.isFetching.value) return;
     productsQuery.fetchNextPage();
   },
-  { distance: 10 }
+  { distance: 10, canLoadMore: () => productsQuery.hasNextPage.value }
 );
 
 function openDeleteProductDialog(product: Product) {

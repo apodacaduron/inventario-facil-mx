@@ -54,7 +54,7 @@ useInfiniteScroll(
     if (salesQuery.isFetching.value) return;
     salesQuery.fetchNextPage();
   },
-  { distance: 10 }
+  { distance: 10, canLoadMore: () => salesQuery.hasNextPage.value }
 );
 
 function openDeleteSaleDialog(sale: Sale) {
@@ -262,7 +262,10 @@ async function deleteSale() {
                   <EyeIcon class="w-5 h-5 mr-2" />
                   <span>Ver</span>
                 </DropdownOption>
-                <DropdownOption @click="openUpdateSaleSidebar(sale)">
+                <DropdownOption
+                  v-if="sale.status !== 'completed'"
+                  @click="openUpdateSaleSidebar(sale)"
+                >
                   <PencilIcon class="w-5 h-5 mr-2" />
                   <span>Actualizar</span>
                 </DropdownOption>

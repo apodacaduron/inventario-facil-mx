@@ -62,7 +62,7 @@ useInfiniteScroll(
     if (customersQuery.isFetching.value) return;
     customersQuery.fetchNextPage();
   },
-  { distance: 10 }
+  { distance: 10, canLoadMore: () => customersQuery.hasNextPage.value }
 );
 
 function openDeleteCustomerDialog(customer: Customer) {
