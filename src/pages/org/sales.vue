@@ -108,7 +108,7 @@ async function deleteSale() {
 </script>
 
 <template>
-  <div class="flex items-center justify-between">
+  <div class="flex items-center justify-between flex-col md:flex-row">
     <div class="mb-6">
       <h2
         class="mb-2 text-3xl font-extrabold leading-none tracking-tight text-gray-900 md:text-4xl dark:text-white"
