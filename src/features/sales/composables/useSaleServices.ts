@@ -94,6 +94,7 @@ export function useSaleServices() {
       qty: product.qty,
       price: product.price,
       unit_price: product.unit_price,
+      org_id: organization.org_id,
     }));
     await supabase.from("i_sale_products").insert(formattedSaleProducts);
     formValues.products.map(async ({ product_id, qty }) => {

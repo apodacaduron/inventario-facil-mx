@@ -146,7 +146,7 @@ const menuList = {
         <li v-for="(menuItem, index) in menuList" :key="index">
           <router-link
             :to="menuItem.path"
-            class="flex items-center p-2 rounded-lg"
+            class="flex items-center p-2 rounded-lg text-gray-500"
             active-class="active-link"
           >
             <component
