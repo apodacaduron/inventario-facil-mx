@@ -32,33 +32,33 @@ function signOut() {
   router.push("/");
 }
 
-const menuList = [
-  {
+const menuList = {
+  dashboard: {
     path: `/org/${route.params.orgId}/dashboard`,
     text: "Inicio",
     icon: HomeIcon,
   },
-  {
+  products: {
     path: `/org/${route.params.orgId}/products`,
     text: "Productos",
     icon: ShoppingBagIcon,
   },
-  {
+  customers: {
     path: `/org/${route.params.orgId}/customers`,
     text: "Clientes",
     icon: UserGroupIcon,
   },
-  {
+  sales: {
     path: `/org/${route.params.orgId}/sales`,
     text: "Ventas",
     icon: BanknotesIcon,
   },
-  {
+  purchases: {
     path: `/org/${route.params.orgId}/purchases`,
     text: "Compras",
     icon: ClipboardDocumentCheckIcon,
   },
-];
+};
 </script>
 
 <template>
@@ -91,12 +91,12 @@ const menuList = [
               ></path>
             </svg>
           </button>
-          <a href="https://flowbite.com" class="flex ms-2 md:me-24">
+          <router-link :to="menuList.dashboard.path" class="flex ms-2 md:me-24">
             <span
               class="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap dark:text-white"
-              >inventariofacil.mx</span
-            >
-          </a>
+              >inventariofacil.mx
+            </span>
+          </router-link>
         </div>
         <div class="flex items-center">
           <div class="flex items-center ms-3 gap-4">
@@ -142,18 +142,19 @@ const menuList = [
     <div
       class="flex flex-col justify-between h-full px-3 pb-4 overflow-y-auto bg-white dark:bg-slate-800"
     >
-      <ul class="space-y-2 font-medium">
+      <ul class="space-y-2">
         <li v-for="(menuItem, index) in menuList" :key="index">
           <router-link
             :to="menuItem.path"
-            class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-slate-700 group"
+            class="flex items-center p-2 rounded-lg"
+            active-class="active-link"
           >
             <component
               :is="menuItem.icon"
               v-if="menuItem.icon"
-              class="w-6 h-6 stroke-[2px] text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
+              class="w-6 h-6 stroke-[2px]"
             />
-            <span class="ms-3">{{ menuItem.text }}</span>
+            <span class="ms-3 font-semibold">{{ menuItem.text }}</span>
           </router-link>
         </li>
       </ul>
@@ -193,7 +194,7 @@ const menuList = [
       <div
         class="flex flex-col justify-between h-full px-3 pb-4 overflow-y-auto bg-white dark:bg-gray-800"
       >
-        <ul class="space-y-2 font-medium">
+        <ul class="space-y-2">
           <li
             v-for="(menuItem, index) in menuList"
             :key="index"
@@ -201,14 +202,15 @@ const menuList = [
           >
             <router-link
               :to="menuItem.path"
-              class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-slate-700 group"
+              class="flex items-center p-2 rounded-lg"
+              active-class="active-link"
             >
               <component
                 :is="menuItem.icon"
                 v-if="menuItem.icon"
-                class="w-6 h-6 stroke-[2px] text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
+                class="w-6 h-6 stroke-[2px] duration-75"
               />
-              <span class="ms-3">{{ menuItem.text }}</span>
+              <span class="ms-3 font-semibold">{{ menuItem.text }}</span>
             </router-link>
           </li>
         </ul>
@@ -233,3 +235,9 @@ const menuList = [
     </div>
   </Slideover>
 </template>
+
+<style scoped lang="scss">
+.active-link {
+  @apply text-primary-800 bg-primary-50 dark:bg-primary-900 dark:text-primary-100;
+}
+</style>
