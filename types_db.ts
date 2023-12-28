@@ -105,6 +105,7 @@ export interface Database {
       i_products: {
         Row: {
           created_at: string
+          current_stock: number | null
           description: string | null
           id: string
           image_url: string | null
@@ -112,9 +113,11 @@ export interface Database {
           org_id: string | null
           retail_price: number | null
           unit_price: number | null
+          updated_at: string | null
         }
         Insert: {
           created_at?: string
+          current_stock?: number | null
           description?: string | null
           id?: string
           image_url?: string | null
@@ -122,9 +125,11 @@ export interface Database {
           org_id?: string | null
           retail_price?: number | null
           unit_price?: number | null
+          updated_at?: string | null
         }
         Update: {
           created_at?: string
+          current_stock?: number | null
           description?: string | null
           id?: string
           image_url?: string | null
@@ -132,6 +137,7 @@ export interface Database {
           org_id?: string | null
           retail_price?: number | null
           unit_price?: number | null
+          updated_at?: string | null
         }
         Relationships: [
           {
@@ -215,6 +221,7 @@ export interface Database {
           qty: number | null
           sale_id: string | null
           unit_price: number | null
+          updated_at: string | null
         }
         Insert: {
           created_at?: string
@@ -224,6 +231,7 @@ export interface Database {
           qty?: number | null
           sale_id?: string | null
           unit_price?: number | null
+          updated_at?: string | null
         }
         Update: {
           created_at?: string
@@ -233,6 +241,7 @@ export interface Database {
           qty?: number | null
           sale_id?: string | null
           unit_price?: number | null
+          updated_at?: string | null
         }
         Relationships: [
           {
@@ -259,6 +268,7 @@ export interface Database {
           org_id: string | null
           sale_date: string | null
           status: Database["public"]["Enums"]["basic_sale_status"] | null
+          updated_at: string | null
         }
         Insert: {
           created_at?: string
@@ -267,6 +277,7 @@ export interface Database {
           org_id?: string | null
           sale_date?: string | null
           status?: Database["public"]["Enums"]["basic_sale_status"] | null
+          updated_at?: string | null
         }
         Update: {
           created_at?: string
@@ -275,6 +286,7 @@ export interface Database {
           org_id?: string | null
           sale_date?: string | null
           status?: Database["public"]["Enums"]["basic_sale_status"] | null
+          updated_at?: string | null
         }
         Relationships: [
           {
@@ -289,45 +301,6 @@ export interface Database {
             columns: ["org_id"]
             isOneToOne: false
             referencedRelation: "i_organizations"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
-      i_stock: {
-        Row: {
-          created_at: string
-          current_stock: number | null
-          id: string
-          org_id: string | null
-          product_id: string | null
-        }
-        Insert: {
-          created_at?: string
-          current_stock?: number | null
-          id?: string
-          org_id?: string | null
-          product_id?: string | null
-        }
-        Update: {
-          created_at?: string
-          current_stock?: number | null
-          id?: string
-          org_id?: string | null
-          product_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "i_stock_org_id_fkey"
-            columns: ["org_id"]
-            isOneToOne: false
-            referencedRelation: "i_organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "i_stock_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "i_products"
             referencedColumns: ["id"]
           }
         ]

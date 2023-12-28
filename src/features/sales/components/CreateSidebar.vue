@@ -183,8 +183,8 @@ const debouncedFetchProductsOptions = useDebounceFn(
 
     return {
       results:
-        productsResponse.data?.filter((product) =>
-          product.i_stock.some((stock) => (stock.current_stock ?? 0) >= 1)
+        productsResponse.data?.filter(
+          (product) => (product.current_stock ?? 0) >= 1
         ) || [],
       hasMorePages: (productsResponse.count ?? 0) >= PAGINATION_LIMIT,
     };

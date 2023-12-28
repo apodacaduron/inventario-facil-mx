@@ -121,24 +121,15 @@ watch(
   () => props.product,
   (nextProduct) => {
     if (!nextProduct) return;
-    const stock = nextProduct.i_stock.find(Boolean);
-    const stockId = stock?.id;
-    const currentStock = stock?.current_stock;
-
-    if (!stockId) throw new Error("StockId is required to fill update sidebar");
-    if (typeof currentStock !== "number" || !isFinite(currentStock))
-      throw new Error("currentStock is required to fill update sidebar");
-
     formInstance.resetForm({
       values: {
         name: nextProduct.name,
         description: nextProduct.description,
         image_url: nextProduct.image_url,
-        current_stock: currentStock,
+        current_stock: nextProduct.current_stock,
         product_id: nextProduct.id,
-        stock_id: stockId,
-        unit_price: nextProduct.unit_price,
-        retail_price: nextProduct.retail_price,
+        unit_price: currencyFormatter.parseRaw(nextProduct.unit_price),
+        retail_price: currencyFormatter.parseRaw(nextProduct.retail_price),
       },
     });
   }

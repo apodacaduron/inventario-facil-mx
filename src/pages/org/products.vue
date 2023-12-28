@@ -85,13 +85,10 @@ const productHandlers = {
   },
   async update(formValues: UpdateProduct) {
     const productId = selectedProductFromActions.value?.id;
-    const stockId = selectedProductFromActions.value?.i_stock.find(Boolean)?.id;
     if (!productId) throw new Error("Product id required to perform update");
-    if (!stockId) throw new Error("Stock id required to perform update");
     await asyncUpdateProduct.execute(0, {
       ...formValues,
       product_id: productId,
-      stock_id: stockId,
     });
     productSidebarMode.value = null;
     selectedProductFromActions.value = null;
@@ -126,16 +123,13 @@ async function deleteProduct() {
 async function shareExistingInventory() {
   const existingProducts =
     productsQuery.data.value?.pages.reduce<Product[]>((acc, page) => {
-      const filteredProducts = page.data?.filter((product) =>
-        product.i_stock.some((stock) => (stock.current_stock ?? 0) > 0)
+      const filteredProducts = page.data?.filter(
+        (product) => (product.current_stock ?? 0) > 0
       );
       return [...acc, ...(filteredProducts ?? [])];
     }, []) ?? [];
   const inventoryString = existingProducts
-    .map(
-      (product) =>
-        `${product.name}: ${product.i_stock.find(Boolean)?.current_stock ?? 0}`
-    )
+    .map((product) => `${product.name}: ${product.current_stock ?? 0}`)
     .join("\r\n");
 
   // @ts-ignore
@@ -248,7 +242,7 @@ function closeShareModal() {
               </div>
             </th>
             <td class="text-center">
-              {{ product.i_stock.find(Boolean)?.current_stock }}
+              {{ product.current_stock }}
             </td>
             <td class="text-center">
               {{ currencyFormatter.parse(product.unit_price) ?? "-" }}
