@@ -105,7 +105,7 @@ watch(
   >
     <div class="space-y-6 pb-16">
       <form @submit="formInstance.handleSubmit">
-        <InputGroup label="Status de venta" name="status" class="px-0">
+        <InputGroup label="Status de venta" name="status" class="!px-0">
           <RichSelect
             v-model="status"
             :options="statusOptions"
@@ -141,7 +141,7 @@ watch(
           </RichSelect>
         </InputGroup>
 
-        <InputGroup class="px-0">
+        <InputGroup class="!px-0">
           <div class="flex flex-col gap-4">
             <Button
               :loading="isLoading"

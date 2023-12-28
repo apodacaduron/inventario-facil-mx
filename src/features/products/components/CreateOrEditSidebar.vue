@@ -146,7 +146,7 @@ watch(
   >
     <div class="space-y-6 pb-16">
       <form @submit="formInstance.handleSubmit">
-        <InputGroup label="Imagen de producto" name="image_url" class="px-0">
+        <InputGroup label="Imagen de producto" name="image_url" class="!px-0">
           <Input
             placeholder="URL de la imagen de tu producto"
             v-model="imageUrl"
@@ -154,7 +154,7 @@ watch(
             v-bind="imageUrlAttrs"
           />
         </InputGroup>
-        <InputGroup label="Nombre de producto" name="name" class="px-0">
+        <InputGroup label="Nombre de producto" name="name" class="!px-0">
           <Input
             placeholder="Ingresa el nombre de producto"
             v-model="name"
@@ -165,7 +165,7 @@ watch(
         <InputGroup
           label="Descripción de producto"
           name="description"
-          class="px-0"
+          class="!px-0"
         >
           <Input
             placeholder="Ingresa la descripción de producto"
@@ -175,19 +175,19 @@ watch(
           />
         </InputGroup>
         <InputGroup
-          label="Cantidad de producto"
+          label="Unidades disponibles"
           name="current_stock"
-          class="px-0"
+          class="!px-0"
         >
           <Input
-            placeholder="Ingresa la cantidad de producto"
+            placeholder="Ingresa las unidades disponibles de producto"
             type="number"
             v-model="currentStock"
             :errors="formInstance.errors.value.current_stock"
             v-bind="currentStockAttrs"
           />
         </InputGroup>
-        <InputGroup label="Precio unitario" name="unit_price" class="px-0">
+        <InputGroup label="Precio unitario" name="unit_price" class="!px-0">
           <Input
             placeholder="Ingresa el costo unitario de producto"
             type="number"
@@ -196,7 +196,7 @@ watch(
             v-bind="unitPriceAttrs"
           />
         </InputGroup>
-        <InputGroup label="Precio de venta" name="retail_price" class="px-0">
+        <InputGroup label="Precio de venta" name="retail_price" class="!px-0">
           <Input
             placeholder="Ingresa el precio de venta del producto"
             type="number"
@@ -205,7 +205,7 @@ watch(
             v-bind="retailPriceAttrs"
           />
         </InputGroup>
-        <InputGroup class="px-0">
+        <InputGroup class="!px-0">
           <div class="flex flex-col gap-4">
             <Button
               :loading="isLoading"

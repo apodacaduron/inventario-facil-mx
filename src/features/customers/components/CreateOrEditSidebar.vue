@@ -113,7 +113,7 @@ watch(
   >
     <div class="space-y-6 pb-16">
       <form @submit="formInstance.handleSubmit">
-        <InputGroup label="Nombre de cliente" name="name" class="px-0">
+        <InputGroup label="Nombre de cliente" name="name" class="!px-0">
           <Input
             placeholder="Ingresa el nombre de cliente"
             v-model="name"
@@ -121,7 +121,7 @@ watch(
             v-bind="nameAttrs"
           />
         </InputGroup>
-        <InputGroup label="Teléfono de cliente" name="phone" class="px-0">
+        <InputGroup label="Teléfono de cliente" name="phone" class="!px-0">
           <Input
             placeholder="Ingresa el telefono del cliente"
             v-model="phone"
@@ -130,7 +130,7 @@ watch(
             v-bind="phoneAttrs"
           />
         </InputGroup>
-        <InputGroup label="Correo de cliente" name="email" class="px-0">
+        <InputGroup label="Correo de cliente" name="email" class="!px-0">
           <Input
             placeholder="Ingresa el correo del cliente"
             v-model="email"
@@ -138,7 +138,7 @@ watch(
             v-bind="emailAttrs"
           />
         </InputGroup>
-        <InputGroup label="Dirección de cliente" name="address" class="px-0">
+        <InputGroup label="Dirección de cliente" name="address" class="!px-0">
           <Input
             placeholder="Ingresa la dirección del cliente"
             v-model="address"
@@ -146,7 +146,7 @@ watch(
             v-bind="addressAttrs"
           />
         </InputGroup>
-        <InputGroup label="URL de mapa" name="map_url" class="px-0">
+        <InputGroup label="URL de mapa" name="map_url" class="!px-0">
           <Input
             placeholder="Ingresa la dirección del cliente"
             v-model="mapUrl"
@@ -154,7 +154,7 @@ watch(
             v-bind="mapUrlAttrs"
           />
         </InputGroup>
-        <InputGroup class="px-0">
+        <InputGroup class="!px-0">
           <div class="flex flex-col gap-4">
             <Button
               :loading="isLoading"

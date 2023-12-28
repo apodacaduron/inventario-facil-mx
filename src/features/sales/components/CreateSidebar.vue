@@ -4,7 +4,6 @@ import {
   Button,
   InputGroup,
   RichSelect,
-  RichSelectOptionIndicator,
   Input,
 } from "@flavorly/vanilla-components";
 import { useForm } from "@vorms/core";
@@ -43,29 +42,6 @@ const locale = {
     subtitle: "Crea rápidamente una nueva venta para tu inventario.",
   },
 };
-
-const statusOptions = [
-  {
-    value: "in_progress",
-    text: "En progreso",
-    description:
-      "La venta se está procesando activamente, se están seleccionando o empaquetando los artículos.",
-    status: "blue",
-  },
-  {
-    value: "completed",
-    text: "Completada",
-    description: "La venta se ha procesado y completado con éxito.",
-    status: "green",
-  },
-  {
-    value: "cancelled",
-    text: "Cancelada",
-    description:
-      "La venta fue anulada antes de completarse, posiblemente a solicitud del cliente u otras razones.",
-    status: "red",
-  },
-];
 
 const productIds = ref<string[]>([]);
 const productServices = useProductServices();
@@ -119,7 +95,6 @@ const productsByIdsQuery = useProductsByIdsQuery({
   },
 });
 
-const { value: status, attrs: statusAttrs } = formInstance.register("status");
 const { value: customer, attrs: customerAttrs } =
   formInstance.register("customer_id");
 
@@ -248,42 +223,7 @@ watch(
   >
     <div class="space-y-6 pb-16">
       <form @submit="formInstance.handleSubmit">
-        <InputGroup label="Status de venta" name="status" class="px-0">
-          <RichSelect
-            v-model="status"
-            :options="statusOptions"
-            placeholder="Seleccione status de venta"
-            clearable
-            v-bind="statusAttrs"
-          >
-            <template
-              #label="{ option: { raw: order }, className, isSelected }"
-            >
-              <RichSelectOptionIndicator
-                :name="order.text"
-                :status="order.status"
-                :description="order.description"
-                :selected="isSelected"
-                :disabled="order.disabled"
-                :parent-classes="className"
-              />
-            </template>
-            <template
-              #option="{ option: { raw: order }, className, isSelected }"
-            >
-              <RichSelectOptionIndicator
-                class="px-3 py-2"
-                :name="order?.text"
-                :status="order?.status"
-                :description="order?.description"
-                :selected="isSelected"
-                :disabled="order?.disabled"
-                :parent-classes="className"
-              />
-            </template>
-          </RichSelect>
-        </InputGroup>
-        <InputGroup label="Cliente" name="customer_id" class="px-0">
+        <InputGroup label="Cliente" name="customer_id" class="!px-0">
           <RichSelect
             v-model="customer"
             v-bind="customerAttrs"
@@ -310,7 +250,7 @@ watch(
             </template>
           </RichSelect>
         </InputGroup>
-        <InputGroup label="Seleccione productos" name="products" class="px-0">
+        <InputGroup label="Seleccione productos" name="products" class="!px-0">
           <RichSelect
             :modelValue="productIds"
             @update:modelValue="updateProductIds"
@@ -435,7 +375,7 @@ watch(
             </table>
           </div>
         </InputGroup>
-        <InputGroup class="px-0">
+        <InputGroup class="!px-0">
           <div class="flex flex-col gap-4">
             <Button
               :loading="isLoading"
