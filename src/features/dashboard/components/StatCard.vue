@@ -1,7 +1,3 @@
-<script setup lang="ts">
-import { Skeleton } from "@flavorly/vanilla-components";
-</script>
-
 <template>
   <div class="w-full bg-white rounded-lg shadow dark:bg-gray-800 p-4 md:p-6">
     <div class="flex justify-between">
