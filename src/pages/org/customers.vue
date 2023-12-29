@@ -80,13 +80,13 @@ const customerHandlers = {
     await asyncCreateCustomer.execute(0, formValues);
     customerSidebarMode.value = null;
     selectedCustomerFromActions.value = null;
-    await queryClient.removeQueries({ queryKey: ["customers"] });
+    await queryClient.invalidateQueries({ queryKey: ["customers"] });
   },
   async update(formValues: UpdateCustomer) {
     await asyncUpdateCustomer.execute(0, formValues);
     customerSidebarMode.value = null;
     selectedCustomerFromActions.value = null;
-    await queryClient.removeQueries({ queryKey: ["customers"] });
+    await queryClient.invalidateQueries({ queryKey: ["customers"] });
   },
 };
 
@@ -111,7 +111,7 @@ async function deleteCustomer() {
   await asyncDeleteCustomer.execute(0, customerId);
   isDeleteCustomerDialogOpen.value = false;
   selectedCustomerFromActions.value = null;
-  await queryClient.removeQueries({ queryKey: ["customers"] });
+  await queryClient.invalidateQueries({ queryKey: ["customers"] });
 }
 </script>
 
@@ -167,10 +167,14 @@ async function deleteCustomer() {
         </tr>
       </thead>
       <tbody>
-        <template v-for="page in customersQuery.data.value?.pages">
+        <!-- @vue-ignore -->
+        <template
+          v-for="(page, index) in customersQuery.data.value?.pages"
+          :key="index"
+        >
           <tr
-            v-for="(customer, index) in page.data"
-            :key="index"
+            v-for="customer in page.data"
+            :key="customer.id"
             class="bg-white border-b dark:bg-neutral-900 dark:border-neutral-800"
           >
             <th

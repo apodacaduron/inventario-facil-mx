@@ -73,13 +73,13 @@ const saleHandlers = {
     await asyncCreateSale.execute(0, formValues);
     saleSidebarMode.value = null;
     selectedSaleFromActions.value = null;
-    await queryClient.removeQueries({ queryKey: ["sales"] });
+    await queryClient.invalidateQueries({ queryKey: ["sales"] });
   },
   async update(formValues: UpdateSale) {
     await asyncUpdateSale.execute(0, formValues);
     saleSidebarMode.value = null;
     selectedSaleFromActions.value = null;
-    await queryClient.removeQueries({ queryKey: ["sales"] });
+    await queryClient.invalidateQueries({ queryKey: ["sales"] });
   },
 };
 
@@ -104,7 +104,7 @@ async function deleteSale() {
   await asyncDeleteSale.execute(0, saleId);
   isDeleteSaleDialogOpen.value = false;
   selectedSaleFromActions.value = null;
-  await queryClient.removeQueries({ queryKey: ["sales"] });
+  await queryClient.invalidateQueries({ queryKey: ["sales"] });
 }
 
 function getBadgeColorFromStatus(status: Sale["status"]) {
@@ -175,10 +175,14 @@ function getBadgeColorFromStatus(status: Sale["status"]) {
         </tr>
       </thead>
       <tbody>
-        <template v-for="page in salesQuery.data.value?.pages">
+        <!-- @vue-ignore -->
+        <template
+          v-for="(page, index) in salesQuery.data.value?.pages"
+          :key="index"
+        >
           <tr
-            v-for="(sale, index) in page.data"
-            :key="index"
+            v-for="sale in page.data"
+            :key="sale.id"
             class="bg-white border-b dark:bg-neutral-900 dark:border-neutral-800"
           >
             <th

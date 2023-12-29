@@ -81,7 +81,7 @@ const productHandlers = {
     await asyncCreateProduct.execute(0, formValues);
     productSidebarMode.value = null;
     selectedProductFromActions.value = null;
-    await queryClient.removeQueries({ queryKey: ["products"] });
+    await queryClient.invalidateQueries({ queryKey: ["products"] });
   },
   async update(formValues: UpdateProduct) {
     const productId = selectedProductFromActions.value?.id;
@@ -92,7 +92,7 @@ const productHandlers = {
     });
     productSidebarMode.value = null;
     selectedProductFromActions.value = null;
-    await queryClient.removeQueries({ queryKey: ["products"] });
+    await queryClient.invalidateQueries({ queryKey: ["products"] });
   },
 };
 
@@ -117,7 +117,7 @@ async function deleteProduct() {
   await asyncDeleteProduct.execute(0, productId);
   isDeleteProductDialogOpen.value = false;
   selectedProductFromActions.value = null;
-  await queryClient.removeQueries({ queryKey: ["products"] });
+  await queryClient.invalidateQueries({ queryKey: ["products"] });
 }
 
 async function shareExistingInventory() {
@@ -209,10 +209,14 @@ function closeShareModal() {
         </tr>
       </thead>
       <tbody>
-        <template v-for="page in productsQuery.data.value?.pages">
+        <!-- @vue-ignore -->
+        <template
+          v-for="(page, index) in productsQuery.data.value?.pages"
+          :key="index"
+        >
           <tr
-            v-for="(product, index) in page.data"
-            :key="index"
+            v-for="product in page.data"
+            :key="product.id"
             class="bg-white border-b dark:bg-neutral-900 dark:border-neutral-800"
           >
             <th
