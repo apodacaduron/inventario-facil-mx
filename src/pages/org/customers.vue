@@ -119,7 +119,7 @@ async function deleteCustomer() {
   <div class="flex items-center justify-between flex-col md:flex-row">
     <div class="mb-6">
       <h2
-        class="mb-2 text-3xl font-extrabold leading-none tracking-tight text-gray-900 md:text-4xl dark:text-white"
+        class="mb-2 text-3xl font-extrabold leading-none tracking-tight text-neutral-900 md:text-4xl dark:text-white"
       >
         Clientes
       </h2>
@@ -150,13 +150,13 @@ async function deleteCustomer() {
     </div>
   </div>
 
-  <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+  <div class="relative overflow-x-auto shadow-md rounded-lg">
     <table
       ref="tableRef"
-      class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400"
+      class="w-full text-sm text-left rtl:text-right text-neutral-500 dark:text-neutral-400"
     >
       <thead
-        class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400"
+        class="text-xs text-neutral-700 uppercase bg-neutral-50 dark:bg-neutral-700 dark:text-neutral-400"
       >
         <tr>
           <th scope="col" class="px-6 py-3">Nombre</th>
@@ -171,11 +171,11 @@ async function deleteCustomer() {
           <tr
             v-for="(customer, index) in page.data"
             :key="index"
-            class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
+            class="bg-white border-b dark:bg-neutral-900 dark:border-neutral-800"
           >
             <th
               scope="row"
-              class="flex items-center px-6 py-4 text-gray-900 whitespace-nowrap dark:text-white"
+              class="flex items-center px-6 py-4 text-neutral-900 whitespace-nowrap dark:text-white"
             >
               <img
                 class="w-12 h-12 rounded-full"
@@ -184,7 +184,7 @@ async function deleteCustomer() {
               />
               <div class="ps-3">
                 <div class="text-base font-semibold">{{ customer.name }}</div>
-                <div v-if="customer.email" class="font-normal text-gray-500">
+                <div v-if="customer.email" class="font-normal text-neutral-500">
                   {{ customer.email }}
                 </div>
               </div>
@@ -245,7 +245,7 @@ async function deleteCustomer() {
     title="Eliminar Cliente"
   >
     <div class="text-center">
-      <p class="text-sm text-gray-500 dark:text-gray-200">
+      <p class="text-sm text-neutral-500 dark:text-neutral-200">
         Esta acción eliminará permanentemente a este cliente. ¿Estás seguro de
         que deseas proceder con la eliminación?
       </p>

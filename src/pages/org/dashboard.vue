@@ -51,7 +51,7 @@ const productsInStockQuery = useProductsInStockQuery();
 <template>
   <div class="flex flex-col gap-8">
     <div class="flex flex-col gap-3">
-      <div class="text-gray-500 dark:text-gray-400 font-semibold">
+      <div class="text-neutral-500 dark:text-neutral-400 font-semibold">
         Estadísticas
         <span
           class="bg-blue-100 text-blue-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300"
@@ -113,17 +113,17 @@ const productsInStockQuery = useProductsInStockQuery();
     </div>
 
     <div class="flex flex-col gap-3">
-      <div class="text-gray-500 dark:text-gray-400 font-semibold">
+      <div class="text-neutral-500 dark:text-neutral-400 font-semibold">
         Productos en stock
       </div>
 
       <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
         <table
           ref="tableRef"
-          class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400"
+          class="w-full text-sm text-left rtl:text-right text-neutral-500 dark:text-neutral-400"
         >
           <thead
-            class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400"
+            class="text-xs text-neutral-700 uppercase bg-neutral-50 dark:bg-neutral-700 dark:text-neutral-400"
           >
             <tr>
               <th scope="col" class="px-6 py-3">Nombre</th>
@@ -136,11 +136,11 @@ const productsInStockQuery = useProductsInStockQuery();
             <tr
               v-for="product in productsInStockQuery.data.value?.data"
               :key="product.id"
-              class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
+              class="bg-white border-b dark:bg-neutral-900 dark:border-neutral-800"
             >
               <th
                 scope="row"
-                class="flex items-center px-6 py-4 text-gray-900 whitespace-nowrap dark:text-white"
+                class="flex items-center px-6 py-4 text-neutral-900 whitespace-nowrap dark:text-white"
               >
                 <img
                   v-if="product.image_url"
@@ -158,7 +158,7 @@ const productsInStockQuery = useProductsInStockQuery();
                   <div class="text-base font-semibold">{{ product.name }}</div>
                   <div
                     v-if="product.description"
-                    class="font-normal text-gray-500"
+                    class="font-normal text-neutral-500"
                   >
                     {{ product.description }}
                   </div>
