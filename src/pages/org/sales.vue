@@ -29,6 +29,7 @@ import { useOrganizationStore } from "@/stores";
 import { useSalesQuery } from "@/features/sales/composables/useSaleQueries";
 import { useQueryClient } from "@tanstack/vue-query";
 import { useCurrencyFormatter } from "@/features/products";
+import { Badge } from "@/components";
 
 const WHATSAPP_URL = import.meta.env.VITE_WHATSAPP_URL;
 const tableRef = ref<HTMLElement | null>(null);
@@ -104,6 +105,19 @@ async function deleteSale() {
   isDeleteSaleDialogOpen.value = false;
   selectedSaleFromActions.value = null;
   await queryClient.removeQueries({ queryKey: ["sales"] });
+}
+
+function getBadgeColorFromStatus(status: Sale["status"]) {
+  switch (status) {
+    case "cancelled":
+      return "red";
+    case "in_progress":
+      return "blue";
+    case "completed":
+      return "green";
+    default:
+      return "blue";
+  }
 }
 </script>
 
@@ -234,10 +248,9 @@ async function deleteSale() {
               }}
             </td>
             <td class="text-center">
-              <span
-                class="bg-blue-100 text-blue-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300"
+              <Badge :color="getBadgeColorFromStatus(sale.status)"
                 >{{ sale.status?.toLocaleUpperCase() }}
-              </span>
+              </Badge>
             </td>
             <td>
               {{
@@ -263,13 +276,16 @@ async function deleteSale() {
                   <span>Ver</span>
                 </DropdownOption>
                 <DropdownOption
-                  v-if="sale.status !== 'completed'"
+                  v-if="sale.status === 'in_progress'"
                   @click="openUpdateSaleSidebar(sale)"
                 >
                   <PencilIcon class="w-5 h-5 mr-2" />
                   <span>Actualizar</span>
                 </DropdownOption>
-                <DropdownOption @click="openDeleteSaleDialog(sale)">
+                <DropdownOption
+                  v-if="sale.status === 'cancelled'"
+                  @click="openDeleteSaleDialog(sale)"
+                >
                   <TrashIcon class="w-5 h-5 mr-2" />
                   <span>Eliminar</span>
                 </DropdownOption>

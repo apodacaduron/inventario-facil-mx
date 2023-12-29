@@ -146,7 +146,7 @@ const menuList = {
         <li v-for="(menuItem, index) in menuList" :key="index">
           <router-link
             :to="menuItem.path"
-            class="flex items-center p-2 rounded-lg text-gray-500"
+            class="flex items-center p-2 rounded-lg text-gray-500 dark:text-gray-300"
             active-class="active-link"
           >
             <component
@@ -179,7 +179,7 @@ const menuList = {
   </aside>
 
   <div class="sm:ml-64">
-    <div class="p-4 mt-14">
+    <div class="p-4 md:p-8 mt-20 md:mt-14">
       <router-view />
     </div>
   </div>
@@ -238,6 +238,6 @@ const menuList = {
 
 <style scoped lang="scss">
 .active-link {
-  @apply text-primary-800 bg-primary-50 dark:bg-primary-900 dark:text-primary-100;
+  @apply text-primary-800 bg-primary-50 dark:bg-primary-900 dark:text-primary-50;
 }
 </style>

@@ -162,7 +162,7 @@ async function deleteCustomer() {
           <th scope="col" class="px-6 py-3">Nombre</th>
           <th scope="col" class="px-6 py-3">Telefono</th>
           <th scope="col" class="px-6 py-3">Dirección</th>
-          <th scope="col" class="px-6 py-3">Mapa</th>
+          <th scope="col" class="px-6 py-3 text-center">Mapa</th>
           <th scope="col" class="px-6 py-3">Acción</th>
         </tr>
       </thead>
@@ -208,7 +208,7 @@ async function deleteCustomer() {
                 :href="customer.map_url"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="block"
+                class="block w-fit mx-auto"
               >
                 <MapIcon class="w-6 h-6 stroke-[2px]" />
               </a>
