@@ -59,12 +59,12 @@ const toggleDark = useToggle(isDark);
       </nav>
       <div class="text-center max-w-5xl mx-auto mt-[10vh]">
         <h1
-          class="mb-4 text-4xl font-extrabold leading-none tracking-tight text-neutral-900 md:text-5xl lg:text-6xl dark:text-white"
+          class="mb-4 text-4xl font-extrabold leading-none tracking-tight text-gray-900 md:text-5xl lg:text-6xl dark:text-white"
         >
           Simplifica tu Gestión de Inventario
         </h1>
         <p
-          class="mb-6 text-lg font-normal text-neutral-500 lg:text-xl sm:px-16 xl:px-48 dark:text-neutral-400"
+          class="mb-6 text-lg font-normal text-gray-500 lg:text-xl sm:px-16 xl:px-48 dark:text-gray-400"
         >
           La solución perfecta para llevar el control de tu inventario de manera
           rápida y sencilla, ¡sin complicaciones ni papeleo!

@@ -5,5 +5,5 @@
 html.dark,
 body.dark {
   color-scheme: dark;
-  @apply bg-neutral-950;
+  @apply bg-gray-950;
 }

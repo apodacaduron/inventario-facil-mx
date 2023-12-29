@@ -63,7 +63,7 @@ const menuList = {
 
 <template>
   <nav
-    class="fixed top-0 z-20 w-full bg-white border-b border-neutral-200 dark:bg-neutral-900 dark:border-neutral-800"
+    class="fixed top-0 z-20 w-full bg-white border-b border-gray-200 dark:bg-gray-900 dark:border-gray-800"
   >
     <div class="px-3 py-3 lg:px-5 lg:pl-3">
       <div class="flex items-center justify-between">
@@ -74,7 +74,7 @@ const menuList = {
             data-drawer-toggle="logo-sidebar"
             aria-controls="logo-sidebar"
             type="button"
-            class="inline-flex items-center p-2 text-sm text-neutral-500 rounded-lg sm:hidden hover:bg-neutral-100 focus:outline-none focus:ring-2 focus:ring-neutral-200 dark:text-slate-400 dark:hover:bg-slate-700 dark:focus:ring-slate-600"
+            class="inline-flex items-center p-2 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-slate-400 dark:hover:bg-slate-700 dark:focus:ring-slate-600"
           >
             <span class="sr-only">Open sidebar</span>
             <svg
@@ -109,7 +109,7 @@ const menuList = {
                 <template #trigger>
                   <button
                     type="button"
-                    class="flex text-sm bg-neutral-800 rounded-full focus:ring-4 focus:ring-neutral-300 dark:focus:ring-slate-600"
+                    class="flex text-sm bg-gray-800 rounded-full focus:ring-4 focus:ring-gray-300 dark:focus:ring-slate-600"
                     aria-expanded="false"
                     data-dropdown-toggle="dropdown-user"
                   >
@@ -136,17 +136,17 @@ const menuList = {
 
   <aside
     id="logo-sidebar"
-    class="fixed top-0 left-0 z-10 w-64 h-screen pt-20 transition-transform -translate-x-full bg-white border-r border-neutral-200 sm:translate-x-0 dark:bg-neutral-900 dark:border-neutral-800"
+    class="fixed top-0 left-0 z-10 w-64 h-screen pt-20 transition-transform -translate-x-full bg-white border-r border-gray-200 sm:translate-x-0 dark:bg-gray-900 dark:border-gray-800"
     aria-label="Sidebar"
   >
     <div
-      class="flex flex-col justify-between h-full px-3 pb-4 overflow-y-auto bg-white dark:bg-neutral-900"
+      class="flex flex-col justify-between h-full px-3 pb-4 overflow-y-auto bg-white dark:bg-gray-900"
     >
       <ul class="space-y-2">
         <li v-for="(menuItem, index) in menuList" :key="index">
           <router-link
             :to="menuItem.path"
-            class="flex items-center p-2 rounded-lg text-neutral-500 dark:text-neutral-300"
+            class="flex items-center p-2 rounded-lg text-gray-500 dark:text-gray-300"
             active-class="active-link"
           >
             <component
@@ -192,7 +192,7 @@ const menuList = {
   >
     <div class="space-y-6 pb-16">
       <div
-        class="flex flex-col justify-between h-full px-3 pb-4 overflow-y-auto bg-white dark:bg-neutral-800"
+        class="flex flex-col justify-between h-full px-3 pb-4 overflow-y-auto bg-white dark:bg-gray-800"
       >
         <ul class="space-y-2">
           <li

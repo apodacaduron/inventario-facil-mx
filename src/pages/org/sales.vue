@@ -125,7 +125,7 @@ function getBadgeColorFromStatus(status: Sale["status"]) {
   <div class="flex items-center justify-between flex-col md:flex-row">
     <div class="mb-6">
       <h2
-        class="mb-2 text-3xl font-extrabold leading-none tracking-tight text-neutral-900 md:text-4xl dark:text-white"
+        class="mb-2 text-3xl font-extrabold leading-none tracking-tight text-gray-900 md:text-4xl dark:text-white"
       >
         Ventas
       </h2>
@@ -159,10 +159,10 @@ function getBadgeColorFromStatus(status: Sale["status"]) {
   <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
     <table
       ref="tableRef"
-      class="w-full text-sm text-left rtl:text-right text-neutral-500 dark:text-neutral-400"
+      class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400"
     >
       <thead
-        class="text-xs text-neutral-700 uppercase bg-neutral-50 dark:bg-neutral-700 dark:text-neutral-400"
+        class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400"
       >
         <tr>
           <th scope="col" class="px-6 py-3">Nombre</th>
@@ -183,11 +183,11 @@ function getBadgeColorFromStatus(status: Sale["status"]) {
           <tr
             v-for="sale in page.data"
             :key="sale.id"
-            class="bg-white border-b dark:bg-neutral-900 dark:border-neutral-800"
+            class="bg-white border-b dark:bg-gray-900 dark:border-gray-800"
           >
             <th
               scope="row"
-              class="flex items-center px-6 py-4 text-neutral-900 whitespace-nowrap dark:text-white"
+              class="flex items-center px-6 py-4 text-gray-900 whitespace-nowrap dark:text-white"
             >
               <img
                 class="w-12 h-12 rounded-full"
@@ -200,7 +200,7 @@ function getBadgeColorFromStatus(status: Sale["status"]) {
                 </div>
                 <div
                   v-if="sale.i_customers?.phone"
-                  class="font-normal text-neutral-500"
+                  class="font-normal text-gray-500"
                 >
                   <a
                     :href="`${WHATSAPP_URL}/${sale.i_customers.phone}`"
@@ -218,7 +218,7 @@ function getBadgeColorFromStatus(status: Sale["status"]) {
                 <img
                   v-for="saleProduct in sale.i_sale_products.slice(0, 3)"
                   :key="saleProduct.id"
-                  class="w-10 h-10 border-2 border-white rounded-full dark:border-neutral-800"
+                  class="w-10 h-10 border-2 border-white rounded-full dark:border-gray-800"
                   :src="
                     saleProduct.i_products?.image_url ??
                     '/product-placeholder.png'
@@ -226,7 +226,7 @@ function getBadgeColorFromStatus(status: Sale["status"]) {
                 />
                 <div
                   v-if="sale.i_sale_products.length > 3"
-                  class="flex items-center justify-center w-10 h-10 text-xs font-medium text-white bg-neutral-700 border-2 border-white rounded-full hover:bg-neutral-600 dark:border-neutral-800"
+                  class="flex items-center justify-center w-10 h-10 text-xs font-medium text-white bg-gray-700 border-2 border-white rounded-full hover:bg-gray-600 dark:border-gray-800"
                 >
                   {{ sale.i_sale_products.length - 3 }}
                 </div>
@@ -307,7 +307,7 @@ function getBadgeColorFromStatus(status: Sale["status"]) {
     title="Eliminar Cliente"
   >
     <div class="text-center">
-      <p class="text-sm text-neutral-500 dark:text-neutral-200">
+      <p class="text-sm text-gray-500 dark:text-gray-200">
         Esta acción eliminará permanentemente esta venta. ¿Estás seguro de que
         deseas proceder con la eliminación?
       </p>

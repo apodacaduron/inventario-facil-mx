@@ -13,6 +13,7 @@ export default {
     extend: {
       colors: {
         primary: colors.blue, 
+        gray: colors.neutral,
       },
     },
   },

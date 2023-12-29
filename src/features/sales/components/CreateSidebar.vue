@@ -285,10 +285,10 @@ watch(
             class="relative overflow-x-auto shadow-md sm:rounded-lg"
           >
             <table
-              class="w-full text-sm text-left rtl:text-right text-neutral-500 dark:text-neutral-400"
+              class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400"
             >
               <thead
-                class="text-xs text-neutral-700 uppercase bg-neutral-50 dark:bg-neutral-700 dark:text-neutral-400"
+                class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400"
               >
                 <tr>
                   <th scope="col" class="px-6 py-3">Nombre</th>
@@ -305,11 +305,11 @@ watch(
                   <tr
                     v-for="product in page.data"
                     :key="product.id"
-                    class="bg-white border-b dark:bg-neutral-900 dark:border-neutral-800"
+                    class="bg-white border-b dark:bg-gray-900 dark:border-gray-800"
                   >
                     <th
                       scope="row"
-                      class="flex items-center px-6 py-4 text-neutral-900 whitespace-nowrap dark:text-white"
+                      class="flex items-center px-6 py-4 text-gray-900 whitespace-nowrap dark:text-white"
                     >
                       <img
                         v-if="product.image_url"
