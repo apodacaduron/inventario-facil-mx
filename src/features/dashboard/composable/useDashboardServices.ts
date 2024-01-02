@@ -57,11 +57,13 @@ export function useDashboardServices() {
     let supabaseSalesQuery = supabase
       .from("i_sales")
       .select("shipping_cost")
+      .eq("status", "completed")
       .eq("org_id", organization.org_id);
     let supabaseQuery = supabase
       .from("i_sale_products")
-      .select("price, unit_price, qty, created_at")
-      .eq("org_id", organization.org_id);
+      .select("price, unit_price, qty, created_at, i_sales!inner(status)")
+      .eq("org_id", organization.org_id)
+      .filter("i_sales.status", "eq", "completed");
 
     if (range) {
       supabaseQuery.gt("created_at", range.from).lt("created_at", range.to);
