@@ -15,11 +15,13 @@ import {
 import { Skeleton } from "@flavorly/vanilla-components";
 import { isDefined } from "@vueuse/core";
 import { useCurrencyFormatter } from "@/features/products";
+import { useRoute } from "vue-router";
 
 const DATE = new Date();
 const FIRST_DAY_OF_MONTH = new Date(DATE.getFullYear(), DATE.getMonth(), 1);
 const LAST_DAY_OF_MONTH = new Date(DATE.getFullYear(), DATE.getMonth() + 1, 0);
 
+const route = useRoute();
 const currencyFormatter = useCurrencyFormatter();
 const totalCustomersQuery = useTotalCustomersQuery({
   options: {
@@ -59,56 +61,64 @@ const productsInStockQuery = useProductsInStockQuery();
         </span>
       </div>
       <div class="grid grid-cols-1 gap-5 lg:grid-cols-2 xl:grid-cols-4">
-        <StatCard>
-          <template #icon><InboxStackIcon class="w-6 h-6" /></template>
-          <template #stat>
-            <template v-if="isDefined(totalSalesQuery.data.value)"
-              >{{ totalSalesQuery.data.value }}
+        <router-link :to="`/org/${route.params.orgId}/sales`">
+          <StatCard>
+            <template #icon><InboxStackIcon class="w-6 h-6" /></template>
+            <template #stat>
+              <template v-if="isDefined(totalSalesQuery.data.value)"
+                >{{ totalSalesQuery.data.value }}
+              </template>
+              <Skeleton v-else :count="1" />
             </template>
-            <Skeleton v-else :count="1" />
-          </template>
-          <template #label>Cantidad de ventas</template>
-        </StatCard>
-        <StatCard>
-          <template #icon><BanknotesIcon class="w-6 h-6" /></template>
-          <template #stat>
-            <template
-              v-if="isDefined(salesPricesQuery.data.value?.sale_price_total)"
-              >{{
-                currencyFormatter.parse(
-                  salesPricesQuery.data.value?.sale_price_total
-                )
-              }}
+            <template #label>Cantidad de ventas</template>
+          </StatCard>
+        </router-link>
+        <router-link :to="`/org/${route.params.orgId}/sales`">
+          <StatCard>
+            <template #icon><BanknotesIcon class="w-6 h-6" /></template>
+            <template #stat>
+              <template
+                v-if="isDefined(salesPricesQuery.data.value?.sale_price_total)"
+                >{{
+                  currencyFormatter.parse(
+                    salesPricesQuery.data.value?.sale_price_total
+                  )
+                }}
+              </template>
+              <Skeleton v-else :count="1" />
             </template>
-            <Skeleton v-else :count="1" />
-          </template>
-          <template #label>Total de ventas</template>
-        </StatCard>
-        <StatCard>
-          <template #icon><CurrencyDollarIcon class="w-6 h-6" /></template>
-          <template #stat>
-            <template
-              v-if="isDefined(salesPricesQuery.data.value?.profit_total)"
-              >{{
-                currencyFormatter.parse(
-                  salesPricesQuery.data.value?.profit_total
-                )
-              }}
+            <template #label>Total de ventas</template>
+          </StatCard>
+        </router-link>
+        <router-link :to="`/org/${route.params.orgId}/sales`">
+          <StatCard>
+            <template #icon><CurrencyDollarIcon class="w-6 h-6" /></template>
+            <template #stat>
+              <template
+                v-if="isDefined(salesPricesQuery.data.value?.profit_total)"
+                >{{
+                  currencyFormatter.parse(
+                    salesPricesQuery.data.value?.profit_total
+                  )
+                }}
+              </template>
+              <Skeleton v-else :count="1" />
             </template>
-            <Skeleton v-else :count="1" />
-          </template>
-          <template #label>Ganancia de ventas</template>
-        </StatCard>
-        <StatCard>
-          <template #icon><UserGroupIcon class="w-6 h-6" /></template>
-          <template #stat>
-            <template v-if="isDefined(totalCustomersQuery.data.value)"
-              >{{ totalCustomersQuery.data.value }}
+            <template #label>Ganancia de ventas</template>
+          </StatCard>
+        </router-link>
+        <router-link :to="`/org/${route.params.orgId}/customers`">
+          <StatCard>
+            <template #icon><UserGroupIcon class="w-6 h-6" /></template>
+            <template #stat>
+              <template v-if="isDefined(totalCustomersQuery.data.value)"
+                >{{ totalCustomersQuery.data.value }}
+              </template>
+              <Skeleton v-else :count="1" />
             </template>
-            <Skeleton v-else :count="1" />
-          </template>
-          <template #label>Total de clientes</template>
-        </StatCard>
+            <template #label>Total de clientes</template>
+          </StatCard>
+        </router-link>
       </div>
     </div>
 
