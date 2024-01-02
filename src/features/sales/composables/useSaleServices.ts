@@ -6,6 +6,8 @@ export type CreateSale = {
   sale_date: Sale["sale_date"];
   status: NonNullable<Sale["status"]>;
   customer_id: NonNullable<Sale["customer_id"]>;
+  notes: NonNullable<Sale["notes"]>;
+  shipping_cost: NonNullable<Sale["shipping_cost"]>;
   products: {
     product_id: SaleProduct["product_id"];
     price: SaleProduct["price"];
@@ -80,6 +82,8 @@ export function useSaleServices() {
           status: "in_progress",
           sale_date: formValues.sale_date,
           customer_id: formValues.customer_id,
+          shipping_cost: formValues.shipping_cost,
+          notes: formValues.notes,
           org_id: organization.org_id,
         },
       ])
@@ -110,6 +114,7 @@ export function useSaleServices() {
       if (formValues.status === "in_progress") {
         nextCurrentStock = nextCurrentStock - formQty;
       }
+      console.log(nextCurrentStock);
       await supabase
         .from("i_products")
         .update({ current_stock: nextCurrentStock })
@@ -156,6 +161,7 @@ export function useSaleServices() {
       } else if (formValues.status === "cancelled") {
         nextCurrentStock = nextCurrentStock + formQty;
       }
+      console.log(nextCurrentStock);
       await supabase
         .from("i_products")
         .update({ current_stock: nextCurrentStock })

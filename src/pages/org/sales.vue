@@ -169,6 +169,7 @@ function getBadgeColorFromStatus(status: Sale["status"]) {
           <th scope="col" class="px-6 py-3">Productos</th>
           <th scope="col" class="px-6 py-3">Cantidad</th>
           <th scope="col" class="px-6 py-3">Total</th>
+          <th scope="col" class="px-6 py-3">Costo de envio</th>
           <th scope="col" class="px-6 py-3">Estatus</th>
           <th scope="col" class="px-6 py-3">Creado</th>
           <th scope="col" class="px-6 py-3">Acción</th>
@@ -250,6 +251,9 @@ function getBadgeColorFromStatus(status: Sale["status"]) {
                   )
                 )
               }}
+            </td>
+            <td class="text-center">
+              {{ currencyFormatter.parse(sale.shipping_cost) }}
             </td>
             <td class="text-center">
               <Badge :color="getBadgeColorFromStatus(sale.status)"

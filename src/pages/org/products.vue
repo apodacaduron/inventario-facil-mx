@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import {
+  AddStockDialog,
   CreateOrEditSidebar,
   CreateProduct,
   Product,
@@ -19,6 +20,7 @@ import {
 } from "@flavorly/vanilla-components";
 import {
   EllipsisVerticalIcon,
+  InboxArrowDownIcon,
   MagnifyingGlassIcon,
   PencilIcon,
   PlusIcon,
@@ -42,6 +44,7 @@ const productSearchDebounced = refDebounced(productSearch, 400);
 const productSidebarMode = ref<"create" | "update" | null>(null);
 const isDeleteProductDialogOpen = ref(false);
 const isShareProductsDialogOpen = ref(false);
+const isAddStockDialogOpen = ref(false);
 const selectedProductFromActions = ref<Product | null>(null);
 const queryClient = useQueryClient();
 const organizationStore = useOrganizationStore();
@@ -109,6 +112,15 @@ async function handleSaveSidebar(formValues: CreateProduct | UpdateProduct) {
 function openUpdateProductSidebar(product: Product) {
   selectedProductFromActions.value = product;
   productSidebarMode.value = "update";
+}
+
+function openAddStockDialog(product: Product) {
+  selectedProductFromActions.value = product;
+  isAddStockDialogOpen.value = true;
+}
+function closeAddStockDialog() {
+  selectedProductFromActions.value = null;
+  isAddStockDialogOpen.value = false;
 }
 
 async function deleteProduct() {
@@ -268,6 +280,10 @@ function closeShareModal() {
                   <PencilIcon class="w-5 h-5 mr-2" />
                   <span>Actualizar</span>
                 </DropdownOption>
+                <DropdownOption @click="openAddStockDialog(product)">
+                  <InboxArrowDownIcon class="w-5 h-5 mr-2" />
+                  <span>Actualizar stock</span>
+                </DropdownOption>
                 <DropdownOption @click="openDeleteProductDialog(product)">
                   <TrashIcon class="w-5 h-5 mr-2" />
                   <span>Eliminar</span>
@@ -361,5 +377,10 @@ function closeShareModal() {
     "
     @close="closeSidebar"
     @save="handleSaveSidebar"
+  />
+  <AddStockDialog
+    :product="selectedProductFromActions"
+    :open="isAddStockDialogOpen"
+    @close="closeAddStockDialog"
   />
 </template>

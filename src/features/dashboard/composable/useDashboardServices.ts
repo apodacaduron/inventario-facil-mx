@@ -54,6 +54,10 @@ export function useDashboardServices() {
     if (!organization?.org_id)
       throw new Error("Organization is required to get sales count");
 
+    let supabaseSalesQuery = supabase
+      .from("i_sales")
+      .select("shipping_cost")
+      .eq("org_id", organization.org_id);
     let supabaseQuery = supabase
       .from("i_sale_products")
       .select("price, unit_price, qty, created_at")
@@ -64,6 +68,10 @@ export function useDashboardServices() {
     }
     const { data } = await supabaseQuery;
 
+    const sumShippingCosts = (await supabaseSalesQuery).data?.reduce(
+      (acc, sale) => acc + (sale.shipping_cost ?? 0),
+      0
+    );
     const sumPrices = data?.reduce(
       (acc, salePrices) => ({
         ...acc,
@@ -81,8 +89,12 @@ export function useDashboardServices() {
     );
     const sumPricesWithProfit = {
       ...sumPrices,
+      sale_price_total:
+        (sumPrices?.sale_price_total ?? 0) + (sumShippingCosts ?? 0),
       profit_total:
-        (sumPrices?.sale_price_total ?? 0) - (sumPrices?.unit_price_total ?? 0),
+        (sumPrices?.sale_price_total ?? 0) -
+        (sumPrices?.unit_price_total ?? 0) +
+        (sumShippingCosts ?? 0),
     };
 
     return sumPricesWithProfit;

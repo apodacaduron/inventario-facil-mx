@@ -52,6 +52,8 @@ const initialForm: CreateSale = {
   sale_date: new Date().toISOString(),
   products: [],
   customer_id: "",
+  shipping_cost: 0,
+  notes: "",
 };
 const formInstance = useForm<CreateSale>({
   initialValues: initialForm,
@@ -61,6 +63,12 @@ const formInstance = useForm<CreateSale>({
       status: z.enum(SALE_STATUS),
       sale_date: z.string().datetime(),
       customer_id: z.string().uuid("Por favor seleccione a un cliente"),
+      shipping_cost: z
+        .number({ invalid_type_error: "Ingresa un número válido" })
+        .nonnegative()
+        .finite()
+        .safe(),
+      notes: z.string().optional(),
       products: z
         .array(
           z.object({
@@ -79,9 +87,13 @@ const formInstance = useForm<CreateSale>({
       ...formProduct,
       price: currencyFormatter.toCents(formProduct.price),
     }));
+    const nextShippingCost = currencyFormatter.toCents(
+      formValues.shipping_cost
+    );
 
     const modifiedFormValues = {
       ...formValues,
+      shipping_cost: nextShippingCost ?? 0,
       products: modifiedProducts,
     };
 
@@ -97,6 +109,9 @@ const productsByIdsQuery = useProductsByIdsQuery({
 
 const { value: customer, attrs: customerAttrs } =
   formInstance.register("customer_id");
+const { value: notes, attrs: notesAttrs } = formInstance.register("notes");
+const { value: shippingCost, attrs: shippingCostAttrs } =
+  formInstance.register("shipping_cost");
 
 function closeSidebar(isOpen: boolean) {
   if (isOpen) return;
@@ -249,6 +264,23 @@ watch(
               </div>
             </template>
           </RichSelect>
+        </InputGroup>
+        <InputGroup label="Notas de venta" name="notes" class="!px-0">
+          <Input
+            placeholder="Ingresa notas de la venta"
+            v-model="notes"
+            :errors="formInstance.errors.value.notes"
+            v-bind="notesAttrs"
+          />
+        </InputGroup>
+        <InputGroup label="Costo de envio" name="shippingCost" class="!px-0">
+          <Input
+            placeholder="Ingresa el costo de envio"
+            v-model="shippingCost"
+            type="number"
+            :errors="formInstance.errors.value.shipping_cost"
+            v-bind="shippingCostAttrs"
+          />
         </InputGroup>
         <InputGroup label="Seleccione productos" name="products" class="!px-0">
           <RichSelect

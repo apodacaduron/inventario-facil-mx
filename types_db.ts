@@ -216,6 +216,7 @@ export interface Database {
         Row: {
           created_at: string
           id: string
+          org_id: string | null
           price: number | null
           product_id: string | null
           qty: number | null
@@ -226,6 +227,7 @@ export interface Database {
         Insert: {
           created_at?: string
           id?: string
+          org_id?: string | null
           price?: number | null
           product_id?: string | null
           qty?: number | null
@@ -236,6 +238,7 @@ export interface Database {
         Update: {
           created_at?: string
           id?: string
+          org_id?: string | null
           price?: number | null
           product_id?: string | null
           qty?: number | null
@@ -244,6 +247,13 @@ export interface Database {
           updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "i_sale_products_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "i_organizations"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "i_sale_products_product_id_fkey"
             columns: ["product_id"]
@@ -265,8 +275,10 @@ export interface Database {
           created_at: string
           customer_id: string | null
           id: string
+          notes: string | null
           org_id: string | null
           sale_date: string | null
+          shipping_cost: number | null
           status: Database["public"]["Enums"]["basic_sale_status"] | null
           updated_at: string | null
         }
@@ -274,8 +286,10 @@ export interface Database {
           created_at?: string
           customer_id?: string | null
           id?: string
+          notes?: string | null
           org_id?: string | null
           sale_date?: string | null
+          shipping_cost?: number | null
           status?: Database["public"]["Enums"]["basic_sale_status"] | null
           updated_at?: string | null
         }
@@ -283,8 +297,10 @@ export interface Database {
           created_at?: string
           customer_id?: string | null
           id?: string
+          notes?: string | null
           org_id?: string | null
           sale_date?: string | null
+          shipping_cost?: number | null
           status?: Database["public"]["Enums"]["basic_sale_status"] | null
           updated_at?: string | null
         }
