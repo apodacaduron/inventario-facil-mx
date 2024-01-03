@@ -78,6 +78,9 @@ const { value: status, attrs: statusAttrs } = formInstance.register("status");
 
 function closeSidebar(isOpen: boolean) {
   if (isOpen) return;
+  forceCloseSidebar();
+}
+function forceCloseSidebar() {
   formInstance.resetForm();
   emit("close");
 }
@@ -153,7 +156,7 @@ watch(
             <Button
               :disabled="isLoading"
               label="Cancelar"
-              @click="closeSidebar"
+              @click="forceCloseSidebar"
             />
           </div>
         </InputGroup>

@@ -40,8 +40,10 @@ export interface Database {
           id: string
           map_url: string | null
           name: string | null
+          notes: string | null
           org_id: string | null
           phone: string | null
+          trust_status: Database["public"]["Enums"]["trust_status"] | null
         }
         Insert: {
           address?: string | null
@@ -50,8 +52,10 @@ export interface Database {
           id?: string
           map_url?: string | null
           name?: string | null
+          notes?: string | null
           org_id?: string | null
           phone?: string | null
+          trust_status?: Database["public"]["Enums"]["trust_status"] | null
         }
         Update: {
           address?: string | null
@@ -60,8 +64,10 @@ export interface Database {
           id?: string
           map_url?: string | null
           name?: string | null
+          notes?: string | null
           org_id?: string | null
           phone?: string | null
+          trust_status?: Database["public"]["Enums"]["trust_status"] | null
         }
         Relationships: [
           {
@@ -272,6 +278,7 @@ export interface Database {
       }
       i_sales: {
         Row: {
+          cancellation_notes: string | null
           created_at: string
           customer_id: string | null
           id: string
@@ -283,6 +290,7 @@ export interface Database {
           updated_at: string | null
         }
         Insert: {
+          cancellation_notes?: string | null
           created_at?: string
           customer_id?: string | null
           id?: string
@@ -294,6 +302,7 @@ export interface Database {
           updated_at?: string | null
         }
         Update: {
+          cancellation_notes?: string | null
           created_at?: string
           customer_id?: string | null
           id?: string
@@ -571,6 +580,7 @@ export interface Database {
         | "incomplete_expired"
         | "past_due"
         | "unpaid"
+      trust_status: "trusted" | "not_trusted"
     }
     CompositeTypes: {
       [_ in never]: never

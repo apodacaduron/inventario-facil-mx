@@ -15,6 +15,7 @@ import {
   DropdownOption,
   Dialog,
 } from "@flavorly/vanilla-components";
+import { Badge } from "@/components";
 import {
   EllipsisVerticalIcon,
   MagnifyingGlassIcon,
@@ -113,6 +114,17 @@ async function deleteCustomer() {
   selectedCustomerFromActions.value = null;
   await queryClient.invalidateQueries({ queryKey: ["customers"] });
 }
+
+function getBadgeColorFromStatus(status: Customer["trust_status"]) {
+  switch (status) {
+    case "trusted":
+      return "green";
+    case "not_trusted":
+      return "red";
+    default:
+      return "green";
+  }
+}
 </script>
 
 <template>
@@ -160,9 +172,11 @@ async function deleteCustomer() {
       >
         <tr>
           <th scope="col" class="px-6 py-3">Nombre</th>
-          <th scope="col" class="px-6 py-3">Telefono</th>
-          <th scope="col" class="px-6 py-3">Dirección</th>
+          <th scope="col" class="px-6 py-3 text-center">Notas</th>
+          <th scope="col" class="px-6 py-3 text-center">Teléfono</th>
+          <th scope="col" class="px-6 py-3 text-center">Dirección</th>
           <th scope="col" class="px-6 py-3 text-center">Mapa</th>
+          <th scope="col" class="px-6 py-3 text-center">Estado de confianza</th>
           <th scope="col" class="px-6 py-3">Acción</th>
         </tr>
       </thead>
@@ -193,7 +207,10 @@ async function deleteCustomer() {
                 </div>
               </div>
             </th>
-            <td>
+            <td class="text-center">
+              {{ customer.notes || "-" }}
+            </td>
+            <td class="text-center">
               <a
                 :href="`${WHATSAPP_URL}/${customer.phone}`"
                 target="_blank"
@@ -203,10 +220,10 @@ async function deleteCustomer() {
                 {{ customer.phone }}
               </a>
             </td>
-            <td>
+            <td class="text-center">
               {{ customer.address || "-" }}
             </td>
-            <td>
+            <td class="text-center">
               <a
                 v-if="customer.map_url"
                 :href="customer.map_url"
@@ -216,6 +233,12 @@ async function deleteCustomer() {
               >
                 <MapIcon class="w-6 h-6 stroke-[2px]" />
               </a>
+              <template v-else>-</template>
+            </td>
+            <td class="text-center">
+              <Badge :color="getBadgeColorFromStatus(customer.trust_status)">
+                {{ customer.trust_status?.toLocaleUpperCase() }}
+              </Badge>
             </td>
             <td class="px-6 py-4">
               <DropdownMenu>
@@ -231,7 +254,10 @@ async function deleteCustomer() {
                   <PencilIcon class="w-5 h-5 mr-2" />
                   <span>Actualizar</span>
                 </DropdownOption>
-                <DropdownOption @click="openDeleteCustomerDialog(customer)">
+                <DropdownOption
+                  class="text-red-500 dark:text-red-500"
+                  @click="openDeleteCustomerDialog(customer)"
+                >
                   <TrashIcon class="w-5 h-5 mr-2" />
                   <span>Eliminar</span>
                 </DropdownOption>
@@ -255,7 +281,7 @@ async function deleteCustomer() {
       </p>
     </div>
     <template #footer>
-      <Button type="button" variant="primary" @click="deleteCustomer">
+      <Button type="button" variant="error" @click="deleteCustomer">
         Si, eliminar
       </Button>
       <Button
