@@ -4,12 +4,18 @@ import {
   Button,
   InputGroup,
   Input,
+  Select,
 } from "@flavorly/vanilla-components";
 import { useForm } from "@vorms/core";
 import { zodResolver } from "@vorms/resolvers/zod";
 import { watch } from "vue";
 import { z } from "zod";
-import { CreateCustomer, Customer, UpdateCustomer } from "../composables";
+import {
+  CreateCustomer,
+  Customer,
+  TRUST_STATUS,
+  UpdateCustomer,
+} from "../composables";
 
 type CreateOrEditSidebarProps = {
   mode?: "create" | "update";
@@ -39,12 +45,14 @@ const locale = {
   },
 };
 
-const initialForm = {
+const initialForm: CreateCustomer = {
   name: "",
   phone: "",
   email: "",
   address: "",
   map_url: "",
+  trust_status: "trusted",
+  notes: "",
 };
 
 const formInstance = useForm<CreateCustomer | UpdateCustomer>({
@@ -56,10 +64,11 @@ const formInstance = useForm<CreateCustomer | UpdateCustomer>({
       email: z.string().email("Debe ser un correo valido").or(z.literal("")),
       address: z.string().or(z.literal("")),
       map_url: z.string().url("Debe ser un url valido").or(z.literal("")),
+      notes: z.string().or(z.literal("")),
+      trust_status: z.enum(TRUST_STATUS),
     })
   ),
   async onSubmit(formValues) {
-    console.log(formValues);
     emit("save", formValues);
   },
 });
@@ -69,9 +78,15 @@ const { value: email, attrs: emailAttrs } = formInstance.register("email");
 const { value: address, attrs: addressAttrs } =
   formInstance.register("address");
 const { value: mapUrl, attrs: mapUrlAttrs } = formInstance.register("map_url");
+const { value: trustStatus, attrs: trustStatusAttrs } =
+  formInstance.register("trust_status");
+const { value: notes, attrs: notesAttrs } = formInstance.register("notes");
 
-function closeSidebar(isOpen: boolean) {
-  if (isOpen) return;
+function closeSidebar(isOpen: boolean, forced: boolean) {
+  if (isOpen && !forced) return;
+  forceCloseSidebar();
+}
+function forceCloseSidebar() {
   formInstance.resetForm();
   emit("close");
 }
@@ -97,6 +112,8 @@ watch(
         address: nextCustomer.address ?? "",
         map_url: nextCustomer.map_url ?? "",
         customer_id: nextCustomer.id,
+        trust_status: nextCustomer.trust_status ?? "trusted",
+        notes: nextCustomer.notes ?? "",
       },
     });
   }
@@ -154,6 +171,29 @@ watch(
             v-bind="mapUrlAttrs"
           />
         </InputGroup>
+        <InputGroup label="Notas" name="notes" class="!px-0">
+          <Input
+            placeholder="Notas de cliente"
+            v-model="notes"
+            :errors="formInstance.errors.value.notes"
+            v-bind="notesAttrs"
+          />
+        </InputGroup>
+        <InputGroup
+          label="Estado de confianza"
+          name="trust_status"
+          class="!px-0"
+        >
+          <Select
+            v-model="trustStatus"
+            placeholder="Escoge un estado de confiabilidad"
+            :options="[
+              { value: 'trusted', text: 'Confiable' },
+              { value: 'not_trusted', text: 'No confiable' },
+            ]"
+            v-bind="trustStatusAttrs"
+          />
+        </InputGroup>
         <InputGroup class="!px-0">
           <div class="flex flex-col gap-4">
             <Button
@@ -164,9 +204,10 @@ watch(
               type="submit"
             />
             <Button
+              type="button"
               :disabled="isLoading"
               label="Cancelar"
-              @click="closeSidebar"
+              @click="forceCloseSidebar"
             />
           </div>
         </InputGroup>

@@ -166,12 +166,12 @@ function getBadgeColorFromStatus(status: Sale["status"]) {
       >
         <tr>
           <th scope="col" class="px-6 py-3">Nombre</th>
-          <th scope="col" class="px-6 py-3">Productos</th>
-          <th scope="col" class="px-6 py-3">Cantidad</th>
-          <th scope="col" class="px-6 py-3">Total</th>
-          <th scope="col" class="px-6 py-3">Costo de envio</th>
-          <th scope="col" class="px-6 py-3">Estatus</th>
-          <th scope="col" class="px-6 py-3">Creado</th>
+          <th scope="col" class="px-6 py-3 text-center">Productos</th>
+          <th scope="col" class="px-6 py-3 text-center">Cantidad</th>
+          <th scope="col" class="px-6 py-3 text-center">Total</th>
+          <th scope="col" class="px-6 py-3 text-center">Costo de envio</th>
+          <th scope="col" class="px-6 py-3 text-center">Estatus</th>
+          <th scope="col" class="px-6 py-3 text-center">Creado</th>
           <th scope="col" class="px-6 py-3">Acción</th>
         </tr>
       </thead>
@@ -188,7 +188,7 @@ function getBadgeColorFromStatus(status: Sale["status"]) {
           >
             <th
               scope="row"
-              class="flex items-center px-6 py-4 text-gray-900 whitespace-nowrap dark:text-white"
+              class="flex items-center px-6 py-4 text-gray-900 whitespace-nowrap dark:text-white min-w-[200px]"
             >
               <img
                 class="w-12 h-12 rounded-full"
@@ -214,7 +214,7 @@ function getBadgeColorFromStatus(status: Sale["status"]) {
                 </div>
               </div>
             </th>
-            <td>
+            <td class="text-center">
               <div class="flex -space-x-4 rtl:space-x-reverse w-fit mx-auto">
                 <img
                   v-for="saleProduct in sale.i_sale_products.slice(0, 3)"
@@ -260,7 +260,7 @@ function getBadgeColorFromStatus(status: Sale["status"]) {
                 >{{ sale.status?.toLocaleUpperCase() }}
               </Badge>
             </td>
-            <td>
+            <td class="text-center">
               {{
                 new Date(sale.created_at).toLocaleDateString("es-MX", {
                   year: "numeric",
@@ -292,6 +292,7 @@ function getBadgeColorFromStatus(status: Sale["status"]) {
                 </DropdownOption>
                 <DropdownOption
                   v-if="sale.status === 'cancelled'"
+                  class="text-red-500 dark:text-red-500"
                   @click="openDeleteSaleDialog(sale)"
                 >
                   <TrashIcon class="w-5 h-5 mr-2" />
@@ -317,7 +318,7 @@ function getBadgeColorFromStatus(status: Sale["status"]) {
       </p>
     </div>
     <template #footer>
-      <Button type="button" variant="primary" @click="deleteSale">
+      <Button type="button" variant="error" @click="deleteSale">
         Si, eliminar
       </Button>
       <Button

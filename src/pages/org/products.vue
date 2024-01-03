@@ -284,7 +284,10 @@ function closeShareModal() {
                   <InboxArrowDownIcon class="w-5 h-5 mr-2" />
                   <span>Actualizar stock</span>
                 </DropdownOption>
-                <DropdownOption @click="openDeleteProductDialog(product)">
+                <DropdownOption
+                  class="text-red-500 dark:text-red-500"
+                  @click="openDeleteProductDialog(product)"
+                >
                   <TrashIcon class="w-5 h-5 mr-2" />
                   <span>Eliminar</span>
                 </DropdownOption>
@@ -308,7 +311,7 @@ function closeShareModal() {
       </p>
     </div>
     <template #footer>
-      <Button type="button" variant="primary" @click="deleteProduct">
+      <Button type="button" variant="error" @click="deleteProduct">
         Si, eliminar
       </Button>
       <Button

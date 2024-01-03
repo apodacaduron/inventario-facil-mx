@@ -8,6 +8,8 @@ export type CreateCustomer = {
   email: Customer["email"];
   address: Customer["address"];
   map_url: Customer["map_url"];
+  trust_status: NonNullable<Customer["trust_status"]>;
+  notes: Customer["notes"];
 };
 export type UpdateCustomer = {
   customer_id: Customer["id"];
@@ -19,6 +21,7 @@ export type CustomerList = Awaited<
 >["data"];
 export type Customer = NonNullable<CustomerList>[number];
 
+export const TRUST_STATUS = ["trusted", "not_trusted"] as const;
 export const customerServicesTypeguards = {
   isCreateCustomer(
     maybeCustomer: CreateCustomer | UpdateCustomer
@@ -81,11 +84,7 @@ export function useCustomerServices() {
       .from("i_customers")
       .insert([
         {
-          name: formValues.name,
-          phone: formValues.phone,
-          email: formValues.email,
-          address: formValues.address,
-          map_url: formValues.map_url,
+          ...formValues,
           org_id: organization.org_id,
         },
       ])
@@ -99,17 +98,14 @@ export function useCustomerServices() {
     );
     if (!organization?.org_id)
       throw new Error("Organization is required to update a customer");
+    const { customer_id, ...otherFormValues } = formValues;
     await supabase
       .from("i_customers")
       .update({
-        name: formValues.name,
-        phone: formValues.phone,
-        email: formValues.email,
-        address: formValues.address,
-        map_url: formValues.map_url,
+        ...otherFormValues,
         org_id: organization.org_id,
       })
-      .eq("id", formValues.customer_id);
+      .eq("id", customer_id);
   }
 
   async function deleteCustomer(customerId: DeleteCustomer) {
