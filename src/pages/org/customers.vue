@@ -41,7 +41,8 @@ const organizationStore = useOrganizationStore();
 const customerServices = useCustomerServices();
 const asyncCreateCustomer = useAsyncState(
   customerServices.createCustomer,
-  null
+  null,
+  { immediate: false }
 );
 const customersQuery = useCustomersQuery({
   options: {
@@ -51,11 +52,13 @@ const customersQuery = useCustomersQuery({
 });
 const asyncDeleteCustomer = useAsyncState(
   customerServices.deleteCustomer,
-  null
+  null,
+  { immediate: false }
 );
 const asyncUpdateCustomer = useAsyncState(
   customerServices.updateCustomer,
-  null
+  null,
+  { immediate: false }
 );
 useInfiniteScroll(
   tableRef,
@@ -78,6 +81,7 @@ function closeSidebar() {
 
 const customerHandlers = {
   async create(formValues: CreateCustomer) {
+    console.log(1);
     await asyncCreateCustomer.execute(0, formValues);
     customerSidebarMode.value = null;
     selectedCustomerFromActions.value = null;
@@ -95,6 +99,7 @@ async function handleSaveSidebar(formValues: CreateCustomer | UpdateCustomer) {
   if (!customerSidebarMode.value)
     throw new Error("customerSidebarMode must not be null");
   if (customerServicesTypeguards.isCreateCustomer(formValues)) {
+    console.log(2);
     await customerHandlers.create(formValues);
   } else {
     await customerHandlers.update(formValues);
