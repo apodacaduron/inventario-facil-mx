@@ -10,14 +10,14 @@ import {
   useProductServices,
 } from "@/features/products";
 import { computed, ref } from "vue";
-import {
-  Button,
-  Input,
-  DropdownMenu,
-  DropdownOption,
-  Dialog,
-  Textarea,
-} from "@flavorly/vanilla-components";
+// import {
+//   Button,
+//   Input,
+//   DropdownMenu,
+//   DropdownOption,
+//   Dialog,
+//   Textarea,
+// } from "@/components/ui";
 import {
   EllipsisVerticalIcon,
   InboxArrowDownIcon,
@@ -171,7 +171,7 @@ function closeShareModal() {
   <div class="flex items-center justify-between flex-col md:flex-row">
     <div class="mb-6">
       <h2
-        class="mb-2 text-3xl font-extrabold leading-none tracking-tight text-gray-900 md:text-4xl dark:text-white"
+        class="mb-2 text-3xl font-extrabold leading-none tracking-tight text-slate-900 md:text-4xl dark:text-white"
       >
         Productos
       </h2>
@@ -208,10 +208,10 @@ function closeShareModal() {
   <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
     <table
       ref="tableRef"
-      class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400"
+      class="w-full text-sm text-left rtl:text-right text-slate-500 dark:text-slate-400"
     >
       <thead
-        class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400"
+        class="text-xs text-slate-700 uppercase bg-slate-50 dark:bg-slate-700 dark:text-slate-400"
       >
         <tr>
           <th scope="col" class="px-6 py-3">Nombre</th>
@@ -230,11 +230,11 @@ function closeShareModal() {
           <tr
             v-for="product in page.data"
             :key="product.id"
-            class="bg-white border-b dark:bg-gray-900 dark:border-gray-800"
+            class="bg-white border-b dark:bg-slate-900 dark:border-slate-800"
           >
             <th
               scope="row"
-              class="flex items-center px-6 py-4 text-gray-900 whitespace-nowrap dark:text-white"
+              class="flex items-center px-6 py-4 text-slate-900 whitespace-nowrap dark:text-white"
             >
               <img
                 v-if="product.image_url"
@@ -252,7 +252,7 @@ function closeShareModal() {
                 <div class="text-base font-semibold">{{ product.name }}</div>
                 <div
                   v-if="product.description"
-                  class="font-normal text-gray-500"
+                  class="font-normal text-slate-500"
                 >
                   {{ product.description }}
                 </div>
@@ -306,7 +306,7 @@ function closeShareModal() {
     title="Eliminar Producto"
   >
     <div class="text-center">
-      <p class="text-sm text-gray-500 dark:text-gray-200">
+      <p class="text-sm text-slate-500 dark:text-slate-200">
         Esta acción eliminará permanentemente el producto. ¿Estás seguro de que
         deseas proceder con la eliminación?
       </p>
@@ -336,11 +336,13 @@ function closeShareModal() {
         />
       </div>
       <div class="mt-3 text-center sm:mt-5">
-        <h3 class="text-lg font-medium leading-6 text-gray-900 dark:text-white">
+        <h3
+          class="text-lg font-medium leading-6 text-slate-900 dark:text-white"
+        >
           🎉 Lista de Productos disponibles
         </h3>
         <div class="mt-2">
-          <p class="text-sm text-gray-500 dark:text-gray-400">
+          <p class="text-sm text-slate-500 dark:text-slate-400">
             A continuación se muestra una lista de productos disponibles
             actualmente en stock. Puedes copiar y compartir esta lista según sea
             necesario.

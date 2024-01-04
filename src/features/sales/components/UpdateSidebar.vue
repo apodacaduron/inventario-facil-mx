@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import {
-  Slideover,
-  Button,
-  InputGroup,
-  RichSelect,
-  RichSelectOptionIndicator,
-} from "@flavorly/vanilla-components";
-import { useForm } from "@vorms/core";
-import { zodResolver } from "@vorms/resolvers/zod";
+// import {
+//   Slideover,
+//   Button,
+//   InputGroup,
+//   RichSelect,
+//   RichSelectOptionIndicator,
+// } from "@/components/ui";
+// import { useForm } from "@vorms/core";
+// import { zodResolver } from "@vorms/resolvers/zod";
 import { watch } from "vue";
 import { z } from "zod";
 import { SALE_STATUS, Sale, UpdateSale } from "../composables";

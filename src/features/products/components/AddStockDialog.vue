@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Dialog, Button } from "@flavorly/vanilla-components";
+// import { Dialog, Button } from "@/components/ui";
 import {
   InboxArrowDownIcon,
   MinusIcon,
@@ -44,11 +44,13 @@ watch(
         />
       </div>
       <div class="mt-3 text-center sm:mt-5">
-        <h3 class="text-lg font-medium leading-6 text-gray-900 dark:text-white">
+        <h3
+          class="text-lg font-medium leading-6 text-slate-900 dark:text-white"
+        >
           🎉 Actualiza tu stock
         </h3>
         <div class="mt-2">
-          <p class="text-sm text-gray-500 dark:text-gray-400">
+          <p class="text-sm text-slate-500 dark:text-slate-400">
             Aumenta o reduce la cantidad de producto disponible
           </p>
         </div>

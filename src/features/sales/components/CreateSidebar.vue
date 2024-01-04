@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import {
-  Slideover,
-  Button,
-  InputGroup,
-  RichSelect,
-  Input,
-} from "@flavorly/vanilla-components";
-import { useForm } from "@vorms/core";
-import { zodResolver } from "@vorms/resolvers/zod";
+// import {
+//   Slideover,
+//   Button,
+//   InputGroup,
+//   RichSelect,
+//   Input,
+// } from "@/components/ui";
+// import { useForm } from "@vorms/core";
+// import { zodResolver } from "@vorms/resolvers/zod";
 import { computed, ref, watch } from "vue";
 import { z } from "zod";
 import { CreateSale, PAGINATION_LIMIT, SALE_STATUS } from "../composables";
@@ -320,10 +320,10 @@ watch(
             class="relative overflow-x-auto shadow-md sm:rounded-lg"
           >
             <table
-              class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400"
+              class="w-full text-sm text-left rtl:text-right text-slate-500 dark:text-slate-400"
             >
               <thead
-                class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400"
+                class="text-xs text-slate-700 uppercase bg-slate-50 dark:bg-slate-700 dark:text-slate-400"
               >
                 <tr>
                   <th scope="col" class="px-6 py-3">Nombre</th>
@@ -340,11 +340,11 @@ watch(
                   <tr
                     v-for="product in page.data"
                     :key="product.id"
-                    class="bg-white border-b dark:bg-gray-900 dark:border-gray-800"
+                    class="bg-white border-b dark:bg-slate-900 dark:border-slate-800"
                   >
                     <th
                       scope="row"
-                      class="flex items-center px-6 py-4 text-gray-900 whitespace-nowrap dark:text-white"
+                      class="flex items-center px-6 py-4 text-slate-900 whitespace-nowrap dark:text-white"
                     >
                       <img
                         v-if="product.image_url"

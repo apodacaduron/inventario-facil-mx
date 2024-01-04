@@ -9,13 +9,13 @@ import {
   UpdateSidebar,
 } from "@/features/sales";
 import { computed, ref } from "vue";
-import {
-  Button,
-  Input,
-  DropdownMenu,
-  DropdownOption,
-  Dialog,
-} from "@flavorly/vanilla-components";
+// import {
+//   Button,
+//   Input,
+//   DropdownMenu,
+//   DropdownOption,
+//   Dialog,
+// } from "@/components/ui";
 import {
   EllipsisVerticalIcon,
   EyeIcon,
@@ -125,7 +125,7 @@ function getBadgeColorFromStatus(status: Sale["status"]) {
   <div class="flex items-center justify-between flex-col md:flex-row">
     <div class="mb-6">
       <h2
-        class="mb-2 text-3xl font-extrabold leading-none tracking-tight text-gray-900 md:text-4xl dark:text-white"
+        class="mb-2 text-3xl font-extrabold leading-none tracking-tight text-slate-900 md:text-4xl dark:text-white"
       >
         Ventas
       </h2>
@@ -159,10 +159,10 @@ function getBadgeColorFromStatus(status: Sale["status"]) {
   <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
     <table
       ref="tableRef"
-      class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400"
+      class="w-full text-sm text-left rtl:text-right text-slate-500 dark:text-slate-400"
     >
       <thead
-        class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400"
+        class="text-xs text-slate-700 uppercase bg-slate-50 dark:bg-slate-700 dark:text-slate-400"
       >
         <tr>
           <th scope="col" class="px-6 py-3">Nombre</th>
@@ -184,11 +184,11 @@ function getBadgeColorFromStatus(status: Sale["status"]) {
           <tr
             v-for="sale in page.data"
             :key="sale.id"
-            class="bg-white border-b dark:bg-gray-900 dark:border-gray-800"
+            class="bg-white border-b dark:bg-slate-900 dark:border-slate-800"
           >
             <th
               scope="row"
-              class="flex items-center px-6 py-4 text-gray-900 whitespace-nowrap dark:text-white min-w-[200px]"
+              class="flex items-center px-6 py-4 text-slate-900 whitespace-nowrap dark:text-white min-w-[200px]"
             >
               <img
                 class="w-12 h-12 rounded-full"
@@ -201,7 +201,7 @@ function getBadgeColorFromStatus(status: Sale["status"]) {
                 </div>
                 <div
                   v-if="sale.i_customers?.phone"
-                  class="font-normal text-gray-500"
+                  class="font-normal text-slate-500"
                 >
                   <a
                     :href="`${WHATSAPP_URL}/${sale.i_customers.phone}`"
@@ -219,7 +219,7 @@ function getBadgeColorFromStatus(status: Sale["status"]) {
                 <img
                   v-for="saleProduct in sale.i_sale_products.slice(0, 3)"
                   :key="saleProduct.id"
-                  class="w-10 h-10 border-2 border-white rounded-full dark:border-gray-800"
+                  class="w-10 h-10 border-2 border-white rounded-full dark:border-slate-800"
                   :src="
                     saleProduct.i_products?.image_url ??
                     '/product-placeholder.png'
@@ -227,7 +227,7 @@ function getBadgeColorFromStatus(status: Sale["status"]) {
                 />
                 <div
                   v-if="sale.i_sale_products.length > 3"
-                  class="flex items-center justify-center w-10 h-10 text-xs font-medium text-white bg-gray-700 border-2 border-white rounded-full hover:bg-gray-600 dark:border-gray-800"
+                  class="flex items-center justify-center w-10 h-10 text-xs font-medium text-white bg-slate-700 border-2 border-white rounded-full hover:bg-slate-600 dark:border-slate-800"
                 >
                   {{ sale.i_sale_products.length - 3 }}
                 </div>
@@ -312,7 +312,7 @@ function getBadgeColorFromStatus(status: Sale["status"]) {
     title="Eliminar Cliente"
   >
     <div class="text-center">
-      <p class="text-sm text-gray-500 dark:text-gray-200">
+      <p class="text-sm text-slate-500 dark:text-slate-200">
         Esta acción eliminará permanentemente esta venta. ¿Estás seguro de que
         deseas proceder con la eliminación?
       </p>

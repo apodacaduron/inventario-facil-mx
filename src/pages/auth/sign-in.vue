@@ -1,42 +1,47 @@
 <script setup lang="ts">
 import { supabase } from "@/config/supabase";
 import { AuthLayout } from "@/features/auth";
-import { InputGroup, Input, Button } from "@flavorly/vanilla-components";
+import { Input, Button } from "@/components/ui";
 import { useMutation } from "@tanstack/vue-query";
-import { useForm } from "@vorms/core";
-import { zodResolver } from "@vorms/resolvers/zod";
 import { useRouter } from "vue-router";
 import z from "zod";
+import { toTypedSchema } from "@vee-validate/zod";
+import { useForm } from "vee-validate";
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 
 const router = useRouter();
 const signInWithPasswordMutation = useMutation({
   mutationFn: supabase.auth.signInWithPassword,
 });
-const { register, handleSubmit, errors } = useForm({
-  initialValues: {
-    email: "",
-    password: "",
-  },
-  validate: zodResolver(
-    z.object({
-      email: z
-        .string()
-        .min(1, "Correo es requerido")
-        .email("Ingresa un correo válido"),
-      password: z.string().min(1, "Contraseña es requerida"),
-    })
-  ),
-  async onSubmit(formValues) {
-    const response = await signInWithPasswordMutation.mutateAsync(formValues);
-    if (response?.error) {
-      alert(response?.error?.message);
-    } else {
-      router.push("/");
-    }
-  },
+
+const formSchema = toTypedSchema(
+  z.object({
+    email: z
+      .string()
+      .min(1, "Correo es requerido")
+      .email("Ingresa un correo válido"),
+    password: z.string().min(1, "Contraseña es requerida"),
+  })
+);
+
+const { handleSubmit } = useForm({
+  validationSchema: formSchema,
 });
-const { value: email, attrs: emailAttrs } = register("email");
-const { value: password, attrs: passwordAttrs } = register("password");
+
+const onSubmit = handleSubmit(async (formValues) => {
+  const response = await signInWithPasswordMutation.mutateAsync(formValues);
+  if (response?.error) {
+    alert(response?.error?.message);
+  } else {
+    router.push("/");
+  }
+});
 </script>
 
 <template>
@@ -45,59 +50,62 @@ const { value: password, attrs: passwordAttrs } = register("password");
       <h1 class="mt-8 mb-2 text-2xl lg:text-3xl">Bienvenido</h1>
       <span class="text-sm"> Inicia sesión con tu cuenta </span>
     </div>
-    <div class="divide-y w-full max-w-md mx-auto">
-      <div class="pb-4">
-        <InputGroup>
-          <Button
-            @click="
-              supabase.auth.signInWithOAuth({
-                provider: 'google',
-              })
-            "
-            label="Inicia sesión con Google"
-          >
-            <template #icon><img src="/google-logo.svg" /></template>
-          </Button>
-        </InputGroup>
+    <div class="divide-y w-full max-w-md mx-auto px-6">
+      <div class="pb-4 my-4">
+        <Button
+          @click="
+            supabase.auth.signInWithOAuth({
+              provider: 'google',
+            })
+          "
+          class="w-full"
+          variant="outline"
+        >
+          <img src="/google-logo.svg" class="w-4 h-4 mr-2" />
+          Inicia sesión con Google
+        </Button>
       </div>
-      <form @submit="handleSubmit" class="pt-4">
-        <InputGroup label="Correo electrónico" name="email">
-          <Input
-            placeholder="Ingresa tu correo"
-            type="email"
-            v-model="email"
-            :errors="errors.email"
-            v-bind="emailAttrs"
-          />
-        </InputGroup>
-        <InputGroup label="Contraseña" name="password">
-          <Input
-            placeholder="Ingresa tu contraseña"
-            type="password"
-            v-model="password"
-            :errors="errors.password"
-            v-bind="passwordAttrs"
-          />
-        </InputGroup>
-        <InputGroup>
-          <Button
-            :loading="signInWithPasswordMutation.isPending.value"
-            :disabled="signInWithPasswordMutation.isPending.value"
-            label="Iniciar sesión"
-            variant="primary"
-            type="submit"
-          />
-        </InputGroup>
-        <InputGroup>
-          <div class="text-center">
-            Aún no tienes una cuenta?
-            <router-link
-              to="/auth/sign-up"
-              class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
-              >Regístrate ahora</router-link
-            >
-          </div>
-        </InputGroup>
+      <form @submit="onSubmit" class="pt-6 flex flex-col gap-6">
+        <FormField v-slot="{ componentField }" name="email">
+          <FormItem v-auto-animate>
+            <FormLabel>Correo electrónico</FormLabel>
+            <FormControl>
+              <Input
+                type="text"
+                placeholder="Ingresa tu correo"
+                v-bind="componentField"
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        </FormField>
+        <FormField v-slot="{ componentField }" name="password">
+          <FormItem v-auto-animate>
+            <FormLabel>Contraseña</FormLabel>
+            <FormControl>
+              <Input
+                type="password"
+                placeholder="Ingresa tu contraseña"
+                v-bind="componentField"
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        </FormField>
+        <Button
+          :loading="signInWithPasswordMutation.isPending.value"
+          :disabled="signInWithPasswordMutation.isPending.value"
+          type="submit"
+          >Iniciar sesión</Button
+        >
+        <div class="text-center">
+          Aún no tienes una cuenta?
+          <router-link
+            to="/auth/sign-up"
+            class="font-medium text-primary hover:underline"
+            >Regístrate ahora</router-link
+          >
+        </div>
       </form>
     </div>
   </AuthLayout>

@@ -8,13 +8,13 @@ import {
   useCustomerServices,
 } from "@/features/customers";
 import { computed, ref } from "vue";
-import {
-  Button,
-  Input,
-  DropdownMenu,
-  DropdownOption,
-  Dialog,
-} from "@flavorly/vanilla-components";
+// import {
+//   Button,
+//   Input,
+//   DropdownMenu,
+//   DropdownOption,
+//   Dialog,
+// } from "@/components/ui";
 import { Badge } from "@/components";
 import {
   EllipsisVerticalIcon,
@@ -129,7 +129,7 @@ function getBadgeColorFromStatus(status: Customer["trust_status"]) {
   <div class="flex items-center justify-between flex-col md:flex-row">
     <div class="mb-6">
       <h2
-        class="mb-2 text-3xl font-extrabold leading-none tracking-tight text-gray-900 md:text-4xl dark:text-white"
+        class="mb-2 text-3xl font-extrabold leading-none tracking-tight text-slate-900 md:text-4xl dark:text-white"
       >
         Clientes
       </h2>
@@ -163,10 +163,10 @@ function getBadgeColorFromStatus(status: Customer["trust_status"]) {
   <div class="relative overflow-x-auto shadow-md rounded-lg">
     <table
       ref="tableRef"
-      class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400"
+      class="w-full text-sm text-left rtl:text-right text-slate-500 dark:text-slate-400"
     >
       <thead
-        class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400"
+        class="text-xs text-slate-700 uppercase bg-slate-50 dark:bg-slate-700 dark:text-slate-400"
       >
         <tr>
           <th scope="col" class="px-6 py-3">Nombre</th>
@@ -187,11 +187,11 @@ function getBadgeColorFromStatus(status: Customer["trust_status"]) {
           <tr
             v-for="customer in page.data"
             :key="customer.id"
-            class="bg-white border-b dark:bg-gray-900 dark:border-gray-800"
+            class="bg-white border-b dark:bg-slate-900 dark:border-slate-800"
           >
             <th
               scope="row"
-              class="flex items-center px-6 py-4 text-gray-900 whitespace-nowrap dark:text-white"
+              class="flex items-center px-6 py-4 text-slate-900 whitespace-nowrap dark:text-white"
             >
               <img
                 class="w-12 h-12 rounded-full"
@@ -200,7 +200,7 @@ function getBadgeColorFromStatus(status: Customer["trust_status"]) {
               />
               <div class="ps-3">
                 <div class="text-base font-semibold">{{ customer.name }}</div>
-                <div v-if="customer.email" class="font-normal text-gray-500">
+                <div v-if="customer.email" class="font-normal text-slate-500">
                   {{ customer.email }}
                 </div>
               </div>
@@ -273,7 +273,7 @@ function getBadgeColorFromStatus(status: Customer["trust_status"]) {
     title="Eliminar Cliente"
   >
     <div class="text-center">
-      <p class="text-sm text-gray-500 dark:text-gray-200">
+      <p class="text-sm text-slate-500 dark:text-slate-200">
         Esta acción eliminará permanentemente a este cliente. ¿Estás seguro de
         que deseas proceder con la eliminación?
       </p>

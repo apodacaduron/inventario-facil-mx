@@ -12,7 +12,7 @@ import {
   InboxStackIcon,
   UserGroupIcon,
 } from "@heroicons/vue/24/outline";
-import { Skeleton } from "@flavorly/vanilla-components";
+import { Skeleton } from "@/components/ui";
 import { isDefined } from "@vueuse/core";
 import { useCurrencyFormatter } from "@/features/products";
 import { useRoute } from "vue-router";
@@ -53,7 +53,7 @@ const productsInStockQuery = useProductsInStockQuery();
 <template>
   <div class="flex flex-col gap-8">
     <div class="flex flex-col gap-3">
-      <div class="text-gray-500 dark:text-gray-400 font-semibold">
+      <div class="text-slate-500 dark:text-slate-400 font-semibold">
         Estadísticas
         <span
           class="bg-blue-100 text-blue-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300"
@@ -123,17 +123,17 @@ const productsInStockQuery = useProductsInStockQuery();
     </div>
 
     <div class="flex flex-col gap-3">
-      <div class="text-gray-500 dark:text-gray-400 font-semibold">
+      <div class="text-slate-500 dark:text-slate-400 font-semibold">
         Productos en stock
       </div>
 
       <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
         <table
           ref="tableRef"
-          class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400"
+          class="w-full text-sm text-left rtl:text-right text-slate-500 dark:text-slate-400"
         >
           <thead
-            class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400"
+            class="text-xs text-slate-700 uppercase bg-slate-50 dark:bg-slate-700 dark:text-slate-400"
           >
             <tr>
               <th scope="col" class="px-6 py-3">Nombre</th>
@@ -146,11 +146,11 @@ const productsInStockQuery = useProductsInStockQuery();
             <tr
               v-for="product in productsInStockQuery.data.value?.data"
               :key="product.id"
-              class="bg-white border-b dark:bg-gray-900 dark:border-gray-800"
+              class="bg-white border-b dark:bg-slate-900 dark:border-slate-800"
             >
               <th
                 scope="row"
-                class="flex items-center px-6 py-4 text-gray-900 whitespace-nowrap dark:text-white"
+                class="flex items-center px-6 py-4 text-slate-900 whitespace-nowrap dark:text-white"
               >
                 <img
                   v-if="product.image_url"
@@ -168,7 +168,7 @@ const productsInStockQuery = useProductsInStockQuery();
                   <div class="text-base font-semibold">{{ product.name }}</div>
                   <div
                     v-if="product.description"
-                    class="font-normal text-gray-500"
+                    class="font-normal text-slate-500"
                   >
                     {{ product.description }}
                   </div>

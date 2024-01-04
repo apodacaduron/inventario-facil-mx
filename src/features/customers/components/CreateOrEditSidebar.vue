@@ -1,13 +1,11 @@
 <script setup lang="ts">
-import {
-  Slideover,
-  Button,
-  InputGroup,
-  Input,
-  Select,
-} from "@flavorly/vanilla-components";
-import { useForm } from "@vorms/core";
-import { zodResolver } from "@vorms/resolvers/zod";
+// import {
+//   Slideover,
+//   Button,
+//   InputGroup,
+//   Input,
+//   Select,
+// } from "@/components/ui";
 import { watch } from "vue";
 import { z } from "zod";
 import {

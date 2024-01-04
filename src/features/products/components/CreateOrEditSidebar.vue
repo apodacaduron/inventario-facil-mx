@@ -1,12 +1,10 @@
 <script setup lang="ts">
-import {
-  Slideover,
-  Button,
-  InputGroup,
-  Input,
-} from "@flavorly/vanilla-components";
-import { useForm } from "@vorms/core";
-import { zodResolver } from "@vorms/resolvers/zod";
+// import {
+//   Slideover,
+//   Button,
+//   InputGroup,
+//   Input,
+// } from "@/components/ui";
 import { watch } from "vue";
 import { z } from "zod";
 import {
@@ -15,6 +13,8 @@ import {
   UpdateProduct,
   useCurrencyFormatter,
 } from "../composables";
+import { useForm } from "vee-validate";
+import { toTypedSchema } from "@vee-validate/zod";
 
 type CreateOrEditSidebarProps = {
   mode?: "create" | "update";
@@ -48,59 +48,49 @@ const initialForm = {
   name: "",
   description: "",
   image_url: "",
-  current_stock: null,
-  unit_price: null,
-  retail_price: null,
+  current_stock: 0,
+  unit_price: 0,
+  retail_price: 0,
 };
 
 const currencyFormatter = useCurrencyFormatter();
-const formInstance = useForm<CreateProduct | UpdateProduct>({
-  initialValues: initialForm,
-  validate: zodResolver(
-    z.object({
-      name: z.string().min(1, "Nombre de producto es requerido"),
-      description: z.string(),
-      image_url: z.string(),
-      current_stock: z
-        .number({ invalid_type_error: "Ingresa un número válido" })
-        .nonnegative()
-        .finite()
-        .safe(),
-      unit_price: z
-        .number({ invalid_type_error: "Ingresa un número válido" })
-        .nonnegative()
-        .finite()
-        .safe(),
-      retail_price: z
-        .number({ invalid_type_error: "Ingresa un número válido" })
-        .nonnegative()
-        .finite()
-        .safe(),
-    })
-  ),
-  async onSubmit(formValues) {
-    const nextUnitPrice = currencyFormatter.toCents(formValues.unit_price);
-    const nextRetailPrice = currencyFormatter.toCents(formValues.retail_price);
 
-    const modifiedFormValues = {
-      ...formValues,
-      unit_price: nextUnitPrice,
-      retail_price: nextRetailPrice,
-    };
-    emit("save", modifiedFormValues);
-  },
-});
-const { value: name, attrs: nameAttrs } = formInstance.register("name");
-const { value: description, attrs: descriptionAttrs } =
-  formInstance.register("description");
-const { value: imageUrl, attrs: imageUrlAttrs } =
-  formInstance.register("image_url");
-const { value: currentStock, attrs: currentStockAttrs } =
-  formInstance.register("current_stock");
-const { value: unitPrice, attrs: unitPriceAttrs } =
-  formInstance.register("unit_price");
-const { value: retailPrice, attrs: retailPriceAttrs } =
-  formInstance.register("retail_price");
+const formSchema = toTypedSchema(z.object({
+  name: z.string().min(1, "Nombre de producto es requerido"),
+  description: z.string(),
+  image_url: z.string(),
+  current_stock: z
+    .number({ invalid_type_error: "Ingresa un número válido" })
+    .nonnegative()
+    .finite()
+    .safe(),
+  unit_price: z
+    .number({ invalid_type_error: "Ingresa un número válido" })
+    .nonnegative()
+    .finite()
+    .safe(),
+  retail_price: z
+    .number({ invalid_type_error: "Ingresa un número válido" })
+    .nonnegative()
+    .finite()
+    .safe(),
+}))
+
+const formInstance = useForm<CreateProduct | UpdateProduct>({
+  validationSchema: formSchema,
+})
+
+const onSubmit = formInstance.handleSubmit(async (formValues) => {
+  const nextUnitPrice = currencyFormatter.toCents(formValues.unit_price);
+  const nextRetailPrice = currencyFormatter.toCents(formValues.retail_price);
+
+  const modifiedFormValues = {
+    ...formValues,
+    unit_price: nextUnitPrice,
+    retail_price: nextRetailPrice,
+  };
+  emit("save", modifiedFormValues);
+})
 
 function closeSidebar(isOpen: boolean) {
   if (isOpen) return;
@@ -115,9 +105,7 @@ watch(
   () => props.open,
   (nextIsOpen) => {
     if (nextIsOpen) return;
-    formInstance.resetForm({
-      values: initialForm,
-    });
+    formInstance.resetForm({values: initialForm });
   }
 );
 watch(
@@ -126,13 +114,13 @@ watch(
     if (!nextProduct) return;
     formInstance.resetForm({
       values: {
-        name: nextProduct.name,
-        description: nextProduct.description,
-        image_url: nextProduct.image_url,
-        current_stock: nextProduct.current_stock,
+        name: nextProduct.name ?? "",
+        description: nextProduct.description ?? "",
+        image_url: nextProduct.image_url ?? "",
+        current_stock: nextProduct.current_stock ?? 0,
         product_id: nextProduct.id,
-        unit_price: currencyFormatter.parseRaw(nextProduct.unit_price),
-        retail_price: currencyFormatter.parseRaw(nextProduct.retail_price),
+        unit_price: currencyFormatter.parseRaw(nextProduct.unit_price) ?? 0,
+        retail_price: currencyFormatter.parseRaw(nextProduct.retail_price) ?? 0,
       },
     });
   }
@@ -140,7 +128,7 @@ watch(
 </script>
 
 <template>
-  <Slideover
+  <!-- <Slideover
     :modelValue="open"
     @update:modelValue="closeSidebar"
     position="right"
@@ -148,7 +136,7 @@ watch(
     :subtitle="locale[mode].subtitle"
   >
     <div class="space-y-6 pb-16">
-      <form @submit="formInstance.handleSubmit">
+      <form @submit="onSubmit">
         <InputGroup label="Imagen de producto" name="image_url" class="!px-0">
           <Input
             placeholder="URL de la imagen de tu producto"
@@ -226,5 +214,5 @@ watch(
         </InputGroup>
       </form>
     </div>
-  </Slideover>
+  </Slideover> -->
 </template>
