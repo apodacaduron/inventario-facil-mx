@@ -27,15 +27,10 @@ import {
   ShareIcon,
   TrashIcon,
 } from "@heroicons/vue/24/outline";
-import {
-  refDebounced,
-  useAsyncState,
-  useClipboard,
-  useInfiniteScroll,
-} from "@vueuse/core";
+import { refDebounced, useClipboard, useInfiniteScroll } from "@vueuse/core";
 import { useOrganizationStore } from "@/stores";
 import { useProductsQuery } from "@/features/products/composables/useProductQueries";
-import { useQueryClient } from "@tanstack/vue-query";
+import { useMutation, useQueryClient } from "@tanstack/vue-query";
 
 const tableRef = ref<HTMLElement | null>(null);
 const shareText = ref("");
@@ -49,7 +44,9 @@ const selectedProductFromActions = ref<Product | null>(null);
 const queryClient = useQueryClient();
 const organizationStore = useOrganizationStore();
 const productServices = useProductServices();
-const asyncCreateProduct = useAsyncState(productServices.createProduct, null);
+const createProductMutation = useMutation({
+  mutationFn: productServices.createProduct,
+});
 const clipboard = useClipboard();
 const currencyFormatter = useCurrencyFormatter();
 const productsQuery = useProductsQuery({
@@ -58,8 +55,12 @@ const productsQuery = useProductsQuery({
     search: productSearchDebounced,
   },
 });
-const asyncDeleteProduct = useAsyncState(productServices.deleteProduct, null);
-const asyncUpdateProduct = useAsyncState(productServices.updateProduct, null);
+const deleteProductMutation = useMutation({
+  mutationFn: productServices.deleteProduct,
+});
+const updateProductMutation = useMutation({
+  mutationFn: productServices.updateProduct,
+});
 useInfiniteScroll(
   tableRef,
   () => {
@@ -81,7 +82,7 @@ function closeSidebar() {
 
 const productHandlers = {
   async create(formValues: CreateProduct) {
-    await asyncCreateProduct.execute(0, formValues);
+    await createProductMutation.mutateAsync(formValues);
     productSidebarMode.value = null;
     selectedProductFromActions.value = null;
     await queryClient.invalidateQueries({ queryKey: ["products"] });
@@ -89,7 +90,7 @@ const productHandlers = {
   async update(formValues: UpdateProduct) {
     const productId = selectedProductFromActions.value?.id;
     if (!productId) throw new Error("Product id required to perform update");
-    await asyncUpdateProduct.execute(0, {
+    await updateProductMutation.mutateAsync({
       ...formValues,
       product_id: productId,
     });
@@ -126,7 +127,7 @@ function closeAddStockDialog() {
 async function deleteProduct() {
   const productId = selectedProductFromActions.value?.id;
   if (!productId) throw new Error("Product id required to perform delete");
-  await asyncDeleteProduct.execute(0, productId);
+  await deleteProductMutation.mutateAsync(productId);
   isDeleteProductDialogOpen.value = false;
   selectedProductFromActions.value = null;
   await queryClient.invalidateQueries({ queryKey: ["products"] });
@@ -376,7 +377,8 @@ function closeShareModal() {
     :mode="productSidebarMode ?? undefined"
     :product="selectedProductFromActions"
     :isLoading="
-      asyncUpdateProduct.isLoading.value || asyncCreateProduct.isLoading.value
+      updateProductMutation.isPending.value ||
+      createProductMutation.isPending.value
     "
     @close="closeSidebar"
     @save="handleSaveSidebar"

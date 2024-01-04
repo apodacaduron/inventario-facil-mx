@@ -2,17 +2,16 @@
 import { supabase } from "@/config/supabase";
 import { AuthLayout } from "@/features/auth";
 import { InputGroup, Input, Button } from "@flavorly/vanilla-components";
+import { useMutation } from "@tanstack/vue-query";
 import { useForm } from "@vorms/core";
 import { zodResolver } from "@vorms/resolvers/zod";
-import { useAsyncState } from "@vueuse/core";
 import { useRouter } from "vue-router";
 import z from "zod";
 
 const router = useRouter();
-const asyncSignUp = useAsyncState(
-  (formValues) => supabase.auth.signUp(formValues),
-  null
-);
+const signUpMutation = useMutation({
+  mutationFn: supabase.auth.signUp,
+});
 const { register, handleSubmit, errors } = useForm({
   initialValues: {
     email: "",
@@ -37,7 +36,7 @@ const { register, handleSubmit, errors } = useForm({
       })
   ),
   async onSubmit(formValues) {
-    const response = await asyncSignUp.execute(0, formValues);
+    const response = await signUpMutation.mutateAsync(formValues);
     if (response?.error) {
       alert(response?.error?.message);
     } else {
@@ -107,8 +106,8 @@ const { value: confirmPassword, attrs: confirmPasswordAttrs } =
         </InputGroup>
         <InputGroup>
           <Button
-            :loading="asyncSignUp.isLoading.value"
-            :disabled="asyncSignUp.isLoading.value"
+            :loading="signUpMutation.isPending.value"
+            :disabled="signUpMutation.isPending.value"
             label="Comenzar ahora"
             variant="primary"
             type="submit"

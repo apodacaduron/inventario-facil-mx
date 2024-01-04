@@ -2,17 +2,16 @@
 import { supabase } from "@/config/supabase";
 import { AuthLayout } from "@/features/auth";
 import { InputGroup, Input, Button } from "@flavorly/vanilla-components";
+import { useMutation } from "@tanstack/vue-query";
 import { useForm } from "@vorms/core";
 import { zodResolver } from "@vorms/resolvers/zod";
-import { useAsyncState } from "@vueuse/core";
 import { useRouter } from "vue-router";
 import z from "zod";
 
 const router = useRouter();
-const asyncSignInWithPassword = useAsyncState(
-  (formValues) => supabase.auth.signInWithPassword(formValues),
-  null
-);
+const signInWithPasswordMutation = useMutation({
+  mutationFn: supabase.auth.signInWithPassword,
+});
 const { register, handleSubmit, errors } = useForm({
   initialValues: {
     email: "",
@@ -28,7 +27,7 @@ const { register, handleSubmit, errors } = useForm({
     })
   ),
   async onSubmit(formValues) {
-    const response = await asyncSignInWithPassword.execute(0, formValues);
+    const response = await signInWithPasswordMutation.mutateAsync(formValues);
     if (response?.error) {
       alert(response?.error?.message);
     } else {
@@ -82,8 +81,8 @@ const { value: password, attrs: passwordAttrs } = register("password");
         </InputGroup>
         <InputGroup>
           <Button
-            :loading="asyncSignInWithPassword.isLoading.value"
-            :disabled="asyncSignInWithPassword.isLoading.value"
+            :loading="signInWithPasswordMutation.isPending.value"
+            :disabled="signInWithPasswordMutation.isPending.value"
             label="Iniciar sesión"
             variant="primary"
             type="submit"

@@ -24,10 +24,10 @@ import {
   PlusIcon,
   TrashIcon,
 } from "@heroicons/vue/24/outline";
-import { useAsyncState, useInfiniteScroll } from "@vueuse/core";
+import { useInfiniteScroll } from "@vueuse/core";
 import { useOrganizationStore } from "@/stores";
 import { useSalesQuery } from "@/features/sales/composables/useSaleQueries";
-import { useQueryClient } from "@tanstack/vue-query";
+import { useMutation, useQueryClient } from "@tanstack/vue-query";
 import { useCurrencyFormatter } from "@/features/products";
 import { Badge } from "@/components";
 
@@ -40,15 +40,15 @@ const selectedSaleFromActions = ref<Sale | null>(null);
 const queryClient = useQueryClient();
 const organizationStore = useOrganizationStore();
 const saleServices = useSaleServices();
-const asyncCreateSale = useAsyncState(saleServices.createSale, null);
+const createSaleMutation = useMutation({ mutationFn: saleServices.createSale });
 const currencyFormatter = useCurrencyFormatter();
 const salesQuery = useSalesQuery({
   options: {
     enabled: computed(() => organizationStore.hasOrganizations),
   },
 });
-const asyncDeleteSale = useAsyncState(saleServices.deleteSale, null);
-const asyncUpdateSale = useAsyncState(saleServices.updateSale, null);
+const deleteSaleMutation = useMutation({ mutationFn: saleServices.deleteSale });
+const updateSaleMutation = useMutation({ mutationFn: saleServices.updateSale });
 useInfiniteScroll(
   tableRef,
   () => {
@@ -70,13 +70,13 @@ function closeSidebar() {
 
 const saleHandlers = {
   async create(formValues: CreateSale) {
-    await asyncCreateSale.execute(0, formValues);
+    await createSaleMutation.mutateAsync(formValues);
     saleSidebarMode.value = null;
     selectedSaleFromActions.value = null;
     await queryClient.invalidateQueries({ queryKey: ["sales"] });
   },
   async update(formValues: UpdateSale) {
-    await asyncUpdateSale.execute(0, formValues);
+    await updateSaleMutation.mutateAsync(formValues);
     saleSidebarMode.value = null;
     selectedSaleFromActions.value = null;
     await queryClient.invalidateQueries({ queryKey: ["sales"] });
@@ -101,7 +101,7 @@ function openUpdateSaleSidebar(sale: Sale) {
 async function deleteSale() {
   const saleId = selectedSaleFromActions.value?.id;
   if (!saleId) throw new Error("Sale id required to perform delete");
-  await asyncDeleteSale.execute(0, saleId);
+  await deleteSaleMutation.mutateAsync(saleId);
   isDeleteSaleDialogOpen.value = false;
   selectedSaleFromActions.value = null;
   await queryClient.invalidateQueries({ queryKey: ["sales"] });
@@ -333,13 +333,13 @@ function getBadgeColorFromStatus(status: Sale["status"]) {
 
   <CreateSidebar
     :open="saleSidebarMode === 'create'"
-    :isLoading="asyncCreateSale.isLoading.value"
+    :isLoading="createSaleMutation.isPending.value"
     @close="closeSidebar"
     @save="handleSaveSidebar"
   />
   <UpdateSidebar
     :open="saleSidebarMode === 'update'"
-    :isLoading="asyncUpdateSale.isLoading.value"
+    :isLoading="updateSaleMutation.isPending.value"
     :sale="selectedSaleFromActions"
     @close="closeSidebar"
     @save="handleSaveSidebar"

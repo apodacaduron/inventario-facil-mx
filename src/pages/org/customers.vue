@@ -24,10 +24,10 @@ import {
   PlusIcon,
   TrashIcon,
 } from "@heroicons/vue/24/outline";
-import { refDebounced, useAsyncState, useInfiniteScroll } from "@vueuse/core";
+import { refDebounced, useInfiniteScroll } from "@vueuse/core";
 import { useOrganizationStore } from "@/stores";
 import { useCustomersQuery } from "@/features/customers/composables/useCustomerQueries";
-import { useQueryClient } from "@tanstack/vue-query";
+import { useMutation, useQueryClient } from "@tanstack/vue-query";
 
 const WHATSAPP_URL = import.meta.env.VITE_WHATSAPP_URL;
 const tableRef = ref<HTMLElement | null>(null);
@@ -39,27 +39,21 @@ const selectedCustomerFromActions = ref<Customer | null>(null);
 const queryClient = useQueryClient();
 const organizationStore = useOrganizationStore();
 const customerServices = useCustomerServices();
-const asyncCreateCustomer = useAsyncState(
-  customerServices.createCustomer,
-  null,
-  { immediate: false }
-);
+const createCustomerMutation = useMutation({
+  mutationFn: customerServices.createCustomer,
+});
 const customersQuery = useCustomersQuery({
   options: {
     enabled: computed(() => organizationStore.hasOrganizations),
     search: customerSearchDebounced,
   },
 });
-const asyncDeleteCustomer = useAsyncState(
-  customerServices.deleteCustomer,
-  null,
-  { immediate: false }
-);
-const asyncUpdateCustomer = useAsyncState(
-  customerServices.updateCustomer,
-  null,
-  { immediate: false }
-);
+const deleteCustomerMutation = useMutation({
+  mutationFn: customerServices.deleteCustomer,
+});
+const updateCustomerMutation = useMutation({
+  mutationFn: customerServices.updateCustomer,
+});
 useInfiniteScroll(
   tableRef,
   () => {
@@ -81,14 +75,13 @@ function closeSidebar() {
 
 const customerHandlers = {
   async create(formValues: CreateCustomer) {
-    console.log(1);
-    await asyncCreateCustomer.execute(0, formValues);
+    await createCustomerMutation.mutateAsync(formValues);
     customerSidebarMode.value = null;
     selectedCustomerFromActions.value = null;
     await queryClient.invalidateQueries({ queryKey: ["customers"] });
   },
   async update(formValues: UpdateCustomer) {
-    await asyncUpdateCustomer.execute(0, formValues);
+    await updateCustomerMutation.mutateAsync(formValues);
     customerSidebarMode.value = null;
     selectedCustomerFromActions.value = null;
     await queryClient.invalidateQueries({ queryKey: ["customers"] });
@@ -114,7 +107,7 @@ function openUpdateCustomerSidebar(customer: Customer) {
 async function deleteCustomer() {
   const customerId = selectedCustomerFromActions.value?.id;
   if (!customerId) throw new Error("Customer id required to perform delete");
-  await asyncDeleteCustomer.execute(0, customerId);
+  await deleteCustomerMutation.mutateAsync(customerId);
   isDeleteCustomerDialogOpen.value = false;
   selectedCustomerFromActions.value = null;
   await queryClient.invalidateQueries({ queryKey: ["customers"] });
@@ -304,7 +297,8 @@ function getBadgeColorFromStatus(status: Customer["trust_status"]) {
     :mode="customerSidebarMode ?? undefined"
     :customer="selectedCustomerFromActions"
     :isLoading="
-      asyncUpdateCustomer.isLoading.value || asyncCreateCustomer.isLoading.value
+      updateCustomerMutation.isPending.value ||
+      createCustomerMutation.isPending.value
     "
     @close="closeSidebar"
     @save="handleSaveSidebar"
