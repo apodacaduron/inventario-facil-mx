@@ -17,8 +17,11 @@ import {
 
 const router = useRouter();
 const signUpMutation = useMutation({
-  mutationFn: supabase.auth.signUp,
+  mutationFn: signUp,
 });
+function signUp(formValues: { email: string; password: string }) {
+  return supabase.auth.signUp(formValues);
+}
 
 const formSchema = toTypedSchema(
   z

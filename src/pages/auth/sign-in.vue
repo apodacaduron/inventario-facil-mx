@@ -17,9 +17,11 @@ import {
 
 const router = useRouter();
 const signInWithPasswordMutation = useMutation({
-  mutationFn: supabase.auth.signInWithPassword,
+  mutationFn: signInWithPassword,
 });
-
+function signInWithPassword(formValues: { email: string; password: string }) {
+  return supabase.auth.signInWithPassword(formValues);
+}
 const formSchema = toTypedSchema(
   z.object({
     email: z
@@ -93,7 +95,6 @@ const onSubmit = handleSubmit(async (formValues) => {
           </FormItem>
         </FormField>
         <Button
-          :loading="signInWithPasswordMutation.isPending.value"
           :disabled="signInWithPasswordMutation.isPending.value"
           type="submit"
           >Iniciar sesión</Button
