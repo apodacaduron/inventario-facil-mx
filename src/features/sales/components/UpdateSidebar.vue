@@ -157,6 +157,7 @@ watch(
             :disabled="isLoading"
             @click="forceCloseSidebar"
             variant="outline"
+            type="button"
             >Cancelar</Button
           >
         </SheetFooter>

@@ -2,8 +2,6 @@
 import {
   Sheet,
   Button,
-  Popover,
-  PopoverTrigger,
   Input,
   SheetContent,
   SheetHeader,
@@ -16,13 +14,6 @@ import {
   FormControl,
   FormDescription,
   FormMessage,
-  PopoverContent,
-  Command,
-  CommandInput,
-  CommandEmpty,
-  CommandList,
-  CommandGroup,
-  CommandItem,
   Textarea,
   Card,
   CardContent,
@@ -40,14 +31,9 @@ import {
 import { computed, ref, watch } from "vue";
 import { z } from "zod";
 import { CreateSale, SALE_STATUS } from "../composables";
-import { refDebounced } from "@vueuse/core";
-import { useCustomersQuery } from "@/features/customers";
-import {
-  CheckIcon,
-  ChevronDoubleDownIcon,
-  PlusCircleIcon,
-  XMarkIcon,
-} from "@heroicons/vue/24/outline";
+import { refDebounced, useInfiniteScroll } from "@vueuse/core";
+import { Customer, useCustomersQuery } from "@/features/customers";
+import { PlusCircleIcon, XMarkIcon } from "@heroicons/vue/24/outline";
 import {
   Product,
   useCurrencyFormatter,
@@ -55,7 +41,6 @@ import {
 } from "@/features/products";
 import { toTypedSchema } from "@vee-validate/zod";
 import { useFieldArray, useForm } from "vee-validate";
-import { cn } from "@/lib/utils";
 import { useOrganizationStore } from "@/stores";
 
 type CreateSidebarProps = {
@@ -82,10 +67,11 @@ const LOCALE = {
     TITLE: "Selecciona productos",
     SUBTITLE: "Selecciona facilmente productos para agregar a tu venta",
   },
+  SELECT_CUSTOMERS: {
+    TITLE: "Selecciona cliente",
+    SUBTITLE: "Selecciona facilmente un cliente para tu venta",
+  },
 };
-
-const isProductSelectorOpen = ref(false);
-const currencyFormatter = useCurrencyFormatter();
 const initialForm: CreateSale = {
   status: "in_progress",
   sale_date: new Date().toISOString(),
@@ -94,6 +80,46 @@ const initialForm: CreateSale = {
   shipping_cost: 0,
   notes: "",
 };
+
+const saleSidebarMode = ref<"sales" | "products" | "customers">("sales");
+const selectedCustomer = ref<Customer | null>(null);
+const productsRef = ref<HTMLElement | null>(null);
+const customersRef = ref<HTMLElement | null>(null);
+const customerSearch = ref("");
+const productSearch = ref("");
+const customerSearchDebounced = refDebounced(customerSearch, 400);
+const productSearchDebounced = refDebounced(productSearch, 400);
+
+const organizationStore = useOrganizationStore();
+const currencyFormatter = useCurrencyFormatter();
+const customersQuery = useCustomersQuery({
+  options: {
+    enabled: computed(() => organizationStore.hasOrganizations),
+    search: customerSearchDebounced,
+  },
+});
+const productsQuery = useProductsQuery({
+  options: {
+    enabled: computed(() => organizationStore.hasOrganizations),
+    search: productSearchDebounced,
+  },
+});
+useInfiniteScroll(
+  customersRef,
+  () => {
+    if (customersQuery.isFetching.value) return;
+    customersQuery.fetchNextPage();
+  },
+  { distance: 10, canLoadMore: () => customersQuery.hasNextPage.value }
+);
+useInfiniteScroll(
+  productsRef,
+  () => {
+    if (productsQuery.isFetching.value) return;
+    productsQuery.fetchNextPage();
+  },
+  { distance: 10, canLoadMore: () => productsQuery.hasNextPage.value }
+);
 
 const formSchema = toTypedSchema(
   z.object({
@@ -150,35 +176,12 @@ function closeSidebar(isOpen: boolean) {
   forceCloseSidebar();
 }
 function forceCloseSidebar() {
-  if (isProductSelectorOpen.value) return (isProductSelectorOpen.value = false);
+  if (saleSidebarMode.value !== "sales")
+    return (saleSidebarMode.value = "sales");
 
   formInstance.resetForm();
   emit("close");
-  isProductSelectorOpen.value = false;
-}
-
-const organizationStore = useOrganizationStore();
-const customerSearch = ref("");
-const customerSearchDebounced = refDebounced(customerSearch, 400);
-const productSearch = ref("");
-const productSearchDebounced = refDebounced(customerSearch, 400);
-const customersQuery = useCustomersQuery({
-  options: {
-    enabled: computed(() => organizationStore.hasOrganizations),
-    search: customerSearchDebounced,
-  },
-});
-const productsQuery = useProductsQuery({
-  options: {
-    enabled: computed(() => organizationStore.hasOrganizations),
-    search: productSearchDebounced,
-  },
-});
-
-function comboboxCustomerFilter(list: string[], search: string) {
-  customerSearch.value = search;
-
-  return list;
+  saleSidebarMode.value = "sales";
 }
 
 function formatProductToSaleDetail(
@@ -234,7 +237,7 @@ watch(
 <template>
   <Sheet :open="open" @update:open="closeSidebar">
     <SheetContent side="right" class="overflow-y-auto">
-      <div v-show="!isProductSelectorOpen">
+      <div v-show="saleSidebarMode === 'sales'">
         <SheetHeader>
           <SheetTitle>
             {{ LOCALE.CREATE.TITLE }}
@@ -247,81 +250,20 @@ watch(
           <FormField name="customer_id">
             <FormItem class="flex flex-col">
               <FormLabel>Cliente</FormLabel>
-              <Popover>
-                <PopoverTrigger as-child>
-                  <FormControl>
-                    <Button
-                      variant="outline"
-                      role="combobox"
-                      :class="
-                        cn(
-                          'justify-between',
-                          !formInstance.values.customer_id &&
-                            'text-muted-foreground'
-                        )
-                      "
-                    >
-                      {{
-                        formInstance.values.customer_id
-                          ? customersQuery.data.value?.pages
-                              .find(Boolean)
-                              ?.data?.find(
-                                (customer) =>
-                                  customer.id ===
-                                  formInstance.values.customer_id
-                              )?.name
-                          : "Seleccione un cliente..."
-                      }}
-                      <ChevronDoubleDownIcon
-                        class="ml-2 h-4 w-4 shrink-0 opacity-50"
-                      />
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent class="w-[200px] p-0">
-                  <!-- @vue-ignore -->
-                  <Command :filterFunction="comboboxCustomerFilter">
-                    <CommandInput placeholder="Busque un cliente..." />
-                    <CommandEmpty>{{
-                      customersQuery.isPending.value ||
-                      customersQuery.isLoading.value ||
-                      customersQuery.isFetching.value
-                        ? "Cargando..."
-                        : "Sin resultados."
-                    }}</CommandEmpty>
-                    <CommandList>
-                      <CommandGroup>
-                        <CommandItem
-                          v-for="customer in customersQuery.data.value?.pages.find(
-                            Boolean
-                          )?.data"
-                          :key="customer.id"
-                          :value="customer.id"
-                          @select="
-                            () => {
-                              formInstance.setValues({
-                                customer_id: customer.id,
-                              });
-                            }
-                          "
-                        >
-                          <CheckIcon
-                            :class="
-                              cn(
-                                'mr-2 h-4 w-4',
-                                customer.id === formInstance.values.customer_id
-                                  ? 'opacity-100'
-                                  : 'opacity-0'
-                              )
-                            "
-                          />
-                          {{ customer.name }}
-                        </CommandItem>
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
+              <Button
+                class="h-12"
+                variant="outline"
+                type="button"
+                @click="saleSidebarMode = 'customers'"
+              >
+                <span v-if="formInstance.values.customer_id">
+                  {{ selectedCustomer?.name }} <br />
+                  <span class="text-xs">
+                    {{ selectedCustomer?.phone }}
+                  </span>
+                </span>
+                <span v-else>Seleccionar cliente</span>
+              </Button>
               <FormDescription>
                 Por favor, registra al cliente antes de proceder con la venta,
                 en caso de que no esté registrado en nuestra base de datos.
@@ -356,75 +298,87 @@ watch(
             </FormItem>
           </FormField>
 
-          <Table v-if="formInstance.values.products?.length">
-            <TableHeader>
-              <TableRow>
-                <TableHead class="w-[100px]"> Producto </TableHead>
-                <TableHead class="text-center">Cantidad</TableHead>
-                <TableHead class="text-center">Precio</TableHead>
-                <TableHead class="text-center">-</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              <TableRow
-                v-for="(productField, idx) in formInstance.values.products"
-                :key="productField.product_id ?? idx"
-              >
-                <TableCell class="font-medium">
-                  {{ productField.name }}
-                </TableCell>
-                <TableCell class="text-center flex justify-center">
-                  <FormField
-                    v-slot="{ componentField }"
-                    :name="`products.${idx}.qty`"
-                  >
-                    <FormItem v-auto-animate>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          placeholder="Cantidad"
-                          v-bind="componentField"
-                          class="w-16"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  </FormField>
-                </TableCell>
-                <TableCell class="text-center">
-                  <FormField
-                    v-slot="{ componentField }"
-                    :name="`products.${idx}.price`"
-                  >
-                    <FormItem v-auto-animate>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          placeholder="Precio"
-                          v-bind="componentField"
-                          class="w-20"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  </FormField>
-                </TableCell>
-                <TableCell class="text-center">
-                  <Button
-                    @click="productsFormFieldArray.remove(idx)"
-                    size="icon"
-                    variant="ghost"
-                  >
-                    <XMarkIcon class="w-4 h-4" />
-                  </Button>
-                </TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
+          <FormField name="products">
+            <FormItem class="flex flex-col">
+              <FormLabel>Productos</FormLabel>
 
-          <Button @click="isProductSelectorOpen = true" variant="outline"
-            ><PlusCircleIcon class="w-5 h-5 mr-2" /> Agregar productos</Button
-          >
+              <Table v-if="formInstance.values.products?.length">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead class="w-[100px]"> Producto </TableHead>
+                    <TableHead class="text-center">Cantidad</TableHead>
+                    <TableHead class="text-center">Precio</TableHead>
+                    <TableHead class="text-center">-</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  <TableRow
+                    v-for="(productField, idx) in formInstance.values.products"
+                    :key="productField.product_id ?? idx"
+                  >
+                    <TableCell class="font-medium">
+                      {{ productField.name }}
+                    </TableCell>
+                    <TableCell class="text-center flex justify-center">
+                      <FormField
+                        v-slot="{ componentField }"
+                        :name="`products.${idx}.qty`"
+                      >
+                        <FormItem v-auto-animate>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              placeholder="Cantidad"
+                              v-bind="componentField"
+                              class="w-16"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      </FormField>
+                    </TableCell>
+                    <TableCell class="text-center">
+                      <FormField
+                        v-slot="{ componentField }"
+                        :name="`products.${idx}.price`"
+                      >
+                        <FormItem v-auto-animate>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              placeholder="Precio"
+                              v-bind="componentField"
+                              class="w-20"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      </FormField>
+                    </TableCell>
+                    <TableCell class="text-center">
+                      <Button
+                        @click="productsFormFieldArray.remove(idx)"
+                        size="icon"
+                        variant="ghost"
+                        type="button"
+                      >
+                        <XMarkIcon class="w-4 h-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+
+              <Button
+                type="button"
+                @click="saleSidebarMode = 'products'"
+                variant="outline"
+              >
+                <PlusCircleIcon class="w-5 h-5 mr-2" /> Agregar productos
+              </Button>
+              <FormMessage />
+            </FormItem>
+          </FormField>
           <SheetFooter>
             <Button :disabled="isLoading" type="submit" class="w-full"
               >Guardar</Button
@@ -433,12 +387,13 @@ watch(
               :disabled="isLoading"
               @click="forceCloseSidebar"
               variant="outline"
+              type="button"
               >Cancelar</Button
             >
           </SheetFooter>
         </form>
       </div>
-      <div v-show="isProductSelectorOpen">
+      <div ref="productsRef" v-show="saleSidebarMode === 'products'">
         <SheetHeader class="mb-6">
           <SheetTitle>{{ LOCALE.SELECT_PRODUCTS.TITLE }}</SheetTitle>
           <SheetDescription>
@@ -469,6 +424,7 @@ watch(
               <Button
                 @click="handleAddToProductsForm(product)"
                 class="w-full"
+                type="button"
                 :variant="
                   hasProductInFieldList(product) ? 'default' : 'outline'
                 "
@@ -483,10 +439,65 @@ watch(
         </div>
 
         <SheetFooter>
-          <Button @click="forceCloseSidebar" variant="outline" class="w-full">
+          <Button
+            @click="forceCloseSidebar"
+            variant="outline"
+            class="w-full"
+            type="button"
+          >
             Cerrar
           </Button>
         </SheetFooter>
+      </div>
+      <div ref="customersRef" v-show="saleSidebarMode === 'customers'">
+        <SheetHeader class="mb-6">
+          <SheetTitle>{{ LOCALE.SELECT_CUSTOMERS.TITLE }}</SheetTitle>
+          <SheetDescription>
+            {{ LOCALE.SELECT_CUSTOMERS.SUBTITLE }}
+          </SheetDescription>
+        </SheetHeader>
+        <Input v-model="customerSearch" placeholder="Busca clientes..." />
+        <div class="grid grid-cols-2 gap-3 mt-4 mb-10">
+          <Card
+            v-for="customer in customersQuery.data.value?.pages.flatMap(
+              (page) => page.data
+            )"
+            :key="customer?.id"
+            class="flex flex-col"
+          >
+            <CardContent class="p-4 text-center">
+              <Avatar>
+                <AvatarFallback>{{
+                  `${customer?.name?.substring(0, 1).toLocaleUpperCase()}`
+                }}</AvatarFallback>
+              </Avatar>
+              <div class="text-sm font-semibold line-clamp-2">
+                {{ customer?.name }}
+              </div>
+            </CardContent>
+            <CardFooter class="p-2 mt-auto">
+              <Button
+                @click="
+                  formInstance.setFieldValue('customer_id', customer?.id ?? '');
+                  selectedCustomer = customer;
+                  saleSidebarMode = 'sales';
+                "
+                class="w-full text-left"
+                type="button"
+                :variant="
+                  formInstance.values.customer_id === customer?.id
+                    ? 'default'
+                    : 'outline'
+                "
+                >{{
+                  formInstance.values.customer_id === customer?.id
+                    ? "Seleccionado"
+                    : "Seleccionar"
+                }}</Button
+              >
+            </CardFooter>
+          </Card>
+        </div>
       </div>
     </SheetContent>
   </Sheet>
