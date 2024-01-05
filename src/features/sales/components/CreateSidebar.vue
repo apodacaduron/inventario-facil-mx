@@ -316,7 +316,7 @@ watch(
                     v-for="(productField, idx) in formInstance.values.products"
                     :key="productField.product_id ?? idx"
                   >
-                    <TableCell class="font-medium">
+                    <TableCell class="font-medium min-w-[80px]">
                       {{ productField.name }}
                     </TableCell>
                     <TableCell class="text-center flex justify-center">
@@ -379,7 +379,7 @@ watch(
               <FormMessage />
             </FormItem>
           </FormField>
-          <SheetFooter>
+          <SheetFooter class="gap-4 sm:gap-0">
             <Button :disabled="isLoading" type="submit" class="w-full"
               >Guardar</Button
             >

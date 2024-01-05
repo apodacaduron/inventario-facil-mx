@@ -149,7 +149,7 @@ watch(
           </FormItem>
         </FormField>
 
-        <SheetFooter>
+        <SheetFooter class="gap-4 sm:gap-0">
           <Button :disabled="isLoading" type="submit" class="w-full"
             >Guardar</Button
           >

@@ -153,7 +153,7 @@ async function shareExistingInventory() {
       return [...acc, ...(filteredProducts ?? [])];
     }, []) ?? [];
   const inventoryString = existingProducts
-    .map((product) => `${product.name}: ${product.current_stock ?? 0}`)
+    .map((product) => `${product.name}`)
     .join("\r\n");
 
   // @ts-ignore
