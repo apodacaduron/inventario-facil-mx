@@ -68,7 +68,7 @@ const productsInStockQuery = useProductsInStockQuery();
               <template v-if="isDefined(totalSalesQuery.data.value)"
                 >{{ totalSalesQuery.data.value }}
               </template>
-              <Skeleton v-else :count="1" />
+              <Skeleton class="h-6 w-[64px]" v-else :count="1" />
             </template>
             <template #label>Cantidad de ventas</template>
           </StatCard>
@@ -85,7 +85,7 @@ const productsInStockQuery = useProductsInStockQuery();
                   )
                 }}
               </template>
-              <Skeleton v-else :count="1" />
+              <Skeleton class="h-6 w-[64px]" v-else :count="1" />
             </template>
             <template #label>Total de ventas</template>
           </StatCard>
@@ -102,7 +102,7 @@ const productsInStockQuery = useProductsInStockQuery();
                   )
                 }}
               </template>
-              <Skeleton v-else :count="1" />
+              <Skeleton class="h-6 w-[64px]" v-else :count="1" />
             </template>
             <template #label>Ganancia de ventas</template>
           </StatCard>
@@ -114,7 +114,7 @@ const productsInStockQuery = useProductsInStockQuery();
               <template v-if="isDefined(totalCustomersQuery.data.value)"
                 >{{ totalCustomersQuery.data.value }}
               </template>
-              <Skeleton v-else :count="1" />
+              <Skeleton class="h-6 w-[64px]" v-else :count="1" />
             </template>
             <template #label>Total de clientes</template>
           </StatCard>
