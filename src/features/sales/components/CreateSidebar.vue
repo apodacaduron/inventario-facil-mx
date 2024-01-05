@@ -1,25 +1,46 @@
 <script setup lang="ts">
-// import {
-//   Slideover,
-//   Button,
-//   InputGroup,
-//   RichSelect,
-//   Input,
-// } from "@/components/ui";
-// import { useForm } from "@vorms/core";
-// import { zodResolver } from "@vorms/resolvers/zod";
+import {
+  Sheet,
+  Button,
+  Popover,
+  PopoverTrigger,
+  Input,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+  SheetFooter,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormDescription,
+  FormMessage,
+  PopoverContent,
+  Command,
+  CommandInput,
+  CommandEmpty,
+  CommandList,
+  CommandGroup,
+  CommandItem,
+  Textarea,
+} from "@/components/ui";
 import { computed, ref, watch } from "vue";
 import { z } from "zod";
 import { CreateSale, PAGINATION_LIMIT, SALE_STATUS } from "../composables";
-import { useDebounceFn } from "@vueuse/core";
-import { useCustomerServices } from "@/features/customers";
-import { CheckIcon } from "@heroicons/vue/24/outline";
+import { refDebounced, useDebounceFn } from "@vueuse/core";
+import { useCustomerServices, useCustomersQuery } from "@/features/customers";
+import { CheckIcon, ChevronDoubleDownIcon } from "@heroicons/vue/24/outline";
 import {
   Product,
   useCurrencyFormatter,
   useProductServices,
   useProductsByIdsQuery,
 } from "@/features/products";
+import { toTypedSchema } from "@vee-validate/zod";
+import { useForm } from "vee-validate";
+import { cn } from "@/lib/utils";
+import { useOrganizationStore } from "@/stores";
 
 type CreateSidebarProps = {
   open: boolean;
@@ -45,7 +66,6 @@ const locale = {
 
 const productIds = ref<string[]>([]);
 const productServices = useProductServices();
-const customerServices = useCustomerServices();
 const currencyFormatter = useCurrencyFormatter();
 const initialForm: CreateSale = {
   status: "in_progress",
@@ -55,50 +75,52 @@ const initialForm: CreateSale = {
   shipping_cost: 0,
   notes: "",
 };
+
+const formSchema = toTypedSchema(
+  z.object({
+    sale_id: z.string().uuid().optional(),
+    status: z.enum(SALE_STATUS),
+    sale_date: z.string().datetime(),
+    customer_id: z.string().uuid("Por favor seleccione a un cliente"),
+    shipping_cost: z
+      .number({ invalid_type_error: "Ingresa un número válido" })
+      .nonnegative()
+      .finite()
+      .safe(),
+    notes: z.string().optional(),
+    products: z
+      .array(
+        z.object({
+          sale_detail_id: z.string().uuid().optional(),
+          product_id: z.string().uuid(),
+          price: z.number().positive().finite().safe(),
+          unit_price: z.number().positive().finite().safe(),
+          qty: z.number().int().positive().finite().safe(),
+        })
+      )
+      .min(1, "Por favor seleccione al menos un producto"),
+  })
+);
+
 const formInstance = useForm<CreateSale>({
   initialValues: initialForm,
-  validate: zodResolver(
-    z.object({
-      sale_id: z.string().uuid().optional(),
-      status: z.enum(SALE_STATUS),
-      sale_date: z.string().datetime(),
-      customer_id: z.string().uuid("Por favor seleccione a un cliente"),
-      shipping_cost: z
-        .number({ invalid_type_error: "Ingresa un número válido" })
-        .nonnegative()
-        .finite()
-        .safe(),
-      notes: z.string().optional(),
-      products: z
-        .array(
-          z.object({
-            sale_detail_id: z.string().uuid().optional(),
-            product_id: z.string().uuid(),
-            price: z.number().positive().finite().safe(),
-            unit_price: z.number().positive().finite().safe(),
-            qty: z.number().int().positive().finite().safe(),
-          })
-        )
-        .min(1, "Por favor seleccione al menos un producto"),
-    })
-  ),
-  async onSubmit(formValues) {
-    const modifiedProducts = formValues.products.map((formProduct) => ({
-      ...formProduct,
-      price: currencyFormatter.toCents(formProduct.price),
-    }));
-    const nextShippingCost = currencyFormatter.toCents(
-      formValues.shipping_cost
-    );
+  validationSchema: formSchema,
+});
 
-    const modifiedFormValues = {
-      ...formValues,
-      shipping_cost: nextShippingCost ?? 0,
-      products: modifiedProducts,
-    };
+const onSubmit = formInstance.handleSubmit(async (formValues) => {
+  const modifiedProducts = formValues.products.map((formProduct) => ({
+    ...formProduct,
+    price: currencyFormatter.toCents(formProduct.price),
+  }));
+  const nextShippingCost = currencyFormatter.toCents(formValues.shipping_cost);
 
-    emit("save", modifiedFormValues);
-  },
+  const modifiedFormValues = {
+    ...formValues,
+    shipping_cost: nextShippingCost ?? 0,
+    products: modifiedProducts,
+  };
+
+  emit("save", modifiedFormValues);
 });
 const productsByIdsQuery = useProductsByIdsQuery({
   options: {
@@ -106,12 +128,6 @@ const productsByIdsQuery = useProductsByIdsQuery({
     productIds: productIds,
   },
 });
-
-const { value: customer, attrs: customerAttrs } =
-  formInstance.register("customer_id");
-const { value: notes, attrs: notesAttrs } = formInstance.register("notes");
-const { value: shippingCost, attrs: shippingCostAttrs } =
-  formInstance.register("shipping_cost");
 
 function closeSidebar(isOpen: boolean) {
   if (isOpen) return;
@@ -153,20 +169,22 @@ function updateProductRow(data: {
   formInstance.setFieldValue("products", formProductsCopy);
 }
 
-const debouncedFetchCustomerOptions = useDebounceFn(
-  async (query: string = "", nextPage: number = 0) => {
-    const customersResponse = await customerServices.loadList({
-      offset: nextPage,
-      search: query,
-    });
-
-    return {
-      results: customersResponse.data || [],
-      hasMorePages: (customersResponse.count ?? 0) >= PAGINATION_LIMIT,
-    };
+const organizationStore = useOrganizationStore();
+const customerSearch = ref("");
+const customerSearchDebounced = refDebounced(customerSearch, 400);
+const customersQuery = useCustomersQuery({
+  options: {
+    enabled: computed(() => organizationStore.hasOrganizations),
+    search: customerSearchDebounced,
   },
-  400
-);
+});
+
+function comboboxCustomerFilter(list: string[], search: string) {
+  customerSearch.value = search;
+
+  return list;
+}
+
 const debouncedFetchProductsOptions = useDebounceFn(
   async (query: string = "", nextPage: number = 0) => {
     const productsResponse = await productServices.loadList({
@@ -232,60 +250,128 @@ watch(
 </script>
 
 <template>
-  <Slideover
-    :modelValue="open"
-    @update:modelValue="closeSidebar"
-    position="right"
-    :title="locale.create.title"
-    :subtitle="locale.create.subtitle"
-  >
-    <div class="space-y-6 pb-16">
-      <form @submit="formInstance.handleSubmit">
-        <InputGroup label="Cliente" name="customer_id" class="!px-0">
-          <RichSelect
-            v-model="customer"
-            v-bind="customerAttrs"
-            placeholder="Seleccione un cliente"
-            :fetchOptions="debouncedFetchCustomerOptions"
-            :minimum-input-length="2"
-            value-attribute="id"
-            text-attribute="name"
-            :errors="formInstance.errors.value.customer_id"
-            feedback="Por favor, registra al cliente antes de proceder con la venta, en caso de que no esté registrado en nuestra base de datos."
-          >
-            <template
-              #option="{ option: { raw: customer }, className, isSelected }"
-            >
-              <div
-                class="px-3 py-2 relative flex items-center"
-                :class="className"
-              >
-                {{ customer.name }}
-                <div v-if="isSelected" class="absolute right-3">
-                  <CheckIcon class="w-4 h-4 stroke-[2px]" />
-                </div>
-              </div>
-            </template>
-          </RichSelect>
-        </InputGroup>
-        <InputGroup label="Notas de venta" name="notes" class="!px-0">
-          <Input
-            placeholder="Ingresa notas de la venta"
-            v-model="notes"
-            :errors="formInstance.errors.value.notes"
-            v-bind="notesAttrs"
-          />
-        </InputGroup>
-        <InputGroup label="Costo de envio" name="shippingCost" class="!px-0">
-          <Input
-            placeholder="Ingresa el costo de envio"
-            v-model="shippingCost"
-            type="number"
-            :errors="formInstance.errors.value.shipping_cost"
-            v-bind="shippingCostAttrs"
-          />
-        </InputGroup>
-        <InputGroup label="Seleccione productos" name="products" class="!px-0">
+  <Sheet :open="open" @update:open="closeSidebar">
+    <SheetContent side="right">
+      <SheetHeader>
+        <SheetTitle>
+          {{ locale.create.title }}
+        </SheetTitle>
+        <SheetDescription>
+          {{ locale.create.subtitle }}
+        </SheetDescription>
+      </SheetHeader>
+      <form @submit="onSubmit" class="flex flex-col gap-6 mt-6 mb-6">
+        <FormField name="customer_id">
+          <FormItem class="flex flex-col">
+            <FormLabel>Cliente</FormLabel>
+            <Popover>
+              <PopoverTrigger as-child>
+                <FormControl>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    :class="
+                      cn(
+                        'justify-between',
+                        !formInstance.values.customer_id &&
+                          'text-muted-foreground'
+                      )
+                    "
+                  >
+                    {{
+                      formInstance.values.customer_id
+                        ? customersQuery.data.value?.pages
+                            .find(Boolean)
+                            ?.data?.find(
+                              (customer) =>
+                                customer.id === formInstance.values.customer_id
+                            )?.name
+                        : "Seleccione un cliente..."
+                    }}
+                    <ChevronDoubleDownIcon
+                      class="ml-2 h-4 w-4 shrink-0 opacity-50"
+                    />
+                  </Button>
+                </FormControl>
+              </PopoverTrigger>
+              <PopoverContent class="w-[200px] p-0">
+                <!-- @vue-ignore -->
+                <Command :filterFunction="comboboxCustomerFilter">
+                  <CommandInput placeholder="Busque un cliente..." />
+                  <CommandEmpty>{{
+                    customersQuery.isPending.value ||
+                    customersQuery.isLoading.value ||
+                    customersQuery.isFetching.value
+                      ? "Cargando..."
+                      : "Sin resultados."
+                  }}</CommandEmpty>
+                  <CommandList>
+                    <CommandGroup>
+                      <CommandItem
+                        v-for="customer in customersQuery.data.value?.pages.find(
+                          Boolean
+                        )?.data"
+                        :key="customer.id"
+                        :value="customer.id"
+                        @select="
+                          () => {
+                            formInstance.setValues({
+                              customer_id: customer.id,
+                            });
+                          }
+                        "
+                      >
+                        <CheckIcon
+                          :class="
+                            cn(
+                              'mr-2 h-4 w-4',
+                              customer.id === formInstance.values.customer_id
+                                ? 'opacity-100'
+                                : 'opacity-0'
+                            )
+                          "
+                        />
+                        {{ customer.name }}
+                      </CommandItem>
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
+            <FormDescription>
+              Por favor, registra al cliente antes de proceder con la venta, en
+              caso de que no esté registrado en nuestra base de datos.
+            </FormDescription>
+            <FormMessage />
+          </FormItem>
+        </FormField>
+        <FormField v-slot="{ componentField }" name="notes">
+          <FormItem v-auto-animate>
+            <FormLabel>Notas de venta</FormLabel>
+            <FormControl>
+              <Textarea
+                placeholder="Ingresa notas de la venta"
+                v-bind="componentField"
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        </FormField>
+
+        <FormField v-slot="{ componentField }" name="shipping_cost">
+          <FormItem v-auto-animate>
+            <FormLabel>Costo de envio</FormLabel>
+            <FormControl>
+              <Input
+                type="number"
+                placeholder="Ingresa el costo de envio"
+                v-bind="componentField"
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        </FormField>
+        <!-- <InputGroup label="Seleccione productos" name="products" class="!px-0">
           <RichSelect
             :modelValue="productIds"
             @update:modelValue="updateProductIds"
@@ -332,7 +418,6 @@ watch(
                 </tr>
               </thead>
               <tbody>
-                <!-- @vue-ignore -->
                 <template
                   v-for="(page, index) in productsByIdsQuery.data.value?.pages"
                   :key="index"
@@ -413,24 +498,19 @@ watch(
               </tbody>
             </table>
           </div>
-        </InputGroup>
-        <InputGroup class="!px-0">
-          <div class="flex flex-col gap-4">
-            <Button
-              :loading="isLoading"
-              :disabled="isLoading"
-              label="Guardar"
-              variant="primary"
-              type="submit"
-            />
-            <Button
-              :disabled="isLoading"
-              label="Cancelar"
-              @click="forceCloseSidebar"
-            />
-          </div>
-        </InputGroup>
+        </InputGroup> -->
+        <SheetFooter>
+          <Button :disabled="isLoading" type="submit" class="w-full"
+            >Guardar</Button
+          >
+          <Button
+            :disabled="isLoading"
+            @click="forceCloseSidebar"
+            variant="outline"
+            >Cancelar</Button
+          >
+        </SheetFooter>
       </form>
-    </div>
-  </Slideover>
+    </SheetContent>
+  </Sheet>
 </template>

@@ -184,7 +184,7 @@ const menuList = {
                     />
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent class="w-56">
+                <DropdownMenuContent>
                   <DropdownMenuItem @click="signOut">
                     <ArrowLeftOnRectangleIcon class="w-4 h-4 mr-2" />
                     <span>Cerrar sesión</span>

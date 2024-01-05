@@ -9,17 +9,23 @@ import {
   UpdateSidebar,
 } from "@/features/sales";
 import { computed, ref } from "vue";
-// import {
-//   Button,
-//   Input,
-//   DropdownMenu,
-//   DropdownOption,
-//   Dialog,
-// } from "@/components/ui";
+import {
+  Button,
+  Input,
+  DropdownMenu,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui";
 import {
   EllipsisVerticalIcon,
   EyeIcon,
-  MagnifyingGlassIcon,
   PencilIcon,
   PlusIcon,
   TrashIcon,
@@ -61,6 +67,10 @@ useInfiniteScroll(
 function openDeleteSaleDialog(sale: Sale) {
   selectedSaleFromActions.value = sale;
   isDeleteSaleDialogOpen.value = true;
+}
+function closeDeleteSaleDialog() {
+  selectedSaleFromActions.value = null;
+  isDeleteSaleDialogOpen.value = false;
 }
 
 function closeSidebar() {
@@ -134,12 +144,8 @@ function getBadgeColorFromStatus(status: Sale["status"]) {
       </p>
     </div>
     <div>
-      <Button
-        @click="saleSidebarMode = 'create'"
-        label="Crear venta"
-        variant="primary"
-      >
-        <template #icon><PlusIcon class="w-5 h-5 stroke-[2px]" /></template>
+      <Button @click="saleSidebarMode = 'create'">
+        <PlusIcon class="w-5 h-5 stroke-[2px] mr-2" /> Crear venta
       </Button>
     </div>
   </div>
@@ -149,10 +155,7 @@ function getBadgeColorFromStatus(status: Sale["status"]) {
   >
     <label for="table-search" class="sr-only">Buscar</label>
     <div class="relative">
-      <Input v-model="saleSearch" placeholder="Buscar ventas">
-        <template #before>
-          <MagnifyingGlassIcon class="w-5 h-5 stroke-[2px]" /> </template
-      ></Input>
+      <Input v-model="saleSearch" placeholder="Buscar ventas" />
     </div>
   </div>
 
@@ -271,33 +274,32 @@ function getBadgeColorFromStatus(status: Sale["status"]) {
             </td>
             <td class="px-6 py-4">
               <DropdownMenu>
-                <template #trigger>
-                  <Button>
-                    <template #default>
-                      <EllipsisVerticalIcon class="w-5 h-5 stroke-[2px]" />
-                    </template>
+                <DropdownMenuTrigger as-child>
+                  <Button variant="outline">
+                    <EllipsisVerticalIcon class="w-5 h-5 stroke-[2px]" />
                   </Button>
-                </template>
-
-                <DropdownOption>
-                  <EyeIcon class="w-5 h-5 mr-2" />
-                  <span>Ver</span>
-                </DropdownOption>
-                <DropdownOption
-                  v-if="sale.status === 'in_progress'"
-                  @click="openUpdateSaleSidebar(sale)"
-                >
-                  <PencilIcon class="w-5 h-5 mr-2" />
-                  <span>Actualizar</span>
-                </DropdownOption>
-                <DropdownOption
-                  v-if="sale.status === 'cancelled'"
-                  class="text-red-500 dark:text-red-500"
-                  @click="openDeleteSaleDialog(sale)"
-                >
-                  <TrashIcon class="w-5 h-5 mr-2" />
-                  <span>Eliminar</span>
-                </DropdownOption>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem>
+                    <EyeIcon class="w-5 h-5 mr-2" />
+                    <span>Ver</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    v-if="sale.status === 'in_progress'"
+                    @click="openUpdateSaleSidebar(sale)"
+                  >
+                    <PencilIcon class="w-5 h-5 mr-2" />
+                    <span>Actualizar</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    v-if="sale.status === 'cancelled'"
+                    class="text-red-500 dark:text-red-500"
+                    @click="openDeleteSaleDialog(sale)"
+                  >
+                    <TrashIcon class="w-5 h-5 mr-2" />
+                    <span>Eliminar</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
               </DropdownMenu>
             </td>
           </tr>
@@ -306,29 +308,28 @@ function getBadgeColorFromStatus(status: Sale["status"]) {
     </table>
   </div>
 
-  <Dialog
-    v-model="isDeleteSaleDialogOpen"
-    position="center"
-    title="Eliminar Cliente"
-  >
-    <div class="text-center">
-      <p class="text-sm text-slate-500 dark:text-slate-200">
-        Esta acción eliminará permanentemente esta venta. ¿Estás seguro de que
-        deseas proceder con la eliminación?
-      </p>
-    </div>
-    <template #footer>
-      <Button type="button" variant="error" @click="deleteSale">
-        Si, eliminar
-      </Button>
-      <Button
-        type="button"
-        variant="secondary"
-        @click="isDeleteSaleDialogOpen = false"
-      >
-        Cancelar
-      </Button>
-    </template>
+  <Dialog :open="isDeleteSaleDialogOpen" @update:open="closeDeleteSaleDialog">
+    <DialogContent>
+      <DialogHeader>
+        <DialogTitle> Eliminar Cliente </DialogTitle>
+        <DialogDescription>
+          Esta acción eliminará permanentemente esta venta. ¿Estás seguro de que
+          deseas proceder con la eliminación?
+        </DialogDescription>
+      </DialogHeader>
+      <DialogFooter>
+        <Button type="button" variant="destructive" @click="deleteSale">
+          Si, eliminar
+        </Button>
+        <Button
+          type="button"
+          variant="secondary"
+          @click="isDeleteSaleDialogOpen = false"
+        >
+          Cancelar
+        </Button>
+      </DialogFooter>
+    </DialogContent>
   </Dialog>
 
   <CreateSidebar

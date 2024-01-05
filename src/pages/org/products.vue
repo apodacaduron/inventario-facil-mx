@@ -10,18 +10,24 @@ import {
   useProductServices,
 } from "@/features/products";
 import { computed, ref } from "vue";
-// import {
-//   Button,
-//   Input,
-//   DropdownMenu,
-//   DropdownOption,
-//   Dialog,
-//   Textarea,
-// } from "@/components/ui";
+import {
+  Button,
+  Input,
+  DropdownMenu,
+  Dialog,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  Textarea,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui";
 import {
   EllipsisVerticalIcon,
   InboxArrowDownIcon,
-  MagnifyingGlassIcon,
   PencilIcon,
   PlusIcon,
   ShareIcon,
@@ -73,6 +79,10 @@ useInfiniteScroll(
 function openDeleteProductDialog(product: Product) {
   selectedProductFromActions.value = product;
   isDeleteProductDialogOpen.value = true;
+}
+function closeDeleteProductDialog() {
+  selectedProductFromActions.value = null;
+  isDeleteProductDialogOpen.value = false;
 }
 
 function closeSidebar() {
@@ -180,15 +190,11 @@ function closeShareModal() {
       </p>
     </div>
     <div class="flex gap-2">
-      <Button
-        @click="productSidebarMode = 'create'"
-        label="Crear producto"
-        variant="primary"
-      >
-        <template #icon><PlusIcon class="w-5 h-5 stroke-[2px]" /></template>
+      <Button @click="productSidebarMode = 'create'">
+        <PlusIcon class="w-5 h-5 stroke-[2px] mr-2" /> Crear producto
       </Button>
-      <Button @click="shareExistingInventory" variant="default">
-        <template #default><ShareIcon class="w-5 h-5 stroke-[2px]" /></template>
+      <Button @click="shareExistingInventory" variant="outline">
+        <ShareIcon class="w-5 h-5 stroke-[2px]" />
       </Button>
     </div>
   </div>
@@ -198,10 +204,7 @@ function closeShareModal() {
   >
     <label for="table-search" class="sr-only">Buscar</label>
     <div class="relative">
-      <Input v-model="productSearch" placeholder="Buscar productos">
-        <template #before>
-          <MagnifyingGlassIcon class="w-5 h-5 stroke-[2px]" /> </template
-      ></Input>
+      <Input v-model="productSearch" placeholder="Buscar productos" />
     </div>
   </div>
 
@@ -269,29 +272,28 @@ function closeShareModal() {
             </td>
             <td class="px-6 py-4">
               <DropdownMenu>
-                <template #trigger>
-                  <Button>
-                    <template #default>
-                      <EllipsisVerticalIcon class="w-5 h-5 stroke-[2px]" />
-                    </template>
+                <DropdownMenuTrigger as-child>
+                  <Button variant="outline">
+                    <EllipsisVerticalIcon class="w-5 h-5 stroke-[2px]" />
                   </Button>
-                </template>
-
-                <DropdownOption @click="openUpdateProductSidebar(product)">
-                  <PencilIcon class="w-5 h-5 mr-2" />
-                  <span>Actualizar</span>
-                </DropdownOption>
-                <DropdownOption @click="openAddStockDialog(product)">
-                  <InboxArrowDownIcon class="w-5 h-5 mr-2" />
-                  <span>Actualizar stock</span>
-                </DropdownOption>
-                <DropdownOption
-                  class="text-red-500 dark:text-red-500"
-                  @click="openDeleteProductDialog(product)"
-                >
-                  <TrashIcon class="w-5 h-5 mr-2" />
-                  <span>Eliminar</span>
-                </DropdownOption>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem @click="openUpdateProductSidebar(product)">
+                    <PencilIcon class="w-5 h-5 mr-2" />
+                    <span>Actualizar</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem @click="openAddStockDialog(product)">
+                    <InboxArrowDownIcon class="w-5 h-5 mr-2" />
+                    <span>Actualizar stock</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    class="text-red-500 dark:text-red-500"
+                    @click="openDeleteProductDialog(product)"
+                  >
+                    <TrashIcon class="w-5 h-5 mr-2" />
+                    <span>Eliminar</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
               </DropdownMenu>
             </td>
           </tr>
@@ -301,77 +303,79 @@ function closeShareModal() {
   </div>
 
   <Dialog
-    v-model="isDeleteProductDialogOpen"
-    position="center"
-    title="Eliminar Producto"
+    :open="isDeleteProductDialogOpen"
+    @update:open="closeDeleteProductDialog"
   >
-    <div class="text-center">
-      <p class="text-sm text-slate-500 dark:text-slate-200">
-        Esta acción eliminará permanentemente el producto. ¿Estás seguro de que
-        deseas proceder con la eliminación?
-      </p>
-    </div>
-    <template #footer>
-      <Button type="button" variant="error" @click="deleteProduct">
-        Si, eliminar
-      </Button>
-      <Button
-        type="button"
-        variant="secondary"
-        @click="isDeleteProductDialogOpen = false"
-      >
-        Cancelar
-      </Button>
-    </template>
+    <DialogContent class="sm:max-w-[425px]">
+      <DialogHeader>
+        <DialogTitle>Eliminar Producto</DialogTitle>
+        <DialogDescription>
+          Esta acción eliminará permanentemente el producto. ¿Estás seguro de
+          que deseas proceder con la eliminación?
+        </DialogDescription>
+      </DialogHeader>
+      <DialogFooter>
+        <Button type="button" variant="destructive" @click="deleteProduct">
+          Si, eliminar
+        </Button>
+        <Button
+          type="button"
+          variant="secondary"
+          @click="closeDeleteProductDialog"
+        >
+          Cancelar
+        </Button>
+      </DialogFooter>
+    </DialogContent>
   </Dialog>
 
-  <Dialog v-model="isShareProductsDialogOpen">
-    <div>
-      <div
-        class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100"
-      >
-        <ShareIcon
-          class="h-6 w-6 stroke-[2px] text-green-600"
-          aria-hidden="true"
-        />
-      </div>
-      <div class="mt-3 text-center sm:mt-5">
-        <h3
-          class="text-lg font-medium leading-6 text-slate-900 dark:text-white"
+  <Dialog
+    :open="isShareProductsDialogOpen"
+    @update:open="(isOpen) => (isShareProductsDialogOpen = isOpen)"
+  >
+    <DialogContent class="sm:max-w-[425px]">
+      <div>
+        <div
+          class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100"
         >
-          🎉 Lista de Productos disponibles
-        </h3>
-        <div class="mt-2">
-          <p class="text-sm text-slate-500 dark:text-slate-400">
-            A continuación se muestra una lista de productos disponibles
-            actualmente en stock. Puedes copiar y compartir esta lista según sea
-            necesario.
-          </p>
+          <ShareIcon
+            class="h-6 w-6 stroke-[2px] text-green-600"
+            aria-hidden="true"
+          />
         </div>
+        <div class="mt-3 text-center sm:mt-5">
+          <h3
+            class="text-lg font-medium leading-6 text-slate-900 dark:text-white"
+          >
+            🎉 Lista de Productos disponibles
+          </h3>
+          <div class="mt-2">
+            <p class="text-sm text-slate-500 dark:text-slate-400">
+              A continuación se muestra una lista de productos disponibles
+              actualmente en stock. Puedes copiar y compartir esta lista según
+              sea necesario.
+            </p>
+          </div>
 
-        <div class="my-2">
-          <Textarea autosize v-model="shareText" />
+          <div class="my-2">
+            <Textarea autosize v-model="shareText" />
+          </div>
         </div>
       </div>
-    </div>
-    <div class="mt-5 sm:mt-6 flex flex-col gap-3">
-      <Button
-        type="button"
-        class="w-full"
-        variant="primary"
-        @click="copyTextShareModal"
-      >
-        Copy
-      </Button>
-      <Button
-        type="button"
-        class="w-full"
-        variant="default"
-        @click="closeShareModal"
-      >
-        Close
-      </Button>
-    </div>
+      <div class="mt-5 sm:mt-6 flex flex-col gap-3">
+        <Button type="button" class="w-full" @click="copyTextShareModal">
+          Copy
+        </Button>
+        <Button
+          type="button"
+          class="w-full"
+          variant="outline"
+          @click="closeShareModal"
+        >
+          Close
+        </Button>
+      </div>
+    </DialogContent>
   </Dialog>
 
   <CreateOrEditSidebar
