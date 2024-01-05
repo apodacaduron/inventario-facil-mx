@@ -19,7 +19,6 @@ import { useRoute, useRouter } from "vue-router";
 import {
   ArrowLeftOnRectangleIcon,
   BanknotesIcon,
-  ClipboardDocumentCheckIcon,
   HomeIcon,
   MoonIcon,
   ShoppingBagIcon,
