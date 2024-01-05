@@ -24,6 +24,9 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
+  Avatar,
+  AvatarImage,
+  AvatarFallback,
 } from "@/components/ui";
 import {
   EllipsisVerticalIcon,
@@ -98,7 +101,7 @@ const productHandlers = {
     await queryClient.invalidateQueries({ queryKey: ["products"] });
   },
   async update(formValues: UpdateProduct) {
-    const productId = selectedProductFromActions.value?.id;
+    const productId = formValues.product_id;
     if (!productId) throw new Error("Product id required to perform update");
     await updateProductMutation.mutateAsync({
       ...formValues,
@@ -111,8 +114,6 @@ const productHandlers = {
 };
 
 async function handleSaveSidebar(formValues: CreateProduct | UpdateProduct) {
-  if (!productSidebarMode.value)
-    throw new Error("productSidebarMode must not be null");
   if (productServicesTypeguards.isCreateProduct(formValues)) {
     await productHandlers.create(formValues);
   } else {
@@ -237,20 +238,14 @@ function closeShareModal() {
           >
             <th
               scope="row"
-              class="flex items-center px-6 py-4 text-slate-900 whitespace-nowrap dark:text-white"
+              class="flex items-center px-6 py-4 text-slate-900 whitespace-nowrap dark:text-white w-max"
             >
-              <img
-                v-if="product.image_url"
-                class="w-12 h-12 rounded-full"
-                :src="product.image_url"
-                alt="Rounded avatar"
-              />
-              <img
-                v-else
-                class="w-12 h-12 rounded-full"
-                src="/product-placeholder.png"
-                alt="Rounded avatar"
-              />
+              <Avatar>
+                <AvatarImage :src="product?.image_url ?? ''" />
+                <AvatarFallback>{{
+                  `${product?.name?.substring(0, 1).toLocaleUpperCase()}`
+                }}</AvatarFallback>
+              </Avatar>
               <div class="ps-3">
                 <div class="text-base font-semibold">{{ product.name }}</div>
                 <div
@@ -393,5 +388,6 @@ function closeShareModal() {
     :product="selectedProductFromActions"
     :open="isAddStockDialogOpen"
     @close="closeAddStockDialog"
+    @save="handleSaveSidebar"
   />
 </template>

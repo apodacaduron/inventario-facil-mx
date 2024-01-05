@@ -12,7 +12,7 @@ export type CreateProduct = {
 };
 export type UpdateProduct = {
   product_id: Product["id"];
-} & CreateProduct;
+} & Partial<CreateProduct>;
 export type DeleteProduct = Product["id"];
 
 export type ProductList = Awaited<
@@ -108,12 +108,7 @@ export function useProductServices() {
       .from("i_products")
       .insert([
         {
-          name: formValues.name,
-          description: formValues.description,
-          image_url: formValues.image_url,
-          current_stock: formValues.current_stock,
-          unit_price: formValues.unit_price,
-          retail_price: formValues.retail_price,
+          ...formValues,
           org_id: organization.org_id,
         },
       ])
@@ -127,18 +122,14 @@ export function useProductServices() {
     );
     if (!organization?.org_id)
       throw new Error("Organization is required to update a product");
+    const { product_id, ...otherFormValues } = formValues
     await supabase
       .from("i_products")
       .update({
-        name: formValues.name,
-        description: formValues.description,
-        image_url: formValues.image_url,
-        current_stock: formValues.current_stock,
-        unit_price: formValues.unit_price,
-        retail_price: formValues.retail_price,
+        ...otherFormValues,
         org_id: organization.org_id,
       })
-      .eq("id", formValues.product_id);
+      .eq("id", product_id);
   }
 
   async function deleteProduct(productId: DeleteProduct) {

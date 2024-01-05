@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "code-check": "npx vue-tsc --noEmit"
   },
   "dependencies": {
     "@formkit/auto-animate": "^0.8.1",

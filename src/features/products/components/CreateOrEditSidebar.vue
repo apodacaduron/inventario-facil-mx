@@ -85,6 +85,7 @@ const formSchema = toTypedSchema(
       .nonnegative()
       .finite()
       .safe(),
+    product_id: z.string().uuid().optional(),
   })
 );
 
@@ -93,8 +94,10 @@ const formInstance = useForm<CreateProduct | UpdateProduct>({
 });
 
 const onSubmit = formInstance.handleSubmit(async (formValues) => {
-  const nextUnitPrice = currencyFormatter.toCents(formValues.unit_price);
-  const nextRetailPrice = currencyFormatter.toCents(formValues.retail_price);
+  const nextUnitPrice = currencyFormatter.toCents(formValues?.unit_price ?? 0);
+  const nextRetailPrice = currencyFormatter.toCents(
+    formValues?.retail_price ?? 0
+  );
 
   const modifiedFormValues = {
     ...formValues,
@@ -194,8 +197,8 @@ watch(
           <FormItem v-auto-animate>
             <FormLabel>Unidades disponibles</FormLabel>
             <FormControl>
-              <Textarea
-                type="text"
+              <Input
+                type="number"
                 placeholder="Ingresa las unidades disponibles de producto"
                 v-bind="componentField"
               />

@@ -1,11 +1,19 @@
 <script setup lang="ts">
-import { Dialog, Button, DialogContent } from "@/components/ui";
+import {
+  Dialog,
+  Button,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui";
 import {
   InboxArrowDownIcon,
   MinusIcon,
   PlusIcon,
 } from "@heroicons/vue/24/outline";
-import { Product } from "../composables";
+import { Product, UpdateProduct } from "../composables";
 import { ref, watch } from "vue";
 
 type AddStockDialogProps = {
@@ -15,12 +23,33 @@ type AddStockDialogProps = {
 };
 
 const props = defineProps<AddStockDialogProps>();
-const emits = defineEmits(["close"]);
+const emit = defineEmits<{
+  (e: "close"): void;
+  (e: "save", formValues: UpdateProduct): void;
+}>();
 
 const stockAmount = ref(0);
 
 function closeDialog() {
-  emits("close");
+  emit("close");
+}
+
+function addOneToStock() {
+  stockAmount.value += 1;
+}
+function substractOneFromStock() {
+  if (stockAmount.value <= 0) return;
+  stockAmount.value -= 1;
+}
+
+function saveStock() {
+  if (!props.product?.id)
+    throw new Error("Product id is required to add to stock");
+  emit("save", {
+    current_stock: stockAmount.value,
+    product_id: props.product.id,
+  });
+  closeDialog();
 }
 
 watch(
@@ -35,7 +64,7 @@ watch(
 <template>
   <Dialog :open="open" @update:open="closeDialog">
     <DialogContent>
-      <div>
+      <DialogHeader>
         <div
           class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100"
         >
@@ -44,34 +73,33 @@ watch(
             aria-hidden="true"
           />
         </div>
-        <div class="mt-3 text-center sm:mt-5">
-          <h3
-            class="text-lg font-medium leading-6 text-slate-900 dark:text-white"
-          >
-            🎉 Actualiza tu stock
-          </h3>
-          <div class="mt-2">
-            <p class="text-sm text-slate-500 dark:text-slate-400">
-              Aumenta o reduce la cantidad de producto disponible
-            </p>
-          </div>
+        <DialogTitle class="text-center"> 🎉 Actualiza tu stock </DialogTitle>
+        <DialogDescription class="text-center">
+          Aumenta o reduce la cantidad de producto disponible
+        </DialogDescription>
+      </DialogHeader>
+      <div class="text-center mb-6">
+        <div class="mb-2 mt-5">
+          <div class="font-semibold text-7xl">{{ stockAmount }}</div>
+        </div>
 
-          <div class="mb-2 mt-6">
-            <div class="font-semibold text-7xl">{{ stockAmount }}</div>
-          </div>
-
-          <div class="flex justify-center gap-4">
-            <Button><MinusIcon class="w-6 h-6 stroke-[2px]" /></Button>
-            <Button><PlusIcon class="w-6 h-6 stroke-[2px]" /></Button>
-          </div>
+        <div class="flex justify-center gap-4">
+          <Button @click="substractOneFromStock"
+            ><MinusIcon class="w-6 h-6 stroke-[2px]"
+          /></Button>
+          <Button @click="addOneToStock"
+            ><PlusIcon class="w-6 h-6 stroke-[2px]"
+          /></Button>
         </div>
       </div>
-      <div class="mt-10 sm:mt-10 flex flex-col gap-3">
-        <Button type="button" class="w-full"> Guardar </Button>
-        <Button type="button" class="w-full" variant="outline">
+      <DialogFooter>
+        <Button @click="saveStock" type="button" class="w-full">
+          Guardar
+        </Button>
+        <Button @click="closeDialog" type="button" variant="outline">
           Cancelar
         </Button>
-      </div>
+      </DialogFooter>
     </DialogContent>
   </Dialog>
 </template>

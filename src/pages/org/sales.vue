@@ -22,6 +22,8 @@ import {
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
+  Avatar,
+  AvatarFallback,
 } from "@/components/ui";
 import {
   EllipsisVerticalIcon,
@@ -86,6 +88,8 @@ const saleHandlers = {
     await queryClient.invalidateQueries({ queryKey: ["sales"] });
   },
   async update(formValues: UpdateSale) {
+    const saleId = formValues.sale_id;
+    if (!saleId) throw new Error("Sale id required to perform update");
     await updateSaleMutation.mutateAsync(formValues);
     saleSidebarMode.value = null;
     selectedSaleFromActions.value = null;
@@ -94,8 +98,6 @@ const saleHandlers = {
 };
 
 async function handleSaveSidebar(formValues: CreateSale | UpdateSale) {
-  if (!saleSidebarMode.value)
-    throw new Error("saleSidebarMode must not be null");
   if (saleServicesTypeguards.isCreateSale(formValues)) {
     await saleHandlers.create(formValues);
   } else {
@@ -191,13 +193,15 @@ function getBadgeColorFromStatus(status: Sale["status"]) {
           >
             <th
               scope="row"
-              class="flex items-center px-6 py-4 text-slate-900 whitespace-nowrap dark:text-white min-w-[200px]"
+              class="flex items-center px-6 py-4 text-slate-900 whitespace-nowrap dark:text-white w-max"
             >
-              <img
-                class="w-12 h-12 rounded-full"
-                src="/customer-placeholder.jpg"
-                alt="Rounded avatar"
-              />
+              <Avatar>
+                <AvatarFallback>{{
+                  `${sale.i_customers?.name
+                    ?.substring(0, 1)
+                    .toLocaleUpperCase()}`
+                }}</AvatarFallback>
+              </Avatar>
               <div class="ps-3">
                 <div class="text-base font-semibold">
                   {{ sale.i_customers?.name }}
@@ -324,7 +328,7 @@ function getBadgeColorFromStatus(status: Sale["status"]) {
         <Button
           type="button"
           variant="secondary"
-          @click="isDeleteSaleDialogOpen = false"
+          @click="closeDeleteSaleDialog"
         >
           Cancelar
         </Button>

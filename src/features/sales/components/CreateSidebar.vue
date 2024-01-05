@@ -24,21 +24,37 @@ import {
   CommandGroup,
   CommandItem,
   Textarea,
+  Card,
+  CardContent,
+  CardFooter,
+  Avatar,
+  AvatarImage,
+  AvatarFallback,
+  Table,
+  TableHeader,
+  TableRow,
+  TableHead,
+  TableBody,
+  TableCell,
 } from "@/components/ui";
 import { computed, ref, watch } from "vue";
 import { z } from "zod";
-import { CreateSale, PAGINATION_LIMIT, SALE_STATUS } from "../composables";
-import { refDebounced, useDebounceFn } from "@vueuse/core";
-import { useCustomerServices, useCustomersQuery } from "@/features/customers";
-import { CheckIcon, ChevronDoubleDownIcon } from "@heroicons/vue/24/outline";
+import { CreateSale, SALE_STATUS } from "../composables";
+import { refDebounced } from "@vueuse/core";
+import { useCustomersQuery } from "@/features/customers";
+import {
+  CheckIcon,
+  ChevronDoubleDownIcon,
+  PlusCircleIcon,
+  XMarkIcon,
+} from "@heroicons/vue/24/outline";
 import {
   Product,
   useCurrencyFormatter,
-  useProductServices,
-  useProductsByIdsQuery,
+  useProductsQuery,
 } from "@/features/products";
 import { toTypedSchema } from "@vee-validate/zod";
-import { useForm } from "vee-validate";
+import { useFieldArray, useForm } from "vee-validate";
 import { cn } from "@/lib/utils";
 import { useOrganizationStore } from "@/stores";
 
@@ -57,15 +73,18 @@ const emit = defineEmits<{
   (e: "save", formValues: CreateSale): void;
 }>();
 
-const locale = {
-  create: {
-    title: "Crear venta",
-    subtitle: "Crea rápidamente una nueva venta para tu inventario.",
+const LOCALE = {
+  CREATE: {
+    TITLE: "Crear venta",
+    SUBTITLE: "Crea rápidamente una nueva venta para tu inventario.",
+  },
+  SELECT_PRODUCTS: {
+    TITLE: "Selecciona productos",
+    SUBTITLE: "Selecciona facilmente productos para agregar a tu venta",
   },
 };
 
-const productIds = ref<string[]>([]);
-const productServices = useProductServices();
+const isProductSelectorOpen = ref(false);
 const currencyFormatter = useCurrencyFormatter();
 const initialForm: CreateSale = {
   status: "in_progress",
@@ -78,7 +97,6 @@ const initialForm: CreateSale = {
 
 const formSchema = toTypedSchema(
   z.object({
-    sale_id: z.string().uuid().optional(),
     status: z.enum(SALE_STATUS),
     sale_date: z.string().datetime(),
     customer_id: z.string().uuid("Por favor seleccione a un cliente"),
@@ -96,6 +114,9 @@ const formSchema = toTypedSchema(
           price: z.number().positive().finite().safe(),
           unit_price: z.number().positive().finite().safe(),
           qty: z.number().int().positive().finite().safe(),
+          // This 2 field are not stored in DB
+          name: z.string(),
+          image_url: z.string(),
         })
       )
       .min(1, "Por favor seleccione al menos un producto"),
@@ -106,6 +127,7 @@ const formInstance = useForm<CreateSale>({
   initialValues: initialForm,
   validationSchema: formSchema,
 });
+const productsFormFieldArray = useFieldArray("products");
 
 const onSubmit = formInstance.handleSubmit(async (formValues) => {
   const modifiedProducts = formValues.products.map((formProduct) => ({
@@ -122,60 +144,34 @@ const onSubmit = formInstance.handleSubmit(async (formValues) => {
 
   emit("save", modifiedFormValues);
 });
-const productsByIdsQuery = useProductsByIdsQuery({
-  options: {
-    enabled: computed(() => Boolean(productIds.value.length)),
-    productIds: productIds,
-  },
-});
 
 function closeSidebar(isOpen: boolean) {
   if (isOpen) return;
   forceCloseSidebar();
 }
 function forceCloseSidebar() {
+  if (isProductSelectorOpen.value) return (isProductSelectorOpen.value = false);
+
   formInstance.resetForm();
   emit("close");
-}
-
-function updateProductIds(nextProductIds: string[]) {
-  productIds.value = nextProductIds;
-
-  const basicFormProducts = nextProductIds.map((productId) => ({
-    product_id: productId,
-    price: null,
-    unit_price: null,
-    qty: null,
-  }));
-
-  formInstance.setFieldValue("products", basicFormProducts);
-}
-
-function updateProductRow(data: {
-  newValue: string;
-  product: Product;
-  field: "qty" | "price";
-}) {
-  const formProductsCopy = [...formInstance.values.products];
-  const matchingProduct = formProductsCopy.find(
-    (formProduct) => formProduct.product_id === data.product.id
-  );
-  if (!matchingProduct) return;
-  const matchingIndex = formProductsCopy.indexOf(matchingProduct);
-  formProductsCopy.splice(matchingIndex, 1, {
-    ...matchingProduct,
-    [data.field]: data.newValue,
-  });
-  formInstance.setFieldValue("products", formProductsCopy);
+  isProductSelectorOpen.value = false;
 }
 
 const organizationStore = useOrganizationStore();
 const customerSearch = ref("");
 const customerSearchDebounced = refDebounced(customerSearch, 400);
+const productSearch = ref("");
+const productSearchDebounced = refDebounced(customerSearch, 400);
 const customersQuery = useCustomersQuery({
   options: {
     enabled: computed(() => organizationStore.hasOrganizations),
     search: customerSearchDebounced,
+  },
+});
+const productsQuery = useProductsQuery({
+  options: {
+    enabled: computed(() => organizationStore.hasOrganizations),
+    search: productSearchDebounced,
   },
 });
 
@@ -185,332 +181,313 @@ function comboboxCustomerFilter(list: string[], search: string) {
   return list;
 }
 
-const debouncedFetchProductsOptions = useDebounceFn(
-  async (query: string = "", nextPage: number = 0) => {
-    const productsResponse = await productServices.loadList({
-      offset: nextPage,
-      search: query,
-    });
+function formatProductToSaleDetail(
+  product: Product | null
+): CreateSale["products"][number] {
+  if (!product) throw new Error("Cannot add product to sale missing data");
 
-    return {
-      results:
-        productsResponse.data?.filter(
-          (product) => (product.current_stock ?? 0) >= 1
-        ) || [],
-      hasMorePages: (productsResponse.count ?? 0) >= PAGINATION_LIMIT,
-    };
-  },
-  400
-);
+  return {
+    product_id: product.id,
+    name: product.name,
+    image_url: product.image_url,
+    price: currencyFormatter.parseRaw(product.retail_price),
+    unit_price: product.unit_price,
+    qty: 1,
+  };
+}
+
+function hasProductInFieldList(product: Product | null) {
+  return productsFormFieldArray.fields.value.some(
+    (productField) =>
+      (productField.value as CreateSale["products"][number])?.product_id ===
+      product?.id
+  );
+}
+
+function findIndexProductInFieldList(product: Product | null) {
+  return productsFormFieldArray.fields.value.findIndex(
+    (productField) =>
+      (productField.value as CreateSale["products"][number])?.product_id ===
+      product?.id
+  );
+}
+
+function handleAddToProductsForm(product: Product | null) {
+  if (hasProductInFieldList(product)) {
+    const productFieldIdx = findIndexProductInFieldList(product);
+    productsFormFieldArray.remove(productFieldIdx);
+  } else {
+    productsFormFieldArray.push(formatProductToSaleDetail(product));
+  }
+}
 
 watch(
   () => props.open,
-  (nextIsOpen) => {
-    if (nextIsOpen) return;
+  () => {
     formInstance.resetForm({
       values: initialForm,
     });
-    productIds.value = [];
-  }
-);
-watch(
-  () => productsByIdsQuery.data.value,
-  (nextProductsByIdsQueryData) => {
-    const formProductsWithPricing: CreateSale["products"] = [];
-    const formProductsWithoutPricing: CreateSale["products"] = [];
-
-    formInstance.values.products.forEach((formProduct) => {
-      if (formProduct.price === null) {
-        formProductsWithoutPricing.push(formProduct);
-      } else {
-        formProductsWithPricing.push(formProduct);
-      }
-    });
-
-    const nextFormProducts = formProductsWithoutPricing.map((formProduct) => {
-      const matchingProduct = nextProductsByIdsQueryData?.pages
-        .flatMap((page) => page.data)
-        .find((product) => product?.id === formProduct.product_id);
-
-      return {
-        ...formProduct,
-        unit_price: matchingProduct?.unit_price ?? null,
-        price: currencyFormatter.parseRaw(
-          matchingProduct?.retail_price ?? null
-        ),
-      };
-    });
-
-    formInstance.setFieldValue("products", [
-      ...formProductsWithPricing,
-      ...nextFormProducts,
-    ]);
   }
 );
 </script>
 
 <template>
   <Sheet :open="open" @update:open="closeSidebar">
-    <SheetContent side="right">
-      <SheetHeader>
-        <SheetTitle>
-          {{ locale.create.title }}
-        </SheetTitle>
-        <SheetDescription>
-          {{ locale.create.subtitle }}
-        </SheetDescription>
-      </SheetHeader>
-      <form @submit="onSubmit" class="flex flex-col gap-6 mt-6 mb-6">
-        <FormField name="customer_id">
-          <FormItem class="flex flex-col">
-            <FormLabel>Cliente</FormLabel>
-            <Popover>
-              <PopoverTrigger as-child>
-                <FormControl>
-                  <Button
-                    variant="outline"
-                    role="combobox"
-                    :class="
-                      cn(
-                        'justify-between',
-                        !formInstance.values.customer_id &&
-                          'text-muted-foreground'
-                      )
-                    "
-                  >
-                    {{
-                      formInstance.values.customer_id
-                        ? customersQuery.data.value?.pages
-                            .find(Boolean)
-                            ?.data?.find(
-                              (customer) =>
-                                customer.id === formInstance.values.customer_id
-                            )?.name
-                        : "Seleccione un cliente..."
-                    }}
-                    <ChevronDoubleDownIcon
-                      class="ml-2 h-4 w-4 shrink-0 opacity-50"
-                    />
-                  </Button>
-                </FormControl>
-              </PopoverTrigger>
-              <PopoverContent class="w-[200px] p-0">
-                <!-- @vue-ignore -->
-                <Command :filterFunction="comboboxCustomerFilter">
-                  <CommandInput placeholder="Busque un cliente..." />
-                  <CommandEmpty>{{
-                    customersQuery.isPending.value ||
-                    customersQuery.isLoading.value ||
-                    customersQuery.isFetching.value
-                      ? "Cargando..."
-                      : "Sin resultados."
-                  }}</CommandEmpty>
-                  <CommandList>
-                    <CommandGroup>
-                      <CommandItem
-                        v-for="customer in customersQuery.data.value?.pages.find(
-                          Boolean
-                        )?.data"
-                        :key="customer.id"
-                        :value="customer.id"
-                        @select="
-                          () => {
-                            formInstance.setValues({
-                              customer_id: customer.id,
-                            });
-                          }
-                        "
-                      >
-                        <CheckIcon
-                          :class="
-                            cn(
-                              'mr-2 h-4 w-4',
-                              customer.id === formInstance.values.customer_id
-                                ? 'opacity-100'
-                                : 'opacity-0'
-                            )
-                          "
-                        />
-                        {{ customer.name }}
-                      </CommandItem>
-                    </CommandGroup>
-                  </CommandList>
-                </Command>
-              </PopoverContent>
-            </Popover>
-            <FormDescription>
-              Por favor, registra al cliente antes de proceder con la venta, en
-              caso de que no esté registrado en nuestra base de datos.
-            </FormDescription>
-            <FormMessage />
-          </FormItem>
-        </FormField>
-        <FormField v-slot="{ componentField }" name="notes">
-          <FormItem v-auto-animate>
-            <FormLabel>Notas de venta</FormLabel>
-            <FormControl>
-              <Textarea
-                placeholder="Ingresa notas de la venta"
-                v-bind="componentField"
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        </FormField>
-
-        <FormField v-slot="{ componentField }" name="shipping_cost">
-          <FormItem v-auto-animate>
-            <FormLabel>Costo de envio</FormLabel>
-            <FormControl>
-              <Input
-                type="number"
-                placeholder="Ingresa el costo de envio"
-                v-bind="componentField"
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        </FormField>
-        <!-- <InputGroup label="Seleccione productos" name="products" class="!px-0">
-          <RichSelect
-            :modelValue="productIds"
-            @update:modelValue="updateProductIds"
-            placeholder="Seleccione productos"
-            :fetchOptions="debouncedFetchProductsOptions"
-            :minimum-input-length="2"
-            value-attribute="id"
-            text-attribute="name"
-            multiple
-            tags
-            clearable
-            :errors="formInstance.errors.value.products"
-            feedback="Si el producto no está visible, probablemente no se encuentra en existencia en el inventario en este momento."
-          >
-            <template
-              #option="{ option: { raw: product }, className, isSelected }"
-            >
-              <div
-                class="px-3 py-2 relative flex items-center"
-                :class="className"
-              >
-                {{ product.name }}
-                <div v-if="isSelected" class="absolute right-3">
-                  <CheckIcon class="w-4 h-4 stroke-[2px]" />
-                </div>
-              </div>
-            </template>
-          </RichSelect>
-
-          <div
-            v-if="formInstance.values.products.length"
-            class="relative overflow-x-auto shadow-md sm:rounded-lg"
-          >
-            <table
-              class="w-full text-sm text-left rtl:text-right text-slate-500 dark:text-slate-400"
-            >
-              <thead
-                class="text-xs text-slate-700 uppercase bg-slate-50 dark:bg-slate-700 dark:text-slate-400"
-              >
-                <tr>
-                  <th scope="col" class="px-6 py-3">Nombre</th>
-                  <th scope="col" class="px-6 py-3 text-center">Cantidad</th>
-                  <th scope="col" class="px-6 py-3">Precio</th>
-                </tr>
-              </thead>
-              <tbody>
-                <template
-                  v-for="(page, index) in productsByIdsQuery.data.value?.pages"
-                  :key="index"
-                >
-                  <tr
-                    v-for="product in page.data"
-                    :key="product.id"
-                    class="bg-white border-b dark:bg-slate-900 dark:border-slate-800"
-                  >
-                    <th
-                      scope="row"
-                      class="flex items-center px-6 py-4 text-slate-900 whitespace-nowrap dark:text-white"
+    <SheetContent side="right" class="overflow-y-auto">
+      <div v-show="!isProductSelectorOpen">
+        <SheetHeader>
+          <SheetTitle>
+            {{ LOCALE.CREATE.TITLE }}
+          </SheetTitle>
+          <SheetDescription>
+            {{ LOCALE.CREATE.SUBTITLE }}
+          </SheetDescription>
+        </SheetHeader>
+        <form @submit="onSubmit" class="flex flex-col gap-6 mt-6 mb-6">
+          <FormField name="customer_id">
+            <FormItem class="flex flex-col">
+              <FormLabel>Cliente</FormLabel>
+              <Popover>
+                <PopoverTrigger as-child>
+                  <FormControl>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      :class="
+                        cn(
+                          'justify-between',
+                          !formInstance.values.customer_id &&
+                            'text-muted-foreground'
+                        )
+                      "
                     >
-                      <img
-                        v-if="product.image_url"
-                        class="w-8 h-8 rounded-full"
-                        :src="product.image_url"
-                        alt="Rounded avatar"
+                      {{
+                        formInstance.values.customer_id
+                          ? customersQuery.data.value?.pages
+                              .find(Boolean)
+                              ?.data?.find(
+                                (customer) =>
+                                  customer.id ===
+                                  formInstance.values.customer_id
+                              )?.name
+                          : "Seleccione un cliente..."
+                      }}
+                      <ChevronDoubleDownIcon
+                        class="ml-2 h-4 w-4 shrink-0 opacity-50"
                       />
-                      <img
-                        v-else
-                        class="w-8 h-8 rounded-full"
-                        src="/product-placeholder.png"
-                        alt="Rounded avatar"
-                      />
-                      <div class="ps-3">
-                        <div class="text-sm font-semibold">
-                          {{ product.name }}
-                        </div>
-                      </div>
-                    </th>
-                    <td>
-                      <div class="mx-auto w-fit">
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent class="w-[200px] p-0">
+                  <!-- @vue-ignore -->
+                  <Command :filterFunction="comboboxCustomerFilter">
+                    <CommandInput placeholder="Busque un cliente..." />
+                    <CommandEmpty>{{
+                      customersQuery.isPending.value ||
+                      customersQuery.isLoading.value ||
+                      customersQuery.isFetching.value
+                        ? "Cargando..."
+                        : "Sin resultados."
+                    }}</CommandEmpty>
+                    <CommandList>
+                      <CommandGroup>
+                        <CommandItem
+                          v-for="customer in customersQuery.data.value?.pages.find(
+                            Boolean
+                          )?.data"
+                          :key="customer.id"
+                          :value="customer.id"
+                          @select="
+                            () => {
+                              formInstance.setValues({
+                                customer_id: customer.id,
+                              });
+                            }
+                          "
+                        >
+                          <CheckIcon
+                            :class="
+                              cn(
+                                'mr-2 h-4 w-4',
+                                customer.id === formInstance.values.customer_id
+                                  ? 'opacity-100'
+                                  : 'opacity-0'
+                              )
+                            "
+                          />
+                          {{ customer.name }}
+                        </CommandItem>
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+              <FormDescription>
+                Por favor, registra al cliente antes de proceder con la venta,
+                en caso de que no esté registrado en nuestra base de datos.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          </FormField>
+          <FormField v-slot="{ componentField }" name="notes">
+            <FormItem v-auto-animate>
+              <FormLabel>Notas de venta</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="Ingresa notas de la venta"
+                  v-bind="componentField"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          </FormField>
+
+          <FormField v-slot="{ componentField }" name="shipping_cost">
+            <FormItem v-auto-animate>
+              <FormLabel>Costo de envio</FormLabel>
+              <FormControl>
+                <Input
+                  type="number"
+                  placeholder="Ingresa el costo de envio"
+                  v-bind="componentField"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          </FormField>
+
+          <Table v-if="formInstance.values.products?.length">
+            <TableHeader>
+              <TableRow>
+                <TableHead class="w-[100px]"> Producto </TableHead>
+                <TableHead class="text-center">Cantidad</TableHead>
+                <TableHead class="text-center">Precio</TableHead>
+                <TableHead class="text-center">-</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <TableRow
+                v-for="(productField, idx) in formInstance.values.products"
+                :key="productField.product_id ?? idx"
+              >
+                <TableCell class="font-medium">
+                  {{ productField.name }}
+                </TableCell>
+                <TableCell class="text-center flex justify-center">
+                  <FormField
+                    v-slot="{ componentField }"
+                    :name="`products.${idx}.qty`"
+                  >
+                    <FormItem v-auto-animate>
+                      <FormControl>
                         <Input
-                          :modelValue="
-                            formInstance.values.products.find(
-                              (_product) => _product.product_id === product.id
-                            )?.qty
-                          "
-                          @update:modelValue="
-                            updateProductRow({
-                              newValue: $event,
-                              product,
-                              field: 'qty',
-                            })
-                          "
-                          class="w-[80px]"
-                          required
                           type="number"
+                          placeholder="Cantidad"
+                          v-bind="componentField"
+                          class="w-16"
                         />
-                      </div>
-                    </td>
-                    <td>
-                      <div class="mx-auto w-fit">
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  </FormField>
+                </TableCell>
+                <TableCell class="text-center">
+                  <FormField
+                    v-slot="{ componentField }"
+                    :name="`products.${idx}.price`"
+                  >
+                    <FormItem v-auto-animate>
+                      <FormControl>
                         <Input
-                          :modelValue="
-                            formInstance.values.products.find(
-                              (_product) => _product.product_id === product.id
-                            )?.price
-                          "
-                          @update:modelValue="
-                            updateProductRow({
-                              newValue: $event,
-                              product,
-                              field: 'price',
-                            })
-                          "
-                          class="w-[80px]"
-                          required
-                          step=".01"
                           type="number"
-                          :errors="formInstance.errors.value.products"
+                          placeholder="Precio"
+                          v-bind="componentField"
+                          class="w-20"
                         />
-                      </div>
-                    </td>
-                  </tr>
-                </template>
-              </tbody>
-            </table>
-          </div>
-        </InputGroup> -->
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  </FormField>
+                </TableCell>
+                <TableCell class="text-center">
+                  <Button
+                    @click="productsFormFieldArray.remove(idx)"
+                    size="icon"
+                    variant="ghost"
+                  >
+                    <XMarkIcon class="w-4 h-4" />
+                  </Button>
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+
+          <Button @click="isProductSelectorOpen = true" variant="outline"
+            ><PlusCircleIcon class="w-5 h-5 mr-2" /> Agregar productos</Button
+          >
+          <SheetFooter>
+            <Button :disabled="isLoading" type="submit" class="w-full"
+              >Guardar</Button
+            >
+            <Button
+              :disabled="isLoading"
+              @click="forceCloseSidebar"
+              variant="outline"
+              >Cancelar</Button
+            >
+          </SheetFooter>
+        </form>
+      </div>
+      <div v-show="isProductSelectorOpen">
+        <SheetHeader class="mb-6">
+          <SheetTitle>{{ LOCALE.SELECT_PRODUCTS.TITLE }}</SheetTitle>
+          <SheetDescription>
+            {{ LOCALE.SELECT_PRODUCTS.SUBTITLE }}
+          </SheetDescription>
+        </SheetHeader>
+        <Input v-model="productSearch" placeholder="Busca productos..." />
+        <div class="grid grid-cols-2 gap-3 mt-4 mb-10">
+          <Card
+            v-for="product in productsQuery.data.value?.pages.flatMap(
+              (page) => page.data
+            )"
+            :key="product?.id"
+            class="flex flex-col"
+          >
+            <CardContent class="p-4 text-center">
+              <Avatar>
+                <AvatarImage :src="product?.image_url ?? ''" />
+                <AvatarFallback>{{
+                  `${product?.name?.substring(0, 1).toLocaleUpperCase()}`
+                }}</AvatarFallback>
+              </Avatar>
+              <div class="text-sm font-semibold line-clamp-2">
+                {{ product?.name }}
+              </div>
+            </CardContent>
+            <CardFooter class="p-2 mt-auto">
+              <Button
+                @click="handleAddToProductsForm(product)"
+                class="w-full"
+                :variant="
+                  hasProductInFieldList(product) ? 'default' : 'outline'
+                "
+                >{{
+                  hasProductInFieldList(product)
+                    ? "Seleccionado"
+                    : "Seleccionar"
+                }}</Button
+              >
+            </CardFooter>
+          </Card>
+        </div>
+
         <SheetFooter>
-          <Button :disabled="isLoading" type="submit" class="w-full"
-            >Guardar</Button
-          >
-          <Button
-            :disabled="isLoading"
-            @click="forceCloseSidebar"
-            variant="outline"
-            >Cancelar</Button
-          >
+          <Button @click="forceCloseSidebar" variant="outline" class="w-full">
+            Cerrar
+          </Button>
         </SheetFooter>
-      </form>
+      </div>
     </SheetContent>
   </Sheet>
 </template>

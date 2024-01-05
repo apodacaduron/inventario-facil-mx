@@ -114,14 +114,8 @@ watch(
 </script>
 
 <template>
-  <Sheet
-    :open="open"
-    @update:open="closeSidebar"
-    position="right"
-    :title="locale.update.title"
-    :subtitle="locale.update.subtitle"
-  >
-    <SheetContent>
+  <Sheet :open="open" @update:open="closeSidebar">
+    <SheetContent side="right">
       <SheetHeader>
         <SheetTitle>
           {{ locale.update.title }}

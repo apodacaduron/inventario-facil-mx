@@ -21,6 +21,8 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
+  Avatar,
+  AvatarFallback,
 } from "@/components/ui";
 import { Badge } from "@/components";
 import {
@@ -91,6 +93,8 @@ const customerHandlers = {
     await queryClient.invalidateQueries({ queryKey: ["customers"] });
   },
   async update(formValues: UpdateCustomer) {
+    const customerId = formValues.customer_id;
+    if (!customerId) throw new Error("Customer id required to perform update");
     await updateCustomerMutation.mutateAsync(formValues);
     customerSidebarMode.value = null;
     selectedCustomerFromActions.value = null;
@@ -99,10 +103,7 @@ const customerHandlers = {
 };
 
 async function handleSaveSidebar(formValues: CreateCustomer | UpdateCustomer) {
-  if (!customerSidebarMode.value)
-    throw new Error("customerSidebarMode must not be null");
   if (customerServicesTypeguards.isCreateCustomer(formValues)) {
-    console.log(2);
     await customerHandlers.create(formValues);
   } else {
     await customerHandlers.update(formValues);
@@ -172,8 +173,8 @@ function getBadgeColorFromStatus(status: Customer["trust_status"]) {
         class="text-xs text-slate-700 uppercase bg-slate-50 dark:bg-slate-700 dark:text-slate-400"
       >
         <tr>
-          <th scope="col" class="px-6 py-3">Nombre</th>
-          <th scope="col" class="px-6 py-3 text-center">Notas</th>
+          <th scope="col" class="px-6 py-3 min-w-48">Nombre</th>
+          <th scope="col" class="px-6 py-3 min-w-64 text-center">Notas</th>
           <th scope="col" class="px-6 py-3 text-center">Teléfono</th>
           <th scope="col" class="px-6 py-3 text-center">Dirección</th>
           <th scope="col" class="px-6 py-3 text-center">Mapa</th>
@@ -194,13 +195,13 @@ function getBadgeColorFromStatus(status: Customer["trust_status"]) {
           >
             <th
               scope="row"
-              class="flex items-center px-6 py-4 text-slate-900 whitespace-nowrap dark:text-white"
+              class="flex items-center px-6 py-4 text-slate-900 whitespace-nowrap dark:text-white w-max"
             >
-              <img
-                class="w-12 h-12 rounded-full"
-                src="/customer-placeholder.jpg"
-                alt="Rounded avatar"
-              />
+              <Avatar>
+                <AvatarFallback>{{
+                  `${customer?.name?.substring(0, 1).toLocaleUpperCase()}`
+                }}</AvatarFallback>
+              </Avatar>
               <div class="ps-3">
                 <div class="text-base font-semibold">{{ customer.name }}</div>
                 <div v-if="customer.email" class="font-normal text-slate-500">

@@ -59,11 +59,11 @@ const menuList = {
     text: "Ventas",
     icon: BanknotesIcon,
   },
-  purchases: {
-    path: `/org/${route.params.orgId}/purchases`,
-    text: "Compras",
-    icon: ClipboardDocumentCheckIcon,
-  },
+  // purchases: {
+  //   path: `/org/${route.params.orgId}/purchases`,
+  //   text: "Compras",
+  //   icon: ClipboardDocumentCheckIcon,
+  // },
 };
 </script>
 
@@ -95,7 +95,7 @@ const menuList = {
                 </svg>
               </button>
             </SheetTrigger>
-            <SheetContent side="left" class="w-[400px] sm:w-[540px]">
+            <SheetContent side="left">
               <SheetHeader class="text-left">
                 <SheetTitle>Explora</SheetTitle>
                 <SheetDescription>

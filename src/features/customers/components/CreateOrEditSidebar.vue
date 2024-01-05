@@ -60,7 +60,7 @@ const locale = {
   },
 };
 
-const initialForm: CreateCustomer = {
+const initialForm: CreateCustomer | UpdateCustomer = {
   name: "",
   phone: "",
   email: "",
@@ -79,6 +79,7 @@ const formSchema = toTypedSchema(
     map_url: z.string().url("Debe ser un url valido").or(z.literal("")),
     notes: z.string().or(z.literal("")),
     trust_status: z.enum(TRUST_STATUS),
+    customer_id: z.string().uuid().optional(),
   })
 );
 
