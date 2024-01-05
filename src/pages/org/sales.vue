@@ -13,13 +13,21 @@ import {
   Button,
   Input,
   DropdownMenu,
-  DropdownOption,
   Dialog,
-} from "@flavorly/vanilla-components";
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  Avatar,
+  AvatarFallback,
+} from "@/components/ui";
 import {
   EllipsisVerticalIcon,
   EyeIcon,
-  MagnifyingGlassIcon,
   PencilIcon,
   PlusIcon,
   TrashIcon,
@@ -62,6 +70,10 @@ function openDeleteSaleDialog(sale: Sale) {
   selectedSaleFromActions.value = sale;
   isDeleteSaleDialogOpen.value = true;
 }
+function closeDeleteSaleDialog() {
+  selectedSaleFromActions.value = null;
+  isDeleteSaleDialogOpen.value = false;
+}
 
 function closeSidebar() {
   saleSidebarMode.value = null;
@@ -76,6 +88,8 @@ const saleHandlers = {
     await queryClient.invalidateQueries({ queryKey: ["sales"] });
   },
   async update(formValues: UpdateSale) {
+    const saleId = formValues.sale_id;
+    if (!saleId) throw new Error("Sale id required to perform update");
     await updateSaleMutation.mutateAsync(formValues);
     saleSidebarMode.value = null;
     selectedSaleFromActions.value = null;
@@ -84,8 +98,6 @@ const saleHandlers = {
 };
 
 async function handleSaveSidebar(formValues: CreateSale | UpdateSale) {
-  if (!saleSidebarMode.value)
-    throw new Error("saleSidebarMode must not be null");
   if (saleServicesTypeguards.isCreateSale(formValues)) {
     await saleHandlers.create(formValues);
   } else {
@@ -125,7 +137,7 @@ function getBadgeColorFromStatus(status: Sale["status"]) {
   <div class="flex items-center justify-between flex-col md:flex-row">
     <div class="mb-6">
       <h2
-        class="mb-2 text-3xl font-extrabold leading-none tracking-tight text-gray-900 md:text-4xl dark:text-white"
+        class="mb-2 text-3xl font-extrabold leading-none tracking-tight text-slate-900 md:text-4xl dark:text-white"
       >
         Ventas
       </h2>
@@ -134,12 +146,8 @@ function getBadgeColorFromStatus(status: Sale["status"]) {
       </p>
     </div>
     <div>
-      <Button
-        @click="saleSidebarMode = 'create'"
-        label="Crear venta"
-        variant="primary"
-      >
-        <template #icon><PlusIcon class="w-5 h-5 stroke-[2px]" /></template>
+      <Button @click="saleSidebarMode = 'create'">
+        <PlusIcon class="w-5 h-5 stroke-[2px] mr-2" /> Crear venta
       </Button>
     </div>
   </div>
@@ -149,20 +157,17 @@ function getBadgeColorFromStatus(status: Sale["status"]) {
   >
     <label for="table-search" class="sr-only">Buscar</label>
     <div class="relative">
-      <Input v-model="saleSearch" placeholder="Buscar ventas">
-        <template #before>
-          <MagnifyingGlassIcon class="w-5 h-5 stroke-[2px]" /> </template
-      ></Input>
+      <Input v-model="saleSearch" placeholder="Buscar ventas" />
     </div>
   </div>
 
   <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
     <table
       ref="tableRef"
-      class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400"
+      class="w-full text-sm text-left rtl:text-right text-slate-500 dark:text-slate-400"
     >
       <thead
-        class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400"
+        class="text-xs text-slate-700 uppercase bg-slate-50 dark:bg-slate-700 dark:text-slate-400"
       >
         <tr>
           <th scope="col" class="px-6 py-3">Nombre</th>
@@ -184,24 +189,26 @@ function getBadgeColorFromStatus(status: Sale["status"]) {
           <tr
             v-for="sale in page.data"
             :key="sale.id"
-            class="bg-white border-b dark:bg-gray-900 dark:border-gray-800"
+            class="bg-white border-b dark:bg-slate-900 dark:border-slate-800"
           >
             <th
               scope="row"
-              class="flex items-center px-6 py-4 text-gray-900 whitespace-nowrap dark:text-white min-w-[200px]"
+              class="flex items-center px-6 py-4 text-slate-900 whitespace-nowrap dark:text-white w-max"
             >
-              <img
-                class="w-12 h-12 rounded-full"
-                src="/customer-placeholder.jpg"
-                alt="Rounded avatar"
-              />
+              <Avatar>
+                <AvatarFallback>{{
+                  `${sale.i_customers?.name
+                    ?.substring(0, 1)
+                    .toLocaleUpperCase()}`
+                }}</AvatarFallback>
+              </Avatar>
               <div class="ps-3">
                 <div class="text-base font-semibold">
                   {{ sale.i_customers?.name }}
                 </div>
                 <div
                   v-if="sale.i_customers?.phone"
-                  class="font-normal text-gray-500"
+                  class="font-normal text-slate-500"
                 >
                   <a
                     :href="`${WHATSAPP_URL}/${sale.i_customers.phone}`"
@@ -219,7 +226,7 @@ function getBadgeColorFromStatus(status: Sale["status"]) {
                 <img
                   v-for="saleProduct in sale.i_sale_products.slice(0, 3)"
                   :key="saleProduct.id"
-                  class="w-10 h-10 border-2 border-white rounded-full dark:border-gray-800"
+                  class="w-10 h-10 border-2 border-white rounded-full dark:border-slate-800"
                   :src="
                     saleProduct.i_products?.image_url ??
                     '/product-placeholder.png'
@@ -227,7 +234,7 @@ function getBadgeColorFromStatus(status: Sale["status"]) {
                 />
                 <div
                   v-if="sale.i_sale_products.length > 3"
-                  class="flex items-center justify-center w-10 h-10 text-xs font-medium text-white bg-gray-700 border-2 border-white rounded-full hover:bg-gray-600 dark:border-gray-800"
+                  class="flex items-center justify-center w-10 h-10 text-xs font-medium text-white bg-slate-700 border-2 border-white rounded-full hover:bg-slate-600 dark:border-slate-800"
                 >
                   {{ sale.i_sale_products.length - 3 }}
                 </div>
@@ -271,33 +278,32 @@ function getBadgeColorFromStatus(status: Sale["status"]) {
             </td>
             <td class="px-6 py-4">
               <DropdownMenu>
-                <template #trigger>
-                  <Button>
-                    <template #default>
-                      <EllipsisVerticalIcon class="w-5 h-5 stroke-[2px]" />
-                    </template>
+                <DropdownMenuTrigger as-child>
+                  <Button variant="outline">
+                    <EllipsisVerticalIcon class="w-5 h-5 stroke-[2px]" />
                   </Button>
-                </template>
-
-                <DropdownOption>
-                  <EyeIcon class="w-5 h-5 mr-2" />
-                  <span>Ver</span>
-                </DropdownOption>
-                <DropdownOption
-                  v-if="sale.status === 'in_progress'"
-                  @click="openUpdateSaleSidebar(sale)"
-                >
-                  <PencilIcon class="w-5 h-5 mr-2" />
-                  <span>Actualizar</span>
-                </DropdownOption>
-                <DropdownOption
-                  v-if="sale.status === 'cancelled'"
-                  class="text-red-500 dark:text-red-500"
-                  @click="openDeleteSaleDialog(sale)"
-                >
-                  <TrashIcon class="w-5 h-5 mr-2" />
-                  <span>Eliminar</span>
-                </DropdownOption>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem>
+                    <EyeIcon class="w-5 h-5 mr-2" />
+                    <span>Ver</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    v-if="sale.status === 'in_progress'"
+                    @click="openUpdateSaleSidebar(sale)"
+                  >
+                    <PencilIcon class="w-5 h-5 mr-2" />
+                    <span>Actualizar</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    v-if="sale.status === 'cancelled'"
+                    class="text-red-500 dark:text-red-500"
+                    @click="openDeleteSaleDialog(sale)"
+                  >
+                    <TrashIcon class="w-5 h-5 mr-2" />
+                    <span>Eliminar</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
               </DropdownMenu>
             </td>
           </tr>
@@ -306,29 +312,28 @@ function getBadgeColorFromStatus(status: Sale["status"]) {
     </table>
   </div>
 
-  <Dialog
-    v-model="isDeleteSaleDialogOpen"
-    position="center"
-    title="Eliminar Cliente"
-  >
-    <div class="text-center">
-      <p class="text-sm text-gray-500 dark:text-gray-200">
-        Esta acción eliminará permanentemente esta venta. ¿Estás seguro de que
-        deseas proceder con la eliminación?
-      </p>
-    </div>
-    <template #footer>
-      <Button type="button" variant="error" @click="deleteSale">
-        Si, eliminar
-      </Button>
-      <Button
-        type="button"
-        variant="secondary"
-        @click="isDeleteSaleDialogOpen = false"
-      >
-        Cancelar
-      </Button>
-    </template>
+  <Dialog :open="isDeleteSaleDialogOpen" @update:open="closeDeleteSaleDialog">
+    <DialogContent>
+      <DialogHeader>
+        <DialogTitle> Eliminar Cliente </DialogTitle>
+        <DialogDescription>
+          Esta acción eliminará permanentemente esta venta. ¿Estás seguro de que
+          deseas proceder con la eliminación?
+        </DialogDescription>
+      </DialogHeader>
+      <DialogFooter>
+        <Button type="button" variant="destructive" @click="deleteSale">
+          Si, eliminar
+        </Button>
+        <Button
+          type="button"
+          variant="secondary"
+          @click="closeDeleteSaleDialog"
+        >
+          Cancelar
+        </Button>
+      </DialogFooter>
+    </DialogContent>
   </Dialog>
 
   <CreateSidebar

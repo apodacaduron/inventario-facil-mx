@@ -12,13 +12,21 @@ import {
   Button,
   Input,
   DropdownMenu,
-  DropdownOption,
   Dialog,
-} from "@flavorly/vanilla-components";
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  Avatar,
+  AvatarFallback,
+} from "@/components/ui";
 import { Badge } from "@/components";
 import {
   EllipsisVerticalIcon,
-  MagnifyingGlassIcon,
   MapIcon,
   PencilIcon,
   PlusIcon,
@@ -67,6 +75,10 @@ function openDeleteCustomerDialog(customer: Customer) {
   selectedCustomerFromActions.value = customer;
   isDeleteCustomerDialogOpen.value = true;
 }
+function closeDeleteCustomerDialog() {
+  selectedCustomerFromActions.value = null;
+  isDeleteCustomerDialogOpen.value = false;
+}
 
 function closeSidebar() {
   customerSidebarMode.value = null;
@@ -81,6 +93,8 @@ const customerHandlers = {
     await queryClient.invalidateQueries({ queryKey: ["customers"] });
   },
   async update(formValues: UpdateCustomer) {
+    const customerId = formValues.customer_id;
+    if (!customerId) throw new Error("Customer id required to perform update");
     await updateCustomerMutation.mutateAsync(formValues);
     customerSidebarMode.value = null;
     selectedCustomerFromActions.value = null;
@@ -89,10 +103,7 @@ const customerHandlers = {
 };
 
 async function handleSaveSidebar(formValues: CreateCustomer | UpdateCustomer) {
-  if (!customerSidebarMode.value)
-    throw new Error("customerSidebarMode must not be null");
   if (customerServicesTypeguards.isCreateCustomer(formValues)) {
-    console.log(2);
     await customerHandlers.create(formValues);
   } else {
     await customerHandlers.update(formValues);
@@ -129,7 +140,7 @@ function getBadgeColorFromStatus(status: Customer["trust_status"]) {
   <div class="flex items-center justify-between flex-col md:flex-row">
     <div class="mb-6">
       <h2
-        class="mb-2 text-3xl font-extrabold leading-none tracking-tight text-gray-900 md:text-4xl dark:text-white"
+        class="mb-2 text-3xl font-extrabold leading-none tracking-tight text-slate-900 md:text-4xl dark:text-white"
       >
         Clientes
       </h2>
@@ -138,12 +149,8 @@ function getBadgeColorFromStatus(status: Customer["trust_status"]) {
       </p>
     </div>
     <div>
-      <Button
-        @click="customerSidebarMode = 'create'"
-        label="Crear cliente"
-        variant="primary"
-      >
-        <template #icon><PlusIcon class="w-5 h-5 stroke-[2px]" /></template>
+      <Button @click="customerSidebarMode = 'create'" label="">
+        <PlusIcon class="w-5 h-5 stroke-[2px] mr-2" /> Crear cliente
       </Button>
     </div>
   </div>
@@ -153,24 +160,21 @@ function getBadgeColorFromStatus(status: Customer["trust_status"]) {
   >
     <label for="table-search" class="sr-only">Buscar</label>
     <div class="relative">
-      <Input v-model="customerSearch" placeholder="Buscar clientes">
-        <template #before>
-          <MagnifyingGlassIcon class="w-5 h-5 stroke-[2px]" /> </template
-      ></Input>
+      <Input v-model="customerSearch" placeholder="Buscar clientes" />
     </div>
   </div>
 
   <div class="relative overflow-x-auto shadow-md rounded-lg">
     <table
       ref="tableRef"
-      class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400"
+      class="w-full text-sm text-left rtl:text-right text-slate-500 dark:text-slate-400"
     >
       <thead
-        class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400"
+        class="text-xs text-slate-700 uppercase bg-slate-50 dark:bg-slate-700 dark:text-slate-400"
       >
         <tr>
-          <th scope="col" class="px-6 py-3">Nombre</th>
-          <th scope="col" class="px-6 py-3 text-center">Notas</th>
+          <th scope="col" class="px-6 py-3 min-w-48">Nombre</th>
+          <th scope="col" class="px-6 py-3 min-w-64 text-center">Notas</th>
           <th scope="col" class="px-6 py-3 text-center">Teléfono</th>
           <th scope="col" class="px-6 py-3 text-center">Dirección</th>
           <th scope="col" class="px-6 py-3 text-center">Mapa</th>
@@ -187,20 +191,20 @@ function getBadgeColorFromStatus(status: Customer["trust_status"]) {
           <tr
             v-for="customer in page.data"
             :key="customer.id"
-            class="bg-white border-b dark:bg-gray-900 dark:border-gray-800"
+            class="bg-white border-b dark:bg-slate-900 dark:border-slate-800"
           >
             <th
               scope="row"
-              class="flex items-center px-6 py-4 text-gray-900 whitespace-nowrap dark:text-white"
+              class="flex items-center px-6 py-4 text-slate-900 whitespace-nowrap dark:text-white w-max"
             >
-              <img
-                class="w-12 h-12 rounded-full"
-                src="/customer-placeholder.jpg"
-                alt="Rounded avatar"
-              />
+              <Avatar>
+                <AvatarFallback>{{
+                  `${customer?.name?.substring(0, 1).toLocaleUpperCase()}`
+                }}</AvatarFallback>
+              </Avatar>
               <div class="ps-3">
                 <div class="text-base font-semibold">{{ customer.name }}</div>
-                <div v-if="customer.email" class="font-normal text-gray-500">
+                <div v-if="customer.email" class="font-normal text-slate-500">
                   {{ customer.email }}
                 </div>
               </div>
@@ -240,25 +244,26 @@ function getBadgeColorFromStatus(status: Customer["trust_status"]) {
             </td>
             <td class="px-6 py-4">
               <DropdownMenu>
-                <template #trigger>
-                  <Button>
-                    <template #default>
-                      <EllipsisVerticalIcon class="w-5 h-5 stroke-[2px]" />
-                    </template>
+                <DropdownMenuTrigger as-child>
+                  <Button variant="outline">
+                    <EllipsisVerticalIcon class="w-5 h-5 stroke-[2px]" />
                   </Button>
-                </template>
-
-                <DropdownOption @click="openUpdateCustomerSidebar(customer)">
-                  <PencilIcon class="w-5 h-5 mr-2" />
-                  <span>Actualizar</span>
-                </DropdownOption>
-                <DropdownOption
-                  class="text-red-500 dark:text-red-500"
-                  @click="openDeleteCustomerDialog(customer)"
-                >
-                  <TrashIcon class="w-5 h-5 mr-2" />
-                  <span>Eliminar</span>
-                </DropdownOption>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem
+                    @click="openUpdateCustomerSidebar(customer)"
+                  >
+                    <PencilIcon class="w-5 h-5 mr-2" />
+                    <span>Actualizar</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    class="text-red-500 dark:text-red-500"
+                    @click="openDeleteCustomerDialog(customer)"
+                  >
+                    <TrashIcon class="w-5 h-5 mr-2" />
+                    <span>Eliminar</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
               </DropdownMenu>
             </td>
           </tr>
@@ -268,28 +273,30 @@ function getBadgeColorFromStatus(status: Customer["trust_status"]) {
   </div>
 
   <Dialog
-    v-model="isDeleteCustomerDialogOpen"
-    position="center"
-    title="Eliminar Cliente"
+    :open="isDeleteCustomerDialogOpen"
+    @update:open="closeDeleteCustomerDialog"
   >
-    <div class="text-center">
-      <p class="text-sm text-gray-500 dark:text-gray-200">
-        Esta acción eliminará permanentemente a este cliente. ¿Estás seguro de
-        que deseas proceder con la eliminación?
-      </p>
-    </div>
-    <template #footer>
-      <Button type="button" variant="error" @click="deleteCustomer">
-        Si, eliminar
-      </Button>
-      <Button
-        type="button"
-        variant="secondary"
-        @click="isDeleteCustomerDialogOpen = false"
-      >
-        Cancelar
-      </Button>
-    </template>
+    <DialogContent class="sm:max-w-[425px]">
+      <DialogHeader>
+        <DialogTitle>Eliminar Cliente</DialogTitle>
+        <DialogDescription>
+          Esta acción eliminará permanentemente a este cliente. ¿Estás seguro de
+          que deseas proceder con la eliminación?
+        </DialogDescription>
+      </DialogHeader>
+      <DialogFooter>
+        <Button type="button" variant="destructive" @click="deleteCustomer">
+          Si, eliminar
+        </Button>
+        <Button
+          type="button"
+          variant="secondary"
+          @click="closeDeleteCustomerDialog"
+        >
+          Cancelar
+        </Button>
+      </DialogFooter>
+    </DialogContent>
   </Dialog>
 
   <CreateOrEditSidebar

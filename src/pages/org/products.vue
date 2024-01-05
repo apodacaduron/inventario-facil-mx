@@ -14,14 +14,23 @@ import {
   Button,
   Input,
   DropdownMenu,
-  DropdownOption,
   Dialog,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
   Textarea,
-} from "@flavorly/vanilla-components";
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  Avatar,
+  AvatarImage,
+  AvatarFallback,
+} from "@/components/ui";
 import {
   EllipsisVerticalIcon,
   InboxArrowDownIcon,
-  MagnifyingGlassIcon,
   PencilIcon,
   PlusIcon,
   ShareIcon,
@@ -74,6 +83,10 @@ function openDeleteProductDialog(product: Product) {
   selectedProductFromActions.value = product;
   isDeleteProductDialogOpen.value = true;
 }
+function closeDeleteProductDialog() {
+  selectedProductFromActions.value = null;
+  isDeleteProductDialogOpen.value = false;
+}
 
 function closeSidebar() {
   productSidebarMode.value = null;
@@ -88,7 +101,7 @@ const productHandlers = {
     await queryClient.invalidateQueries({ queryKey: ["products"] });
   },
   async update(formValues: UpdateProduct) {
-    const productId = selectedProductFromActions.value?.id;
+    const productId = formValues.product_id;
     if (!productId) throw new Error("Product id required to perform update");
     await updateProductMutation.mutateAsync({
       ...formValues,
@@ -101,8 +114,6 @@ const productHandlers = {
 };
 
 async function handleSaveSidebar(formValues: CreateProduct | UpdateProduct) {
-  if (!productSidebarMode.value)
-    throw new Error("productSidebarMode must not be null");
   if (productServicesTypeguards.isCreateProduct(formValues)) {
     await productHandlers.create(formValues);
   } else {
@@ -171,7 +182,7 @@ function closeShareModal() {
   <div class="flex items-center justify-between flex-col md:flex-row">
     <div class="mb-6">
       <h2
-        class="mb-2 text-3xl font-extrabold leading-none tracking-tight text-gray-900 md:text-4xl dark:text-white"
+        class="mb-2 text-3xl font-extrabold leading-none tracking-tight text-slate-900 md:text-4xl dark:text-white"
       >
         Productos
       </h2>
@@ -180,15 +191,11 @@ function closeShareModal() {
       </p>
     </div>
     <div class="flex gap-2">
-      <Button
-        @click="productSidebarMode = 'create'"
-        label="Crear producto"
-        variant="primary"
-      >
-        <template #icon><PlusIcon class="w-5 h-5 stroke-[2px]" /></template>
+      <Button @click="productSidebarMode = 'create'">
+        <PlusIcon class="w-5 h-5 stroke-[2px] mr-2" /> Crear producto
       </Button>
-      <Button @click="shareExistingInventory" variant="default">
-        <template #default><ShareIcon class="w-5 h-5 stroke-[2px]" /></template>
+      <Button @click="shareExistingInventory" variant="outline">
+        <ShareIcon class="w-5 h-5 stroke-[2px]" />
       </Button>
     </div>
   </div>
@@ -198,20 +205,17 @@ function closeShareModal() {
   >
     <label for="table-search" class="sr-only">Buscar</label>
     <div class="relative">
-      <Input v-model="productSearch" placeholder="Buscar productos">
-        <template #before>
-          <MagnifyingGlassIcon class="w-5 h-5 stroke-[2px]" /> </template
-      ></Input>
+      <Input v-model="productSearch" placeholder="Buscar productos" />
     </div>
   </div>
 
   <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
     <table
       ref="tableRef"
-      class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400"
+      class="w-full text-sm text-left rtl:text-right text-slate-500 dark:text-slate-400"
     >
       <thead
-        class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400"
+        class="text-xs text-slate-700 uppercase bg-slate-50 dark:bg-slate-700 dark:text-slate-400"
       >
         <tr>
           <th scope="col" class="px-6 py-3">Nombre</th>
@@ -230,29 +234,23 @@ function closeShareModal() {
           <tr
             v-for="product in page.data"
             :key="product.id"
-            class="bg-white border-b dark:bg-gray-900 dark:border-gray-800"
+            class="bg-white border-b dark:bg-slate-900 dark:border-slate-800"
           >
             <th
               scope="row"
-              class="flex items-center px-6 py-4 text-gray-900 whitespace-nowrap dark:text-white"
+              class="flex items-center px-6 py-4 text-slate-900 whitespace-nowrap dark:text-white w-max"
             >
-              <img
-                v-if="product.image_url"
-                class="w-12 h-12 rounded-full"
-                :src="product.image_url"
-                alt="Rounded avatar"
-              />
-              <img
-                v-else
-                class="w-12 h-12 rounded-full"
-                src="/product-placeholder.png"
-                alt="Rounded avatar"
-              />
+              <Avatar>
+                <AvatarImage :src="product?.image_url ?? ''" />
+                <AvatarFallback>{{
+                  `${product?.name?.substring(0, 1).toLocaleUpperCase()}`
+                }}</AvatarFallback>
+              </Avatar>
               <div class="ps-3">
                 <div class="text-base font-semibold">{{ product.name }}</div>
                 <div
                   v-if="product.description"
-                  class="font-normal text-gray-500"
+                  class="font-normal text-slate-500"
                 >
                   {{ product.description }}
                 </div>
@@ -269,29 +267,28 @@ function closeShareModal() {
             </td>
             <td class="px-6 py-4">
               <DropdownMenu>
-                <template #trigger>
-                  <Button>
-                    <template #default>
-                      <EllipsisVerticalIcon class="w-5 h-5 stroke-[2px]" />
-                    </template>
+                <DropdownMenuTrigger as-child>
+                  <Button variant="outline">
+                    <EllipsisVerticalIcon class="w-5 h-5 stroke-[2px]" />
                   </Button>
-                </template>
-
-                <DropdownOption @click="openUpdateProductSidebar(product)">
-                  <PencilIcon class="w-5 h-5 mr-2" />
-                  <span>Actualizar</span>
-                </DropdownOption>
-                <DropdownOption @click="openAddStockDialog(product)">
-                  <InboxArrowDownIcon class="w-5 h-5 mr-2" />
-                  <span>Actualizar stock</span>
-                </DropdownOption>
-                <DropdownOption
-                  class="text-red-500 dark:text-red-500"
-                  @click="openDeleteProductDialog(product)"
-                >
-                  <TrashIcon class="w-5 h-5 mr-2" />
-                  <span>Eliminar</span>
-                </DropdownOption>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem @click="openUpdateProductSidebar(product)">
+                    <PencilIcon class="w-5 h-5 mr-2" />
+                    <span>Actualizar</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem @click="openAddStockDialog(product)">
+                    <InboxArrowDownIcon class="w-5 h-5 mr-2" />
+                    <span>Actualizar stock</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    class="text-red-500 dark:text-red-500"
+                    @click="openDeleteProductDialog(product)"
+                  >
+                    <TrashIcon class="w-5 h-5 mr-2" />
+                    <span>Eliminar</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
               </DropdownMenu>
             </td>
           </tr>
@@ -301,75 +298,79 @@ function closeShareModal() {
   </div>
 
   <Dialog
-    v-model="isDeleteProductDialogOpen"
-    position="center"
-    title="Eliminar Producto"
+    :open="isDeleteProductDialogOpen"
+    @update:open="closeDeleteProductDialog"
   >
-    <div class="text-center">
-      <p class="text-sm text-gray-500 dark:text-gray-200">
-        Esta acción eliminará permanentemente el producto. ¿Estás seguro de que
-        deseas proceder con la eliminación?
-      </p>
-    </div>
-    <template #footer>
-      <Button type="button" variant="error" @click="deleteProduct">
-        Si, eliminar
-      </Button>
-      <Button
-        type="button"
-        variant="secondary"
-        @click="isDeleteProductDialogOpen = false"
-      >
-        Cancelar
-      </Button>
-    </template>
+    <DialogContent class="sm:max-w-[425px]">
+      <DialogHeader>
+        <DialogTitle>Eliminar Producto</DialogTitle>
+        <DialogDescription>
+          Esta acción eliminará permanentemente el producto. ¿Estás seguro de
+          que deseas proceder con la eliminación?
+        </DialogDescription>
+      </DialogHeader>
+      <DialogFooter>
+        <Button type="button" variant="destructive" @click="deleteProduct">
+          Si, eliminar
+        </Button>
+        <Button
+          type="button"
+          variant="secondary"
+          @click="closeDeleteProductDialog"
+        >
+          Cancelar
+        </Button>
+      </DialogFooter>
+    </DialogContent>
   </Dialog>
 
-  <Dialog v-model="isShareProductsDialogOpen">
-    <div>
-      <div
-        class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100"
-      >
-        <ShareIcon
-          class="h-6 w-6 stroke-[2px] text-green-600"
-          aria-hidden="true"
-        />
-      </div>
-      <div class="mt-3 text-center sm:mt-5">
-        <h3 class="text-lg font-medium leading-6 text-gray-900 dark:text-white">
-          🎉 Lista de Productos disponibles
-        </h3>
-        <div class="mt-2">
-          <p class="text-sm text-gray-500 dark:text-gray-400">
-            A continuación se muestra una lista de productos disponibles
-            actualmente en stock. Puedes copiar y compartir esta lista según sea
-            necesario.
-          </p>
+  <Dialog
+    :open="isShareProductsDialogOpen"
+    @update:open="(isOpen) => (isShareProductsDialogOpen = isOpen)"
+  >
+    <DialogContent class="sm:max-w-[425px]">
+      <div>
+        <div
+          class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100"
+        >
+          <ShareIcon
+            class="h-6 w-6 stroke-[2px] text-green-600"
+            aria-hidden="true"
+          />
         </div>
+        <div class="mt-3 text-center sm:mt-5">
+          <h3
+            class="text-lg font-medium leading-6 text-slate-900 dark:text-white"
+          >
+            🎉 Lista de Productos disponibles
+          </h3>
+          <div class="mt-2">
+            <p class="text-sm text-slate-500 dark:text-slate-400">
+              A continuación se muestra una lista de productos disponibles
+              actualmente en stock. Puedes copiar y compartir esta lista según
+              sea necesario.
+            </p>
+          </div>
 
-        <div class="my-2">
-          <Textarea autosize v-model="shareText" />
+          <div class="my-2">
+            <Textarea autosize v-model="shareText" />
+          </div>
         </div>
       </div>
-    </div>
-    <div class="mt-5 sm:mt-6 flex flex-col gap-3">
-      <Button
-        type="button"
-        class="w-full"
-        variant="primary"
-        @click="copyTextShareModal"
-      >
-        Copy
-      </Button>
-      <Button
-        type="button"
-        class="w-full"
-        variant="default"
-        @click="closeShareModal"
-      >
-        Close
-      </Button>
-    </div>
+      <div class="mt-5 sm:mt-6 flex flex-col gap-3">
+        <Button type="button" class="w-full" @click="copyTextShareModal">
+          Copy
+        </Button>
+        <Button
+          type="button"
+          class="w-full"
+          variant="outline"
+          @click="closeShareModal"
+        >
+          Close
+        </Button>
+      </div>
+    </DialogContent>
   </Dialog>
 
   <CreateOrEditSidebar
@@ -387,5 +388,6 @@ function closeShareModal() {
     :product="selectedProductFromActions"
     :open="isAddStockDialogOpen"
     @close="closeAddStockDialog"
+    @save="handleSaveSidebar"
   />
 </template>

@@ -1,11 +1,19 @@
 <script setup lang="ts">
-import { Dialog, Button } from "@flavorly/vanilla-components";
+import {
+  Dialog,
+  Button,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui";
 import {
   InboxArrowDownIcon,
   MinusIcon,
   PlusIcon,
 } from "@heroicons/vue/24/outline";
-import { Product } from "../composables";
+import { Product, UpdateProduct } from "../composables";
 import { ref, watch } from "vue";
 
 type AddStockDialogProps = {
@@ -15,12 +23,33 @@ type AddStockDialogProps = {
 };
 
 const props = defineProps<AddStockDialogProps>();
-const emits = defineEmits(["close"]);
+const emit = defineEmits<{
+  (e: "close"): void;
+  (e: "save", formValues: UpdateProduct): void;
+}>();
 
 const stockAmount = ref(0);
 
 function closeDialog() {
-  emits("close");
+  emit("close");
+}
+
+function addOneToStock() {
+  stockAmount.value += 1;
+}
+function substractOneFromStock() {
+  if (stockAmount.value <= 0) return;
+  stockAmount.value -= 1;
+}
+
+function saveStock() {
+  if (!props.product?.id)
+    throw new Error("Product id is required to add to stock");
+  emit("save", {
+    current_stock: stockAmount.value,
+    product_id: props.product.id,
+  });
+  closeDialog();
 }
 
 watch(
@@ -33,39 +62,44 @@ watch(
 </script>
 
 <template>
-  <Dialog :modelValue="open" @update:modalValue="closeDialog">
-    <div>
-      <div
-        class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100"
-      >
-        <InboxArrowDownIcon
-          class="h-6 w-6 stroke-[2px] text-green-600"
-          aria-hidden="true"
-        />
-      </div>
-      <div class="mt-3 text-center sm:mt-5">
-        <h3 class="text-lg font-medium leading-6 text-gray-900 dark:text-white">
-          🎉 Actualiza tu stock
-        </h3>
-        <div class="mt-2">
-          <p class="text-sm text-gray-500 dark:text-gray-400">
-            Aumenta o reduce la cantidad de producto disponible
-          </p>
+  <Dialog :open="open" @update:open="closeDialog">
+    <DialogContent>
+      <DialogHeader>
+        <div
+          class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100"
+        >
+          <InboxArrowDownIcon
+            class="h-6 w-6 stroke-[2px] text-green-600"
+            aria-hidden="true"
+          />
         </div>
-
-        <div class="mb-2 mt-6">
+        <DialogTitle class="text-center"> 🎉 Actualiza tu stock </DialogTitle>
+        <DialogDescription class="text-center">
+          Aumenta o reduce la cantidad de producto disponible
+        </DialogDescription>
+      </DialogHeader>
+      <div class="text-center mb-6">
+        <div class="mb-2 mt-5">
           <div class="font-semibold text-7xl">{{ stockAmount }}</div>
         </div>
 
         <div class="flex justify-center gap-4">
-          <Button><MinusIcon class="w-6 h-6 stroke-[2px]" /></Button>
-          <Button><PlusIcon class="w-6 h-6 stroke-[2px]" /></Button>
+          <Button @click="substractOneFromStock"
+            ><MinusIcon class="w-6 h-6 stroke-[2px]"
+          /></Button>
+          <Button @click="addOneToStock"
+            ><PlusIcon class="w-6 h-6 stroke-[2px]"
+          /></Button>
         </div>
       </div>
-    </div>
-    <div class="mt-10 sm:mt-10 flex flex-col gap-3">
-      <Button type="button" class="w-full" variant="primary"> Guardar </Button>
-      <Button type="button" class="w-full" variant="default"> Cancelar </Button>
-    </div>
+      <DialogFooter>
+        <Button @click="saveStock" type="button" class="w-full">
+          Guardar
+        </Button>
+        <Button @click="closeDialog" type="button" variant="outline">
+          Cancelar
+        </Button>
+      </DialogFooter>
+    </DialogContent>
   </Dialog>
 </template>

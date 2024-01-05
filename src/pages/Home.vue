@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useAuthStore, useOrganizationStore } from "@/stores";
-import { Button } from "@flavorly/vanilla-components";
+import { Button } from "@/components/ui";
 import { MoonIcon, SunIcon } from "@heroicons/vue/24/outline";
 import { useDark, useToggle } from "@vueuse/core";
 
@@ -23,7 +23,7 @@ const toggleDark = useToggle(isDark);
           >
         </a>
         <div class="gap-4 flex">
-          <Button @click="toggleDark()">
+          <Button @click="toggleDark()" variant="outline">
             <MoonIcon class="w-4 h-4 stroke-[2px]" v-if="isDark" />
             <SunIcon class="w-4 h-4 stroke-[2px]" v-else />
           </Button>
@@ -42,29 +42,28 @@ const toggleDark = useToggle(isDark);
               <Button
                 :loading="!organizationStore.hasOrganizations"
                 :disabled="!organizationStore.hasOrganizations"
-                label="Dashboard"
-                variant="primary"
-              />
+                >Dashboard</Button
+              >
             </router-link>
           </div>
           <div v-else class="hidden gap-4 md:flex">
             <router-link to="/auth/sign-in">
-              <Button label="Iniciar sesión" variant="default" />
+              <Button variant="outline">Iniciar sesión</Button>
             </router-link>
             <router-link to="/auth/sign-up">
-              <Button label="Regístrate" variant="primary" />
+              <Button>Regístrate</Button>
             </router-link>
           </div>
         </div>
       </nav>
       <div class="text-center max-w-5xl mx-auto mt-[10vh]">
         <h1
-          class="mb-4 text-4xl font-extrabold leading-none tracking-tight text-gray-900 md:text-5xl lg:text-6xl dark:text-white"
+          class="mb-4 text-4xl font-extrabold leading-none tracking-tight text-slate-900 md:text-5xl lg:text-6xl dark:text-white"
         >
           Simplifica tu Gestión de Inventario
         </h1>
         <p
-          class="mb-6 text-lg font-normal text-gray-500 lg:text-xl sm:px-16 xl:px-48 dark:text-gray-400"
+          class="mb-6 text-lg font-normal text-slate-500 lg:text-xl sm:px-16 xl:px-48 dark:text-slate-400"
         >
           La solución perfecta para llevar el control de tu inventario de manera
           rápida y sencilla, ¡sin complicaciones ni papeleo!
@@ -80,7 +79,6 @@ const toggleDark = useToggle(isDark);
           }"
         >
           <Button
-            variant="primary"
             class="px-8 py-3 text-base"
             :loading="!organizationStore.hasOrganizations"
             :disabled="!organizationStore.hasOrganizations"
@@ -104,7 +102,7 @@ const toggleDark = useToggle(isDark);
           </Button>
         </router-link>
         <router-link v-else to="/auth/sign-up">
-          <Button variant="primary" class="px-8 py-3 text-base">
+          <Button class="px-8 py-3 text-base">
             Regístrate
             <svg
               class="w-3.5 h-3.5 ms-2 rtl:rotate-180"

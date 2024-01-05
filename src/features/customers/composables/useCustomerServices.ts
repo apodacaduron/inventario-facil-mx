@@ -13,7 +13,7 @@ export type CreateCustomer = {
 };
 export type UpdateCustomer = {
   customer_id: Customer["id"];
-} & CreateCustomer;
+} & Partial<CreateCustomer>;
 export type DeleteCustomer = Customer["id"];
 
 export type CustomerList = Awaited<

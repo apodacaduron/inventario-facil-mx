@@ -1,16 +1,29 @@
 <script setup lang="ts">
 import {
-  Slideover,
+  Sheet,
   Button,
-  InputGroup,
-  RichSelect,
-  RichSelectOptionIndicator,
-} from "@flavorly/vanilla-components";
-import { useForm } from "@vorms/core";
-import { zodResolver } from "@vorms/resolvers/zod";
+  Select,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+  SheetFooter,
+  FormControl,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  FormMessage,
+  FormItem,
+  FormField,
+  FormLabel,
+} from "@/components/ui";
 import { watch } from "vue";
 import { z } from "zod";
 import { SALE_STATUS, Sale, UpdateSale } from "../composables";
+import { toTypedSchema } from "@vee-validate/zod";
+import { useForm } from "vee-validate";
 
 type UpdateSidebarProps = {
   open: boolean;
@@ -61,20 +74,22 @@ const initialForm: UpdateSale = {
   sale_id: props.sale?.id ?? "",
   status: "in_progress",
 };
+
+const formSchema = toTypedSchema(
+  z.object({
+    sale_id: z.string().uuid(),
+    status: z.enum(SALE_STATUS),
+  })
+);
+
 const formInstance = useForm<UpdateSale>({
   initialValues: initialForm,
-  validate: zodResolver(
-    z.object({
-      sale_id: z.string().uuid(),
-      status: z.enum(SALE_STATUS),
-    })
-  ),
-  async onSubmit(formValues) {
-    emit("save", formValues);
-  },
+  validationSchema: formSchema,
 });
 
-const { value: status, attrs: statusAttrs } = formInstance.register("status");
+const onSubmit = formInstance.handleSubmit(async (formValues) => {
+  emit("save", formValues);
+});
 
 function closeSidebar(isOpen: boolean) {
   if (isOpen) return;
@@ -99,68 +114,54 @@ watch(
 </script>
 
 <template>
-  <Slideover
-    :modelValue="open"
-    @update:modelValue="closeSidebar"
-    position="right"
-    :title="locale.update.title"
-    :subtitle="locale.update.subtitle"
-  >
-    <div class="space-y-6 pb-16">
-      <form @submit="formInstance.handleSubmit">
-        <InputGroup label="Status de venta" name="status" class="!px-0">
-          <RichSelect
-            v-model="status"
-            :options="statusOptions"
-            placeholder="Seleccione status de venta"
-            clearable
-            v-bind="statusAttrs"
-          >
-            <template
-              #label="{ option: { raw: order }, className, isSelected }"
-            >
-              <RichSelectOptionIndicator
-                :name="order.text"
-                :status="order.status"
-                :description="order.description"
-                :selected="isSelected"
-                :disabled="order.disabled"
-                :parent-classes="className"
-              />
-            </template>
-            <template
-              #option="{ option: { raw: order }, className, isSelected }"
-            >
-              <RichSelectOptionIndicator
-                class="px-3 py-2"
-                :name="order?.text"
-                :status="order?.status"
-                :description="order?.description"
-                :selected="isSelected"
-                :disabled="order?.disabled"
-                :parent-classes="className"
-              />
-            </template>
-          </RichSelect>
-        </InputGroup>
+  <Sheet :open="open" @update:open="closeSidebar">
+    <SheetContent side="right">
+      <SheetHeader>
+        <SheetTitle>
+          {{ locale.update.title }}
+        </SheetTitle>
+        <SheetDescription>
+          {{ locale.update.subtitle }}
+        </SheetDescription>
+      </SheetHeader>
+      <form @submit="onSubmit" class="flex flex-col gap-6 mt-6 mb-6">
+        <FormField v-slot="{ componentField }" name="status">
+          <FormItem v-auto-animate>
+            <FormLabel>Status de venta</FormLabel>
+            <Select v-bind="componentField">
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccione status de venta" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem
+                    v-for="(status, index) in statusOptions"
+                    :value="status.value"
+                    :key="index"
+                    >{{ status.text }}</SelectItem
+                  >
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+            <FormMessage />
+          </FormItem>
+        </FormField>
 
-        <InputGroup class="!px-0">
-          <div class="flex flex-col gap-4">
-            <Button
-              :loading="isLoading"
-              :disabled="isLoading"
-              label="Guardar"
-              variant="primary"
-              type="submit"
-            />
-            <Button
-              :disabled="isLoading"
-              label="Cancelar"
-              @click="forceCloseSidebar"
-            />
-          </div>
-        </InputGroup>
+        <SheetFooter>
+          <Button :disabled="isLoading" type="submit" class="w-full"
+            >Guardar</Button
+          >
+          <Button
+            :disabled="isLoading"
+            @click="forceCloseSidebar"
+            variant="outline"
+            type="button"
+            >Cancelar</Button
+          >
+        </SheetFooter>
       </form>
-    </div>
-  </Slideover>
+    </SheetContent>
+  </Sheet>
 </template>
