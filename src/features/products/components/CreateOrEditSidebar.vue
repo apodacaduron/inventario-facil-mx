@@ -68,8 +68,8 @@ const currencyFormatter = useCurrencyFormatter();
 const formSchema = toTypedSchema(
   z.object({
     name: z.string().min(1, "Nombre de producto es requerido"),
-    description: z.string(),
-    image_url: z.string(),
+    description: z.string().optional(),
+    image_url: z.string().optional(),
     current_stock: z
       .number({ invalid_type_error: "Ingresa un número válido" })
       .nonnegative()
@@ -94,6 +94,10 @@ const formInstance = useForm<CreateProduct | UpdateProduct>({
 });
 
 const onSubmit = formInstance.handleSubmit(async (formValues) => {
+  if (typeof formValues.product_id === "undefined") {
+    delete formValues.product_id;
+  }
+
   const nextUnitPrice = currencyFormatter.toCents(formValues?.unit_price ?? 0);
   const nextRetailPrice = currencyFormatter.toCents(
     formValues?.retail_price ?? 0
@@ -104,6 +108,7 @@ const onSubmit = formInstance.handleSubmit(async (formValues) => {
     unit_price: nextUnitPrice,
     retail_price: nextRetailPrice,
   };
+
   emit("save", modifiedFormValues);
 });
 
