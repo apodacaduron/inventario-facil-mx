@@ -210,7 +210,7 @@ watch(
           <FormItem v-auto-animate>
             <FormLabel>Precio unitario</FormLabel>
             <FormControl>
-              <Textarea
+              <Input
                 type="number"
                 placeholder="Ingresa el costo unitario de producto"
                 v-bind="componentField"
@@ -223,7 +223,7 @@ watch(
           <FormItem v-auto-animate>
             <FormLabel>Precio de venta</FormLabel>
             <FormControl>
-              <Textarea
+              <Input
                 type="number"
                 placeholder="Ingresa el precio de venta del producto"
                 v-bind="componentField"
