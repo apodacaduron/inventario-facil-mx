@@ -3,6 +3,7 @@ import { useOrganizationStore } from "@/stores";
 import { useRoute } from "vue-router";
 
 export type CreateProduct = {
+  product_id?: Product["id"];
   name: Product["name"];
   description: Product["description"];
   image_url: Product["image_url"];
@@ -25,8 +26,7 @@ export const productServicesTypeguards = {
     maybeProduct: CreateProduct | UpdateProduct
   ): maybeProduct is CreateProduct {
     return (
-      !("product_id" in (maybeProduct as CreateProduct)) &&
-      !("stock_id" in (maybeProduct as CreateProduct)) &&
+      !("product_id" in maybeProduct && maybeProduct.product_id) &&
       "name" in maybeProduct &&
       "description" in maybeProduct &&
       "image_url" in maybeProduct &&
@@ -104,11 +104,12 @@ export function useProductServices() {
     );
     if (!organization?.org_id)
       throw new Error("Organization is required to create a product");
+    const { product_id, ...otherFormValues } = formValues;
     await supabase
       .from("i_products")
       .insert([
         {
-          ...formValues,
+          ...otherFormValues,
           org_id: organization.org_id,
         },
       ])
@@ -122,7 +123,7 @@ export function useProductServices() {
     );
     if (!organization?.org_id)
       throw new Error("Organization is required to update a product");
-    const { product_id, ...otherFormValues } = formValues
+    const { product_id, ...otherFormValues } = formValues;
     await supabase
       .from("i_products")
       .update({

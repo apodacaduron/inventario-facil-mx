@@ -3,6 +3,7 @@ import { useOrganizationStore } from "@/stores";
 import { useRoute } from "vue-router";
 
 export type CreateSale = {
+  sale_id?: Sale["id"];
   sale_date: Sale["sale_date"];
   status: NonNullable<Sale["status"]>;
   customer_id: NonNullable<Sale["customer_id"]>;
@@ -14,13 +15,13 @@ export type CreateSale = {
     unit_price: SaleProduct["unit_price"];
     qty: SaleProduct["qty"];
     // This 2 field are not stored in DB
-    name: NonNullable<SaleProduct["i_products"]>['name'];
-    image_url: NonNullable<SaleProduct["i_products"]>['image_url'];
+    name: NonNullable<SaleProduct["i_products"]>["name"];
+    image_url: NonNullable<SaleProduct["i_products"]>["image_url"];
   }[];
 };
 export type UpdateSale = {
   sale_id: Sale["id"];
-} & Pick<CreateSale, "status">;
+} & CreateSale;
 export type DeleteSale = Sale["id"];
 
 export type SaleList = Awaited<
@@ -33,7 +34,7 @@ export type SaleProduct = Sale["i_sale_products"][number];
 export const saleServicesTypeguards = {
   isCreateSale(maybeSale: CreateSale | UpdateSale): maybeSale is CreateSale {
     return (
-      !("sale_id" in (maybeSale as CreateSale)) &&
+      !("sale_id" in maybeSale && maybeSale.sale_id) &&
       "sale_date" in maybeSale &&
       "status" in maybeSale &&
       "customer_id" in maybeSale
@@ -78,15 +79,13 @@ export function useSaleServices() {
     );
     if (!organization?.org_id)
       throw new Error("Organization is required to create a sale");
+
+    const { products, sale_id, ...otherFormValues } = formValues;
     const createdSaleResponse = await supabase
       .from("i_sales")
       .insert([
         {
-          status: "in_progress",
-          sale_date: formValues.sale_date,
-          customer_id: formValues.customer_id,
-          shipping_cost: formValues.shipping_cost,
-          notes: formValues.notes,
+          ...otherFormValues,
           org_id: organization.org_id,
         },
       ])
@@ -130,17 +129,30 @@ export function useSaleServices() {
     );
     if (!organization?.org_id)
       throw new Error("Organization is required to update a sale");
+    const { sale_id, products, ...otherFormValues } = formValues;
+
     const saleResponse = await supabase
       .from("i_sales")
-      .select()
-      .eq("id", formValues.sale_id)
-      .single();
-    await supabase
-      .from("i_sales")
       .update({
-        status: formValues.status,
+        ...otherFormValues,
       })
-      .eq("id", formValues.sale_id);
+      .eq("id", formValues.sale_id)
+      .select()
+      .single();
+
+    const formattedSaleProducts = formValues.products.map((product) => ({
+      sale_id: formValues.sale_id,
+      product_id: product.product_id,
+      qty: product.qty,
+      price: product.price,
+      unit_price: product.unit_price,
+      org_id: organization.org_id,
+    }));
+    await supabase
+      .from("i_sale_products")
+      .delete()
+      .match({ sale_id: formValues.sale_id });
+    await supabase.from("i_sale_products").insert(formattedSaleProducts);
 
     if (saleResponse.data?.status === formValues.status) return;
     const saleProductsResponse = await supabase

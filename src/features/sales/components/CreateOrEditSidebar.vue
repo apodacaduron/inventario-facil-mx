@@ -27,10 +27,16 @@ import {
   TableHead,
   TableBody,
   TableCell,
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectItem,
+  SelectContent,
+  SelectGroup,
 } from "@/components/ui";
 import { computed, ref, watch } from "vue";
 import { z } from "zod";
-import { CreateSale, SALE_STATUS } from "../composables";
+import { CreateSale, SALE_STATUS, Sale, UpdateSale } from "../composables";
 import { refDebounced, useInfiniteScroll } from "@vueuse/core";
 import { Customer, useCustomersQuery } from "@/features/customers";
 import { PlusCircleIcon, XMarkIcon } from "@heroicons/vue/24/outline";
@@ -46,10 +52,10 @@ import { useOrganizationStore } from "@/stores";
 type CreateSidebarProps = {
   open: boolean;
   isLoading?: boolean;
+  sale?: Sale | null;
 };
 
 const props = withDefaults(defineProps<CreateSidebarProps>(), {
-  mode: "create",
   open: false,
   isLoading: false,
 });
@@ -63,6 +69,10 @@ const LOCALE = {
     TITLE: "Crear venta",
     SUBTITLE: "Crea rápidamente una nueva venta para tu inventario.",
   },
+  UPDATE: {
+    TITLE: "Actualizar venta",
+    SUBTITLE: "Actualiza rápidamente una venta de tu inventario.",
+  },
   SELECT_PRODUCTS: {
     TITLE: "Selecciona productos",
     SUBTITLE: "Selecciona facilmente productos para agregar a tu venta",
@@ -72,6 +82,28 @@ const LOCALE = {
     SUBTITLE: "Selecciona facilmente un cliente para tu venta",
   },
 };
+const statusOptions = [
+  {
+    value: "in_progress",
+    text: "En progreso",
+    description:
+      "La venta se está procesando activamente, se están seleccionando o empaquetando los artículos.",
+    status: "blue",
+  },
+  {
+    value: "completed",
+    text: "Completada",
+    description: "La venta se ha procesado y completado con éxito.",
+    status: "green",
+  },
+  {
+    value: "cancelled",
+    text: "Cancelada",
+    description:
+      "La venta fue anulada antes de completarse, posiblemente a solicitud del cliente u otras razones.",
+    status: "red",
+  },
+];
 const initialForm: CreateSale = {
   status: "in_progress",
   sale_date: new Date().toISOString(),
@@ -121,8 +153,11 @@ useInfiniteScroll(
   { distance: 10, canLoadMore: () => productsQuery.hasNextPage.value }
 );
 
+const sidebarMode = computed(() => (props.sale ? "UPDATE" : "CREATE"));
+
 const formSchema = toTypedSchema(
   z.object({
+    sale_id: z.string().uuid().optional(),
     status: z.enum(SALE_STATUS),
     sale_date: z.string().datetime(),
     customer_id: z.string().uuid("Por favor seleccione a un cliente"),
@@ -149,7 +184,7 @@ const formSchema = toTypedSchema(
   })
 );
 
-const formInstance = useForm<CreateSale>({
+const formInstance = useForm<CreateSale | UpdateSale>({
   initialValues: initialForm,
   validationSchema: formSchema,
 });
@@ -167,7 +202,6 @@ const onSubmit = formInstance.handleSubmit(async (formValues) => {
     shipping_cost: nextShippingCost ?? 0,
     products: modifiedProducts,
   };
-
   emit("save", modifiedFormValues);
 });
 
@@ -230,6 +264,32 @@ watch(
     formInstance.resetForm({
       values: initialForm,
     });
+
+    if (!props.sale) return;
+    formInstance.resetForm({
+      values: {
+        sale_id: props.sale?.id ?? "",
+        notes: props.sale?.notes ?? "",
+        products:
+          props.sale?.i_sale_products.map((saleProduct) => ({
+            sale_detail_id: saleProduct.id,
+            image_url: saleProduct.i_products?.image_url ?? "",
+            product_id: saleProduct.i_products?.id ?? "",
+            name: saleProduct.i_products?.name ?? "",
+            price: currencyFormatter.parseRaw(
+              saleProduct.i_products?.retail_price ?? 0
+            ),
+            unit_price: saleProduct.i_products?.unit_price ?? 0,
+            qty: saleProduct.qty,
+          })) ?? [],
+        customer_id: props.sale?.customer_id ?? "",
+        sale_date: props.sale?.sale_date
+          ? new Date(props.sale.sale_date).toISOString()
+          : new Date().toISOString(),
+        shipping_cost: props.sale?.shipping_cost ?? 0,
+        status: props.sale?.status ?? "in_progress",
+      },
+    });
   }
 );
 </script>
@@ -240,14 +300,38 @@ watch(
       <div v-show="saleSidebarMode === 'sales'">
         <SheetHeader>
           <SheetTitle>
-            {{ LOCALE.CREATE.TITLE }}
+            {{ LOCALE[sidebarMode].TITLE }}
           </SheetTitle>
           <SheetDescription>
-            {{ LOCALE.CREATE.SUBTITLE }}
+            {{ LOCALE[sidebarMode].SUBTITLE }}
           </SheetDescription>
         </SheetHeader>
         <form @submit="onSubmit" class="flex flex-col gap-6 mt-6 mb-6">
-          <FormField name="customer_id">
+          <FormField v-if="sale?.id" v-slot="{ componentField }" name="status">
+            <FormItem v-auto-animate>
+              <FormLabel>Status de venta</FormLabel>
+              <Select v-bind="componentField">
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccione status de venta" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectItem
+                      v-for="(status, index) in statusOptions"
+                      :value="status.value"
+                      :key="index"
+                    >
+                      {{ status.text }}
+                    </SelectItem>
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          </FormField>
+          <FormField v-if="!sale?.id" name="customer_id">
             <FormItem class="flex flex-col">
               <FormLabel>Cliente</FormLabel>
               <Button
@@ -314,10 +398,10 @@ watch(
                 <TableBody>
                   <TableRow
                     v-for="(productField, idx) in formInstance.values.products"
-                    :key="productField.product_id ?? idx"
+                    :key="productField?.product_id ?? idx"
                   >
                     <TableCell class="font-medium min-w-[80px]">
-                      {{ productField.name }}
+                      {{ productField?.name }}
                     </TableCell>
                     <TableCell class="text-center flex justify-center">
                       <FormField

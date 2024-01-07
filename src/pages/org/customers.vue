@@ -301,7 +301,6 @@ function getBadgeColorFromStatus(status: Customer["trust_status"]) {
 
   <CreateOrEditSidebar
     :open="Boolean(customerSidebarMode)"
-    :mode="customerSidebarMode ?? undefined"
     :customer="selectedCustomerFromActions"
     :isLoading="
       updateCustomerMutation.isPending.value ||

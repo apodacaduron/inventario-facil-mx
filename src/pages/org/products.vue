@@ -375,7 +375,6 @@ function closeShareModal() {
 
   <CreateOrEditSidebar
     :open="Boolean(productSidebarMode)"
-    :mode="productSidebarMode ?? undefined"
     :product="selectedProductFromActions"
     :isLoading="
       updateProductMutation.isPending.value ||

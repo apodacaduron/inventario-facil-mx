@@ -3,6 +3,7 @@ import { useOrganizationStore } from "@/stores";
 import { useRoute } from "vue-router";
 
 export type CreateCustomer = {
+  customer_id?: Customer["id"];
   name: Customer["name"];
   phone: Customer["phone"];
   email: Customer["email"];
@@ -13,7 +14,7 @@ export type CreateCustomer = {
 };
 export type UpdateCustomer = {
   customer_id: Customer["id"];
-} & Partial<CreateCustomer>;
+} & CreateCustomer;
 export type DeleteCustomer = Customer["id"];
 
 export type CustomerList = Awaited<
@@ -27,7 +28,7 @@ export const customerServicesTypeguards = {
     maybeCustomer: CreateCustomer | UpdateCustomer
   ): maybeCustomer is CreateCustomer {
     return (
-      !("customer_id" in (maybeCustomer as CreateCustomer)) &&
+      !("customer_id" in maybeCustomer && maybeCustomer.customer_id) &&
       "name" in maybeCustomer &&
       "phone" in maybeCustomer &&
       "email" in maybeCustomer
@@ -80,11 +81,12 @@ export function useCustomerServices() {
     );
     if (!organization?.org_id)
       throw new Error("Organization is required to create a customer");
+    const { customer_id, ...otherFormValues } = formValues;
     await supabase
       .from("i_customers")
       .insert([
         {
-          ...formValues,
+          ...otherFormValues,
           org_id: organization.org_id,
         },
       ])

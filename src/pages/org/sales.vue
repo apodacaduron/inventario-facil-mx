@@ -1,12 +1,11 @@
 <script setup lang="ts">
 import {
-  CreateSidebar,
+  CreateOrEditSidebar,
   CreateSale,
   Sale,
   UpdateSale,
   saleServicesTypeguards,
   useSaleServices,
-  UpdateSidebar,
 } from "@/features/sales";
 import { computed, ref } from "vue";
 import {
@@ -336,15 +335,9 @@ function getBadgeColorFromStatus(status: Sale["status"]) {
     </DialogContent>
   </Dialog>
 
-  <CreateSidebar
-    :open="saleSidebarMode === 'create'"
+  <CreateOrEditSidebar
+    :open="Boolean(saleSidebarMode)"
     :isLoading="createSaleMutation.isPending.value"
-    @close="closeSidebar"
-    @save="handleSaveSidebar"
-  />
-  <UpdateSidebar
-    :open="saleSidebarMode === 'update'"
-    :isLoading="updateSaleMutation.isPending.value"
     :sale="selectedSaleFromActions"
     @close="closeSidebar"
     @save="handleSaveSidebar"
