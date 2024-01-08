@@ -31,7 +31,7 @@ import {
   PlusIcon,
   TrashIcon,
 } from "@heroicons/vue/24/outline";
-import { useInfiniteScroll } from "@vueuse/core";
+import { refDebounced, useInfiniteScroll } from "@vueuse/core";
 import { useOrganizationStore } from "@/stores";
 import { useSalesQuery } from "@/features/sales/composables/useSaleQueries";
 import { useMutation, useQueryClient } from "@tanstack/vue-query";
@@ -41,6 +41,7 @@ import { Badge } from "@/components";
 const WHATSAPP_URL = import.meta.env.VITE_WHATSAPP_URL;
 const tableRef = ref<HTMLElement | null>(null);
 const saleSearch = ref("");
+const saleSearchDebounced = refDebounced(saleSearch, 400);
 const saleSidebarMode = ref<"create" | "update" | null>(null);
 const isDeleteSaleDialogOpen = ref(false);
 const selectedSaleFromActions = ref<Sale | null>(null);
@@ -52,6 +53,7 @@ const currencyFormatter = useCurrencyFormatter();
 const salesQuery = useSalesQuery({
   options: {
     enabled: computed(() => organizationStore.hasOrganizations),
+    search: saleSearchDebounced,
   },
 });
 const deleteSaleMutation = useMutation({ mutationFn: saleServices.deleteSale });

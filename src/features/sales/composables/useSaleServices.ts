@@ -52,7 +52,7 @@ export function useSaleServices() {
   const route = useRoute();
   const orgId = route.params.orgId;
 
-  async function loadList(options?: { offset?: number }) {
+  async function loadList(options?: { offset?: number; search?: string }) {
     const offset = options?.offset ?? 0;
     const from = offset * PAGINATION_LIMIT;
     const to = from + PAGINATION_LIMIT - 1;
@@ -63,12 +63,18 @@ export function useSaleServices() {
     if (!organization?.org_id)
       throw new Error("Organization is required to get sale list");
 
-    const saleSearch = supabase
+    let saleSearch = supabase
       .from("i_sales")
-      .select("*, i_sale_products(*, i_products(*)), i_customers(*)")
+      .select("*, i_sale_products(*, i_products(*)), i_customers!inner(*)")
       .eq("org_id", organization.org_id)
       .range(from, to)
       .order("created_at", { ascending: false });
+
+    if (options?.search) {
+      saleSearch = saleSearch.textSearch("i_customers.name", options.search, {
+        type: "plain",
+      });
+    }
 
     return await saleSearch;
   }

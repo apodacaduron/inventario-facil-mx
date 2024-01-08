@@ -1,19 +1,21 @@
 import { useInfiniteQuery } from "@tanstack/vue-query";
 import { useSaleServices } from "./useSaleServices";
-import { MaybeRefOrGetter } from "vue";
+import { MaybeRefOrGetter, toValue } from "vue";
 
 export function useSalesQuery(context: {
   options: {
     enabled: MaybeRefOrGetter<boolean | undefined>;
+    search: MaybeRefOrGetter<string | undefined>;
   };
 }) {
   const saleServices = useSaleServices();
 
   return useInfiniteQuery({
-    queryKey: ["sales"],
+    queryKey: ["sales", context.options.search],
     queryFn({ pageParam }) {
       return saleServices.loadList({
         offset: pageParam,
+        search: toValue(context.options.search),
       });
     },
     initialPageParam: 0,
