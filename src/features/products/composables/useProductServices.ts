@@ -118,17 +118,11 @@ export function useProductServices() {
   }
 
   async function updateProduct(formValues: UpdateProduct) {
-    const organization = organizationStore.findOrganizationById(
-      orgId.toString()
-    );
-    if (!organization?.org_id)
-      throw new Error("Organization is required to update a product");
     const { product_id, ...otherFormValues } = formValues;
     await supabase
       .from("i_products")
       .update({
         ...otherFormValues,
-        org_id: organization.org_id,
       })
       .eq("id", product_id);
   }
