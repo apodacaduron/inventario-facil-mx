@@ -1,5 +1,7 @@
 import { supabase } from "@/config/supabase";
+import { useProductServices } from "@/features/products";
 import { useOrganizationStore } from "@/stores";
+import { PostgrestSingleResponse } from "@supabase/supabase-js";
 import { useRoute } from "vue-router";
 
 export type CreateSale = {
@@ -29,6 +31,7 @@ export type SaleList = Awaited<
 >["data"];
 export type Sale = NonNullable<SaleList>[number];
 export const SALE_STATUS = ["in_progress", "completed", "cancelled"] as const;
+export type SaleProductList = Sale["i_sale_products"];
 export type SaleProduct = Sale["i_sale_products"][number];
 
 export const saleServicesTypeguards = {
@@ -48,6 +51,8 @@ export const saleServicesTypeguards = {
 export const PAGINATION_LIMIT = 30;
 
 export function useSaleServices() {
+  const productServices = useProductServices();
+
   const organizationStore = useOrganizationStore();
   const route = useRoute();
   const orgId = route.params.orgId;
@@ -122,10 +127,7 @@ export function useSaleServices() {
       if (formValues.status === "in_progress") {
         nextCurrentStock = nextCurrentStock - formQty;
       }
-      await supabase
-        .from("i_products")
-        .update({ current_stock: nextCurrentStock })
-        .eq("id", product_id);
+      await productServices.updateProduct({ product_id, current_stock: nextCurrentStock });
     });
   }
 
@@ -146,27 +148,41 @@ export function useSaleServices() {
       .select()
       .single();
 
-    const formattedSaleProducts = formValues.products.map((product) => ({
-      sale_id: formValues.sale_id,
-      product_id: product.product_id,
-      qty: product.qty,
-      price: product.price,
-      unit_price: product.unit_price,
-      org_id: organization.org_id,
-    }));
-    await supabase
-      .from("i_sale_products")
-      .delete()
-      .match({ sale_id: formValues.sale_id });
-    await supabase.from("i_sale_products").insert(formattedSaleProducts);
+    if (saleResponse.data?.status === 'completed') return;
 
-    if (saleResponse.data?.status === formValues.status) return;
-    const saleProductsResponse = await supabase
-      .from("i_sale_products")
-      .select()
-      .eq("sale_id", formValues.sale_id);
+    let saleProductsQuery: PostgrestSingleResponse<SaleProductList>
+    let oldSaleProductsQuery: PostgrestSingleResponse<SaleProductList>
 
-    saleProductsResponse.data?.map(async ({ product_id, qty }) => {
+    if (formValues.status === 'in_progress') {
+      const formattedSaleProducts = formValues.products.map((product) => ({
+        sale_id: formValues.sale_id,
+        product_id: product.product_id,
+        qty: product.qty,
+        price: product.price,
+        unit_price: product.unit_price,
+        org_id: organization.org_id,
+      }));
+      oldSaleProductsQuery = await supabase
+        .from("i_sale_products")
+        .delete()
+        .match({ sale_id: formValues.sale_id }).select();
+      await Promise.all(oldSaleProductsQuery.data?.map(async (oldSaleProduct) => {
+        if (!oldSaleProduct.product_id) return
+        const productResponse = await supabase
+          .from("i_products")
+          .select("current_stock")
+          .eq("id", oldSaleProduct.product_id)
+          .single();
+
+        const nextCurrentStock = (productResponse.data?.current_stock ?? 0) + (oldSaleProduct.qty ?? 0)
+        await productServices.updateProduct({ product_id: oldSaleProduct.product_id, current_stock: nextCurrentStock });
+      }) ?? [])
+      saleProductsQuery = await supabase.from("i_sale_products").insert(formattedSaleProducts).select();
+    } else {
+      saleProductsQuery = await supabase.from("i_sale_products").select();
+    }
+
+    await Promise.all(saleProductsQuery.data?.map(async ({ product_id, qty }) => {
       if (!product_id) return;
       const productResponse = await supabase
         .from("i_products")
@@ -174,18 +190,16 @@ export function useSaleServices() {
         .eq("id", product_id)
         .single();
 
-      let nextCurrentStock = productResponse.data?.current_stock ?? 0;
       let formQty = qty ?? 0;
+      let nextCurrentStock = productResponse.data?.current_stock ?? 0
       if (formValues.status === "in_progress") {
         nextCurrentStock = nextCurrentStock - formQty;
       } else if (formValues.status === "cancelled") {
         nextCurrentStock = nextCurrentStock + formQty;
       }
-      await supabase
-        .from("i_products")
-        .update({ current_stock: nextCurrentStock })
-        .eq("id", product_id);
-    });
+
+      await productServices.updateProduct({ product_id, current_stock: nextCurrentStock });
+    }) ?? [])
   }
 
   async function deleteSale(saleId: DeleteSale) {
