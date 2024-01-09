@@ -94,7 +94,7 @@ const menuList = {
                 </svg>
               </button>
             </SheetTrigger>
-            <SheetContent side="left">
+            <SheetContent side="left" class="overflow-y-auto">
               <SheetHeader class="text-left">
                 <SheetTitle>Explora</SheetTitle>
                 <SheetDescription>

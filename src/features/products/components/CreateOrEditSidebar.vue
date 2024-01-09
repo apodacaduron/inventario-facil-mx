@@ -149,7 +149,7 @@ watch(
 
 <template>
   <Sheet :open="open" @update:open="closeSidebar">
-    <SheetContent side="right">
+    <SheetContent side="right" class="overflow-y-auto">
       <SheetHeader>
         <SheetTitle>
           {{ locale[mode].title }}
