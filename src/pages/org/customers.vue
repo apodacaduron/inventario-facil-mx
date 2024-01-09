@@ -257,6 +257,7 @@ function getBadgeColorFromStatus(status: Customer["trust_status"]) {
                     <span>Actualizar</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem
+                    v-if="customer.trust_status === 'not_trusted'"
                     class="text-red-500 dark:text-red-500"
                     @click="openDeleteCustomerDialog(customer)"
                   >
