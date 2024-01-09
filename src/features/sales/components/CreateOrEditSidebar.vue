@@ -128,6 +128,7 @@ const customersQuery = useCustomersQuery({
   options: {
     enabled: computed(() => organizationStore.hasOrganizations),
     search: customerSearchDebounced,
+    filters: [{ column: "trust_status", operator: "eq", value: "trusted" }],
   },
 });
 const productsQuery = useProductsQuery({

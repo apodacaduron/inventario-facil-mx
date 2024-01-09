@@ -22,6 +22,12 @@ export type CustomerList = Awaited<
 >["data"];
 export type Customer = NonNullable<CustomerList>[number];
 
+export type CustomerFilters = Array<{
+  column: string
+  operator: string,
+  value: any
+}>
+
 export const TRUST_STATUS = ["trusted", "not_trusted"] as const;
 export const customerServicesTypeguards = {
   isCreateCustomer(
@@ -48,7 +54,7 @@ export function useCustomerServices() {
   const route = useRoute();
   const orgId = route.params.orgId;
 
-  async function loadList(options?: { offset?: number; search?: string }) {
+  async function loadList(options?: { offset?: number; search?: string, filters?: CustomerFilters }) {
     const offset = options?.offset ?? 0;
     const from = offset * PAGINATION_LIMIT;
     const to = from + PAGINATION_LIMIT - 1;
@@ -59,7 +65,7 @@ export function useCustomerServices() {
     if (!organization?.org_id)
       throw new Error("Organization is required to get customer list");
 
-    const customerSearch = supabase
+    let customerSearch = supabase
       .from("i_customers")
       .select("*")
       .eq("org_id", organization.org_id)
@@ -67,9 +73,14 @@ export function useCustomerServices() {
       .order("created_at", { ascending: false });
 
     if (options?.search) {
-      return await customerSearch.textSearch("name", options.search, {
+      customerSearch = customerSearch.textSearch("name", options.search, {
         type: "plain",
       });
+    }
+    if (options?.filters) {
+      options?.filters.forEach(filter => {
+        customerSearch = customerSearch.filter(filter.column, filter.operator, filter.value)
+      })
     }
 
     return await customerSearch;

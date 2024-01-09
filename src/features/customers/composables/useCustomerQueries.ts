@@ -1,21 +1,23 @@
 import { useInfiniteQuery } from "@tanstack/vue-query";
-import { useCustomerServices } from "./useCustomerServices";
+import { CustomerFilters, useCustomerServices } from "./useCustomerServices";
 import { MaybeRefOrGetter, toValue } from "vue";
 
 export function useCustomersQuery(context: {
   options: {
     enabled: MaybeRefOrGetter<boolean | undefined>;
-    search: MaybeRefOrGetter<string | undefined>;
+    search?: MaybeRefOrGetter<string | undefined>;
+    filters?: MaybeRefOrGetter<CustomerFilters | undefined>;
   };
 }) {
   const customerServices = useCustomerServices();
 
   return useInfiniteQuery({
-    queryKey: ["customers", context.options.search],
+    queryKey: ["customers", context.options.search, context.options.filters],
     queryFn({ pageParam }) {
       return customerServices.loadList({
         offset: pageParam,
         search: toValue(context.options.search),
+        filters: toValue(context.options.filters),
       });
     },
     initialPageParam: 0,
