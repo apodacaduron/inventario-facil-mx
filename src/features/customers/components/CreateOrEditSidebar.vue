@@ -102,30 +102,28 @@ function forceCloseSidebar() {
 }
 
 watch(
-  () => props.open,
-  (nextIsOpen) => {
-    if (nextIsOpen) return;
-    formInstance.resetForm({
-      values: initialForm,
-    });
-  }
-);
-watch(
-  () => props.customer,
-  (nextCustomer) => {
-    if (!nextCustomer) return;
-    formInstance.resetForm({
-      values: {
-        name: nextCustomer.name ?? "",
-        phone: nextCustomer.phone ?? "",
-        email: nextCustomer.email ?? "",
-        address: nextCustomer.address ?? "",
-        map_url: nextCustomer.map_url ?? "",
-        customer_id: nextCustomer.id,
-        trust_status: nextCustomer.trust_status ?? "trusted",
-        notes: nextCustomer.notes ?? "",
-      },
-    });
+  [() => props.open, () => props.customer],
+  ([nextIsOpen, nextCustomer]) => {
+    if (!nextIsOpen) return;
+    if (!nextCustomer) {
+      formInstance.resetForm({
+        values: initialForm,
+      });
+    }
+    if (nextCustomer) {
+      formInstance.resetForm({
+        values: {
+          name: nextCustomer.name ?? "",
+          phone: nextCustomer.phone ?? "",
+          email: nextCustomer.email ?? "",
+          address: nextCustomer.address ?? "",
+          map_url: nextCustomer.map_url ?? "",
+          customer_id: nextCustomer.id,
+          trust_status: nextCustomer.trust_status ?? "trusted",
+          notes: nextCustomer.notes ?? "",
+        },
+      });
+    }
   }
 );
 </script>

@@ -58,9 +58,9 @@ const initialForm = {
   name: "",
   description: "",
   image_url: "",
-  current_stock: 0,
-  unit_price: 0,
-  retail_price: 0,
+  current_stock: null,
+  unit_price: null,
+  retail_price: null,
 };
 
 const currencyFormatter = useCurrencyFormatter();
@@ -121,17 +121,12 @@ function forceCloseSidebar() {
   emit("close");
 }
 
-watch(
-  () => props.open,
-  (nextIsOpen) => {
-    if (nextIsOpen) return;
+watch([() => props.open, () => props.product], ([nextIsOpen, nextProduct]) => {
+  if (!nextIsOpen) return;
+  if (!nextProduct) {
     formInstance.resetForm({ values: initialForm });
   }
-);
-watch(
-  () => props.product,
-  (nextProduct) => {
-    if (!nextProduct) return;
+  if (nextProduct) {
     formInstance.resetForm({
       values: {
         name: nextProduct.name ?? "",
@@ -144,7 +139,7 @@ watch(
       },
     });
   }
-);
+});
 </script>
 
 <template>
