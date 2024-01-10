@@ -42,7 +42,7 @@ const WHATSAPP_URL = import.meta.env.VITE_WHATSAPP_URL;
 const tableRef = ref<HTMLElement | null>(null);
 const saleSearch = ref("");
 const saleSearchDebounced = refDebounced(saleSearch, 400);
-const saleSidebarMode = ref<"create" | "update" | null>(null);
+const saleSidebarMode = ref<"create" | "update" | "view" | null>(null);
 const isDeleteSaleDialogOpen = ref(false);
 const selectedSaleFromActions = ref<Sale | null>(null);
 const queryClient = useQueryClient();
@@ -77,23 +77,20 @@ function closeDeleteSaleDialog() {
 }
 
 function closeSidebar() {
-  saleSidebarMode.value = null;
-  selectedSaleFromActions.value = null;
+  handleSaleSidebar({ sale: null, mode: null });
 }
 
 const saleHandlers = {
   async create(formValues: CreateSale) {
     await createSaleMutation.mutateAsync(formValues);
-    saleSidebarMode.value = null;
-    selectedSaleFromActions.value = null;
+    closeSidebar();
     await queryClient.invalidateQueries({ queryKey: ["sales"] });
   },
   async update(formValues: UpdateSale) {
     const saleId = formValues.sale_id;
     if (!saleId) throw new Error("Sale id required to perform update");
     await updateSaleMutation.mutateAsync(formValues);
-    saleSidebarMode.value = null;
-    selectedSaleFromActions.value = null;
+    closeSidebar();
     await queryClient.invalidateQueries({ queryKey: ["sales"] });
   },
 };
@@ -106,9 +103,12 @@ async function handleSaveSidebar(formValues: CreateSale | UpdateSale) {
   }
 }
 
-function openUpdateSaleSidebar(sale: Sale) {
-  selectedSaleFromActions.value = sale;
-  saleSidebarMode.value = "update";
+function handleSaleSidebar(options: {
+  sale?: Sale | null;
+  mode: "create" | "update" | "view" | null;
+}) {
+  selectedSaleFromActions.value = options.sale ?? null;
+  saleSidebarMode.value = options.mode;
 }
 
 async function deleteSale() {
@@ -285,13 +285,15 @@ function getBadgeColorFromStatus(status: Sale["status"]) {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
-                  <DropdownMenuItem>
+                  <DropdownMenuItem
+                    @click="handleSaleSidebar({ sale, mode: 'view' })"
+                  >
                     <EyeIcon class="w-5 h-5 mr-2" />
                     <span>Ver</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     v-if="sale.status === 'in_progress'"
-                    @click="openUpdateSaleSidebar(sale)"
+                    @click="handleSaleSidebar({ sale, mode: 'update' })"
                   >
                     <PencilIcon class="w-5 h-5 mr-2" />
                     <span>Actualizar</span>
@@ -339,6 +341,7 @@ function getBadgeColorFromStatus(status: Sale["status"]) {
 
   <CreateOrEditSidebar
     :open="Boolean(saleSidebarMode)"
+    :viewOnly="saleSidebarMode === 'view'"
     :isLoading="createSaleMutation.isPending.value"
     :sale="selectedSaleFromActions"
     @close="closeSidebar"

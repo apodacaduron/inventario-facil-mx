@@ -33,6 +33,7 @@ import {
   SelectItem,
   SelectContent,
   SelectGroup,
+  Badge,
 } from "@/components/ui";
 import { computed, ref, watch } from "vue";
 import { z } from "zod";
@@ -49,14 +50,16 @@ import { toTypedSchema } from "@vee-validate/zod";
 import { useFieldArray, useForm } from "vee-validate";
 import { useOrganizationStore } from "@/stores";
 
-type CreateSidebarProps = {
+type CreateOrEditSidebarProps = {
   open: boolean;
+  viewOnly?: boolean;
   isLoading?: boolean;
   sale?: Sale | null;
 };
 
-const props = withDefaults(defineProps<CreateSidebarProps>(), {
+const props = withDefaults(defineProps<CreateOrEditSidebarProps>(), {
   open: false,
+  viewOnly: false,
   isLoading: false,
 });
 const emit = defineEmits<{
@@ -64,6 +67,7 @@ const emit = defineEmits<{
   (e: "save", formValues: CreateSale): void;
 }>();
 
+const WHATSAPP_URL = import.meta.env.VITE_WHATSAPP_URL;
 const LOCALE = {
   CREATE: {
     TITLE: "Crear venta",
@@ -72,6 +76,10 @@ const LOCALE = {
   UPDATE: {
     TITLE: "Actualizar venta",
     SUBTITLE: "Actualiza rápidamente una venta de tu inventario.",
+  },
+  VIEW: {
+    TITLE: "Detalle de venta",
+    SUBTITLE: "Ve más a detalle tu venta",
   },
   SELECT_PRODUCTS: {
     TITLE: "Selecciona productos",
@@ -211,9 +219,6 @@ function closeSidebar(isOpen: boolean) {
   forceCloseSidebar();
 }
 function forceCloseSidebar() {
-  if (saleSidebarMode.value !== "sales")
-    return (saleSidebarMode.value = "sales");
-
   formInstance.resetForm();
   emit("close");
   saleSidebarMode.value = "sales";
@@ -297,7 +302,7 @@ watch(
 
 <template>
   <Sheet :open="open" @update:open="closeSidebar">
-    <SheetContent side="right" class="overflow-y-auto">
+    <SheetContent v-if="!viewOnly" side="right" class="overflow-y-auto">
       <div v-show="saleSidebarMode === 'sales'">
         <SheetHeader>
           <SheetTitle>
@@ -582,6 +587,97 @@ watch(
               >
             </CardFooter>
           </Card>
+        </div>
+      </div>
+    </SheetContent>
+    <SheetContent v-else slide="right">
+      <SheetHeader>
+        <SheetTitle>
+          {{ LOCALE.VIEW.TITLE }}
+          <Badge>{{ sale?.status?.toUpperCase() }}</Badge>
+        </SheetTitle>
+        <SheetDescription>
+          {{ LOCALE.VIEW.SUBTITLE }}
+        </SheetDescription>
+      </SheetHeader>
+
+      <div class="flex flex-col gap-6 mt-6">
+        <div>
+          <div class="font-medium text-sm tracking-tight text-foreground">
+            Cliente
+          </div>
+          <div class="flex items-center text-slate-900 dark:text-white">
+            <Avatar>
+              <AvatarFallback>{{
+                `${sale?.i_customers?.name
+                  ?.substring(0, 1)
+                  .toLocaleUpperCase()}`
+              }}</AvatarFallback>
+            </Avatar>
+            <div class="ps-3">
+              <div class="text-base font-semibold">
+                {{ sale?.i_customers?.name }}
+              </div>
+              <div
+                v-if="sale?.i_customers?.phone"
+                class="font-normal text-slate-500"
+              >
+                <a
+                  :href="`${WHATSAPP_URL}/${sale.i_customers.phone}`"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="block"
+                >
+                  {{ sale.i_customers.phone }}
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div v-if="sale?.notes">
+          <div class="font-medium text-sm tracking-tight text-foreground">
+            Notas
+          </div>
+          <div class="flex items-center text-slate-900 dark:text-white">
+            {{ sale?.notes }}
+          </div>
+        </div>
+        <div v-if="sale?.shipping_cost">
+          <div class="font-medium text-sm tracking-tight text-foreground">
+            Costo de envio
+          </div>
+          <div class="flex items-center text-slate-900 dark:text-white">
+            {{ currencyFormatter.parse(sale?.shipping_cost) }}
+          </div>
+        </div>
+        <div>
+          <div>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead class="w-[100px]"> Producto </TableHead>
+                  <TableHead class="text-center">Cantidad</TableHead>
+                  <TableHead class="text-center">Precio</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                <TableRow
+                  v-for="(saleProduct, idx) in sale?.i_sale_products"
+                  :key="saleProduct?.id ?? idx"
+                >
+                  <TableCell class="font-medium min-w-[80px]">
+                    {{ saleProduct?.i_products?.name }}
+                  </TableCell>
+                  <TableCell class="text-center flex justify-center">
+                    {{ saleProduct.qty }}
+                  </TableCell>
+                  <TableCell class="text-center">
+                    {{ currencyFormatter.parse(saleProduct.price) }}
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </div>
         </div>
       </div>
     </SheetContent>
