@@ -219,6 +219,9 @@ function closeSidebar(isOpen: boolean) {
   forceCloseSidebar();
 }
 function forceCloseSidebar() {
+  if (saleSidebarMode.value !== "sales")
+    return (saleSidebarMode.value = "sales");
+
   formInstance.resetForm();
   emit("close");
   saleSidebarMode.value = "sales";
