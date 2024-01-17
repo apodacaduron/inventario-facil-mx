@@ -23,10 +23,10 @@ export type CustomerList = Awaited<
 export type Customer = NonNullable<CustomerList>[number];
 
 export type CustomerFilters = Array<{
-  column: string
-  operator: string,
-  value: any
-}>
+  column: string;
+  operator: string;
+  value: any;
+}>;
 
 export const TRUST_STATUS = ["trusted", "not_trusted"] as const;
 export const customerServicesTypeguards = {
@@ -54,7 +54,11 @@ export function useCustomerServices() {
   const route = useRoute();
   const orgId = route.params.orgId;
 
-  async function loadList(options?: { offset?: number; search?: string, filters?: CustomerFilters }) {
+  async function loadList(options?: {
+    offset?: number;
+    search?: string;
+    filters?: CustomerFilters;
+  }) {
     const offset = options?.offset ?? 0;
     const from = offset * PAGINATION_LIMIT;
     const to = from + PAGINATION_LIMIT - 1;
@@ -78,9 +82,13 @@ export function useCustomerServices() {
       });
     }
     if (options?.filters) {
-      options?.filters.forEach(filter => {
-        customerSearch = customerSearch.filter(filter.column, filter.operator, filter.value)
-      })
+      options?.filters.forEach((filter) => {
+        customerSearch = customerSearch.filter(
+          filter.column,
+          filter.operator,
+          filter.value
+        );
+      });
     }
 
     return await customerSearch;
