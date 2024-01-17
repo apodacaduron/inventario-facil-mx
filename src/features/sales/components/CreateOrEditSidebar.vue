@@ -143,6 +143,13 @@ const productsQuery = useProductsQuery({
   options: {
     enabled: computed(() => organizationStore.hasOrganizations),
     search: productSearchDebounced,
+    filters: [
+      {
+        column: "current_stock",
+        operator: "gt",
+        value: 0,
+      },
+    ],
   },
 });
 useInfiniteScroll(
@@ -459,6 +466,31 @@ watch(
                       </Button>
                     </TableCell>
                   </TableRow>
+                  <TableRow>
+                    <TableCell class="font-medium min-w-[80px]"> </TableCell>
+                    <TableCell class="text-center flex justify-center">
+                      {{
+                        formInstance.values.products.reduce(
+                          (acc, formProduct) => acc + (formProduct.qty ?? 0),
+                          0
+                        )
+                      }}
+                    </TableCell>
+                    <TableCell class="text-center">
+                      {{
+                        currencyFormatter.parse(
+                          formInstance.values.products.reduce(
+                            (acc, formProduct) =>
+                              acc +
+                              (formProduct.qty ?? 0) *
+                                (currencyFormatter.toCents(formProduct.price) ??
+                                  0),
+                            0
+                          ) ?? 0
+                        )
+                      }}
+                    </TableCell>
+                  </TableRow>
                 </TableBody>
               </Table>
 
@@ -675,7 +707,34 @@ watch(
                     {{ saleProduct.qty }}
                   </TableCell>
                   <TableCell class="text-center">
-                    {{ currencyFormatter.parse(saleProduct.price) }}
+                    {{
+                      currencyFormatter.parse(
+                        (saleProduct.price ?? 0) * (saleProduct.qty ?? 0)
+                      )
+                    }}
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell class="font-medium min-w-[80px]"> </TableCell>
+                  <TableCell class="text-center flex justify-center">
+                    {{
+                      sale?.i_sale_products.reduce(
+                        (acc, saleProduct) => acc + (saleProduct.qty ?? 0),
+                        0
+                      )
+                    }}
+                  </TableCell>
+                  <TableCell class="text-center">
+                    {{
+                      currencyFormatter.parse(
+                        sale?.i_sale_products.reduce(
+                          (acc, saleProduct) =>
+                            acc +
+                            (saleProduct.qty ?? 0) * (saleProduct.price ?? 0),
+                          0
+                        ) ?? 0
+                      )
+                    }}
                   </TableCell>
                 </TableRow>
               </TableBody>
