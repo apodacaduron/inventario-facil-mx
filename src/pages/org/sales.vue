@@ -223,7 +223,10 @@ function getBadgeColorFromStatus(status: Sale["status"]) {
               </div>
             </th>
             <td class="text-center">
-              <div class="flex -space-x-4 rtl:space-x-reverse w-fit mx-auto">
+              <div
+                class="flex -space-x-4 rtl:space-x-reverse w-fit mx-auto cursor-pointer"
+                @click="handleSaleSidebar({ sale, mode: 'view' })"
+              >
                 <img
                   v-for="saleProduct in sale.i_sale_products.slice(0, 3)"
                   :key="saleProduct.id"
