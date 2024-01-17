@@ -21,6 +21,12 @@ export type ProductList = Awaited<
 >["data"];
 export type Product = NonNullable<ProductList>[number];
 
+export type ProductFilters = Array<{
+  column: string;
+  operator: string;
+  value: any;
+}>;
+
 export const productServicesTypeguards = {
   isCreateProduct(
     maybeProduct: CreateProduct | UpdateProduct
@@ -47,7 +53,11 @@ export function useProductServices() {
   const route = useRoute();
   const orgId = route.params.orgId;
 
-  async function loadList(options?: { offset?: number; search?: string }) {
+  async function loadList(options?: {
+    offset?: number;
+    search?: string;
+    filters?: ProductFilters;
+  }) {
     const offset = options?.offset ?? 0;
     const from = offset * PAGINATION_LIMIT;
     const to = from + PAGINATION_LIMIT - 1;
@@ -68,6 +78,16 @@ export function useProductServices() {
     if (options?.search) {
       productSearch = productSearch.textSearch("name", options.search, {
         type: "plain",
+      });
+    }
+
+    if (options?.filters) {
+      options?.filters.forEach((filter) => {
+        productSearch = productSearch.filter(
+          filter.column,
+          filter.operator,
+          filter.value
+        );
       });
     }
 
