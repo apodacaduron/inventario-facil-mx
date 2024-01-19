@@ -76,9 +76,7 @@ export function useProductServices() {
       .order("created_at", { ascending: false });
 
     if (options?.search) {
-      productSearch = productSearch.textSearch("name", options.search, {
-        type: "plain",
-      });
+      productSearch = productSearch.ilike("name", `%${options.search}%`);
     }
 
     if (options?.filters) {

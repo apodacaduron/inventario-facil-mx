@@ -77,9 +77,7 @@ export function useCustomerServices() {
       .order("created_at", { ascending: false });
 
     if (options?.search) {
-      customerSearch = customerSearch.textSearch("name", options.search, {
-        type: "plain",
-      });
+      customerSearch = customerSearch.ilike("name", `%${options.search}%`);
     }
     if (options?.filters) {
       options?.filters.forEach((filter) => {

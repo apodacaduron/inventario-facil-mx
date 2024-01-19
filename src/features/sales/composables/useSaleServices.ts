@@ -76,9 +76,7 @@ export function useSaleServices() {
       .order("created_at", { ascending: false });
 
     if (options?.search) {
-      saleSearch = saleSearch.textSearch("i_customers.name", options.search, {
-        type: "plain",
-      });
+      saleSearch = saleSearch.ilike("i_customers.name", `%${options.search}%`);
     }
 
     return await saleSearch;
@@ -127,7 +125,10 @@ export function useSaleServices() {
       if (formValues.status === "in_progress") {
         nextCurrentStock = nextCurrentStock - formQty;
       }
-      await productServices.updateProduct({ product_id, current_stock: nextCurrentStock });
+      await productServices.updateProduct({
+        product_id,
+        current_stock: nextCurrentStock,
+      });
     });
   }
 
@@ -148,12 +149,12 @@ export function useSaleServices() {
       .select()
       .single();
 
-    if (saleResponse.data?.status === 'completed') return;
+    if (saleResponse.data?.status === "completed") return;
 
-    let saleProductsQuery: PostgrestSingleResponse<SaleProductList>
-    let oldSaleProductsQuery: PostgrestSingleResponse<SaleProductList>
+    let saleProductsQuery: PostgrestSingleResponse<SaleProductList>;
+    let oldSaleProductsQuery: PostgrestSingleResponse<SaleProductList>;
 
-    if (formValues.status === 'in_progress') {
+    if (formValues.status === "in_progress") {
       const formattedSaleProducts = formValues.products.map((product) => ({
         sale_id: formValues.sale_id,
         product_id: product.product_id,
@@ -165,41 +166,57 @@ export function useSaleServices() {
       oldSaleProductsQuery = await supabase
         .from("i_sale_products")
         .delete()
-        .match({ sale_id: formValues.sale_id }).select();
-      await Promise.all(oldSaleProductsQuery.data?.map(async (oldSaleProduct) => {
-        if (!oldSaleProduct.product_id) return
-        const productResponse = await supabase
-          .from("i_products")
-          .select("current_stock")
-          .eq("id", oldSaleProduct.product_id)
-          .single();
+        .match({ sale_id: formValues.sale_id })
+        .select();
+      await Promise.all(
+        oldSaleProductsQuery.data?.map(async (oldSaleProduct) => {
+          if (!oldSaleProduct.product_id) return;
+          const productResponse = await supabase
+            .from("i_products")
+            .select("current_stock")
+            .eq("id", oldSaleProduct.product_id)
+            .single();
 
-        const nextCurrentStock = (productResponse.data?.current_stock ?? 0) + (oldSaleProduct.qty ?? 0)
-        await productServices.updateProduct({ product_id: oldSaleProduct.product_id, current_stock: nextCurrentStock });
-      }) ?? [])
-      saleProductsQuery = await supabase.from("i_sale_products").insert(formattedSaleProducts).select();
+          const nextCurrentStock =
+            (productResponse.data?.current_stock ?? 0) +
+            (oldSaleProduct.qty ?? 0);
+          await productServices.updateProduct({
+            product_id: oldSaleProduct.product_id,
+            current_stock: nextCurrentStock,
+          });
+        }) ?? []
+      );
+      saleProductsQuery = await supabase
+        .from("i_sale_products")
+        .insert(formattedSaleProducts)
+        .select();
     } else {
       saleProductsQuery = await supabase.from("i_sale_products").select();
     }
 
-    await Promise.all(saleProductsQuery.data?.map(async ({ product_id, qty }) => {
-      if (!product_id) return;
-      const productResponse = await supabase
-        .from("i_products")
-        .select("current_stock")
-        .eq("id", product_id)
-        .single();
+    await Promise.all(
+      saleProductsQuery.data?.map(async ({ product_id, qty }) => {
+        if (!product_id) return;
+        const productResponse = await supabase
+          .from("i_products")
+          .select("current_stock")
+          .eq("id", product_id)
+          .single();
 
-      let formQty = qty ?? 0;
-      let nextCurrentStock = productResponse.data?.current_stock ?? 0
-      if (formValues.status === "in_progress") {
-        nextCurrentStock = nextCurrentStock - formQty;
-      } else if (formValues.status === "cancelled") {
-        nextCurrentStock = nextCurrentStock + formQty;
-      }
+        let formQty = qty ?? 0;
+        let nextCurrentStock = productResponse.data?.current_stock ?? 0;
+        if (formValues.status === "in_progress") {
+          nextCurrentStock = nextCurrentStock - formQty;
+        } else if (formValues.status === "cancelled") {
+          nextCurrentStock = nextCurrentStock + formQty;
+        }
 
-      await productServices.updateProduct({ product_id, current_stock: nextCurrentStock });
-    }) ?? [])
+        await productServices.updateProduct({
+          product_id,
+          current_stock: nextCurrentStock,
+        });
+      }) ?? []
+    );
   }
 
   async function deleteSale(saleId: DeleteSale) {
