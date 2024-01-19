@@ -158,7 +158,7 @@ function getBadgeColorFromStatus(status: Sale["status"]) {
   >
     <label for="table-search" class="sr-only">Buscar</label>
     <div class="relative">
-      <Input v-model="saleSearch" placeholder="Buscar ventas" />
+      <Input v-model="saleSearch" type="search" placeholder="Buscar ventas" />
     </div>
   </div>
 

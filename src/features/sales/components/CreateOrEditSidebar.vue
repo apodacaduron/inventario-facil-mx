@@ -525,7 +525,11 @@ watch(
             {{ LOCALE.SELECT_PRODUCTS.SUBTITLE }}
           </SheetDescription>
         </SheetHeader>
-        <Input v-model="productSearch" placeholder="Busca productos..." />
+        <Input
+          v-model="productSearch"
+          type="search"
+          placeholder="Busca productos..."
+        />
         <div class="grid grid-cols-2 gap-3 mt-4 mb-10">
           <Card
             v-for="product in productsQuery.data.value?.pages.flatMap(
@@ -581,7 +585,11 @@ watch(
             {{ LOCALE.SELECT_CUSTOMERS.SUBTITLE }}
           </SheetDescription>
         </SheetHeader>
-        <Input v-model="customerSearch" placeholder="Busca clientes..." />
+        <Input
+          v-model="customerSearch"
+          type="search"
+          placeholder="Busca clientes..."
+        />
         <div class="grid grid-cols-2 gap-3 mt-4 mb-10">
           <Card
             v-for="customer in customersQuery.data.value?.pages.flatMap(

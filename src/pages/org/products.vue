@@ -205,7 +205,11 @@ function closeShareModal() {
   >
     <label for="table-search" class="sr-only">Buscar</label>
     <div class="relative">
-      <Input v-model="productSearch" placeholder="Buscar productos" />
+      <Input
+        v-model="productSearch"
+        type="search"
+        placeholder="Buscar productos"
+      />
     </div>
   </div>
 

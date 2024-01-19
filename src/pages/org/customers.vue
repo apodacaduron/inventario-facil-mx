@@ -160,7 +160,11 @@ function getBadgeColorFromStatus(status: Customer["trust_status"]) {
   >
     <label for="table-search" class="sr-only">Buscar</label>
     <div class="relative">
-      <Input v-model="customerSearch" placeholder="Buscar clientes" />
+      <Input
+        v-model="customerSearch"
+        type="search"
+        placeholder="Buscar clientes"
+      />
     </div>
   </div>
 
