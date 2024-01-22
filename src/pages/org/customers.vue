@@ -75,29 +75,24 @@ function openDeleteCustomerDialog(customer: Customer) {
   selectedCustomerFromActions.value = customer;
   isDeleteCustomerDialogOpen.value = true;
 }
-function closeDeleteCustomerDialog() {
-  selectedCustomerFromActions.value = null;
-  isDeleteCustomerDialogOpen.value = false;
-}
 
 function closeSidebar() {
   customerSidebarMode.value = null;
   selectedCustomerFromActions.value = null;
+  isDeleteCustomerDialogOpen.value = false;
 }
 
 const customerHandlers = {
   async create(formValues: CreateCustomer) {
     await createCustomerMutation.mutateAsync(formValues);
-    customerSidebarMode.value = null;
-    selectedCustomerFromActions.value = null;
+    closeSidebar();
     await queryClient.invalidateQueries({ queryKey: ["customers"] });
   },
   async update(formValues: UpdateCustomer) {
     const customerId = formValues.customer_id;
     if (!customerId) throw new Error("Customer id required to perform update");
     await updateCustomerMutation.mutateAsync(formValues);
-    customerSidebarMode.value = null;
-    selectedCustomerFromActions.value = null;
+    closeSidebar();
     await queryClient.invalidateQueries({ queryKey: ["customers"] });
   },
 };
@@ -119,8 +114,7 @@ async function deleteCustomer() {
   const customerId = selectedCustomerFromActions.value?.id;
   if (!customerId) throw new Error("Customer id required to perform delete");
   await deleteCustomerMutation.mutateAsync(customerId);
-  isDeleteCustomerDialogOpen.value = false;
-  selectedCustomerFromActions.value = null;
+  closeSidebar();
   await queryClient.invalidateQueries({ queryKey: ["customers"] });
 }
 
@@ -277,10 +271,7 @@ function getBadgeColorFromStatus(status: Customer["trust_status"]) {
     </table>
   </div>
 
-  <Dialog
-    :open="isDeleteCustomerDialogOpen"
-    @update:open="closeDeleteCustomerDialog"
-  >
+  <Dialog :open="isDeleteCustomerDialogOpen" @update:open="closeSidebar">
     <DialogContent class="sm:max-w-[425px]">
       <DialogHeader>
         <DialogTitle>Eliminar Cliente</DialogTitle>
@@ -293,11 +284,7 @@ function getBadgeColorFromStatus(status: Customer["trust_status"]) {
         <Button type="button" variant="destructive" @click="deleteCustomer">
           Si, eliminar
         </Button>
-        <Button
-          type="button"
-          variant="secondary"
-          @click="closeDeleteCustomerDialog"
-        >
+        <Button type="button" variant="secondary" @click="closeSidebar">
           Cancelar
         </Button>
       </DialogFooter>

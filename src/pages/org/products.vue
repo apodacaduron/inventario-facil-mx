@@ -83,21 +83,18 @@ function openDeleteProductDialog(product: Product) {
   selectedProductFromActions.value = product;
   isDeleteProductDialogOpen.value = true;
 }
-function closeDeleteProductDialog() {
-  selectedProductFromActions.value = null;
-  isDeleteProductDialogOpen.value = false;
-}
 
-function closeSidebar() {
+function closeModal() {
   productSidebarMode.value = null;
   selectedProductFromActions.value = null;
+  isAddStockDialogOpen.value = false;
+  isDeleteProductDialogOpen.value = false;
 }
 
 const productHandlers = {
   async create(formValues: CreateProduct) {
     await createProductMutation.mutateAsync(formValues);
-    productSidebarMode.value = null;
-    selectedProductFromActions.value = null;
+    closeModal();
     await queryClient.invalidateQueries({ queryKey: ["products"] });
   },
   async update(formValues: UpdateProduct) {
@@ -107,13 +104,12 @@ const productHandlers = {
       ...formValues,
       product_id: productId,
     });
-    productSidebarMode.value = null;
-    selectedProductFromActions.value = null;
+    closeModal();
     await queryClient.invalidateQueries({ queryKey: ["products"] });
   },
 };
 
-async function handleSaveSidebar(formValues: CreateProduct | UpdateProduct) {
+async function handleSaveModal(formValues: CreateProduct | UpdateProduct) {
   if (productServicesTypeguards.isCreateProduct(formValues)) {
     await productHandlers.create(formValues);
   } else {
@@ -130,17 +126,12 @@ function openAddStockDialog(product: Product) {
   selectedProductFromActions.value = product;
   isAddStockDialogOpen.value = true;
 }
-function closeAddStockDialog() {
-  selectedProductFromActions.value = null;
-  isAddStockDialogOpen.value = false;
-}
 
 async function deleteProduct() {
   const productId = selectedProductFromActions.value?.id;
   if (!productId) throw new Error("Product id required to perform delete");
   await deleteProductMutation.mutateAsync(productId);
-  isDeleteProductDialogOpen.value = false;
-  selectedProductFromActions.value = null;
+  closeModal();
   await queryClient.invalidateQueries({ queryKey: ["products"] });
 }
 
@@ -301,10 +292,7 @@ function closeShareModal() {
     </table>
   </div>
 
-  <Dialog
-    :open="isDeleteProductDialogOpen"
-    @update:open="closeDeleteProductDialog"
-  >
+  <Dialog :open="isDeleteProductDialogOpen" @update:open="closeModal">
     <DialogContent class="sm:max-w-[425px]">
       <DialogHeader>
         <DialogTitle>Eliminar Producto</DialogTitle>
@@ -317,11 +305,7 @@ function closeShareModal() {
         <Button type="button" variant="destructive" @click="deleteProduct">
           Si, eliminar
         </Button>
-        <Button
-          type="button"
-          variant="secondary"
-          @click="closeDeleteProductDialog"
-        >
+        <Button type="button" variant="secondary" @click="closeModal">
           Cancelar
         </Button>
       </DialogFooter>
@@ -384,13 +368,13 @@ function closeShareModal() {
       updateProductMutation.isPending.value ||
       createProductMutation.isPending.value
     "
-    @close="closeSidebar"
-    @save="handleSaveSidebar"
+    @close="closeModal"
+    @save="handleSaveModal"
   />
   <AddStockDialog
     :product="selectedProductFromActions"
     :open="isAddStockDialogOpen"
-    @close="closeAddStockDialog"
-    @save="handleSaveSidebar"
+    @close="closeModal"
+    @save="handleSaveModal"
   />
 </template>
