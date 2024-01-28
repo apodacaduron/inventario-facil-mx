@@ -166,7 +166,7 @@ export function useSaleServices() {
       oldSaleProductsQuery = await supabase
         .from("i_sale_products")
         .delete()
-        .match({ sale_id: formValues.sale_id })
+        .eq("sale_id", formValues.sale_id)
         .select();
       await Promise.all(
         oldSaleProductsQuery.data?.map(async (oldSaleProduct) => {
@@ -191,7 +191,10 @@ export function useSaleServices() {
         .insert(formattedSaleProducts)
         .select();
     } else {
-      saleProductsQuery = await supabase.from("i_sale_products").select();
+      saleProductsQuery = await supabase
+        .from("i_sale_products")
+        .select("*, i_products(*)")
+        .eq("sale_id", formValues.sale_id);
     }
 
     await Promise.all(
