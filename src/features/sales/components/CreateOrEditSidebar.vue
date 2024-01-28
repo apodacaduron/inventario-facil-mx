@@ -302,7 +302,8 @@ watch(
         sale_date: props.sale?.sale_date
           ? new Date(props.sale.sale_date).toISOString()
           : new Date().toISOString(),
-        shipping_cost: props.sale?.shipping_cost ?? 0,
+        shipping_cost:
+          currencyFormatter.parseRaw(props.sale?.shipping_cost) ?? 0,
         status: props.sale?.status ?? "in_progress",
       },
     });
