@@ -292,10 +292,8 @@ watch(
             image_url: saleProduct.i_products?.image_url ?? "",
             product_id: saleProduct.i_products?.id ?? "",
             name: saleProduct.i_products?.name ?? "",
-            price: currencyFormatter.parseRaw(
-              saleProduct.i_products?.retail_price ?? 0
-            ),
-            unit_price: saleProduct.i_products?.unit_price ?? 0,
+            price: currencyFormatter.parseRaw(saleProduct?.price ?? 0),
+            unit_price: saleProduct?.unit_price ?? 0,
             qty: saleProduct.qty,
           })) ?? [],
         customer_id: props.sale?.customer_id ?? "",
