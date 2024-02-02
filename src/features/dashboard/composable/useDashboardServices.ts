@@ -66,6 +66,9 @@ export function useDashboardServices() {
       .filter("i_sales.status", "eq", "completed");
 
     if (range) {
+      supabaseSalesQuery
+        .gt("created_at", range.from)
+        .lt("created_at", range.to);
       supabaseQuery.gt("created_at", range.from).lt("created_at", range.to);
     }
     const { data } = await supabaseQuery;
