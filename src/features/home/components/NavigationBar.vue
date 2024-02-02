@@ -2,6 +2,7 @@
 import { MoonIcon, SunIcon } from "@heroicons/vue/24/outline";
 import { useDark, useToggle } from "@vueuse/core";
 import { useAuthStore, useOrganizationStore } from "@/stores";
+import { Button } from "@/components/ui";
 
 const authStore = useAuthStore();
 const organizationStore = useOrganizationStore();
