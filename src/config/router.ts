@@ -52,11 +52,6 @@ export const routes: RouteWithMeta[] = [
         component: () => import("@/pages/org/sales.vue"),
       },
       {
-        path: "purchases",
-        meta: organizationMeta,
-        component: () => import("@/pages/org/purchases.vue"),
-      },
-      {
         path: "customers",
         meta: organizationMeta,
         component: () => import("@/pages/org/customers.vue"),

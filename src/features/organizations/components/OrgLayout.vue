@@ -58,11 +58,6 @@ const menuList = {
     text: "Ventas",
     icon: BanknotesIcon,
   },
-  // purchases: {
-  //   path: `/org/${route.params.orgId}/purchases`,
-  //   text: "Compras",
-  //   icon: ClipboardDocumentCheckIcon,
-  // },
 };
 </script>
 
