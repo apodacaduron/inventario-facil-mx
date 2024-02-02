@@ -8,46 +8,100 @@ import {
 } from "@/features/dashboard";
 import {
   BanknotesIcon,
+  CheckIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
   CurrencyDollarIcon,
   InboxStackIcon,
   UserGroupIcon,
 } from "@heroicons/vue/24/outline";
-import { Skeleton } from "@/components/ui";
+import {
+  Skeleton,
+  Badge,
+  Button,
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuGroup,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
+} from "@/components/ui";
 import { isDefined } from "@vueuse/core";
 import { useCurrencyFormatter } from "@/features/products";
 import { useRoute } from "vue-router";
+import { ref, toRef, watch } from "vue";
 
-const DATE = new Date();
-const FIRST_DAY_OF_MONTH = new Date(DATE.getFullYear(), DATE.getMonth(), 1);
-const LAST_DAY_OF_MONTH = new Date(DATE.getFullYear(), DATE.getMonth() + 1, 0);
+const monthNumber = ref(new Date().getMonth());
+const fullYearNumber = ref(new Date().getFullYear());
+const yearDropdownMonthOptions = ref(
+  generateMonthOptions(fullYearNumber.value)
+);
+const firstDayOfTheSelectedMonth = toRef(
+  () => new Date(fullYearNumber.value, monthNumber.value, 1)
+);
+const lastDayOfTheSelectedMonth = toRef(
+  () => new Date(fullYearNumber.value, monthNumber.value + 1, 0)
+);
+const selectedMonthName = toRef(() =>
+  generateMonthName({ year: fullYearNumber.value, month: monthNumber.value })
+);
 
 const route = useRoute();
 const currencyFormatter = useCurrencyFormatter();
 const totalCustomersQuery = useTotalCustomersQuery({
   options: {
-    range: {
-      from: FIRST_DAY_OF_MONTH.toISOString(),
-      to: LAST_DAY_OF_MONTH.toISOString(),
-    },
+    range: toRef(() => ({
+      from: firstDayOfTheSelectedMonth.value.toISOString(),
+      to: lastDayOfTheSelectedMonth.value.toISOString(),
+    })),
   },
 });
 const totalSalesQuery = useTotalSalesQuery({
   options: {
-    range: {
-      from: FIRST_DAY_OF_MONTH.toISOString(),
-      to: LAST_DAY_OF_MONTH.toISOString(),
-    },
+    range: toRef(() => ({
+      from: firstDayOfTheSelectedMonth.value.toISOString(),
+      to: lastDayOfTheSelectedMonth.value.toISOString(),
+    })),
   },
 });
 const salesPricesQuery = useSalesPricesQuery({
   options: {
-    range: {
-      from: FIRST_DAY_OF_MONTH.toISOString(),
-      to: LAST_DAY_OF_MONTH.toISOString(),
-    },
+    range: toRef(() => ({
+      from: firstDayOfTheSelectedMonth.value.toISOString(),
+      to: lastDayOfTheSelectedMonth.value.toISOString(),
+    })),
   },
 });
 const productsInStockQuery = useProductsInStockQuery();
+
+function generateMonthName(data: { year: number; month: number }) {
+  return new Date(data.year, data.month, 1)
+    .toLocaleString("es-MX", {
+      month: "long",
+    })
+    .toLocaleUpperCase();
+}
+
+function generateMonthOptions(year: number) {
+  const MONTHS_OF_YEAR = 12;
+
+  const nextArrayLength =
+    year === new Date().getFullYear()
+      ? new Date().getMonth() + 1
+      : MONTHS_OF_YEAR;
+
+  return Array.from({
+    length: nextArrayLength,
+  }).map((_v, index) => ({
+    monthName: generateMonthName({ year, month: index }),
+    monthNumber: index,
+  }));
+}
+
+watch(fullYearNumber, (nextFullYearNumber) => {
+  yearDropdownMonthOptions.value = generateMonthOptions(nextFullYearNumber);
+});
 </script>
 
 <template>
@@ -55,10 +109,46 @@ const productsInStockQuery = useProductsInStockQuery();
     <div class="flex flex-col gap-3">
       <div class="text-slate-500 dark:text-slate-400 font-semibold">
         Estadísticas
-        <span
-          class="bg-blue-100 text-blue-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300"
-          >MENSUAL
-        </span>
+        <Badge variant="secondary">MENSUAL</Badge>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger as-child>
+            <Button variant="ghost"
+              ><Badge>{{ selectedMonthName }}</Badge></Button
+            >
+          </DropdownMenuTrigger>
+          <DropdownMenuContent class="w-[200px]">
+            <DropdownMenuGroup>
+              <DropdownMenuLabel class="flex justify-between items-center">
+                <Button @click="fullYearNumber--" size="sm">
+                  <ChevronLeftIcon class="h-4 w-4" />
+                </Button>
+                {{ fullYearNumber }}
+                <Button
+                  size="sm"
+                  :disabled="fullYearNumber === new Date().getFullYear()"
+                  @click="fullYearNumber++"
+                >
+                  <ChevronRightIcon class="h-4 w-4" />
+                </Button>
+              </DropdownMenuLabel>
+            </DropdownMenuGroup>
+            <DropdownMenuSeparator />
+            <DropdownMenuGroup>
+              <DropdownMenuItem
+                v-for="option in yearDropdownMonthOptions"
+                :key="option.monthNumber"
+                @click="monthNumber = option.monthNumber"
+              >
+                <CheckIcon
+                  v-if="option.monthNumber === monthNumber"
+                  class="mr-2 h-4 w-4"
+                />
+                {{ option.monthName }}
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
       <div class="grid grid-cols-1 gap-5 lg:grid-cols-2 xl:grid-cols-4">
         <router-link :to="`/org/${route.params.orgId}/sales`">
