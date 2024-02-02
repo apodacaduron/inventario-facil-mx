@@ -32,19 +32,20 @@ import { useCurrencyFormatter } from "@/features/products";
 import { useRoute } from "vue-router";
 import { ref, toRef, watch } from "vue";
 
-const monthNumber = ref(new Date().getMonth());
-const fullYearNumber = ref(new Date().getFullYear());
-const yearDropdownMonthOptions = ref(
-  generateMonthOptions(fullYearNumber.value)
+const selectedMonth = ref(new Date().getMonth());
+const selectedYear = ref(new Date().getFullYear());
+const yearDropdownMonthOptions = ref(generateMonthOptions(selectedYear.value));
+const isCurrentYearSelected = toRef(
+  () => selectedYear.value === new Date().getFullYear()
 );
 const firstDayOfTheSelectedMonth = toRef(
-  () => new Date(fullYearNumber.value, monthNumber.value, 1)
+  () => new Date(selectedYear.value, selectedMonth.value, 1)
 );
 const lastDayOfTheSelectedMonth = toRef(
-  () => new Date(fullYearNumber.value, monthNumber.value + 1, 0)
+  () => new Date(selectedYear.value, selectedMonth.value + 1, 0)
 );
 const selectedMonthName = toRef(() =>
-  generateMonthName({ year: fullYearNumber.value, month: monthNumber.value })
+  generateMonthName({ year: selectedYear.value, month: selectedMonth.value })
 );
 
 const route = useRoute();
@@ -99,7 +100,11 @@ function generateMonthOptions(year: number) {
   }));
 }
 
-watch(fullYearNumber, (nextFullYearNumber) => {
+watch(selectedYear, (nextFullYearNumber) => {
+  const currentMonth = new Date().getMonth();
+  if (isCurrentYearSelected.value && selectedMonth.value > currentMonth) {
+    selectedMonth.value = currentMonth;
+  }
   yearDropdownMonthOptions.value = generateMonthOptions(nextFullYearNumber);
 });
 </script>
@@ -120,14 +125,14 @@ watch(fullYearNumber, (nextFullYearNumber) => {
           <DropdownMenuContent class="w-[200px]">
             <DropdownMenuGroup>
               <DropdownMenuLabel class="flex justify-between items-center">
-                <Button @click="fullYearNumber--" size="sm">
+                <Button @click="selectedYear--" size="sm">
                   <ChevronLeftIcon class="h-4 w-4" />
                 </Button>
-                {{ fullYearNumber }}
+                {{ selectedYear }}
                 <Button
                   size="sm"
-                  :disabled="fullYearNumber === new Date().getFullYear()"
-                  @click="fullYearNumber++"
+                  :disabled="selectedYear === new Date().getFullYear()"
+                  @click="selectedYear++"
                 >
                   <ChevronRightIcon class="h-4 w-4" />
                 </Button>
@@ -138,10 +143,10 @@ watch(fullYearNumber, (nextFullYearNumber) => {
               <DropdownMenuItem
                 v-for="option in yearDropdownMonthOptions"
                 :key="option.monthNumber"
-                @click="monthNumber = option.monthNumber"
+                @click="selectedMonth = option.monthNumber"
               >
                 <CheckIcon
-                  v-if="option.monthNumber === monthNumber"
+                  v-if="option.monthNumber === selectedMonth"
                   class="mr-2 h-4 w-4"
                 />
                 {{ option.monthName }}
