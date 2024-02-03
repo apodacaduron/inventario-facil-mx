@@ -3,27 +3,22 @@ import {
   AddStockDialog,
   CreateOrEditSidebar,
   CreateProduct,
+  DeleteProductDialog,
   Product,
+  ShareStockDialog,
   UpdateProduct,
   productServicesTypeguards,
   useCurrencyFormatter,
   useProductServices,
 } from "@/features/products";
-import { computed, ref } from "vue";
+import { computed, ref, watchEffect } from "vue";
 import {
   Button,
   Input,
   DropdownMenu,
-  Dialog,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
-  Textarea,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
   Avatar,
   AvatarImage,
   AvatarFallback,
@@ -36,27 +31,27 @@ import {
   ShareIcon,
   TrashIcon,
 } from "@heroicons/vue/24/outline";
-import { refDebounced, useClipboard, useInfiniteScroll } from "@vueuse/core";
+import { refDebounced, useInfiniteScroll } from "@vueuse/core";
 import { useOrganizationStore } from "@/stores";
 import { useProductsQuery } from "@/features/products/composables/useProductQueries";
 import { useMutation, useQueryClient } from "@tanstack/vue-query";
 
 const tableRef = ref<HTMLElement | null>(null);
-const shareText = ref("");
+
 const productSearch = ref("");
 const productSearchDebounced = refDebounced(productSearch, 400);
 const productSidebarMode = ref<"create" | "update" | null>(null);
 const isDeleteProductDialogOpen = ref(false);
-const isShareProductsDialogOpen = ref(false);
+const isShareStockDialogOpen = ref(false);
 const isAddStockDialogOpen = ref(false);
-const selectedProductFromActions = ref<Product | null>(null);
+const selectedProduct = ref<Product | null>(null);
 const queryClient = useQueryClient();
 const organizationStore = useOrganizationStore();
 const productServices = useProductServices();
 const createProductMutation = useMutation({
   mutationFn: productServices.createProduct,
 });
-const clipboard = useClipboard();
+
 const currencyFormatter = useCurrencyFormatter();
 const productsQuery = useProductsQuery({
   options: {
@@ -80,21 +75,13 @@ useInfiniteScroll(
 );
 
 function openDeleteProductDialog(product: Product) {
-  selectedProductFromActions.value = product;
+  selectedProduct.value = product;
   isDeleteProductDialogOpen.value = true;
-}
-
-function closeModal() {
-  productSidebarMode.value = null;
-  selectedProductFromActions.value = null;
-  isAddStockDialogOpen.value = false;
-  isDeleteProductDialogOpen.value = false;
 }
 
 const productHandlers = {
   async create(formValues: CreateProduct) {
     await createProductMutation.mutateAsync(formValues);
-    closeModal();
     await queryClient.invalidateQueries({ queryKey: ["products"] });
   },
   async update(formValues: UpdateProduct) {
@@ -104,7 +91,6 @@ const productHandlers = {
       ...formValues,
       product_id: productId,
     });
-    closeModal();
     await queryClient.invalidateQueries({ queryKey: ["products"] });
   },
 };
@@ -115,58 +101,34 @@ async function handleSaveModal(formValues: CreateProduct | UpdateProduct) {
   } else {
     await productHandlers.update(formValues);
   }
+  productSidebarMode.value = null;
 }
 
 function openUpdateProductSidebar(product: Product) {
-  selectedProductFromActions.value = product;
+  selectedProduct.value = product;
   productSidebarMode.value = "update";
 }
 
 function openAddStockDialog(product: Product) {
-  selectedProductFromActions.value = product;
+  selectedProduct.value = product;
   isAddStockDialogOpen.value = true;
 }
 
-async function deleteProduct() {
-  const productId = selectedProductFromActions.value?.id;
+async function deleteProduct(product: Product | null) {
+  const productId = product?.id;
   if (!productId) throw new Error("Product id required to perform delete");
   await deleteProductMutation.mutateAsync(productId);
-  closeModal();
+  isDeleteProductDialogOpen.value = false;
   await queryClient.invalidateQueries({ queryKey: ["products"] });
 }
 
-async function shareExistingInventory() {
-  const existingProducts =
-    productsQuery.data.value?.pages.reduce<Product[]>((acc, page) => {
-      const filteredProducts = page.data?.filter(
-        (product) => (product.current_stock ?? 0) > 0
-      );
-      return [...acc, ...(filteredProducts ?? [])];
-    }, []) ?? [];
-  const inventoryString = existingProducts
-    .map((product) => `${product.name}`)
-    .join("\r\n");
+watchEffect(() => {
+  if (isDeleteProductDialogOpen.value) return;
+  if (isAddStockDialogOpen.value) return;
+  if (productSidebarMode.value) return;
 
-  // @ts-ignore
-  if (navigator.share) {
-    await navigator.share({
-      title: "Productos disponibles",
-      text: inventoryString,
-    });
-  } else {
-    isShareProductsDialogOpen.value = true;
-    shareText.value = inventoryString;
-  }
-}
-
-function copyTextShareModal() {
-  clipboard.copy(shareText.value);
-  closeShareModal();
-}
-function closeShareModal() {
-  isShareProductsDialogOpen.value = false;
-  shareText.value = "";
-}
+  selectedProduct.value = null;
+});
 </script>
 
 <template>
@@ -185,7 +147,7 @@ function closeShareModal() {
       <Button @click="productSidebarMode = 'create'">
         <PlusIcon class="w-5 h-5 stroke-[2px] mr-2" /> Crear producto
       </Button>
-      <Button @click="shareExistingInventory" variant="outline">
+      <Button @click="isShareStockDialogOpen = true" variant="outline">
         <ShareIcon class="w-5 h-5 stroke-[2px]" />
       </Button>
     </div>
@@ -292,89 +254,27 @@ function closeShareModal() {
     </table>
   </div>
 
-  <Dialog :open="isDeleteProductDialogOpen" @update:open="closeModal">
-    <DialogContent class="sm:max-w-[425px]">
-      <DialogHeader>
-        <DialogTitle>Eliminar Producto</DialogTitle>
-        <DialogDescription>
-          Esta acción eliminará permanentemente el producto. ¿Estás seguro de
-          que deseas proceder con la eliminación?
-        </DialogDescription>
-      </DialogHeader>
-      <DialogFooter>
-        <Button type="button" variant="destructive" @click="deleteProduct">
-          Si, eliminar
-        </Button>
-        <Button type="button" variant="secondary" @click="closeModal">
-          Cancelar
-        </Button>
-      </DialogFooter>
-    </DialogContent>
-  </Dialog>
-
-  <Dialog
-    :open="isShareProductsDialogOpen"
-    @update:open="(isOpen) => (isShareProductsDialogOpen = isOpen)"
-  >
-    <DialogContent class="sm:max-w-[425px]">
-      <div>
-        <div
-          class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100"
-        >
-          <ShareIcon
-            class="h-6 w-6 stroke-[2px] text-green-600"
-            aria-hidden="true"
-          />
-        </div>
-        <div class="mt-3 text-center sm:mt-5">
-          <h3
-            class="text-lg font-medium leading-6 text-slate-900 dark:text-white"
-          >
-            🎉 Lista de Productos disponibles
-          </h3>
-          <div class="mt-2">
-            <p class="text-sm text-slate-500 dark:text-slate-400">
-              A continuación se muestra una lista de productos disponibles
-              actualmente en stock. Puedes copiar y compartir esta lista según
-              sea necesario.
-            </p>
-          </div>
-
-          <div class="my-2">
-            <Textarea autosize v-model="shareText" />
-          </div>
-        </div>
-      </div>
-      <div class="mt-5 sm:mt-6 flex flex-col gap-3">
-        <Button type="button" class="w-full" @click="copyTextShareModal">
-          Copy
-        </Button>
-        <Button
-          type="button"
-          class="w-full"
-          variant="outline"
-          @click="closeShareModal"
-        >
-          Close
-        </Button>
-      </div>
-    </DialogContent>
-  </Dialog>
-
+  <DeleteProductDialog
+    v-model:open="isDeleteProductDialogOpen"
+    :product="selectedProduct"
+    :isLoading="deleteProductMutation.isPending.value"
+    @confirmDelete="deleteProduct"
+  />
+  <ShareStockDialog v-model:open="isShareStockDialogOpen" />
   <CreateOrEditSidebar
     :open="Boolean(productSidebarMode)"
-    :product="selectedProductFromActions"
+    @close="productSidebarMode = null"
+    :product="selectedProduct"
     :isLoading="
       updateProductMutation.isPending.value ||
       createProductMutation.isPending.value
     "
-    @close="closeModal"
     @save="handleSaveModal"
   />
   <AddStockDialog
-    :product="selectedProductFromActions"
-    :open="isAddStockDialogOpen"
-    @close="closeModal"
+    v-model:open="isAddStockDialogOpen"
+    :product="selectedProduct"
+    :isLoading="updateProductMutation.isPending.value"
     @save="handleSaveModal"
   />
 </template>
