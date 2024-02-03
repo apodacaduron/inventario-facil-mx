@@ -10,6 +10,12 @@ import { toRef } from "vue";
 import { useCurrencyFormatter } from "@/features/products";
 import StatCard from "./StatCard.vue";
 import { Skeleton } from "@/components/ui";
+import {
+  BanknotesIcon,
+  CurrencyDollarIcon,
+  InboxStackIcon,
+  UserGroupIcon,
+} from "@heroicons/vue/24/outline";
 
 const props = defineProps<{ from: string; to: string }>();
 
