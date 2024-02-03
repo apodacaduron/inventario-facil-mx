@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/vue-query";
 import { useDashboardServices } from "./useDashboardServices";
-import { MaybeRefOrGetter, toValue } from "vue";
+import { MaybeRefOrGetter, toRef, toValue } from "vue";
+import { isDefined } from "@vueuse/core";
 
 export function useTotalCustomersQuery(context?: {
   options?: {
@@ -49,7 +50,11 @@ export function useSalesPricesQuery(context?: {
   });
 }
 
-export function useProductsInStockQuery() {
+export function useProductsInStockQuery(context?: {
+  options?: {
+    enabled?: MaybeRefOrGetter<boolean | undefined>;
+  };
+}) {
   const dashboardServices = useDashboardServices();
 
   return useQuery({
@@ -57,5 +62,10 @@ export function useProductsInStockQuery() {
     queryFn() {
       return dashboardServices.getProductsInStock();
     },
+    enabled: toRef(
+      () =>
+        toValue(context?.options?.enabled) ||
+        !isDefined(toValue(context?.options?.enabled))
+    ),
   });
 }

@@ -11,7 +11,7 @@ import {
   useCurrencyFormatter,
   useProductServices,
 } from "@/features/products";
-import { computed, ref, watchEffect } from "vue";
+import { ref, toRef, watchEffect } from "vue";
 import {
   Button,
   Input,
@@ -55,7 +55,7 @@ const createProductMutation = useMutation({
 const currencyFormatter = useCurrencyFormatter();
 const productsQuery = useProductsQuery({
   options: {
-    enabled: computed(() => organizationStore.hasOrganizations),
+    enabled: toRef(() => organizationStore.hasOrganizations),
     search: productSearchDebounced,
     order: ["created_at", "desc"],
   },

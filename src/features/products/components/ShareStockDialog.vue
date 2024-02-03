@@ -10,7 +10,7 @@ import {
 import { useProductsInStockQuery } from "@/features/dashboard";
 import { CheckIcon, ShareIcon } from "@heroicons/vue/24/outline";
 import { useClipboard } from "@vueuse/core";
-import { computed, ref } from "vue";
+import { computed, ref, toRef } from "vue";
 
 const openModel = defineModel<boolean>("open");
 
@@ -18,7 +18,11 @@ const showCurrentStock = ref(false);
 const hasBeenCopied = ref(false);
 
 const clipboard = useClipboard();
-const productsInStockQuery = useProductsInStockQuery();
+const productsInStockQuery = useProductsInStockQuery({
+  options: {
+    enabled: toRef(() => Boolean(openModel.value)),
+  },
+});
 
 const inventoryString = computed(
   () =>
