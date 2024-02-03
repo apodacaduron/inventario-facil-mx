@@ -1,23 +1,34 @@
 import { useInfiniteQuery } from "@tanstack/vue-query";
-import { ProductFilters, useProductServices } from "./useProductServices";
+import {
+  ProductFilterParams,
+  ProductOrderParam,
+  useProductServices,
+} from "./useProductServices";
 import { MaybeRefOrGetter, toValue } from "vue";
 
 export function useProductsQuery(context: {
   options: {
     enabled: MaybeRefOrGetter<boolean | undefined>;
     search: MaybeRefOrGetter<string | undefined>;
-    filters?: MaybeRefOrGetter<ProductFilters | undefined>;
+    filters?: MaybeRefOrGetter<ProductFilterParams | undefined>;
+    order?: MaybeRefOrGetter<ProductOrderParam | undefined>;
   };
 }) {
   const productServices = useProductServices();
 
   return useInfiniteQuery({
-    queryKey: ["products", context.options.search, context.options.filters],
+    queryKey: [
+      "products",
+      context.options.search,
+      context.options.filters,
+      context.options.order,
+    ],
     queryFn({ pageParam }) {
       return productServices.loadList({
         offset: pageParam,
         search: toValue(context.options.search),
         filters: toValue(context.options.filters),
+        order: toValue(context.options.order),
       });
     },
     initialPageParam: 0,

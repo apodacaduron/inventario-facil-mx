@@ -21,11 +21,12 @@ export type ProductList = Awaited<
 >["data"];
 export type Product = NonNullable<ProductList>[number];
 
-export type ProductFilters = Array<{
+export type ProductFilterParams = Array<{
   column: string;
   operator: string;
   value: any;
 }>;
+export type ProductOrderParam = [string, "asc" | "desc"];
 
 export const productServicesTypeguards = {
   isCreateProduct(
@@ -56,7 +57,8 @@ export function useProductServices() {
   async function loadList(options?: {
     offset?: number;
     search?: string;
-    filters?: ProductFilters;
+    filters?: ProductFilterParams;
+    order?: ProductOrderParam;
   }) {
     const offset = options?.offset ?? 0;
     const from = offset * PAGINATION_LIMIT;
@@ -72,13 +74,17 @@ export function useProductServices() {
       .from("i_products")
       .select("*")
       .eq("org_id", organization.org_id)
-      .range(from, to)
-      .order("created_at", { ascending: false });
+      .range(from, to);
 
     if (options?.search) {
       productSearch = productSearch.ilike("name", `%${options.search}%`);
     }
-
+    if (options?.order) {
+      const [column = "created_at", order = "desc"] = options?.order;
+      productSearch = productSearch.order(column, {
+        ascending: order === "asc",
+      });
+    }
     if (options?.filters) {
       options?.filters.forEach((filter) => {
         productSearch = productSearch.filter(
