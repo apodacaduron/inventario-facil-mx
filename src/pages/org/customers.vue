@@ -23,6 +23,12 @@ import {
   DialogFooter,
   Avatar,
   AvatarFallback,
+  Table,
+  TableHeader,
+  TableRow,
+  TableHead,
+  TableBody,
+  TableCell,
 } from "@/components/ui";
 import { Badge } from "@/components";
 import {
@@ -163,38 +169,28 @@ function getBadgeColorFromStatus(status: Customer["trust_status"]) {
     </div>
   </div>
 
-  <div class="relative overflow-x-auto shadow-md rounded-lg">
-    <table
-      ref="tableRef"
-      class="w-full text-sm text-left rtl:text-right text-slate-500 dark:text-slate-400"
-    >
-      <thead
-        class="text-xs text-slate-700 uppercase bg-slate-50 dark:bg-slate-700 dark:text-slate-400"
-      >
-        <tr>
-          <th scope="col" class="px-6 py-3 min-w-48">Nombre</th>
-          <th scope="col" class="px-6 py-3 min-w-64 text-center">Notas</th>
-          <th scope="col" class="px-6 py-3 text-center">Teléfono</th>
-          <th scope="col" class="px-6 py-3 text-center">Dirección</th>
-          <th scope="col" class="px-6 py-3 text-center">Mapa</th>
-          <th scope="col" class="px-6 py-3 text-center">Estado de confianza</th>
-          <th scope="col" class="px-6 py-3">Acción</th>
-        </tr>
-      </thead>
-      <tbody>
+  <div ref="tableRef" class="overflow-x-auto">
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead> Nombre </TableHead>
+          <TableHead class="text-center">Notas</TableHead>
+          <TableHead class="text-center">Teléfono</TableHead>
+          <TableHead class="text-center"> Dirección </TableHead>
+          <TableHead class="text-center"> Mapa </TableHead>
+          <TableHead class="text-center"> Estado de confianza </TableHead>
+          <TableHead class="text-center"> - </TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
         <!-- @vue-ignore -->
         <template
           v-for="(page, index) in customersQuery.data.value?.pages"
           :key="index"
         >
-          <tr
-            v-for="customer in page.data"
-            :key="customer.id"
-            class="bg-white border-b dark:bg-slate-900 dark:border-slate-800"
-          >
-            <th
-              scope="row"
-              class="flex items-center px-6 py-4 text-slate-900 whitespace-nowrap dark:text-white w-max"
+          <TableRow v-for="customer in page.data" :key="customer.id">
+            <TableCell
+              class="flex items-center px-6 py-4 text-foreground whitespace-nowrap w-max"
             >
               <Avatar>
                 <AvatarFallback>{{
@@ -207,24 +203,24 @@ function getBadgeColorFromStatus(status: Customer["trust_status"]) {
                   {{ customer.email }}
                 </div>
               </div>
-            </th>
-            <td class="text-center">
-              {{ customer.notes || "-" }}
-            </td>
-            <td class="text-center">
-              <a
+            </TableCell>
+            <TableCell class="text-center">{{
+              customer.notes || "-"
+            }}</TableCell>
+            <TableCell class="text-center"
+              ><a
                 :href="`${WHATSAPP_URL}/${customer.phone}`"
                 target="_blank"
                 rel="noopener noreferrer"
                 class="block"
               >
                 {{ customer.phone }}
-              </a>
-            </td>
-            <td class="text-center">
+              </a></TableCell
+            >
+            <TableCell class="text-center">
               {{ customer.address || "-" }}
-            </td>
-            <td class="text-center">
+            </TableCell>
+            <TableCell class="text-center">
               <a
                 v-if="customer.map_url"
                 :href="customer.map_url"
@@ -235,13 +231,13 @@ function getBadgeColorFromStatus(status: Customer["trust_status"]) {
                 <MapIcon class="w-6 h-6 stroke-[2px]" />
               </a>
               <template v-else>-</template>
-            </td>
-            <td class="text-center">
+            </TableCell>
+            <TableCell class="text-center">
               <Badge :color="getBadgeColorFromStatus(customer.trust_status)">
                 {{ customer.trust_status?.toLocaleUpperCase() }}
               </Badge>
-            </td>
-            <td class="px-6 py-4">
+            </TableCell>
+            <TableCell class="text-center">
               <DropdownMenu>
                 <DropdownMenuTrigger as-child>
                   <Button variant="outline">
@@ -265,11 +261,11 @@ function getBadgeColorFromStatus(status: Customer["trust_status"]) {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-            </td>
-          </tr>
+            </TableCell>
+          </TableRow>
         </template>
-      </tbody>
-    </table>
+      </TableBody>
+    </Table>
   </div>
 
   <Dialog :open="isDeleteCustomerDialogOpen" @update:open="closeSidebar">

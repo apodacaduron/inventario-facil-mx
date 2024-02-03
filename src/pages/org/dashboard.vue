@@ -1,9 +1,5 @@
 <script setup lang="ts">
-import {
-  ProductsInStockTable,
-  StatsGrid,
-  useDashboardDates,
-} from "@/features/dashboard";
+import { StatsGrid, useDashboardDates } from "@/features/dashboard";
 import {
   CheckIcon,
   ChevronLeftIcon,
@@ -80,16 +76,6 @@ const dashboardDates = useDashboardDates();
         :from="dashboardDates.firstDayOfTheSelectedMonth.value.toISOString()"
         :to="dashboardDates.lastDayOfTheSelectedMonth.value.toISOString()"
       />
-    </div>
-
-    <div class="flex flex-col gap-3">
-      <div class="text-slate-500 dark:text-slate-400 font-semibold">
-        Productos en stock
-      </div>
-
-      <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
-        <ProductsInStockTable />
-      </div>
     </div>
   </div>
 </template>

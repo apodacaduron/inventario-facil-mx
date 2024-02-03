@@ -22,6 +22,12 @@ import {
   Avatar,
   AvatarImage,
   AvatarFallback,
+  Table,
+  TableHeader,
+  TableRow,
+  TableHead,
+  TableBody,
+  TableCell,
 } from "@/components/ui";
 import {
   EllipsisVerticalIcon,
@@ -136,7 +142,7 @@ watchEffect(() => {
   <div class="flex items-center justify-between flex-col md:flex-row">
     <div class="mb-6">
       <h2
-        class="mb-2 text-3xl font-extrabold leading-none tracking-tight text-slate-900 md:text-4xl dark:text-white"
+        class="mb-2 text-3xl font-extrabold leading-none tracking-tight md:text-4xl text-foreground"
       >
         Productos
       </h2>
@@ -158,7 +164,7 @@ watchEffect(() => {
     class="flex items-center justify-between flex-column flex-wrap md:flex-row space-y-4 md:space-y-0 pb-4"
   >
     <label for="table-search" class="sr-only">Buscar</label>
-    <div class="relative">
+    <div>
       <Input
         v-model="productSearch"
         type="search"
@@ -167,36 +173,26 @@ watchEffect(() => {
     </div>
   </div>
 
-  <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
-    <table
-      ref="tableRef"
-      class="w-full text-sm text-left rtl:text-right text-slate-500 dark:text-slate-400"
-    >
-      <thead
-        class="text-xs text-slate-700 uppercase bg-slate-50 dark:bg-slate-700 dark:text-slate-400"
-      >
-        <tr>
-          <th scope="col" class="px-6 py-3">Nombre</th>
-          <th scope="col" class="px-6 py-3 text-center">Cantidad</th>
-          <th scope="col" class="px-6 py-3 text-center">Precio unitario</th>
-          <th scope="col" class="px-6 py-3 text-center">Precio de venta</th>
-          <th scope="col" class="px-6 py-3">Acción</th>
-        </tr>
-      </thead>
-      <tbody>
+  <div ref="tableRef" class="overflow-x-auto">
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead> Nombre </TableHead>
+          <TableHead class="text-center">Cantidad</TableHead>
+          <TableHead class="text-center">Precio unitario</TableHead>
+          <TableHead class="text-center"> Precio de venta </TableHead>
+          <TableHead class="text-center"> - </TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
         <!-- @vue-ignore -->
         <template
           v-for="(page, index) in productsQuery.data.value?.pages"
           :key="index"
         >
-          <tr
-            v-for="product in page.data"
-            :key="product.id"
-            class="bg-white border-b dark:bg-slate-900 dark:border-slate-800"
-          >
-            <th
-              scope="row"
-              class="flex items-center px-6 py-4 text-slate-900 whitespace-nowrap dark:text-white w-max"
+          <TableRow v-for="product in page.data" :key="product.id">
+            <TableCell
+              class="flex items-center px-6 py-4 text-foreground whitespace-nowrap w-max"
             >
               <Avatar>
                 <AvatarImage :src="product?.image_url ?? ''" />
@@ -213,17 +209,17 @@ watchEffect(() => {
                   {{ product.description }}
                 </div>
               </div>
-            </th>
-            <td class="text-center">
-              {{ product.current_stock }}
-            </td>
-            <td class="text-center">
-              {{ currencyFormatter.parse(product.unit_price) ?? "-" }}
-            </td>
-            <td class="text-center">
+            </TableCell>
+            <TableCell class="text-center">{{
+              product.current_stock
+            }}</TableCell>
+            <TableCell class="text-center">{{
+              currencyFormatter.parse(product.unit_price) ?? "-"
+            }}</TableCell>
+            <TableCell class="text-center">
               {{ currencyFormatter.parse(product.retail_price) ?? "-" }}
-            </td>
-            <td class="px-6 py-4">
+            </TableCell>
+            <TableCell class="text-center">
               <DropdownMenu>
                 <DropdownMenuTrigger as-child>
                   <Button variant="outline">
@@ -248,11 +244,11 @@ watchEffect(() => {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-            </td>
-          </tr>
+            </TableCell>
+          </TableRow>
         </template>
-      </tbody>
-    </table>
+      </TableBody>
+    </Table>
   </div>
 
   <DeleteProductDialog

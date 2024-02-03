@@ -23,6 +23,13 @@ import {
   DropdownMenuItem,
   Avatar,
   AvatarFallback,
+  Table,
+  TableHeader,
+  TableRow,
+  TableHead,
+  TableBody,
+  TableCell,
+  AvatarImage,
 } from "@/components/ui";
 import {
   EllipsisVerticalIcon,
@@ -162,39 +169,29 @@ function getBadgeColorFromStatus(status: Sale["status"]) {
     </div>
   </div>
 
-  <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
-    <table
-      ref="tableRef"
-      class="w-full text-sm text-left rtl:text-right text-slate-500 dark:text-slate-400"
-    >
-      <thead
-        class="text-xs text-slate-700 uppercase bg-slate-50 dark:bg-slate-700 dark:text-slate-400"
-      >
-        <tr>
-          <th scope="col" class="px-6 py-3">Nombre</th>
-          <th scope="col" class="px-6 py-3 text-center">Productos</th>
-          <th scope="col" class="px-6 py-3 text-center">Cantidad</th>
-          <th scope="col" class="px-6 py-3 text-center">Total</th>
-          <th scope="col" class="px-6 py-3 text-center">Costo de envio</th>
-          <th scope="col" class="px-6 py-3 text-center">Estatus</th>
-          <th scope="col" class="px-6 py-3 text-center">Creado</th>
-          <th scope="col" class="px-6 py-3">Acción</th>
-        </tr>
-      </thead>
-      <tbody>
+  <div ref="tableRef" class="overflow-x-auto">
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead> Nombre </TableHead>
+          <TableHead class="text-center">Productos</TableHead>
+          <TableHead class="text-center">Cantidad</TableHead>
+          <TableHead class="text-center"> Total </TableHead>
+          <TableHead class="text-center"> Costo de envio </TableHead>
+          <TableHead class="text-center"> Estatus</TableHead>
+          <TableHead class="text-center"> Creado</TableHead>
+          <TableHead class="text-center"> - </TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
         <!-- @vue-ignore -->
         <template
           v-for="(page, index) in salesQuery.data.value?.pages"
           :key="index"
         >
-          <tr
-            v-for="sale in page.data"
-            :key="sale.id"
-            class="bg-white border-b dark:bg-slate-900 dark:border-slate-800"
-          >
-            <th
-              scope="row"
-              class="flex items-center px-6 py-4 text-slate-900 whitespace-nowrap dark:text-white w-max"
+          <TableRow v-for="sale in page.data" :key="sale.id">
+            <TableCell
+              class="flex items-center px-6 py-4 text-foreground whitespace-nowrap w-max"
             >
               <Avatar>
                 <AvatarFallback>{{
@@ -221,38 +218,39 @@ function getBadgeColorFromStatus(status: Sale["status"]) {
                   </a>
                 </div>
               </div>
-            </th>
-            <td class="text-center">
-              <div
+            </TableCell>
+            <TableCell class="text-center"
+              ><div
                 class="flex -space-x-4 rtl:space-x-reverse w-fit mx-auto cursor-pointer"
                 @click="handleSaleSidebar({ sale, mode: 'view' })"
               >
-                <img
+                <Avatar
                   v-for="saleProduct in sale.i_sale_products.slice(0, 3)"
                   :key="saleProduct.id"
-                  class="w-10 h-10 border-2 border-white rounded-full dark:border-slate-800"
-                  :src="
-                    saleProduct.i_products?.image_url ??
-                    '/product-placeholder.png'
-                  "
-                />
+                  class="border-muted border-2"
+                >
+                  <AvatarImage :src="saleProduct.i_products?.image_url ?? ''" />
+                  <AvatarFallback>{{
+                    `${saleProduct.i_products?.name
+                      ?.substring(0, 1)
+                      .toLocaleUpperCase()}`
+                  }}</AvatarFallback>
+                </Avatar>
                 <div
                   v-if="sale.i_sale_products.length > 3"
-                  class="flex items-center justify-center w-10 h-10 text-xs font-medium text-white bg-slate-700 border-2 border-white rounded-full hover:bg-slate-600 dark:border-slate-800"
+                  class="flex items-center justify-center w-10 h-10 text-xs font-medium border-2 rounded-full bg-background border-muted"
                 >
                   {{ sale.i_sale_products.length - 3 }}
                 </div>
-              </div>
-            </td>
-            <td class="text-center">
-              {{
-                sale.i_sale_products.reduce(
-                  (acc, saleProduct) => acc + (saleProduct.qty ?? 0),
-                  0
-                )
-              }}
-            </td>
-            <td class="text-center">
+              </div></TableCell
+            >
+            <TableCell class="text-center">{{
+              sale.i_sale_products.reduce(
+                (acc, saleProduct) => acc + (saleProduct.qty ?? 0),
+                0
+              )
+            }}</TableCell>
+            <TableCell class="text-center">
               {{
                 currencyFormatter.parse(
                   sale.i_sale_products.reduce(
@@ -262,16 +260,16 @@ function getBadgeColorFromStatus(status: Sale["status"]) {
                   )
                 )
               }}
-            </td>
-            <td class="text-center">
+            </TableCell>
+            <TableCell class="text-center">
               {{ currencyFormatter.parse(sale.shipping_cost) }}
-            </td>
-            <td class="text-center">
+            </TableCell>
+            <TableCell class="text-center">
               <Badge :color="getBadgeColorFromStatus(sale.status)"
                 >{{ sale.status?.toLocaleUpperCase() }}
               </Badge>
-            </td>
-            <td class="text-center">
+            </TableCell>
+            <TableCell class="text-center">
               {{
                 new Date(sale.created_at).toLocaleDateString("es-MX", {
                   year: "numeric",
@@ -279,8 +277,8 @@ function getBadgeColorFromStatus(status: Sale["status"]) {
                   day: "numeric",
                 })
               }}
-            </td>
-            <td class="px-6 py-4">
+            </TableCell>
+            <TableCell class="text-center">
               <DropdownMenu>
                 <DropdownMenuTrigger as-child>
                   <Button variant="outline">
@@ -311,11 +309,11 @@ function getBadgeColorFromStatus(status: Sale["status"]) {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-            </td>
-          </tr>
+            </TableCell>
+          </TableRow>
         </template>
-      </tbody>
-    </table>
+      </TableBody>
+    </Table>
   </div>
 
   <Dialog :open="isDeleteSaleDialogOpen" @update:open="closeDeleteSaleDialog">

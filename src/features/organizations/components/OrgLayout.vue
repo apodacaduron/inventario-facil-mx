@@ -62,9 +62,7 @@ const menuList = {
 </script>
 
 <template>
-  <nav
-    class="fixed top-0 z-20 w-full bg-white border-b border-slate-200 dark:bg-slate-900 dark:border-slate-800"
-  >
+  <nav class="fixed top-0 z-20 w-full border-b border-border bg-background">
     <div class="px-3 py-3 lg:px-5 lg:pl-3">
       <div class="flex items-center justify-between">
         <div class="flex items-center justify-start rtl:justify-end">
@@ -115,9 +113,7 @@ const menuList = {
                             v-if="menuItem.icon"
                             class="w-6 h-6 stroke-[2px] duration-75"
                           />
-                          <span class="ms-3 font-semibold">{{
-                            menuItem.text
-                          }}</span>
+                          <span class="ms-3">{{ menuItem.text }}</span>
                         </router-link>
                       </SheetClose>
                     </li>
@@ -125,16 +121,16 @@ const menuList = {
 
                   <div
                     id="dropdown-cta"
-                    class="p-4 mt-6 rounded-lg bg-slate-50 border border-slate-100 dark:bg-slate-900 dark:border-slate-700"
+                    class="p-4 mt-6 rounded-lg border border-border"
                     role="alert"
                   >
                     <div class="flex items-center mb-3">
                       <span
-                        class="bg-orange-100 text-orange-800 text-sm font-semibold me-2 px-2.5 py-0.5 rounded dark:bg-orange-200 dark:text-orange-900"
+                        class="bg-orange-100 text-orange-800 text-sm me-2 px-2.5 py-0.5 rounded dark:bg-orange-200 dark:text-orange-900"
                         >Alpha</span
                       >
                     </div>
-                    <p class="mb-3 text-sm text-slate-800 dark:text-slate-400">
+                    <p class="mb-3 text-sm text-muted-foreground">
                       Este producto se encuentra en fase alpha. ¡Gracias por
                       probarlo y ser parte de su desarrollo inicial!
                     </p>
@@ -146,7 +142,7 @@ const menuList = {
 
           <router-link :to="menuList.dashboard.path" class="flex ms-2 md:me-24">
             <span
-              class="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap dark:text-white"
+              class="self-center text-xl sm:text-2xl whitespace-nowrap dark:text-white"
               >inventariofacil.mx
             </span>
           </router-link>
@@ -194,12 +190,10 @@ const menuList = {
 
   <aside
     id="logo-sidebar"
-    class="fixed top-0 left-0 z-10 w-64 h-screen pt-20 transition-transform -translate-x-full bg-white border-r border-slate-200 sm:translate-x-0 dark:bg-slate-900 dark:border-slate-800"
+    class="fixed top-0 left-0 z-10 w-64 h-screen pt-20 transition-transform -translate-x-full border-r sm:translate-x-0 border-border"
     aria-label="Sidebar"
   >
-    <div
-      class="flex flex-col justify-between h-full px-3 pb-4 overflow-y-auto bg-white dark:bg-slate-900"
-    >
+    <div class="flex flex-col justify-between h-full px-3 pb-4 overflow-y-auto">
       <ul class="space-y-2">
         <li v-for="(menuItem, index) in menuList" :key="index">
           <router-link
@@ -212,23 +206,23 @@ const menuList = {
               v-if="menuItem.icon"
               class="w-6 h-6 stroke-[2px]"
             />
-            <span class="ms-3 font-semibold">{{ menuItem.text }}</span>
+            <span class="ms-3">{{ menuItem.text }}</span>
           </router-link>
         </li>
       </ul>
 
       <div
         id="dropdown-cta"
-        class="p-4 mt-6 rounded-lg bg-slate-50 border border-slate-100 dark:bg-slate-900 dark:border-slate-700"
+        class="p-4 mt-6 rounded-lg border border-border"
         role="alert"
       >
         <div class="flex items-center mb-3">
           <span
-            class="bg-orange-100 text-orange-800 text-sm font-semibold me-2 px-2.5 py-0.5 rounded dark:bg-orange-200 dark:text-orange-900"
+            class="bg-orange-100 text-orange-800 text-sm me-2 px-2.5 py-0.5 rounded dark:bg-orange-200 dark:text-orange-900"
             >Alpha</span
           >
         </div>
-        <p class="mb-3 text-sm text-slate-800 dark:text-slate-400">
+        <p class="mb-3 text-sm text-muted-foreground">
           Este producto se encuentra en fase alpha. ¡Gracias por probarlo y ser
           parte de su desarrollo inicial!
         </p>
@@ -245,6 +239,6 @@ const menuList = {
 
 <style scoped lang="scss">
 .active-link {
-  @apply text-slate-800 bg-slate-50 dark:bg-slate-900 dark:text-slate-50;
+  @apply font-semibold text-foreground;
 }
 </style>
