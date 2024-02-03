@@ -54,6 +54,7 @@ const customersQuery = useCustomersQuery({
   options: {
     enabled: computed(() => organizationStore.hasOrganizations),
     search: customerSearchDebounced,
+    order: ["created_at", "desc"],
   },
 });
 const deleteCustomerMutation = useMutation({

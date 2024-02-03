@@ -137,6 +137,7 @@ const customersQuery = useCustomersQuery({
     enabled: computed(() => organizationStore.hasOrganizations),
     search: customerSearchDebounced,
     filters: [{ column: "trust_status", operator: "eq", value: "trusted" }],
+    order: ["name", "asc"],
   },
 });
 const productsQuery = useProductsQuery({
@@ -150,6 +151,7 @@ const productsQuery = useProductsQuery({
         value: 0,
       },
     ],
+    order: ["name", "asc"],
   },
 });
 useInfiniteScroll(

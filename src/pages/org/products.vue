@@ -57,6 +57,7 @@ const productsQuery = useProductsQuery({
   options: {
     enabled: computed(() => organizationStore.hasOrganizations),
     search: productSearchDebounced,
+    order: ["created_at", "desc"],
   },
 });
 const deleteProductMutation = useMutation({
