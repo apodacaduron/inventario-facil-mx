@@ -74,7 +74,7 @@ const bestCustomersQuery = useBestCustomersQuery({
       from: props.from,
       to: props.to,
     })),
-    limit: 5,
+    limit: 3,
   },
 });
 </script>
@@ -212,14 +212,14 @@ const bestCustomersQuery = useBestCustomersQuery({
       </Card>
     </router-link>
 
-    <router-link :to="`/org/${route.params.orgId}/customers`" class="col-span-2">
+    <router-link :to="`/org/${route.params.orgId}/customers`" class="lg:col-span-2">
       <Card>
         <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle class="text-sm font-medium">Los mejores clientes</CardTitle>
           <ArchiveBoxIcon class="w-5 h-5" />
         </CardHeader>
         <CardContent>
-          <div class="text-2xl font-bold h-[32px] flex flex-row gap-2">
+          <div class="text-2xl font-bold flex flex-row gap-2 lg:h-[32px]">
             <template v-if="isDefined(bestCustomersQuery.data.value)">
               <div class="relative" v-for="(customer, index) in bestCustomersQuery.data.value" :key="customer.id">
                 <Badge>
