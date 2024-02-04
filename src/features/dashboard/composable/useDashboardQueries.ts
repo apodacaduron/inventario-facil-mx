@@ -69,3 +69,51 @@ export function useProductsInStockQuery(context?: {
     ),
   });
 }
+
+export function useMostSoldProductsQuery(context?: {
+  options?: {
+    range?: MaybeRefOrGetter<{ from: string; to: string } | undefined>;
+    limit?: MaybeRefOrGetter<number | undefined>;
+  };
+}) {
+  const dashboardServices = useDashboardServices();
+
+  return useQuery({
+    queryKey: [
+      "dashboard",
+      "most-sold-products",
+      context?.options?.range,
+      context?.options?.limit,
+    ],
+    queryFn() {
+      return dashboardServices.getMostSoldProducts({
+        range: toValue(context?.options?.range),
+        limit: toValue(context?.options?.limit),
+      });
+    },
+  });
+}
+
+export function useBestCustomersQuery(context?: {
+  options?: {
+    range?: MaybeRefOrGetter<{ from: string; to: string } | undefined>;
+    limit?: MaybeRefOrGetter<number | undefined>;
+  };
+}) {
+  const dashboardServices = useDashboardServices();
+
+  return useQuery({
+    queryKey: [
+      "dashboard",
+      "best-customers",
+      context?.options?.range,
+      context?.options?.limit,
+    ],
+    queryFn() {
+      return dashboardServices.getBestCustomers({
+        range: toValue(context?.options?.range),
+        limit: toValue(context?.options?.limit),
+      });
+    },
+  });
+}

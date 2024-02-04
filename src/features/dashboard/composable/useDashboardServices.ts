@@ -1,4 +1,6 @@
 import { supabase } from "@/config/supabase";
+import { Customer } from "@/features/customers";
+import { SaleProduct } from "@/features/sales";
 import { useOrganizationStore } from "@/stores";
 import { useRoute } from "vue-router";
 
@@ -122,10 +124,134 @@ export function useDashboardServices() {
     return await supabaseQuery;
   }
 
+  async function getMostSoldProducts(options: {
+    range?: { from: string; to: string };
+    limit?: number;
+  }) {
+    const organization = organizationStore.findOrganizationById(
+      orgId.toString()
+    );
+    if (!organization?.org_id)
+      throw new Error("Organization is required to get sales count");
+
+    let supabaseQuery = supabase
+      .from("i_sale_products")
+      .select("*, i_products(*)")
+      .eq("org_id", organization.org_id)
+      .order("qty", { ascending: false });
+
+    if (options.range) {
+      supabaseQuery
+        .gt("created_at", options.range.from)
+        .lt("created_at", options.range.to);
+    }
+
+    const response = await supabaseQuery;
+
+    // Perform grouping in JavaScript
+    const groupedProducts =
+      response.data?.reduce<
+        Record<string, SaleProduct & { total_sold: number }>
+      >((acc, item) => {
+        const productId = item.product_id;
+        const qty = item.qty;
+
+        if (!productId || !qty) return acc;
+
+        if (!acc[productId]) {
+          acc[productId] = {
+            ...item,
+            total_sold: 0,
+          };
+        }
+
+        acc[productId] = {
+          ...item,
+          total_sold: acc[productId].total_sold + qty,
+        };
+
+        return acc;
+      }, {}) ?? {};
+
+    // Convert the grouped data to an array of objects
+    const sortedResults = Object.values(groupedProducts).sort(
+      (a, b) => b.total_sold - a.total_sold
+    );
+
+    const DEFAULT_LIMIT = 3;
+    const topProducts = sortedResults.slice(0, options.limit ?? DEFAULT_LIMIT);
+
+    return topProducts;
+  }
+
+  async function getBestCustomers(options: {
+    range?: { from: string; to: string };
+    limit?: number;
+  }) {
+    const organization = organizationStore.findOrganizationById(
+      orgId.toString()
+    );
+    if (!organization?.org_id)
+      throw new Error("Organization is required to get sales count");
+
+    let supabaseQuery = supabase
+      .from("i_sale_products")
+      .select("*, i_sales(*, i_customers(*))")
+      .eq("org_id", organization.org_id)
+      .order("qty", { ascending: false });
+
+    if (options.range) {
+      supabaseQuery
+        .gt("created_at", options.range.from)
+        .lt("created_at", options.range.to);
+    }
+
+    const response = await supabaseQuery;
+
+    // Perform grouping in JavaScript
+    const groupedProducts =
+      response.data?.reduce<Record<string, Customer & { total_sold: number }>>(
+        (acc, item) => {
+          const customerData = item.i_sales?.i_customers;
+          const customerId = customerData?.id;
+          const qty = item.qty;
+
+          if (!customerData || !customerId || !qty) return acc;
+
+          if (!acc[customerId]) {
+            acc[customerId] = {
+              ...customerData,
+              total_sold: 0,
+            };
+          }
+
+          acc[customerId] = {
+            ...customerData,
+            total_sold: acc[customerId].total_sold + qty,
+          };
+
+          return acc;
+        },
+        {}
+      ) ?? {};
+
+    // Convert the grouped data to an array of objects
+    const sortedResults = Object.values(groupedProducts).sort(
+      (a, b) => b.total_sold - a.total_sold
+    );
+
+    const DEFAULT_LIMIT = 3;
+    const topCustomers = sortedResults.slice(0, options.limit ?? DEFAULT_LIMIT);
+
+    return topCustomers;
+  }
+
   return {
     getTotalCustomers,
     getTotalSales,
     getSalesPrices,
     getProductsInStock,
+    getMostSoldProducts,
+    getBestCustomers,
   };
 }
