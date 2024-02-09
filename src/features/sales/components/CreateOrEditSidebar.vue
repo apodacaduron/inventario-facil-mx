@@ -35,7 +35,7 @@ import {
   SelectGroup,
   Badge,
 } from "@/components/ui";
-import { computed, ref, watch } from "vue";
+import { computed, ref, toRef, watch } from "vue";
 import { z } from "zod";
 import { CreateSale, SALE_STATUS, Sale, UpdateSale } from "../composables";
 import { refDebounced, useInfiniteScroll } from "@vueuse/core";
@@ -134,7 +134,7 @@ const organizationStore = useOrganizationStore();
 const currencyFormatter = useCurrencyFormatter();
 const customersQuery = useCustomersQuery({
   options: {
-    enabled: computed(() => organizationStore.hasOrganizations),
+    enabled: toRef(() => organizationStore.hasOrganizations),
     search: customerSearchDebounced,
     filters: [{ column: "trust_status", operator: "eq", value: "trusted" }],
     order: ["name", "asc"],
@@ -142,7 +142,7 @@ const customersQuery = useCustomersQuery({
 });
 const productsQuery = useProductsQuery({
   options: {
-    enabled: computed(() => organizationStore.hasOrganizations),
+    enabled: toRef(() => organizationStore.hasOrganizations),
     search: productSearchDebounced,
     filters: [
       {
@@ -279,14 +279,18 @@ function handleAddToProductsForm(product: Product | null) {
 watch(
   () => props.open,
   () => {
-    formInstance.resetForm({
-      values: initialForm,
-    });
+    formInstance.resetForm(
+      {
+        values: initialForm,
+      },
+      { force: true }
+    );
 
     if (!props.sale) return;
+
     formInstance.resetForm({
       values: {
-        sale_id: props.sale?.id ?? "",
+        sale_id: props.sale?.id,
         notes: props.sale?.notes ?? "",
         products:
           props.sale?.i_sale_products.map((saleProduct) => ({

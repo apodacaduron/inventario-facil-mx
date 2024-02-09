@@ -7,7 +7,7 @@ import {
   saleServicesTypeguards,
   useSaleServices,
 } from "@/features/sales";
-import { computed, ref } from "vue";
+import { computed, ref, watchEffect } from "vue";
 import {
   Button,
   Input,
@@ -51,7 +51,7 @@ const saleSearch = ref("");
 const saleSearchDebounced = refDebounced(saleSearch, 400);
 const saleSidebarMode = ref<"create" | "update" | "view" | null>(null);
 const isDeleteSaleDialogOpen = ref(false);
-const selectedSaleFromActions = ref<Sale | null>(null);
+const selectedSale = ref<Sale | null>(null);
 const queryClient = useQueryClient();
 const organizationStore = useOrganizationStore();
 const saleServices = useSaleServices();
@@ -75,12 +75,8 @@ useInfiniteScroll(
 );
 
 function openDeleteSaleDialog(sale: Sale) {
-  selectedSaleFromActions.value = sale;
+  selectedSale.value = sale;
   isDeleteSaleDialogOpen.value = true;
-}
-function closeDeleteSaleDialog() {
-  selectedSaleFromActions.value = null;
-  isDeleteSaleDialogOpen.value = false;
 }
 
 function closeSidebar() {
@@ -103,6 +99,7 @@ const saleHandlers = {
 };
 
 async function handleSaveSidebar(formValues: CreateSale | UpdateSale) {
+  console.log(formValues, saleServicesTypeguards.isCreateSale(formValues));
   if (saleServicesTypeguards.isCreateSale(formValues)) {
     await saleHandlers.create(formValues);
   } else {
@@ -114,16 +111,15 @@ function handleSaleSidebar(options: {
   sale?: Sale | null;
   mode: "create" | "update" | "view" | null;
 }) {
-  selectedSaleFromActions.value = options.sale ?? null;
+  selectedSale.value = options.sale ?? null;
   saleSidebarMode.value = options.mode;
 }
 
 async function deleteSale() {
-  const saleId = selectedSaleFromActions.value?.id;
+  const saleId = selectedSale.value?.id;
   if (!saleId) throw new Error("Sale id required to perform delete");
   await deleteSaleMutation.mutateAsync(saleId);
   isDeleteSaleDialogOpen.value = false;
-  selectedSaleFromActions.value = null;
   await queryClient.invalidateQueries({ queryKey: ["sales"] });
 }
 
@@ -139,6 +135,13 @@ function getBadgeColorFromStatus(status: Sale["status"]) {
       return "blue";
   }
 }
+
+watchEffect(() => {
+  if (isDeleteSaleDialogOpen.value) return;
+  if (saleSidebarMode.value) return;
+
+  selectedSale.value = null;
+});
 </script>
 
 <template>
@@ -316,10 +319,10 @@ function getBadgeColorFromStatus(status: Sale["status"]) {
     </Table>
   </div>
 
-  <Dialog :open="isDeleteSaleDialogOpen" @update:open="closeDeleteSaleDialog">
+  <Dialog v-model:open="isDeleteSaleDialogOpen">
     <DialogContent>
       <DialogHeader>
-        <DialogTitle> Eliminar Cliente </DialogTitle>
+        <DialogTitle> Eliminar Venta </DialogTitle>
         <DialogDescription>
           Esta acción eliminará permanentemente esta venta. ¿Estás seguro de que
           deseas proceder con la eliminación?
@@ -332,7 +335,7 @@ function getBadgeColorFromStatus(status: Sale["status"]) {
         <Button
           type="button"
           variant="secondary"
-          @click="closeDeleteSaleDialog"
+          @click="isDeleteSaleDialogOpen = false"
         >
           Cancelar
         </Button>
@@ -344,7 +347,7 @@ function getBadgeColorFromStatus(status: Sale["status"]) {
     :open="Boolean(saleSidebarMode)"
     :viewOnly="saleSidebarMode === 'view'"
     :isLoading="createSaleMutation.isPending.value"
-    :sale="selectedSaleFromActions"
+    :sale="selectedSale"
     @close="closeSidebar"
     @save="handleSaveSidebar"
   />

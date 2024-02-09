@@ -124,7 +124,7 @@ function forceCloseSidebar() {
 watch([() => props.open, () => props.product], ([nextIsOpen, nextProduct]) => {
   if (!nextIsOpen) return;
   if (!nextProduct) {
-    formInstance.resetForm({ values: initialForm });
+    formInstance.resetForm({ values: initialForm }, { force: true });
   }
   if (nextProduct) {
     formInstance.resetForm({

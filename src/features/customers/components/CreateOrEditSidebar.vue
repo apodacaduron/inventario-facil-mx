@@ -106,9 +106,12 @@ watch(
   ([nextIsOpen, nextCustomer]) => {
     if (!nextIsOpen) return;
     if (!nextCustomer) {
-      formInstance.resetForm({
-        values: initialForm,
-      });
+      formInstance.resetForm(
+        {
+          values: initialForm,
+        },
+        { force: true }
+      );
     }
     if (nextCustomer) {
       formInstance.resetForm({
