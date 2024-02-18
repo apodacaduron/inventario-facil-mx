@@ -17,7 +17,12 @@ export function useCustomersQuery(context: {
   const customerServices = useCustomerServices();
 
   return useInfiniteQuery({
-    queryKey: ["customers", context.options.search, context.options.filters],
+    queryKey: [
+      "customers",
+      context.options.search,
+      context.options.filters,
+      context.options.order,
+    ],
     queryFn({ pageParam }) {
       return customerServices.loadList({
         offset: pageParam,

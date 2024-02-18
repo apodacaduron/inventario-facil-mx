@@ -30,6 +30,8 @@ import {
   TableCell,
 } from "@/components/ui";
 import {
+  ChevronDownIcon,
+  ChevronUpIcon,
   EllipsisVerticalIcon,
   InboxArrowDownIcon,
   PencilIcon,
@@ -41,6 +43,7 @@ import { refDebounced, useInfiniteScroll } from "@vueuse/core";
 import { useOrganizationStore } from "@/stores";
 import { useProductsQuery } from "@/features/products/composables/useProductQueries";
 import { useMutation, useQueryClient } from "@tanstack/vue-query";
+import { useTableOrder } from "@/features/global";
 
 const tableRef = ref<HTMLElement | null>(null);
 
@@ -51,6 +54,11 @@ const isDeleteProductDialogOpen = ref(false);
 const isShareStockDialogOpen = ref(false);
 const isAddStockDialogOpen = ref(false);
 const selectedProduct = ref<Product | null>(null);
+const productsTableOrder = useTableOrder({
+  options: {
+    initialOrder: ["created_at", "desc"],
+  },
+});
 const queryClient = useQueryClient();
 const organizationStore = useOrganizationStore();
 const productServices = useProductServices();
@@ -63,7 +71,7 @@ const productsQuery = useProductsQuery({
   options: {
     enabled: toRef(() => organizationStore.hasOrganizations),
     search: productSearchDebounced,
-    order: ["created_at", "desc"],
+    order: toRef(() => productsTableOrder.tableOrder.value),
   },
 });
 const deleteProductMutation = useMutation({
@@ -177,8 +185,48 @@ watchEffect(() => {
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead> Nombre </TableHead>
-          <TableHead class="text-center">Cantidad</TableHead>
+          <TableHead
+            @click="productsTableOrder.toggleTableOrder('name')"
+            class="cursor-pointer"
+          >
+            <span class="flex items-center gap-2">
+              Nombre
+              <template
+                v-if="productsTableOrder.tableOrder.value[0] === 'name'"
+              >
+                <ChevronUpIcon
+                  v-if="productsTableOrder.tableOrder.value[1] === 'desc'"
+                  class="h-4 w-4"
+                />
+                <ChevronDownIcon
+                  v-if="productsTableOrder.tableOrder.value[1] === 'asc'"
+                  class="h-4 w-4"
+                />
+              </template>
+            </span>
+          </TableHead>
+          <TableHead
+            @click="productsTableOrder.toggleTableOrder('current_stock')"
+            class="text-center cursor-pointer"
+          >
+            <span class="flex items-center gap-2">
+              Cantidad
+              <template
+                v-if="
+                  productsTableOrder.tableOrder.value[0] === 'current_stock'
+                "
+              >
+                <ChevronUpIcon
+                  v-if="productsTableOrder.tableOrder.value[1] === 'desc'"
+                  class="h-4 w-4"
+                />
+                <ChevronDownIcon
+                  v-if="productsTableOrder.tableOrder.value[1] === 'asc'"
+                  class="h-4 w-4"
+                />
+              </template>
+            </span>
+          </TableHead>
           <TableHead class="text-center">Precio unitario</TableHead>
           <TableHead class="text-center"> Precio de venta </TableHead>
           <TableHead class="text-center"> - </TableHead>

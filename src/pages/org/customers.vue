@@ -7,7 +7,8 @@ import {
   customerServicesTypeguards,
   useCustomerServices,
 } from "@/features/customers";
-import { computed, ref } from "vue";
+import { ref, toRef } from "vue";
+import { useTableOrder } from "@/features/global";
 import {
   Button,
   Input,
@@ -32,6 +33,8 @@ import {
 } from "@/components/ui";
 import { Badge } from "@/components";
 import {
+  ChevronDownIcon,
+  ChevronUpIcon,
   EllipsisVerticalIcon,
   MapIcon,
   PencilIcon,
@@ -50,6 +53,11 @@ const customerSearchDebounced = refDebounced(customerSearch, 400);
 const customerSidebarMode = ref<"create" | "update" | null>(null);
 const isDeleteCustomerDialogOpen = ref(false);
 const selectedCustomerFromActions = ref<Customer | null>(null);
+const customersTableOrder = useTableOrder({
+  options: {
+    initialOrder: ["created_at", "desc"],
+  },
+});
 const queryClient = useQueryClient();
 const organizationStore = useOrganizationStore();
 const customerServices = useCustomerServices();
@@ -58,9 +66,9 @@ const createCustomerMutation = useMutation({
 });
 const customersQuery = useCustomersQuery({
   options: {
-    enabled: computed(() => organizationStore.hasOrganizations),
+    enabled: toRef(() => organizationStore.hasOrganizations),
     search: customerSearchDebounced,
-    order: ["created_at", "desc"],
+    order: toRef(() => customersTableOrder.tableOrder.value),
   },
 });
 const deleteCustomerMutation = useMutation({
@@ -173,7 +181,26 @@ function getBadgeColorFromStatus(status: Customer["trust_status"]) {
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead> Nombre </TableHead>
+          <TableHead
+            @click="customersTableOrder.toggleTableOrder('name')"
+            class="cursor-pointer"
+          >
+            <span class="flex items-center gap-2">
+              Nombre
+              <template
+                v-if="customersTableOrder.tableOrder.value[0] === 'name'"
+              >
+                <ChevronUpIcon
+                  v-if="customersTableOrder.tableOrder.value[1] === 'desc'"
+                  class="h-4 w-4"
+                />
+                <ChevronDownIcon
+                  v-if="customersTableOrder.tableOrder.value[1] === 'asc'"
+                  class="h-4 w-4"
+                />
+              </template>
+            </span>
+          </TableHead>
           <TableHead class="text-center">Notas</TableHead>
           <TableHead class="text-center">Teléfono</TableHead>
           <TableHead class="text-center"> Dirección </TableHead>
