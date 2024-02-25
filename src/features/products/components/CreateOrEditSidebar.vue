@@ -15,7 +15,7 @@ import {
   Textarea,
   SheetFooter,
 } from "@/components/ui";
-import { watch } from "vue";
+import { toRef, watch } from "vue";
 import { z } from "zod";
 import {
   CreateProduct,
@@ -27,19 +27,16 @@ import { useForm } from "vee-validate";
 import { toTypedSchema } from "@vee-validate/zod";
 
 type CreateOrEditSidebarProps = {
-  mode?: "create" | "update";
-  open?: boolean;
   isLoading?: boolean;
   product?: Product | null;
 };
 
+const openModel = defineModel<boolean>("open");
 const props = withDefaults(defineProps<CreateOrEditSidebarProps>(), {
-  mode: "create",
-  open: false,
   isLoading: false,
+  product: null,
 });
 const emit = defineEmits<{
-  (e: "close"): void;
   (e: "save", formValues: CreateProduct | UpdateProduct): void;
 }>();
 
@@ -53,7 +50,6 @@ const locale = {
     subtitle: "Actualiza rápidamente un producto de tu inventario.",
   },
 };
-
 const initialForm = {
   name: "",
   description: "",
@@ -64,7 +60,6 @@ const initialForm = {
 };
 
 const currencyFormatter = useCurrencyFormatter();
-
 const formSchema = toTypedSchema(
   z.object({
     name: z.string().min(1, "Nombre de producto es requerido"),
@@ -88,10 +83,11 @@ const formSchema = toTypedSchema(
     product_id: z.string().uuid().optional(),
   })
 );
-
 const formInstance = useForm<CreateProduct | UpdateProduct>({
   validationSchema: formSchema,
 });
+
+const formMode = toRef(() => (props.product ? "update" : "create"));
 
 const onSubmit = formInstance.handleSubmit(async (formValues) => {
   if (typeof formValues.product_id === "undefined") {
@@ -112,45 +108,38 @@ const onSubmit = formInstance.handleSubmit(async (formValues) => {
   emit("save", modifiedFormValues);
 });
 
-function closeSidebar(isOpen: boolean) {
-  if (isOpen) return;
-  forceCloseSidebar();
-}
-function forceCloseSidebar() {
-  formInstance.resetForm();
-  emit("close");
-}
-
-watch([() => props.open, () => props.product], ([nextIsOpen, nextProduct]) => {
-  if (!nextIsOpen) return;
-  if (!nextProduct) {
-    formInstance.resetForm({ values: initialForm }, { force: true });
+watch(
+  () => props.product,
+  (nextProduct) => {
+    if (nextProduct) {
+      formInstance.resetForm({
+        values: {
+          name: nextProduct.name ?? "",
+          description: nextProduct.description ?? "",
+          image_url: nextProduct.image_url ?? "",
+          current_stock: nextProduct.current_stock ?? 0,
+          product_id: nextProduct.id,
+          unit_price: currencyFormatter.parseRaw(nextProduct.unit_price) ?? 0,
+          retail_price:
+            currencyFormatter.parseRaw(nextProduct.retail_price) ?? 0,
+        },
+      });
+    } else {
+      formInstance.resetForm({ values: initialForm }, { force: true });
+    }
   }
-  if (nextProduct) {
-    formInstance.resetForm({
-      values: {
-        name: nextProduct.name ?? "",
-        description: nextProduct.description ?? "",
-        image_url: nextProduct.image_url ?? "",
-        current_stock: nextProduct.current_stock ?? 0,
-        product_id: nextProduct.id,
-        unit_price: currencyFormatter.parseRaw(nextProduct.unit_price) ?? 0,
-        retail_price: currencyFormatter.parseRaw(nextProduct.retail_price) ?? 0,
-      },
-    });
-  }
-});
+);
 </script>
 
 <template>
-  <Sheet :open="open" @update:open="closeSidebar">
+  <Sheet v-model:open="openModel">
     <SheetContent side="right" class="overflow-y-auto">
       <SheetHeader>
         <SheetTitle>
-          {{ locale[mode].title }}
+          {{ locale[formMode].title }}
         </SheetTitle>
         <SheetDescription>
-          {{ locale[mode].subtitle }}
+          {{ locale[formMode].subtitle }}
         </SheetDescription>
       </SheetHeader>
       <form @submit="onSubmit" class="flex flex-col gap-6 mt-6 mb-6">
@@ -238,7 +227,7 @@ watch([() => props.open, () => props.product], ([nextIsOpen, nextProduct]) => {
           >
           <Button
             :disabled="isLoading"
-            @click="forceCloseSidebar"
+            @click="openModel = false"
             variant="outline"
             type="button"
             >Cancelar</Button

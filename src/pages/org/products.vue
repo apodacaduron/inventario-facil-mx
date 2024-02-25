@@ -49,11 +49,11 @@ const tableRef = ref<HTMLElement | null>(null);
 
 const productSearch = ref("");
 const productSearchDebounced = refDebounced(productSearch, 400);
-const productSidebarMode = ref<"create" | "update" | null>(null);
+const isCreateOrUpdateSidebarOpen = ref(false);
 const isDeleteProductDialogOpen = ref(false);
 const isShareStockDialogOpen = ref(false);
 const isAddStockDialogOpen = ref(false);
-const selectedProduct = ref<Product | null>(null);
+const activeProduct = ref<Product | null>(null);
 const productsTableOrder = useTableOrder({
   options: {
     initialOrder: ["created_at", "desc"],
@@ -90,7 +90,7 @@ useInfiniteScroll(
 );
 
 function openDeleteProductDialog(product: Product) {
-  selectedProduct.value = product;
+  activeProduct.value = product;
   isDeleteProductDialogOpen.value = true;
 }
 
@@ -100,17 +100,17 @@ function handleSaveModal(formValues: CreateProduct | UpdateProduct) {
   } else {
     updateProductMutation.mutate(formValues);
   }
-  productSidebarMode.value = null;
+  isCreateOrUpdateSidebarOpen.value = false;
   isAddStockDialogOpen.value = false;
 }
 
 function openUpdateProductSidebar(product: Product) {
-  selectedProduct.value = product;
-  productSidebarMode.value = "update";
+  activeProduct.value = product;
+  isCreateOrUpdateSidebarOpen.value = true;
 }
 
 function openAddStockDialog(product: Product) {
-  selectedProduct.value = product;
+  activeProduct.value = product;
   isAddStockDialogOpen.value = true;
 }
 
@@ -138,9 +138,9 @@ async function deleteProductMutationFn(product: Product | null) {
 watchEffect(() => {
   if (isDeleteProductDialogOpen.value) return;
   if (isAddStockDialogOpen.value) return;
-  if (productSidebarMode.value) return;
+  if (isCreateOrUpdateSidebarOpen.value) return;
 
-  selectedProduct.value = null;
+  activeProduct.value = null;
 });
 </script>
 
@@ -157,7 +157,7 @@ watchEffect(() => {
       </p>
     </div>
     <div class="flex gap-2">
-      <Button @click="productSidebarMode = 'create'">
+      <Button @click="isCreateOrUpdateSidebarOpen = true">
         <PlusIcon class="w-5 h-5 stroke-[2px] mr-2" /> Crear producto
       </Button>
       <Button @click="isShareStockDialogOpen = true" variant="outline">
@@ -299,15 +299,14 @@ watchEffect(() => {
 
   <DeleteProductDialog
     v-model:open="isDeleteProductDialogOpen"
-    :product="selectedProduct"
+    :product="activeProduct"
     :isLoading="deleteProductMutation.isPending.value"
     @confirmDelete="deleteProductMutation.mutate"
   />
   <ShareStockDialog v-model:open="isShareStockDialogOpen" />
   <CreateOrEditSidebar
-    :open="Boolean(productSidebarMode)"
-    @close="productSidebarMode = null"
-    :product="selectedProduct"
+    v-model:open="isCreateOrUpdateSidebarOpen"
+    :product="activeProduct"
     :isLoading="
       updateProductMutation.isPending.value ||
       createProductMutation.isPending.value
@@ -316,7 +315,7 @@ watchEffect(() => {
   />
   <AddStockDialog
     v-model:open="isAddStockDialogOpen"
-    :product="selectedProduct"
+    :product="activeProduct"
     :isLoading="updateProductMutation.isPending.value"
     @save="handleSaveModal"
   />
