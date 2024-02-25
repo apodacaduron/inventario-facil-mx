@@ -62,7 +62,13 @@ const queryClient = useQueryClient();
 const organizationStore = useOrganizationStore();
 const customerServices = useCustomerServices();
 const createCustomerMutation = useMutation({
-  mutationFn: customerServices.createCustomer,
+  mutationFn: createCustomerMutationFn,
+});
+const updateCustomerMutation = useMutation({
+  mutationFn: updateCustomerMutationFn,
+});
+const deleteCustomerMutation = useMutation({
+  mutationFn: deleteCustomerMutationFn,
 });
 const customersQuery = useCustomersQuery({
   options: {
@@ -70,12 +76,6 @@ const customersQuery = useCustomersQuery({
     search: customerSearchDebounced,
     order: toRef(() => customersTableOrder.tableOrder.value),
   },
-});
-const deleteCustomerMutation = useMutation({
-  mutationFn: customerServices.deleteCustomer,
-});
-const updateCustomerMutation = useMutation({
-  mutationFn: customerServices.updateCustomer,
 });
 useInfiniteScroll(
   tableRef,
@@ -97,26 +97,11 @@ function closeSidebar() {
   isDeleteCustomerDialogOpen.value = false;
 }
 
-const customerHandlers = {
-  async create(formValues: CreateCustomer) {
-    await createCustomerMutation.mutateAsync(formValues);
-    closeSidebar();
-    await queryClient.invalidateQueries({ queryKey: ["customers"] });
-  },
-  async update(formValues: UpdateCustomer) {
-    const customerId = formValues.customer_id;
-    if (!customerId) throw new Error("Customer id required to perform update");
-    await updateCustomerMutation.mutateAsync(formValues);
-    closeSidebar();
-    await queryClient.invalidateQueries({ queryKey: ["customers"] });
-  },
-};
-
-async function handleSaveSidebar(formValues: CreateCustomer | UpdateCustomer) {
+function handleSaveSidebar(formValues: CreateCustomer | UpdateCustomer) {
   if (customerServicesTypeguards.isCreateCustomer(formValues)) {
-    await customerHandlers.create(formValues);
+    createCustomerMutation.mutate(formValues);
   } else {
-    await customerHandlers.update(formValues);
+    updateCustomerMutation.mutate(formValues);
   }
 }
 
@@ -125,10 +110,22 @@ function openUpdateCustomerSidebar(customer: Customer) {
   customerSidebarMode.value = "update";
 }
 
-async function deleteCustomer() {
+async function createCustomerMutationFn(formValues: CreateCustomer) {
+  await customerServices.createCustomer(formValues);
+  closeSidebar();
+  await queryClient.invalidateQueries({ queryKey: ["customers"] });
+}
+async function updateCustomerMutationFn(formValues: UpdateCustomer) {
+  const customerId = formValues.customer_id;
+  if (!customerId) throw new Error("Customer id required to perform update");
+  await customerServices.updateCustomer(formValues);
+  closeSidebar();
+  await queryClient.invalidateQueries({ queryKey: ["customers"] });
+}
+async function deleteCustomerMutationFn() {
   const customerId = selectedCustomerFromActions.value?.id;
   if (!customerId) throw new Error("Customer id required to perform delete");
-  await deleteCustomerMutation.mutateAsync(customerId);
+  await customerServices.deleteCustomer(customerId);
   closeSidebar();
   await queryClient.invalidateQueries({ queryKey: ["customers"] });
 }
@@ -305,7 +302,11 @@ function getBadgeColorFromStatus(status: Customer["trust_status"]) {
         </DialogDescription>
       </DialogHeader>
       <DialogFooter>
-        <Button type="button" variant="destructive" @click="deleteCustomer">
+        <Button
+          type="button"
+          variant="destructive"
+          @click="deleteCustomerMutation.mutate"
+        >
           Si, eliminar
         </Button>
         <Button type="button" variant="secondary" @click="closeSidebar">

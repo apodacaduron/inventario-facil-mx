@@ -63,7 +63,13 @@ const queryClient = useQueryClient();
 const organizationStore = useOrganizationStore();
 const productServices = useProductServices();
 const createProductMutation = useMutation({
-  mutationFn: productServices.createProduct,
+  mutationFn: createProductMutationFn,
+});
+const updateProductMutation = useMutation({
+  mutationFn: updateProductMutationFn,
+});
+const deleteProductMutation = useMutation({
+  mutationFn: deleteProductMutationFn,
 });
 
 const currencyFormatter = useCurrencyFormatter();
@@ -73,12 +79,6 @@ const productsQuery = useProductsQuery({
     search: productSearchDebounced,
     order: toRef(() => productsTableOrder.tableOrder.value),
   },
-});
-const deleteProductMutation = useMutation({
-  mutationFn: productServices.deleteProduct,
-});
-const updateProductMutation = useMutation({
-  mutationFn: productServices.updateProduct,
 });
 useInfiniteScroll(
   tableRef,
@@ -94,29 +94,14 @@ function openDeleteProductDialog(product: Product) {
   isDeleteProductDialogOpen.value = true;
 }
 
-const productHandlers = {
-  async create(formValues: CreateProduct) {
-    await createProductMutation.mutateAsync(formValues);
-    await queryClient.invalidateQueries({ queryKey: ["products"] });
-  },
-  async update(formValues: UpdateProduct) {
-    const productId = formValues.product_id;
-    if (!productId) throw new Error("Product id required to perform update");
-    await updateProductMutation.mutateAsync({
-      ...formValues,
-      product_id: productId,
-    });
-    await queryClient.invalidateQueries({ queryKey: ["products"] });
-  },
-};
-
-async function handleSaveModal(formValues: CreateProduct | UpdateProduct) {
+function handleSaveModal(formValues: CreateProduct | UpdateProduct) {
   if (productServicesTypeguards.isCreateProduct(formValues)) {
-    await productHandlers.create(formValues);
+    createProductMutation.mutate(formValues);
   } else {
-    await productHandlers.update(formValues);
+    updateProductMutation.mutate(formValues);
   }
   productSidebarMode.value = null;
+  isAddStockDialogOpen.value = false;
 }
 
 function openUpdateProductSidebar(product: Product) {
@@ -129,10 +114,23 @@ function openAddStockDialog(product: Product) {
   isAddStockDialogOpen.value = true;
 }
 
-async function deleteProduct(product: Product | null) {
+async function createProductMutationFn(formValues: CreateProduct) {
+  await productServices.createProduct(formValues);
+  await queryClient.invalidateQueries({ queryKey: ["products"] });
+}
+async function updateProductMutationFn(formValues: UpdateProduct) {
+  const productId = formValues.product_id;
+  if (!productId) throw new Error("Product id required to perform update");
+  await productServices.updateProduct({
+    ...formValues,
+    product_id: productId,
+  });
+  await queryClient.invalidateQueries({ queryKey: ["products"] });
+}
+async function deleteProductMutationFn(product: Product | null) {
   const productId = product?.id;
   if (!productId) throw new Error("Product id required to perform delete");
-  await deleteProductMutation.mutateAsync(productId);
+  await productServices.deleteProduct(productId);
   isDeleteProductDialogOpen.value = false;
   await queryClient.invalidateQueries({ queryKey: ["products"] });
 }
@@ -303,7 +301,7 @@ watchEffect(() => {
     v-model:open="isDeleteProductDialogOpen"
     :product="selectedProduct"
     :isLoading="deleteProductMutation.isPending.value"
-    @confirmDelete="deleteProduct"
+    @confirmDelete="deleteProductMutation.mutate"
   />
   <ShareStockDialog v-model:open="isShareStockDialogOpen" />
   <CreateOrEditSidebar

@@ -55,7 +55,9 @@ const selectedSale = ref<Sale | null>(null);
 const queryClient = useQueryClient();
 const organizationStore = useOrganizationStore();
 const saleServices = useSaleServices();
-const createSaleMutation = useMutation({ mutationFn: saleServices.createSale });
+const createSaleMutation = useMutation({ mutationFn: createSaleMutationFn });
+const updateSaleMutation = useMutation({ mutationFn: updateSaleMutationFn });
+const deleteSaleMutation = useMutation({ mutationFn: deleteSaleMutationFn });
 const currencyFormatter = useCurrencyFormatter();
 const salesQuery = useSalesQuery({
   options: {
@@ -63,8 +65,6 @@ const salesQuery = useSalesQuery({
     search: saleSearchDebounced,
   },
 });
-const deleteSaleMutation = useMutation({ mutationFn: saleServices.deleteSale });
-const updateSaleMutation = useMutation({ mutationFn: saleServices.updateSale });
 useInfiniteScroll(
   tableRef,
   () => {
@@ -83,27 +83,11 @@ function closeSidebar() {
   handleSaleSidebar({ sale: null, mode: null });
 }
 
-const saleHandlers = {
-  async create(formValues: CreateSale) {
-    await createSaleMutation.mutateAsync(formValues);
-    closeSidebar();
-    await queryClient.invalidateQueries({ queryKey: ["sales"] });
-  },
-  async update(formValues: UpdateSale) {
-    const saleId = formValues.sale_id;
-    if (!saleId) throw new Error("Sale id required to perform update");
-    await updateSaleMutation.mutateAsync(formValues);
-    closeSidebar();
-    await queryClient.invalidateQueries({ queryKey: ["sales"] });
-  },
-};
-
-async function handleSaveSidebar(formValues: CreateSale | UpdateSale) {
-  console.log(formValues, saleServicesTypeguards.isCreateSale(formValues));
+function handleSaveSidebar(formValues: CreateSale | UpdateSale) {
   if (saleServicesTypeguards.isCreateSale(formValues)) {
-    await saleHandlers.create(formValues);
+    createSaleMutation.mutate(formValues);
   } else {
-    await saleHandlers.update(formValues);
+    updateSaleMutation.mutate(formValues);
   }
 }
 
@@ -115,10 +99,22 @@ function handleSaleSidebar(options: {
   saleSidebarMode.value = options.mode;
 }
 
-async function deleteSale() {
+async function createSaleMutationFn(formValues: CreateSale) {
+  await saleServices.createSale(formValues);
+  closeSidebar();
+  await queryClient.invalidateQueries({ queryKey: ["sales"] });
+}
+async function updateSaleMutationFn(formValues: UpdateSale) {
+  const saleId = formValues.sale_id;
+  if (!saleId) throw new Error("Sale id required to perform update");
+  await saleServices.updateSale(formValues);
+  closeSidebar();
+  await queryClient.invalidateQueries({ queryKey: ["sales"] });
+}
+async function deleteSaleMutationFn() {
   const saleId = selectedSale.value?.id;
   if (!saleId) throw new Error("Sale id required to perform delete");
-  await deleteSaleMutation.mutateAsync(saleId);
+  await saleServices.deleteSale(saleId);
   isDeleteSaleDialogOpen.value = false;
   await queryClient.invalidateQueries({ queryKey: ["sales"] });
 }
@@ -329,7 +325,11 @@ watchEffect(() => {
         </DialogDescription>
       </DialogHeader>
       <DialogFooter>
-        <Button type="button" variant="destructive" @click="deleteSale">
+        <Button
+          type="button"
+          variant="destructive"
+          @click="deleteSaleMutation.mutate"
+        >
           Si, eliminar
         </Button>
         <Button
