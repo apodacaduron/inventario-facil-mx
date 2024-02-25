@@ -21,7 +21,7 @@ import {
   SheetTitle,
   SheetDescription,
 } from "@/components/ui";
-import { watch } from "vue";
+import { toRef, watch } from "vue";
 import { z } from "zod";
 import {
   CreateCustomer,
@@ -33,19 +33,16 @@ import { useForm } from "vee-validate";
 import { toTypedSchema } from "@vee-validate/zod";
 
 type CreateOrEditSidebarProps = {
-  mode?: "create" | "update";
-  open?: boolean;
   isLoading?: boolean;
   customer?: Customer | null;
 };
 
+const openModel = defineModel<boolean>("open");
 const props = withDefaults(defineProps<CreateOrEditSidebarProps>(), {
-  mode: "create",
-  open: false,
   isLoading: false,
+  customer: null,
 });
 const emit = defineEmits<{
-  (e: "close"): void;
   (e: "save", formValues: CreateCustomer | UpdateCustomer): void;
 }>();
 
@@ -88,31 +85,15 @@ const formInstance = useForm<CreateCustomer | UpdateCustomer>({
   validationSchema: formSchema,
 });
 
+const formMode = toRef(() => (props.customer ? "update" : "create"));
+
 const onSubmit = formInstance.handleSubmit(async (formValues) => {
   emit("save", formValues);
 });
 
-function closeSidebar(isOpen: boolean, forced: boolean) {
-  if (isOpen && !forced) return;
-  forceCloseSidebar();
-}
-function forceCloseSidebar() {
-  formInstance.resetForm();
-  emit("close");
-}
-
 watch(
-  [() => props.open, () => props.customer],
-  ([nextIsOpen, nextCustomer]) => {
-    if (!nextIsOpen) return;
-    if (!nextCustomer) {
-      formInstance.resetForm(
-        {
-          values: initialForm,
-        },
-        { force: true }
-      );
-    }
+  () => props.customer,
+  (nextCustomer) => {
     if (nextCustomer) {
       formInstance.resetForm({
         values: {
@@ -126,17 +107,19 @@ watch(
           notes: nextCustomer.notes ?? "",
         },
       });
+    } else {
+      formInstance.resetForm({ values: initialForm }, { force: true });
     }
   }
 );
 </script>
 
 <template>
-  <Sheet :open="open" @update:open="closeSidebar">
+  <Sheet v-model:open="openModel">
     <SheetContent side="right" class="overflow-y-auto">
       <SheetHeader>
-        <SheetTitle>{{ locale[mode].title }}</SheetTitle>
-        <SheetDescription>{{ locale[mode].subtitle }}</SheetDescription>
+        <SheetTitle>{{ locale[formMode].title }}</SheetTitle>
+        <SheetDescription>{{ locale[formMode].subtitle }}</SheetDescription>
       </SheetHeader>
       <div class="space-y-6 pb-16">
         <form @submit="onSubmit" class="flex flex-col gap-6 mt-6 mb-6">
@@ -243,7 +226,7 @@ watch(
             <Button
               type="button"
               :disabled="isLoading"
-              @click="forceCloseSidebar"
+              @click="openModel = false"
               variant="outline"
               >Cancelar</Button
             >

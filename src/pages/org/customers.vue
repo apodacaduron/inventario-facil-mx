@@ -6,22 +6,17 @@ import {
   UpdateCustomer,
   customerServicesTypeguards,
   useCustomerServices,
+  DeleteCustomerDialog,
 } from "@/features/customers";
-import { ref, toRef } from "vue";
+import { ref, toRef, watchEffect } from "vue";
 import { useTableOrder } from "@/features/global";
 import {
   Button,
   Input,
   DropdownMenu,
-  Dialog,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
   Avatar,
   AvatarFallback,
   Table,
@@ -50,9 +45,9 @@ const WHATSAPP_URL = import.meta.env.VITE_WHATSAPP_URL;
 const tableRef = ref<HTMLElement | null>(null);
 const customerSearch = ref("");
 const customerSearchDebounced = refDebounced(customerSearch, 400);
-const customerSidebarMode = ref<"create" | "update" | null>(null);
+const isCreateOrUpdateSidebarOpen = ref(false);
 const isDeleteCustomerDialogOpen = ref(false);
-const selectedCustomerFromActions = ref<Customer | null>(null);
+const activeCustomer = ref<Customer | null>(null);
 const customersTableOrder = useTableOrder({
   options: {
     initialOrder: ["created_at", "desc"],
@@ -87,14 +82,8 @@ useInfiniteScroll(
 );
 
 function openDeleteCustomerDialog(customer: Customer) {
-  selectedCustomerFromActions.value = customer;
+  activeCustomer.value = customer;
   isDeleteCustomerDialogOpen.value = true;
-}
-
-function closeSidebar() {
-  customerSidebarMode.value = null;
-  selectedCustomerFromActions.value = null;
-  isDeleteCustomerDialogOpen.value = false;
 }
 
 function handleSaveSidebar(formValues: CreateCustomer | UpdateCustomer) {
@@ -103,30 +92,29 @@ function handleSaveSidebar(formValues: CreateCustomer | UpdateCustomer) {
   } else {
     updateCustomerMutation.mutate(formValues);
   }
+  isCreateOrUpdateSidebarOpen.value = false;
 }
 
 function openUpdateCustomerSidebar(customer: Customer) {
-  selectedCustomerFromActions.value = customer;
-  customerSidebarMode.value = "update";
+  activeCustomer.value = customer;
+  isCreateOrUpdateSidebarOpen.value = true;
 }
 
 async function createCustomerMutationFn(formValues: CreateCustomer) {
   await customerServices.createCustomer(formValues);
-  closeSidebar();
   await queryClient.invalidateQueries({ queryKey: ["customers"] });
 }
 async function updateCustomerMutationFn(formValues: UpdateCustomer) {
   const customerId = formValues.customer_id;
   if (!customerId) throw new Error("Customer id required to perform update");
   await customerServices.updateCustomer(formValues);
-  closeSidebar();
   await queryClient.invalidateQueries({ queryKey: ["customers"] });
 }
 async function deleteCustomerMutationFn() {
-  const customerId = selectedCustomerFromActions.value?.id;
+  const customerId = activeCustomer.value?.id;
   if (!customerId) throw new Error("Customer id required to perform delete");
   await customerServices.deleteCustomer(customerId);
-  closeSidebar();
+  isDeleteCustomerDialogOpen.value = false;
   await queryClient.invalidateQueries({ queryKey: ["customers"] });
 }
 
@@ -140,6 +128,13 @@ function getBadgeColorFromStatus(status: Customer["trust_status"]) {
       return "green";
   }
 }
+
+watchEffect(() => {
+  if (isDeleteCustomerDialogOpen.value) return;
+  if (isCreateOrUpdateSidebarOpen.value) return;
+
+  activeCustomer.value = null;
+});
 </script>
 
 <template>
@@ -155,7 +150,7 @@ function getBadgeColorFromStatus(status: Customer["trust_status"]) {
       </p>
     </div>
     <div>
-      <Button @click="customerSidebarMode = 'create'" label="">
+      <Button @click="isCreateOrUpdateSidebarOpen = true" label="">
         <PlusIcon class="w-5 h-5 stroke-[2px] mr-2" /> Crear cliente
       </Button>
     </div>
@@ -292,38 +287,20 @@ function getBadgeColorFromStatus(status: Customer["trust_status"]) {
     </Table>
   </div>
 
-  <Dialog :open="isDeleteCustomerDialogOpen" @update:open="closeSidebar">
-    <DialogContent class="sm:max-w-[425px]">
-      <DialogHeader>
-        <DialogTitle>Eliminar Cliente</DialogTitle>
-        <DialogDescription>
-          Esta acción eliminará permanentemente a este cliente. ¿Estás seguro de
-          que deseas proceder con la eliminación?
-        </DialogDescription>
-      </DialogHeader>
-      <DialogFooter>
-        <Button
-          type="button"
-          variant="destructive"
-          @click="deleteCustomerMutation.mutate"
-        >
-          Si, eliminar
-        </Button>
-        <Button type="button" variant="secondary" @click="closeSidebar">
-          Cancelar
-        </Button>
-      </DialogFooter>
-    </DialogContent>
-  </Dialog>
+  <DeleteCustomerDialog
+    v-model:open="isDeleteCustomerDialogOpen"
+    :customer="activeCustomer"
+    :isLoading="deleteCustomerMutation.isPending.value"
+    @confirmDelete="deleteCustomerMutation.mutate"
+  />
 
   <CreateOrEditSidebar
-    :open="Boolean(customerSidebarMode)"
-    :customer="selectedCustomerFromActions"
+    v-model:open="isCreateOrUpdateSidebarOpen"
+    :customer="activeCustomer"
     :isLoading="
       updateCustomerMutation.isPending.value ||
       createCustomerMutation.isPending.value
     "
-    @close="closeSidebar"
     @save="handleSaveSidebar"
   />
 </template>

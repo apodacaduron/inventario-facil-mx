@@ -2,6 +2,7 @@
 import {
   CreateOrEditSidebar,
   CreateSale,
+  DeleteSaleDialog,
   Sale,
   UpdateSale,
   saleServicesTypeguards,
@@ -12,12 +13,6 @@ import {
   Button,
   Input,
   DropdownMenu,
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -51,7 +46,7 @@ const saleSearch = ref("");
 const saleSearchDebounced = refDebounced(saleSearch, 400);
 const saleSidebarMode = ref<"create" | "update" | "view" | null>(null);
 const isDeleteSaleDialogOpen = ref(false);
-const selectedSale = ref<Sale | null>(null);
+const activeSale = ref<Sale | null>(null);
 const queryClient = useQueryClient();
 const organizationStore = useOrganizationStore();
 const saleServices = useSaleServices();
@@ -75,7 +70,7 @@ useInfiniteScroll(
 );
 
 function openDeleteSaleDialog(sale: Sale) {
-  selectedSale.value = sale;
+  activeSale.value = sale;
   isDeleteSaleDialogOpen.value = true;
 }
 
@@ -95,7 +90,7 @@ function handleSaleSidebar(options: {
   sale?: Sale | null;
   mode: "create" | "update" | "view" | null;
 }) {
-  selectedSale.value = options.sale ?? null;
+  activeSale.value = options.sale ?? null;
   saleSidebarMode.value = options.mode;
 }
 
@@ -112,7 +107,7 @@ async function updateSaleMutationFn(formValues: UpdateSale) {
   await queryClient.invalidateQueries({ queryKey: ["sales"] });
 }
 async function deleteSaleMutationFn() {
-  const saleId = selectedSale.value?.id;
+  const saleId = activeSale.value?.id;
   if (!saleId) throw new Error("Sale id required to perform delete");
   await saleServices.deleteSale(saleId);
   isDeleteSaleDialogOpen.value = false;
@@ -136,7 +131,7 @@ watchEffect(() => {
   if (isDeleteSaleDialogOpen.value) return;
   if (saleSidebarMode.value) return;
 
-  selectedSale.value = null;
+  activeSale.value = null;
 });
 </script>
 
@@ -315,39 +310,18 @@ watchEffect(() => {
     </Table>
   </div>
 
-  <Dialog v-model:open="isDeleteSaleDialogOpen">
-    <DialogContent>
-      <DialogHeader>
-        <DialogTitle> Eliminar Venta </DialogTitle>
-        <DialogDescription>
-          Esta acción eliminará permanentemente esta venta. ¿Estás seguro de que
-          deseas proceder con la eliminación?
-        </DialogDescription>
-      </DialogHeader>
-      <DialogFooter>
-        <Button
-          type="button"
-          variant="destructive"
-          @click="deleteSaleMutation.mutate"
-        >
-          Si, eliminar
-        </Button>
-        <Button
-          type="button"
-          variant="secondary"
-          @click="isDeleteSaleDialogOpen = false"
-        >
-          Cancelar
-        </Button>
-      </DialogFooter>
-    </DialogContent>
-  </Dialog>
+  <DeleteSaleDialog
+    v-model:open="isDeleteSaleDialogOpen"
+    :sale="activeSale"
+    :isLoading="deleteSaleMutation.isPending.value"
+    @confirmDelete="deleteSaleMutation.mutate"
+  />
 
   <CreateOrEditSidebar
     :open="Boolean(saleSidebarMode)"
     :viewOnly="saleSidebarMode === 'view'"
     :isLoading="createSaleMutation.isPending.value"
-    :sale="selectedSale"
+    :sale="activeSale"
     @close="closeSidebar"
     @save="handleSaveSidebar"
   />
