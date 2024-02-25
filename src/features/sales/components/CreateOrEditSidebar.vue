@@ -277,40 +277,35 @@ function handleAddToProductsForm(product: Product | null) {
 }
 
 watch(
-  () => props.open,
-  () => {
-    formInstance.resetForm(
-      {
-        values: initialForm,
-      },
-      { force: true }
-    );
-
-    if (!props.sale) return;
-
-    formInstance.resetForm({
-      values: {
-        sale_id: props.sale?.id,
-        notes: props.sale?.notes ?? "",
-        products:
-          props.sale?.i_sale_products.map((saleProduct) => ({
-            sale_detail_id: saleProduct.id,
-            image_url: saleProduct.i_products?.image_url ?? "",
-            product_id: saleProduct.i_products?.id ?? "",
-            name: saleProduct.i_products?.name ?? "",
-            price: currencyFormatter.parseRaw(saleProduct?.price ?? 0),
-            unit_price: saleProduct?.unit_price ?? 0,
-            qty: saleProduct.qty,
-          })) ?? [],
-        customer_id: props.sale?.customer_id ?? "",
-        sale_date: props.sale?.sale_date
-          ? new Date(props.sale.sale_date).toISOString()
-          : new Date().toISOString(),
-        shipping_cost:
-          currencyFormatter.parseRaw(props.sale?.shipping_cost) ?? 0,
-        status: props.sale?.status ?? "in_progress",
-      },
-    });
+  () => props.sale,
+  (nextSale) => {
+    if (nextSale) {
+      formInstance.resetForm({
+        values: {
+          sale_id: nextSale?.id,
+          notes: nextSale?.notes ?? "",
+          products:
+            nextSale?.i_sale_products.map((saleProduct) => ({
+              sale_detail_id: saleProduct.id,
+              image_url: saleProduct.i_products?.image_url ?? "",
+              product_id: saleProduct.i_products?.id ?? "",
+              name: saleProduct.i_products?.name ?? "",
+              price: currencyFormatter.parseRaw(saleProduct?.price ?? 0),
+              unit_price: saleProduct?.unit_price ?? 0,
+              qty: saleProduct.qty,
+            })) ?? [],
+          customer_id: nextSale?.customer_id ?? "",
+          sale_date: nextSale?.sale_date
+            ? new Date(nextSale.sale_date).toISOString()
+            : new Date().toISOString(),
+          shipping_cost:
+            currencyFormatter.parseRaw(nextSale?.shipping_cost) ?? 0,
+          status: nextSale?.status ?? "in_progress",
+        },
+      });
+    } else {
+      formInstance.resetForm({ values: initialForm }, { force: true });
+    }
   }
 );
 </script>
