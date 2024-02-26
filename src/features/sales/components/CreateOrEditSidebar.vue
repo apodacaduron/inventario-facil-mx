@@ -35,7 +35,7 @@ import {
   SelectGroup,
   Badge,
 } from "@/components/ui";
-import { computed, ref, toRef, watch } from "vue";
+import { ref, toRef, watch } from "vue";
 import { z } from "zod";
 import { CreateSale, SALE_STATUS, Sale, UpdateSale } from "../composables";
 import { refDebounced, useInfiniteScroll } from "@vueuse/core";
@@ -51,19 +51,18 @@ import { useFieldArray, useForm } from "vee-validate";
 import { useOrganizationStore } from "@/stores";
 
 type CreateOrEditSidebarProps = {
-  open: boolean;
   viewOnly?: boolean;
   isLoading?: boolean;
   sale?: Sale | null;
 };
 
+const openModel = defineModel<boolean>("open");
 const props = withDefaults(defineProps<CreateOrEditSidebarProps>(), {
-  open: false,
   viewOnly: false,
   isLoading: false,
+  sale: null,
 });
 const emit = defineEmits<{
-  (e: "close"): void;
   (e: "save", formValues: CreateSale): void;
 }>();
 
@@ -122,7 +121,7 @@ const initialForm: CreateSale = {
 };
 
 const saleSidebarMode = ref<"sales" | "products" | "customers">("sales");
-const selectedCustomer = ref<Customer | null>(null);
+const activeCustomer = ref<Customer | null>(null);
 const productsRef = ref<HTMLElement | null>(null);
 const customersRef = ref<HTMLElement | null>(null);
 const customerSearch = ref("");
@@ -171,7 +170,7 @@ useInfiniteScroll(
   { distance: 10, canLoadMore: () => productsQuery.hasNextPage.value }
 );
 
-const sidebarMode = computed(() => (props.sale ? "UPDATE" : "CREATE"));
+const sidebarMode = toRef(() => (props.sale ? "UPDATE" : "CREATE"));
 
 const formSchema = toTypedSchema(
   z.object({
@@ -223,19 +222,6 @@ const onSubmit = formInstance.handleSubmit(async (formValues) => {
   emit("save", modifiedFormValues);
 });
 
-function closeSidebar(isOpen: boolean) {
-  if (isOpen) return;
-  forceCloseSidebar();
-}
-function forceCloseSidebar() {
-  if (saleSidebarMode.value !== "sales")
-    return (saleSidebarMode.value = "sales");
-
-  formInstance.resetForm();
-  emit("close");
-  saleSidebarMode.value = "sales";
-}
-
 function formatProductToSaleDetail(
   product: Product | null
 ): CreateSale["products"][number] {
@@ -276,6 +262,13 @@ function handleAddToProductsForm(product: Product | null) {
   }
 }
 
+function handleCloseSidebar() {
+  if (saleSidebarMode.value !== "sales") {
+    return (saleSidebarMode.value = "sales");
+  }
+  openModel.value = false;
+}
+
 watch(
   () => props.sale,
   (nextSale) => {
@@ -311,7 +304,7 @@ watch(
 </script>
 
 <template>
-  <Sheet :open="open" @update:open="closeSidebar">
+  <Sheet :open="openModel" @update:open="handleCloseSidebar">
     <SheetContent v-if="!viewOnly" side="right" class="overflow-y-auto">
       <div v-show="saleSidebarMode === 'sales'">
         <SheetHeader>
@@ -357,9 +350,9 @@ watch(
                 @click="saleSidebarMode = 'customers'"
               >
                 <span v-if="formInstance.values.customer_id">
-                  {{ selectedCustomer?.name }} <br />
+                  {{ activeCustomer?.name }} <br />
                   <span class="text-xs">
-                    {{ selectedCustomer?.phone }}
+                    {{ activeCustomer?.phone }}
                   </span>
                 </span>
                 <span v-else>Seleccionar cliente</span>
@@ -510,7 +503,10 @@ watch(
             >
             <Button
               :disabled="isLoading"
-              @click="forceCloseSidebar"
+              @click="
+                openModel = false;
+                saleSidebarMode = 'sales';
+              "
               variant="outline"
               type="button"
               >Cancelar</Button
@@ -569,7 +565,7 @@ watch(
 
         <SheetFooter>
           <Button
-            @click="forceCloseSidebar"
+            @click="saleSidebarMode = 'sales'"
             variant="outline"
             class="w-full"
             type="button"
@@ -612,7 +608,7 @@ watch(
               <Button
                 @click="
                   formInstance.setFieldValue('customer_id', customer?.id ?? '');
-                  selectedCustomer = customer;
+                  activeCustomer = customer;
                   saleSidebarMode = 'sales';
                 "
                 class="w-full text-left"

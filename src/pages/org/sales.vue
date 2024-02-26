@@ -44,7 +44,8 @@ const WHATSAPP_URL = import.meta.env.VITE_WHATSAPP_URL;
 const tableRef = ref<HTMLElement | null>(null);
 const saleSearch = ref("");
 const saleSearchDebounced = refDebounced(saleSearch, 400);
-const saleSidebarMode = ref<"create" | "update" | "view" | null>(null);
+const isCreateOrUpdateSidebarOpen = ref(false);
+const isSaleSidebarViewOnly = ref(false);
 const isDeleteSaleDialogOpen = ref(false);
 const activeSale = ref<Sale | null>(null);
 const queryClient = useQueryClient();
@@ -74,36 +75,32 @@ function openDeleteSaleDialog(sale: Sale) {
   isDeleteSaleDialogOpen.value = true;
 }
 
-function closeSidebar() {
-  handleSaleSidebar({ sale: null, mode: null });
-}
-
 function handleSaveSidebar(formValues: CreateSale | UpdateSale) {
   if (saleServicesTypeguards.isCreateSale(formValues)) {
     createSaleMutation.mutate(formValues);
   } else {
     updateSaleMutation.mutate(formValues);
   }
+  isCreateOrUpdateSidebarOpen.value = false;
 }
 
 function handleSaleSidebar(options: {
   sale?: Sale | null;
-  mode: "create" | "update" | "view" | null;
+  viewOnly?: boolean;
 }) {
   activeSale.value = options.sale ?? null;
-  saleSidebarMode.value = options.mode;
+  isCreateOrUpdateSidebarOpen.value = true;
+  isSaleSidebarViewOnly.value = Boolean(options.viewOnly);
 }
 
 async function createSaleMutationFn(formValues: CreateSale) {
   await saleServices.createSale(formValues);
-  closeSidebar();
   await queryClient.invalidateQueries({ queryKey: ["sales"] });
 }
 async function updateSaleMutationFn(formValues: UpdateSale) {
   const saleId = formValues.sale_id;
   if (!saleId) throw new Error("Sale id required to perform update");
   await saleServices.updateSale(formValues);
-  closeSidebar();
   await queryClient.invalidateQueries({ queryKey: ["sales"] });
 }
 async function deleteSaleMutationFn() {
@@ -129,9 +126,10 @@ function getBadgeColorFromStatus(status: Sale["status"]) {
 
 watchEffect(() => {
   if (isDeleteSaleDialogOpen.value) return;
-  if (saleSidebarMode.value) return;
+  if (isCreateOrUpdateSidebarOpen.value) return;
 
   activeSale.value = null;
+  isSaleSidebarViewOnly.value = false;
 });
 </script>
 
@@ -148,7 +146,7 @@ watchEffect(() => {
       </p>
     </div>
     <div>
-      <Button @click="saleSidebarMode = 'create'">
+      <Button @click="isCreateOrUpdateSidebarOpen = true">
         <PlusIcon class="w-5 h-5 stroke-[2px] mr-2" /> Crear venta
       </Button>
     </div>
@@ -216,7 +214,7 @@ watchEffect(() => {
             <TableCell class="text-center"
               ><div
                 class="flex -space-x-4 rtl:space-x-reverse w-fit mx-auto cursor-pointer"
-                @click="handleSaleSidebar({ sale, mode: 'view' })"
+                @click="handleSaleSidebar({ sale, viewOnly: true })"
               >
                 <Avatar
                   v-for="saleProduct in sale.i_sale_products.slice(0, 3)"
@@ -281,14 +279,14 @@ watchEffect(() => {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
                   <DropdownMenuItem
-                    @click="handleSaleSidebar({ sale, mode: 'view' })"
+                    @click="handleSaleSidebar({ sale, viewOnly: true })"
                   >
                     <EyeIcon class="w-5 h-5 mr-2" />
                     <span>Ver</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     v-if="sale.status === 'in_progress'"
-                    @click="handleSaleSidebar({ sale, mode: 'update' })"
+                    @click="handleSaleSidebar({ sale })"
                   >
                     <PencilIcon class="w-5 h-5 mr-2" />
                     <span>Actualizar</span>
@@ -318,11 +316,12 @@ watchEffect(() => {
   />
 
   <CreateOrEditSidebar
-    :open="Boolean(saleSidebarMode)"
-    :viewOnly="saleSidebarMode === 'view'"
-    :isLoading="createSaleMutation.isPending.value"
+    v-model:open="isCreateOrUpdateSidebarOpen"
+    :viewOnly="isSaleSidebarViewOnly"
+    :isLoading="
+      createSaleMutation.isPending.value || updateSaleMutation.isPending.value
+    "
     :sale="activeSale"
-    @close="closeSidebar"
     @save="handleSaveSidebar"
   />
 </template>
