@@ -23,7 +23,7 @@ const toggleDark = useToggle(isDark);
       </span>
     </a>
     <div class="gap-4 flex">
-      <Button @click="toggleDark()" variant="outline">
+      <Button aria-label="Toggle theme" @click="toggleDark()" variant="outline">
         <MoonIcon class="w-4 h-4 stroke-[2px]" v-if="isDark" />
         <SunIcon class="w-4 h-4 stroke-[2px]" v-else />
       </Button>

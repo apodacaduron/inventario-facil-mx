@@ -80,6 +80,7 @@ const organizationStore = useOrganizationStore();
       <img
         src="/hero-light.svg"
         class="w-full h-full max-w-none object-cover lg:object-fill"
+        alt="hero"
       />
     </section>
   </main>
