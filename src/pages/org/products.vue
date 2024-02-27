@@ -145,18 +145,18 @@ watchEffect(() => {
 </script>
 
 <template>
-  <div class="flex items-center justify-between flex-col md:flex-row">
+  <div class="flex justify-between flex-col md:flex-row">
     <div class="mb-6">
       <h2
-        class="mb-2 text-3xl font-extrabold leading-none tracking-tight md:text-4xl text-foreground"
+        class="mb-0 md:mb-2 text-3xl font-extrabold leading-none tracking-tight md:text-4xl text-foreground"
       >
         Productos
       </h2>
-      <p class="max-w-xl">
+      <p class="hidden md:block max-w-xl">
         Tus productos, tu control. Gestiona fácilmente tu inventario.
       </p>
     </div>
-    <div class="flex gap-2">
+    <div class="hidden lg:flex gap-2">
       <Button @click="isCreateOrUpdateSidebarOpen = true">
         <PlusIcon class="w-5 h-5 stroke-[2px] mr-2" /> Crear producto
       </Button>
@@ -166,16 +166,21 @@ watchEffect(() => {
     </div>
   </div>
 
-  <div
-    class="flex items-center justify-between flex-column flex-wrap md:flex-row space-y-4 md:space-y-0 pb-4"
-  >
-    <label for="table-search" class="sr-only">Buscar</label>
-    <div>
-      <Input
-        v-model="productSearch"
-        type="search"
-        placeholder="Buscar productos"
-      />
+  <div class="flex items-center justify-between pb-4 gap-4">
+    <Input
+      v-model="productSearch"
+      type="search"
+      placeholder="Buscar productos"
+      class="max-w-[256px]"
+    />
+
+    <div class="flex lg:hidden gap-2">
+      <Button @click="isCreateOrUpdateSidebarOpen = true">
+        <PlusIcon class="w-5 h-5 stroke-[2px]" />
+      </Button>
+      <Button @click="isShareStockDialogOpen = true" variant="outline">
+        <ShareIcon class="w-5 h-5 stroke-[2px]" />
+      </Button>
     </div>
   </div>
 

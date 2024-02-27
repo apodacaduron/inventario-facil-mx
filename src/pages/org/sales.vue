@@ -134,30 +134,36 @@ watchEffect(() => {
 </script>
 
 <template>
-  <div class="flex items-center justify-between flex-col md:flex-row">
+  <div class="flex justify-between flex-col md:flex-row">
     <div class="mb-6">
       <h2
-        class="mb-2 text-3xl font-extrabold leading-none tracking-tight text-slate-900 md:text-4xl dark:text-white"
+        class="mb-0 md:mb-2 text-3xl font-extrabold leading-none tracking-tight text-slate-900 md:text-4xl dark:text-white"
       >
         Ventas
       </h2>
-      <p class="max-w-xl">
+      <p class="hidden md:block max-w-xl">
         Tus ventas, tu control. Gestiona fácilmente tu lista de ventas.
       </p>
     </div>
-    <div>
+    <div class="hidden lg:flex gap-2">
       <Button @click="isCreateOrUpdateSidebarOpen = true">
         <PlusIcon class="w-5 h-5 stroke-[2px] mr-2" /> Crear venta
       </Button>
     </div>
   </div>
 
-  <div
-    class="flex items-center justify-between flex-column flex-wrap md:flex-row space-y-4 md:space-y-0 pb-4"
-  >
-    <label for="table-search" class="sr-only">Buscar</label>
-    <div class="relative">
-      <Input v-model="saleSearch" type="search" placeholder="Buscar ventas" />
+  <div class="flex items-center justify-between pb-4 gap-4">
+    <Input
+      v-model="saleSearch"
+      type="search"
+      placeholder="Buscar ventas"
+      class="max-w-[256px]"
+    />
+
+    <div class="flex lg:hidden gap-2">
+      <Button @click="isCreateOrUpdateSidebarOpen = true">
+        <PlusIcon class="w-5 h-5 stroke-[2px]" />
+      </Button>
     </div>
   </div>
 
