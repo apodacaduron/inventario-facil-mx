@@ -192,7 +192,6 @@ const formSchema = toTypedSchema(
           price: z.number().positive().finite().safe(),
           unit_price: z.number().positive().finite().safe(),
           qty: z.number().int().positive().finite().safe(),
-          // This 2 field are not stored in DB
           name: z.string(),
           image_url: z.string(),
         })
@@ -401,7 +400,11 @@ watch(
                     <TableHead class="w-[100px]"> Producto </TableHead>
                     <TableHead class="text-center">Cantidad</TableHead>
                     <TableHead class="text-center">Precio</TableHead>
-                    <TableHead class="text-center">-</TableHead>
+                    <TableHead
+                      v-if="formInstance.values.status === 'in_progress'"
+                      class="text-center"
+                      >-</TableHead
+                    >
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -448,7 +451,10 @@ watch(
                         </FormItem>
                       </FormField>
                     </TableCell>
-                    <TableCell class="text-center">
+                    <TableCell
+                      v-if="formInstance.values.status === 'in_progress'"
+                      class="text-center"
+                    >
                       <Button
                         @click="productsFormFieldArray.remove(idx)"
                         size="icon"
@@ -488,6 +494,7 @@ watch(
               </Table>
 
               <Button
+                v-if="formInstance.values.status === 'in_progress'"
                 type="button"
                 @click="saleSidebarMode = 'products'"
                 variant="outline"

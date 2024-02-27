@@ -14,7 +14,6 @@ export type CreateSale = {
     price: SaleProduct["price"];
     unit_price: SaleProduct["unit_price"];
     qty: SaleProduct["qty"];
-    // This 2 field are not stored in DB
     name: NonNullable<SaleProduct["i_products"]>["name"];
     image_url: NonNullable<SaleProduct["i_products"]>["image_url"];
   }[];
