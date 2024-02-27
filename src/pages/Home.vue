@@ -2,9 +2,11 @@
 import { useAuthStore, useOrganizationStore } from "@/stores";
 import { Button } from "@/components/ui";
 import { NavigationBar } from "@/features/home";
+import { useDark } from "@vueuse/core";
 
 const authStore = useAuthStore();
 const organizationStore = useOrganizationStore();
+const isDark = useDark();
 </script>
 
 <template>
@@ -78,7 +80,7 @@ const organizationStore = useOrganizationStore();
         </router-link>
       </div>
       <img
-        src="/hero-light.svg"
+        :src="`/hero-${isDark ? 'dark' : 'light'}.svg`"
         class="w-full h-full max-w-none object-cover lg:object-fill"
         alt="hero"
       />
