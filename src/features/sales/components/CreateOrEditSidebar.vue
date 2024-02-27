@@ -279,9 +279,9 @@ watch(
           products:
             nextSale?.i_sale_products.map((saleProduct) => ({
               sale_detail_id: saleProduct.id,
-              image_url: saleProduct.i_products?.image_url ?? "",
-              product_id: saleProduct.i_products?.id ?? "",
-              name: saleProduct.i_products?.name ?? "",
+              image_url: saleProduct.image_url ?? "",
+              product_id: saleProduct.product_id ?? "",
+              name: saleProduct.name ?? "",
               price: currencyFormatter.parseRaw(saleProduct?.price ?? 0),
               unit_price: saleProduct?.unit_price ?? 0,
               qty: saleProduct.qty,
@@ -712,7 +712,7 @@ watch(
                   :key="saleProduct?.id ?? idx"
                 >
                   <TableCell class="font-medium min-w-[80px]">
-                    {{ saleProduct?.i_products?.name }}
+                    {{ saleProduct?.name }}
                   </TableCell>
                   <TableCell class="text-center flex justify-center">
                     {{ saleProduct.qty }}

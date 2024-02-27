@@ -136,7 +136,7 @@ export function useDashboardServices() {
 
     let supabaseQuery = supabase
       .from("i_sale_products")
-      .select("*, i_products(*)")
+      .select("*")
       .eq("org_id", organization.org_id)
       .order("qty", { ascending: false });
 

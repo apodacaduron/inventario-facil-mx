@@ -192,10 +192,10 @@ const bestCustomersQuery = useBestCustomersQuery({
                 :key="soldProduct.id">
 
                 <Avatar class="border-muted border-2">
-                  <AvatarImage :src="soldProduct.i_products?.image_url ?? ''" />
+                  <AvatarImage :src="soldProduct?.image_url ?? ''" />
                   <AvatarFallback>
                     {{
-                      `${soldProduct.i_products?.name
+                      `${soldProduct?.name
                         ?.substring(0, 1)
                         .toLocaleUpperCase()}`
                     }}

@@ -227,11 +227,9 @@ watchEffect(() => {
                   :key="saleProduct.id"
                   class="border-muted border-2"
                 >
-                  <AvatarImage :src="saleProduct.i_products?.image_url ?? ''" />
+                  <AvatarImage :src="saleProduct.image_url ?? ''" />
                   <AvatarFallback>{{
-                    `${saleProduct.i_products?.name
-                      ?.substring(0, 1)
-                      .toLocaleUpperCase()}`
+                    `${saleProduct.name?.substring(0, 1).toLocaleUpperCase()}`
                   }}</AvatarFallback>
                 </Avatar>
                 <div

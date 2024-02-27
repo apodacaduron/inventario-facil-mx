@@ -14,8 +14,8 @@ export type CreateSale = {
     price: SaleProduct["price"];
     unit_price: SaleProduct["unit_price"];
     qty: SaleProduct["qty"];
-    name: NonNullable<SaleProduct["i_products"]>["name"];
-    image_url: NonNullable<SaleProduct["i_products"]>["image_url"];
+    name: SaleProduct["name"];
+    image_url: SaleProduct["image_url"];
   }[];
 };
 export type UpdateSale = {
@@ -98,7 +98,7 @@ export function useSaleServices() {
 
     let saleQuery = supabase
       .from("i_sales")
-      .select("*, i_sale_products(*, i_products(*)), i_customers!inner(*)")
+      .select("*, i_sale_products(*), i_customers!inner(*)")
       .eq("org_id", organization.org_id)
       .range(from, to)
       .order("created_at", { ascending: false });
