@@ -231,7 +231,7 @@ const menuList = {
   </aside>
 
   <div class="sm:ml-64">
-    <div class="p-4 md:p-8 mt-20 md:mt-14">
+    <div class="p-0 md:p-8 mt-20 md:mt-14">
       <router-view />
     </div>
   </div>

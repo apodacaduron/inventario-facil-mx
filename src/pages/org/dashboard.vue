@@ -21,7 +21,7 @@ const dashboardDates = useDashboardDates();
 </script>
 
 <template>
-  <div class="flex flex-col gap-8">
+  <div class="flex flex-col gap-8 mx-4 md:mx-0 mb-6">
     <div class="flex flex-col gap-3">
       <div class="text-slate-500 dark:text-slate-400 font-semibold">
         Estadísticas

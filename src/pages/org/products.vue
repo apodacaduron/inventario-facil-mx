@@ -145,7 +145,7 @@ watchEffect(() => {
 </script>
 
 <template>
-  <div class="flex justify-between flex-col md:flex-row">
+  <div class="flex justify-between flex-col md:flex-row mx-4 md:mx-0">
     <div class="mb-6">
       <h2
         class="mb-0 md:mb-2 text-3xl font-extrabold leading-none tracking-tight md:text-4xl text-foreground"
@@ -166,7 +166,7 @@ watchEffect(() => {
     </div>
   </div>
 
-  <div class="flex items-center justify-between pb-4 gap-4">
+  <div class="flex items-center justify-between pb-4 gap-4 mx-4 md:mx-0">
     <Input
       v-model="productSearch"
       type="search"
@@ -190,7 +190,7 @@ watchEffect(() => {
         <TableRow>
           <TableHead
             @click="productsTableOrder.toggleTableOrder('name')"
-            class="cursor-pointer"
+            class="cursor-pointer pl-4"
           >
             <span class="flex items-center gap-2">
               Nombre
@@ -243,7 +243,7 @@ watchEffect(() => {
         >
           <TableRow v-for="product in page.data" :key="product.id">
             <TableCell
-              class="flex items-center px-6 py-4 text-foreground whitespace-nowrap w-max"
+              class="flex items-center p-4 text-foreground whitespace-nowrap w-max"
             >
               <Avatar>
                 <AvatarImage :src="product?.image_url ?? ''" />
