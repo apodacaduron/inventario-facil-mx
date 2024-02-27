@@ -86,16 +86,12 @@ export function useCustomerServices() {
       throw new Error("Organization is required to create a customer");
 
     const { customer_id, ...otherFormValues } = formValues;
-    await supabase
-      .from("i_customers")
-      .insert([
-        {
-          ...otherFormValues,
-          org_id: organization.org_id,
-        },
-      ])
-      .select()
-      .single();
+    await supabase.from("i_customers").insert([
+      {
+        ...otherFormValues,
+        org_id: organization.org_id,
+      },
+    ]);
   }
 
   async function updateCustomer(formValues: UpdateCustomer) {

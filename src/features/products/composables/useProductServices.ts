@@ -85,16 +85,12 @@ export function useProductServices() {
       throw new Error("Organization is required to create a product");
 
     const { product_id, ...otherFormValues } = formValues;
-    await supabase
-      .from("i_products")
-      .insert([
-        {
-          ...otherFormValues,
-          org_id: organization.org_id,
-        },
-      ])
-      .select()
-      .single();
+    await supabase.from("i_products").insert([
+      {
+        ...otherFormValues,
+        org_id: organization.org_id,
+      },
+    ]);
   }
 
   async function updateProduct(formValues: UpdateProduct) {
