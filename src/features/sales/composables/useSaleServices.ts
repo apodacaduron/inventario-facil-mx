@@ -1,7 +1,6 @@
 import { supabase } from "@/config/supabase";
 import { LoadListOptions, useServiceHelpers } from "@/features/global";
 import { useProductServices } from "@/features/products";
-import { PostgrestSingleResponse } from "@supabase/supabase-js";
 
 export type CreateSale = {
   sale_id?: Sale["id"];
@@ -47,8 +46,48 @@ export const saleServicesTypeguards = {
   },
 };
 
+const helpers = {
+  async updateStockBasedOnSaleProducts(
+    saleProducts: Array<{
+      qty: number | null;
+      product_id: string | null;
+    }> | null,
+    callback: (currentStock: number, saleProductQty: number) => number
+  ) {
+    const productServices = useProductServices();
+    await Promise.all(
+      saleProducts?.map(async (saleProduct) => {
+        if (!saleProduct.product_id) return;
+        const productResponse = await supabase
+          .from("i_products")
+          .select("current_stock")
+          .eq("id", saleProduct.product_id)
+          .single();
+
+        const saleQuantity = saleProduct?.qty ?? 0;
+        const currentStock = productResponse.data?.current_stock ?? 0;
+        const nextCurrentStock = callback(currentStock, saleQuantity);
+
+        await productServices.updateProduct({
+          product_id: saleProduct.product_id,
+          current_stock: nextCurrentStock,
+        });
+      }) ?? []
+    );
+  },
+  formatSaleProduct(product: UpdateSale["products"][number]) {
+    return {
+      product_id: product.product_id,
+      price: product.price,
+      unit_price: product.unit_price,
+      qty: product.qty,
+      name: product.name,
+      image_url: product.image_url,
+    };
+  },
+};
+
 export function useSaleServices() {
-  const productServices = useProductServices();
   const serviceHelpers = useServiceHelpers();
 
   async function loadList(options?: LoadListOptions) {
@@ -91,33 +130,20 @@ export function useSaleServices() {
     if (!createdSaleResponse.data?.id)
       throw new Error("Sale id is required to add to sale detail");
 
-    const formattedSaleProducts = formValues.products.map((product) => ({
-      sale_id: createdSaleResponse.data.id,
-      product_id: product.product_id,
-      qty: product.qty,
-      price: product.price,
-      unit_price: product.unit_price,
-      org_id: organization.org_id,
-    }));
-    await supabase.from("i_sale_products").insert(formattedSaleProducts);
-    formValues.products.map(async ({ product_id, qty }) => {
-      if (!product_id) return;
-      const productResponse = await supabase
-        .from("i_products")
-        .select("current_stock")
-        .eq("id", product_id)
-        .single();
+    await supabase.from("i_sale_products").insert(
+      formValues.products.map((product) => ({
+        ...helpers.formatSaleProduct(product),
+        sale_id: createdSaleResponse.data.id,
+        org_id: organization.org_id,
+      }))
+    );
 
-      let nextCurrentStock = productResponse.data?.current_stock ?? 0;
-      let formQty = qty ?? 0;
-      if (formValues.status === "in_progress") {
-        nextCurrentStock = nextCurrentStock - formQty;
-      }
-      await productServices.updateProduct({
-        product_id,
-        current_stock: nextCurrentStock,
-      });
-    });
+    await (async function updateNewStock() {
+      await helpers.updateStockBasedOnSaleProducts(
+        formValues.products,
+        (currentStock, saleProductQty) => currentStock - saleProductQty
+      );
+    })();
   }
 
   async function updateSale(formValues: UpdateSale) {
@@ -126,86 +152,50 @@ export function useSaleServices() {
       throw new Error("Organization is required to update a sale");
     const { sale_id, products, ...otherFormValues } = formValues;
 
-    const saleResponse = await supabase
+    await supabase
       .from("i_sales")
       .update({
         ...otherFormValues,
       })
-      .eq("id", formValues.sale_id)
-      .select()
-      .single();
+      .eq("id", formValues.sale_id);
 
-    if (saleResponse.data?.status === "completed") return;
-
-    let saleProductsQuery: PostgrestSingleResponse<SaleProductList>;
-    let oldSaleProductsQuery: PostgrestSingleResponse<SaleProductList>;
+    if (formValues.status === "completed") return;
 
     if (formValues.status === "in_progress") {
-      const formattedSaleProducts = formValues.products.map((product) => ({
-        sale_id: formValues.sale_id,
-        product_id: product.product_id,
-        qty: product.qty,
-        price: product.price,
-        unit_price: product.unit_price,
-        org_id: organization.org_id,
-      }));
-      oldSaleProductsQuery = await supabase
+      const oldSaleProductsQuery = await supabase
         .from("i_sale_products")
         .delete()
         .eq("sale_id", formValues.sale_id)
         .select();
-      await Promise.all(
-        oldSaleProductsQuery.data?.map(async (oldSaleProduct) => {
-          if (!oldSaleProduct.product_id) return;
-          const productResponse = await supabase
-            .from("i_products")
-            .select("current_stock")
-            .eq("id", oldSaleProduct.product_id)
-            .single();
 
-          const nextCurrentStock =
-            (productResponse.data?.current_stock ?? 0) +
-            (oldSaleProduct.qty ?? 0);
-          await productServices.updateProduct({
-            product_id: oldSaleProduct.product_id,
-            current_stock: nextCurrentStock,
-          });
-        }) ?? []
-      );
-      saleProductsQuery = await supabase
-        .from("i_sale_products")
-        .insert(formattedSaleProducts)
-        .select();
-    } else {
-      saleProductsQuery = await supabase
-        .from("i_sale_products")
-        .select("*, i_products(*)")
-        .eq("sale_id", formValues.sale_id);
+      await (async function restoreOldStock() {
+        await helpers.updateStockBasedOnSaleProducts(
+          oldSaleProductsQuery.data,
+          (currentStock, saleProductQty) => currentStock + saleProductQty
+        );
+      })();
+
+      const formattedSaleProducts = formValues.products.map((product) => ({
+        ...helpers.formatSaleProduct(product),
+        sale_id: formValues.sale_id,
+        org_id: organization.org_id,
+      }));
+      await supabase.from("i_sale_products").insert(formattedSaleProducts);
+
+      await (async function updateNewStock() {
+        await helpers.updateStockBasedOnSaleProducts(
+          formValues.products,
+          (currentStock, saleProductQty) => currentStock - saleProductQty
+        );
+      })();
+    } else if (formValues.status === "cancelled") {
+      await (async function restoreOldStock() {
+        await helpers.updateStockBasedOnSaleProducts(
+          formValues.products,
+          (currentStock, saleProductQty) => currentStock + saleProductQty
+        );
+      })();
     }
-
-    await Promise.all(
-      saleProductsQuery.data?.map(async ({ product_id, qty }) => {
-        if (!product_id) return;
-        const productResponse = await supabase
-          .from("i_products")
-          .select("current_stock")
-          .eq("id", product_id)
-          .single();
-
-        let formQty = qty ?? 0;
-        let nextCurrentStock = productResponse.data?.current_stock ?? 0;
-        if (formValues.status === "in_progress") {
-          nextCurrentStock = nextCurrentStock - formQty;
-        } else if (formValues.status === "cancelled") {
-          nextCurrentStock = nextCurrentStock + formQty;
-        }
-
-        await productServices.updateProduct({
-          product_id,
-          current_stock: nextCurrentStock,
-        });
-      }) ?? []
-    );
   }
 
   async function deleteSale(saleId: DeleteSale) {
