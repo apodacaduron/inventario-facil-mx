@@ -1,8 +1,7 @@
 import { supabase } from "@/config/supabase";
+import { LoadListOptions, useServiceHelpers } from "@/features/global";
 import { useProductServices } from "@/features/products";
-import { useOrganizationStore } from "@/stores";
 import { PostgrestSingleResponse } from "@supabase/supabase-js";
-import { useRoute } from "vue-router";
 
 export type CreateSale = {
   sale_id?: Sale["id"];
@@ -48,27 +47,18 @@ export const saleServicesTypeguards = {
   },
 };
 
-export const PAGINATION_LIMIT = 30;
-
 export function useSaleServices() {
   const productServices = useProductServices();
+  const serviceHelpers = useServiceHelpers();
 
-  const organizationStore = useOrganizationStore();
-  const route = useRoute();
-  const orgId = route.params.orgId;
+  async function loadList(options?: LoadListOptions) {
+    const [from, to] = serviceHelpers.getPaginationRange(options?.offset);
 
-  async function loadList(options?: { offset?: number; search?: string }) {
-    const offset = options?.offset ?? 0;
-    const from = offset * PAGINATION_LIMIT;
-    const to = from + PAGINATION_LIMIT - 1;
-
-    const organization = organizationStore.findOrganizationById(
-      orgId.toString()
-    );
+    const organization = serviceHelpers.getCurrentOrganization();
     if (!organization?.org_id)
       throw new Error("Organization is required to get sale list");
 
-    let saleSearch = supabase
+    let saleQuery = supabase
       .from("i_sales")
       .select("*, i_sale_products(*, i_products(*)), i_customers!inner(*)")
       .eq("org_id", organization.org_id)
@@ -76,16 +66,14 @@ export function useSaleServices() {
       .order("created_at", { ascending: false });
 
     if (options?.search) {
-      saleSearch = saleSearch.ilike("i_customers.name", `%${options.search}%`);
+      saleQuery = saleQuery.ilike("i_customers.name", `%${options.search}%`);
     }
 
-    return await saleSearch;
+    return await saleQuery;
   }
 
   async function createSale(formValues: CreateSale) {
-    const organization = organizationStore.findOrganizationById(
-      orgId.toString()
-    );
+    const organization = serviceHelpers.getCurrentOrganization();
     if (!organization?.org_id)
       throw new Error("Organization is required to create a sale");
 
@@ -133,9 +121,7 @@ export function useSaleServices() {
   }
 
   async function updateSale(formValues: UpdateSale) {
-    const organization = organizationStore.findOrganizationById(
-      orgId.toString()
-    );
+    const organization = serviceHelpers.getCurrentOrganization();
     if (!organization?.org_id)
       throw new Error("Organization is required to update a sale");
     const { sale_id, products, ...otherFormValues } = formValues;

@@ -1,17 +1,14 @@
 import { useInfiniteQuery } from "@tanstack/vue-query";
-import {
-  ProductFilterParams,
-  ProductOrderParam,
-  useProductServices,
-} from "./useProductServices";
+import { useProductServices } from "./useProductServices";
 import { MaybeRefOrGetter, toValue } from "vue";
+import { LoadListOptions } from "@/features/global";
 
 export function useProductsQuery(context: {
   options: {
     enabled: MaybeRefOrGetter<boolean | undefined>;
     search: MaybeRefOrGetter<string | undefined>;
-    filters?: MaybeRefOrGetter<ProductFilterParams | undefined>;
-    order?: MaybeRefOrGetter<ProductOrderParam | undefined>;
+    filters?: MaybeRefOrGetter<LoadListOptions["filters"] | undefined>;
+    order?: MaybeRefOrGetter<LoadListOptions["order"] | undefined>;
   };
 }) {
   const productServices = useProductServices();
@@ -29,33 +26,6 @@ export function useProductsQuery(context: {
         search: toValue(context.options.search),
         filters: toValue(context.options.filters),
         order: toValue(context.options.order),
-      });
-    },
-    initialPageParam: 0,
-    getNextPageParam: (lastPage, _allPages, lastPageParam) => {
-      if (lastPage.data?.length === 0) {
-        return undefined;
-      }
-      return lastPageParam + 1;
-    },
-    enabled: context.options.enabled,
-  });
-}
-
-export function useProductsByIdsQuery(context: {
-  options: {
-    enabled: MaybeRefOrGetter<boolean | undefined>;
-    productIds: MaybeRefOrGetter<string[] | undefined>;
-  };
-}) {
-  const productServices = useProductServices();
-
-  return useInfiniteQuery({
-    queryKey: ["products", context.options.productIds],
-    queryFn({ pageParam }) {
-      return productServices.loadListByIds({
-        offset: pageParam,
-        productIds: toValue(context.options.productIds) ?? [],
       });
     },
     initialPageParam: 0,

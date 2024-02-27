@@ -1,6 +1,5 @@
 import { supabase } from "@/config/supabase";
-import { useOrganizationStore } from "@/stores";
-import { useRoute } from "vue-router";
+import { LoadListOptions, useServiceHelpers } from "@/features/global";
 
 export type CreateProduct = {
   product_id?: Product["id"];
@@ -21,13 +20,6 @@ export type ProductList = Awaited<
 >["data"];
 export type Product = NonNullable<ProductList>[number];
 
-export type ProductFilterParams = Array<{
-  column: string;
-  operator: string;
-  value: any;
-}>;
-export type ProductOrderParam = [string, "asc" | "desc"];
-
 export const productServicesTypeguards = {
   isCreateProduct(
     maybeProduct: CreateProduct | UpdateProduct
@@ -47,47 +39,36 @@ export const productServicesTypeguards = {
   },
 };
 
-export const PAGINATION_LIMIT = 30;
-
 export function useProductServices() {
-  const organizationStore = useOrganizationStore();
-  const route = useRoute();
-  const orgId = route.params.orgId;
+  const serviceHelpers = useServiceHelpers();
 
-  async function loadList(options?: {
-    offset?: number;
-    search?: string;
-    filters?: ProductFilterParams;
-    order?: ProductOrderParam;
-  }) {
-    const offset = options?.offset ?? 0;
-    const from = offset * PAGINATION_LIMIT;
-    const to = from + PAGINATION_LIMIT - 1;
-
-    const organization = organizationStore.findOrganizationById(
-      orgId.toString()
-    );
+  async function loadList(options?: LoadListOptions) {
+    const organization = serviceHelpers.getCurrentOrganization();
     if (!organization?.org_id)
       throw new Error("Organization is required to get product list");
 
-    let productSearch = supabase
+    const [from, to] = serviceHelpers.getPaginationRange(options?.offset);
+
+    let productQuery = supabase
       .from("i_products")
       .select("*")
       .eq("org_id", organization.org_id)
       .range(from, to);
 
     if (options?.search) {
-      productSearch = productSearch.ilike("name", `%${options.search}%`);
+      productQuery = productQuery.ilike("name", `%${options.search}%`);
     }
+
     if (options?.order) {
       const [column = "created_at", order = "desc"] = options?.order;
-      productSearch = productSearch.order(column, {
+      productQuery = productQuery.order(column, {
         ascending: order === "asc",
       });
     }
+
     if (options?.filters) {
       options?.filters.forEach((filter) => {
-        productSearch = productSearch.filter(
+        productQuery = productQuery.filter(
           filter.column,
           filter.operator,
           filter.value
@@ -95,39 +76,14 @@ export function useProductServices() {
       });
     }
 
-    return await productSearch;
-  }
-
-  async function loadListByIds(options?: {
-    offset?: number;
-    productIds: string[];
-  }) {
-    const offset = options?.offset ?? 0;
-    const from = offset * PAGINATION_LIMIT;
-    const to = from + PAGINATION_LIMIT - 1;
-
-    const organization = organizationStore.findOrganizationById(
-      orgId.toString()
-    );
-    if (!organization?.org_id)
-      throw new Error("Organization is required to get product list");
-
-    const productSearch = supabase
-      .from("i_products")
-      .select("*")
-      .eq("org_id", organization.org_id)
-      .in("id", options?.productIds ?? [])
-      .range(from, to);
-
-    return await productSearch;
+    return await productQuery;
   }
 
   async function createProduct(formValues: CreateProduct) {
-    const organization = organizationStore.findOrganizationById(
-      orgId.toString()
-    );
+    const organization = serviceHelpers.getCurrentOrganization();
     if (!organization?.org_id)
       throw new Error("Organization is required to create a product");
+
     const { product_id, ...otherFormValues } = formValues;
     await supabase
       .from("i_products")
@@ -160,7 +116,6 @@ export function useProductServices() {
 
   return {
     loadList,
-    loadListByIds,
     createProduct,
     deleteProduct,
     updateProduct,

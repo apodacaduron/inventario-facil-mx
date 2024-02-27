@@ -1,6 +1,5 @@
 import { supabase } from "@/config/supabase";
-import { useOrganizationStore } from "@/stores";
-import { useRoute } from "vue-router";
+import { LoadListOptions, useServiceHelpers } from "@/features/global";
 
 export type CreateCustomer = {
   customer_id?: Customer["id"];
@@ -22,13 +21,6 @@ export type CustomerList = Awaited<
 >["data"];
 export type Customer = NonNullable<CustomerList>[number];
 
-export type CustomerFilterParams = Array<{
-  column: string;
-  operator: string;
-  value: any;
-}>;
-export type CustomerOrderParam = [string, "asc" | "desc"];
-
 export const TRUST_STATUS = ["trusted", "not_trusted"] as const;
 export const customerServicesTypeguards = {
   isCreateCustomer(
@@ -48,47 +40,36 @@ export const customerServicesTypeguards = {
   },
 };
 
-export const PAGINATION_LIMIT = 30;
-
 export function useCustomerServices() {
-  const organizationStore = useOrganizationStore();
-  const route = useRoute();
-  const orgId = route.params.orgId;
+  const serviceHelpers = useServiceHelpers();
 
-  async function loadList(options?: {
-    offset?: number;
-    search?: string;
-    filters?: CustomerFilterParams;
-    order?: CustomerOrderParam;
-  }) {
-    const offset = options?.offset ?? 0;
-    const from = offset * PAGINATION_LIMIT;
-    const to = from + PAGINATION_LIMIT - 1;
-
-    const organization = organizationStore.findOrganizationById(
-      orgId.toString()
-    );
+  async function loadList(options?: LoadListOptions) {
+    const organization = serviceHelpers.getCurrentOrganization();
     if (!organization?.org_id)
       throw new Error("Organization is required to get customer list");
 
-    let customerSearch = supabase
+    const [from, to] = serviceHelpers.getPaginationRange(options?.offset);
+
+    let customerQuery = supabase
       .from("i_customers")
       .select("*")
       .eq("org_id", organization.org_id)
       .range(from, to);
 
     if (options?.search) {
-      customerSearch = customerSearch.ilike("name", `%${options.search}%`);
+      customerQuery = customerQuery.ilike("name", `%${options.search}%`);
     }
+
     if (options?.order) {
       const [column = "created_at", order = "desc"] = options?.order;
-      customerSearch = customerSearch.order(column, {
+      customerQuery = customerQuery.order(column, {
         ascending: order === "asc",
       });
     }
+
     if (options?.filters) {
       options?.filters.forEach((filter) => {
-        customerSearch = customerSearch.filter(
+        customerQuery = customerQuery.filter(
           filter.column,
           filter.operator,
           filter.value
@@ -96,15 +77,14 @@ export function useCustomerServices() {
       });
     }
 
-    return await customerSearch;
+    return await customerQuery;
   }
 
   async function createCustomer(formValues: CreateCustomer) {
-    const organization = organizationStore.findOrganizationById(
-      orgId.toString()
-    );
+    const organization = serviceHelpers.getCurrentOrganization();
     if (!organization?.org_id)
       throw new Error("Organization is required to create a customer");
+
     const { customer_id, ...otherFormValues } = formValues;
     await supabase
       .from("i_customers")
@@ -119,11 +99,10 @@ export function useCustomerServices() {
   }
 
   async function updateCustomer(formValues: UpdateCustomer) {
-    const organization = organizationStore.findOrganizationById(
-      orgId.toString()
-    );
+    const organization = serviceHelpers.getCurrentOrganization();
     if (!organization?.org_id)
       throw new Error("Organization is required to update a customer");
+
     const { customer_id, ...otherFormValues } = formValues;
     await supabase
       .from("i_customers")
