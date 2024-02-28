@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { cn } from '@/lib/utils'
+import { cn } from "@/config/shadcn";
 
-const props = defineProps<{ class?: string }>()
+const props = defineProps<{ class?: string }>();
 </script>
 
 <template>
@@ -9,7 +9,7 @@ const props = defineProps<{ class?: string }>()
     :class="
       cn(
         'p-2 align-middle [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]',
-        props.class,
+        props.class
       )
     "
   >

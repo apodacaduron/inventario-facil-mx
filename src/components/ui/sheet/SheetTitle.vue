@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { DialogTitle, type DialogTitleProps } from 'radix-vue'
-import { cn } from '@/lib/utils'
+import { DialogTitle, type DialogTitleProps } from "radix-vue";
+import { cn } from "@/config/shadcn";
 
-const props = defineProps<DialogTitleProps & { class?: string }>()
+const props = defineProps<DialogTitleProps & { class?: string }>();
 </script>
 
 <template>

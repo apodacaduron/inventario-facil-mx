@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { Label, type LabelProps } from "radix-vue";
 import { useFormField } from "./useFormField";
-import { cn } from "@/lib/utils";
+import { cn } from "@/config/shadcn";
 
 defineProps<LabelProps>();
 

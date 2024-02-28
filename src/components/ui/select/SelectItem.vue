@@ -4,11 +4,11 @@ import {
   SelectItemIndicator,
   type SelectItemProps,
   SelectItemText,
-} from 'radix-vue'
-import { CheckIcon } from '@radix-icons/vue'
-import { cn } from '@/lib/utils'
+} from "radix-vue";
+import { CheckIcon } from "@radix-icons/vue";
+import { cn } from "@/config/shadcn";
 
-const props = defineProps<SelectItemProps & { class?: string }>()
+const props = defineProps<SelectItemProps & { class?: string }>();
 </script>
 
 <template>
@@ -17,7 +17,7 @@ const props = defineProps<SelectItemProps & { class?: string }>()
     :class="
       cn(
         'relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
-        props.class,
+        props.class
       )
     "
   >

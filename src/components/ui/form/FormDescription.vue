@@ -1,8 +1,8 @@
 <script lang="ts" setup>
-import { useFormField } from './useFormField'
-import { cn } from '@/lib/utils'
+import { useFormField } from "./useFormField";
+import { cn } from "@/config/shadcn";
 
-const { formDescriptionId } = useFormField()
+const { formDescriptionId } = useFormField();
 </script>
 
 <template>

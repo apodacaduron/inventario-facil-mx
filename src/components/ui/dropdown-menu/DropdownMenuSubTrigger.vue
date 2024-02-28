@@ -2,11 +2,11 @@
 import {
   DropdownMenuSubTrigger,
   type DropdownMenuSubTriggerProps,
-} from 'radix-vue'
-import { ChevronRightIcon } from '@radix-icons/vue'
-import { cn } from '@/lib/utils'
+} from "radix-vue";
+import { ChevronRightIcon } from "@radix-icons/vue";
+import { cn } from "@/config/shadcn";
 
-const props = defineProps<DropdownMenuSubTriggerProps & { class?: string }>()
+const props = defineProps<DropdownMenuSubTriggerProps & { class?: string }>();
 </script>
 
 <template>
@@ -15,7 +15,7 @@ const props = defineProps<DropdownMenuSubTriggerProps & { class?: string }>()
     :class="[
       cn(
         'flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none focus:bg-accent data-[state=open]:bg-accent',
-        props.class,
+        props.class
       ),
     ]"
   >
