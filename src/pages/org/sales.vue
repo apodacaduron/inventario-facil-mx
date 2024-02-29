@@ -161,7 +161,7 @@ watchEffect(() => {
     />
 
     <div class="flex lg:hidden gap-2">
-      <Button @click="isCreateOrUpdateSidebarOpen = true">
+      <Button @click="isCreateOrUpdateSidebarOpen = true" size="icon">
         <PlusIcon class="w-5 h-5 stroke-[2px]" />
       </Button>
     </div>

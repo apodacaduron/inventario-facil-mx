@@ -160,7 +160,11 @@ watchEffect(() => {
       <Button @click="isCreateOrUpdateSidebarOpen = true">
         <PlusIcon class="w-5 h-5 stroke-[2px] mr-2" /> Crear producto
       </Button>
-      <Button @click="isShareStockDialogOpen = true" variant="outline">
+      <Button
+        @click="isShareStockDialogOpen = true"
+        variant="outline"
+        size="icon"
+      >
         <ShareIcon class="w-5 h-5 stroke-[2px]" />
       </Button>
     </div>
@@ -175,10 +179,14 @@ watchEffect(() => {
     />
 
     <div class="flex lg:hidden gap-2">
-      <Button @click="isCreateOrUpdateSidebarOpen = true">
+      <Button @click="isCreateOrUpdateSidebarOpen = true" size="icon">
         <PlusIcon class="w-5 h-5 stroke-[2px]" />
       </Button>
-      <Button @click="isShareStockDialogOpen = true" variant="outline">
+      <Button
+        @click="isShareStockDialogOpen = true"
+        variant="outline"
+        size="icon"
+      >
         <ShareIcon class="w-5 h-5 stroke-[2px]" />
       </Button>
     </div>
