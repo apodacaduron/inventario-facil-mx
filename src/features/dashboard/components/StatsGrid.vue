@@ -201,8 +201,9 @@ const bestCustomersQuery = useBestCustomersQuery({
                     }}
                   </AvatarFallback>
                 </Avatar>
-                <div class="absolute -top-1 -right-1 text-xs bg-red-500 text-white rounded-full w-4 h-4 text-center">{{
-                  index + 1 }}</div>
+                <div class="absolute -top-1 -right-1 text-xs bg-red-500 text-white rounded-full w-4 h-4 text-center">
+                  {{ index + 1 }}
+                </div>
               </div>
               <span class="ml-2">/ mes</span>
             </template>

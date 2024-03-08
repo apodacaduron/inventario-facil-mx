@@ -542,12 +542,17 @@ watch(
             class="flex flex-col"
           >
             <CardContent class="p-4 text-center">
-              <Avatar>
-                <AvatarImage :src="product?.image_url ?? ''" />
-                <AvatarFallback>{{
-                  `${product?.name?.substring(0, 1).toLocaleUpperCase()}`
-                }}</AvatarFallback>
-              </Avatar>
+              <div class="relative">
+                <Avatar>
+                  <AvatarImage :src="product?.image_url ?? ''" />
+                  <AvatarFallback>{{
+                    `${product?.name?.substring(0, 1).toLocaleUpperCase()}`
+                  }}</AvatarFallback>
+                </Avatar>
+                <Badge class="absolute -top-1 -right-1 text-xs">
+                  {{ product?.current_stock }}
+                </Badge>
+              </div>
               <div class="text-sm font-semibold line-clamp-2">
                 {{ product?.name }}
               </div>
