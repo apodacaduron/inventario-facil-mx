@@ -193,7 +193,7 @@ const formSchema = toTypedSchema(
           unit_price: z.number().positive().finite().safe(),
           qty: z.number().int().positive().finite().safe(),
           name: z.string(),
-          image_url: z.string(),
+          image_url: z.string().nullish().optional(),
         })
       )
       .min(1, "Por favor seleccione al menos un producto"),
