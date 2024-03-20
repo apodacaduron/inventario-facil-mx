@@ -15,18 +15,14 @@ import {
   SheetClose,
 } from "@/components/ui";
 import { useDark, useToggle } from "@vueuse/core";
-import { useRoute, useRouter } from "vue-router";
+import { useRouter } from "vue-router";
 import {
   ArrowLeftOnRectangleIcon,
-  BanknotesIcon,
-  HomeIcon,
   MoonIcon,
-  ShoppingBagIcon,
   SunIcon,
-  UserGroupIcon,
+  UsersIcon,
 } from "@heroicons/vue/24/outline";
 
-const route = useRoute();
 const router = useRouter();
 const isDark = useDark();
 const toggleDark = useToggle(isDark);
@@ -38,25 +34,10 @@ function signOut() {
 }
 
 const menuList = {
-  dashboard: {
-    path: `/org/${route.params.orgId}/dashboard`,
-    text: "Inicio",
-    icon: HomeIcon,
-  },
-  products: {
-    path: `/org/${route.params.orgId}/products`,
-    text: "Productos",
-    icon: ShoppingBagIcon,
-  },
-  customers: {
-    path: `/org/${route.params.orgId}/customers`,
-    text: "Clientes",
-    icon: UserGroupIcon,
-  },
-  sales: {
-    path: `/org/${route.params.orgId}/sales`,
-    text: "Ventas",
-    icon: BanknotesIcon,
+  users: {
+    path: `/admin/users`,
+    text: "Usuarios",
+    icon: UsersIcon,
   },
 };
 </script>
@@ -140,7 +121,7 @@ const menuList = {
             </SheetContent>
           </Sheet>
 
-          <router-link :to="menuList.dashboard.path" class="flex ms-2 md:me-24">
+          <router-link :to="menuList.users.path" class="flex ms-2 md:me-24">
             <span
               class="self-center text-xl sm:text-2xl whitespace-nowrap dark:text-white"
               >inventariofacil.mx
@@ -175,15 +156,10 @@ const menuList = {
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
-                  <router-link
-                    v-if="authStore.userRole === 'admin'"
-                    to="/admin"
-                  >
-                    <DropdownMenuItem>
-                      <ArrowLeftOnRectangleIcon class="w-4 h-4 mr-2" />
-                      <span>Ir al panel de administrador</span>
-                    </DropdownMenuItem>
-                  </router-link>
+                  <DropdownMenuItem>
+                    <ArrowLeftOnRectangleIcon class="w-4 h-4 mr-2" />
+                    <span>Volver a organización</span>
+                  </DropdownMenuItem>
                   <DropdownMenuItem @click="signOut">
                     <ArrowLeftOnRectangleIcon class="w-4 h-4 mr-2" />
                     <span>Cerrar sesión</span>
