@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useAuthStore } from "@/stores";
+import { useAuthStore, useOrganizationStore } from "@/stores";
 import {
   Button,
   DropdownMenu,
@@ -18,15 +18,22 @@ import { useDark, useToggle } from "@vueuse/core";
 import { useRouter } from "vue-router";
 import {
   ArrowLeftOnRectangleIcon,
+  BuildingStorefrontIcon,
   MoonIcon,
   SunIcon,
   UsersIcon,
 } from "@heroicons/vue/24/outline";
+import { toRef } from "vue";
 
 const router = useRouter();
 const isDark = useDark();
 const toggleDark = useToggle(isDark);
 const authStore = useAuthStore();
+const organizationStore = useOrganizationStore();
+
+const orgId = toRef(
+  () => organizationStore.organizations?.find(Boolean)?.org_id
+);
 
 function signOut() {
   authStore.signOut();
@@ -156,10 +163,12 @@ const menuList = {
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
-                  <DropdownMenuItem>
-                    <ArrowLeftOnRectangleIcon class="w-4 h-4 mr-2" />
-                    <span>Volver a organización</span>
-                  </DropdownMenuItem>
+                  <router-link :to="`/org/${orgId}/dashboard`">
+                    <DropdownMenuItem>
+                      <BuildingStorefrontIcon class="w-4 h-4 mr-2" />
+                      <span>Volver a organización</span>
+                    </DropdownMenuItem>
+                  </router-link>
                   <DropdownMenuItem @click="signOut">
                     <ArrowLeftOnRectangleIcon class="w-4 h-4 mr-2" />
                     <span>Cerrar sesión</span>
