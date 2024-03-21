@@ -1,2 +1,4 @@
 export * from "./useTableOrder";
 export * from "./useServiceHelpers";
+export * from "./useRoleServices";
+export * from "./useRoleQueries";

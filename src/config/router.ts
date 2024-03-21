@@ -1,15 +1,15 @@
+import { useRoleServices } from "@/features/global/composables/useRoleServices";
 import { useAuthStore } from "@/stores";
 import { useOrganizationStore } from "@/stores/useOrganizationStore";
 import { until } from "@vueuse/core";
 import { storeToRefs } from "pinia";
 import {
-  NavigationGuard,
+  RouteLocationNormalized,
   RouteRecordRaw,
   createRouter,
   createWebHistory,
 } from "vue-router";
 
-type RouteGuard = NavigationGuard;
 type RouteWithMeta = RouteRecordRaw & {
   meta?: {
     requiresAuth?: boolean;
@@ -19,6 +19,10 @@ type RouteWithMeta = RouteRecordRaw & {
   };
 };
 
+const adminMeta: RouteWithMeta["meta"] = {
+  requiresAuth: true,
+  hasAdminRole: true,
+};
 const organizationMeta: RouteWithMeta["meta"] = {
   requiresAuth: true,
   requiresOrganization: true,
@@ -55,6 +59,18 @@ export const routes: RouteWithMeta[] = [
         path: "customers",
         meta: organizationMeta,
         component: () => import("@/pages/org/customers.vue"),
+      },
+    ],
+  },
+  {
+    path: "/admin",
+    meta: adminMeta,
+    component: () => import("@/features/admin/components/AdminLayout.vue"),
+    children: [
+      {
+        path: "users",
+        meta: adminMeta,
+        component: () => import("@/pages/admin/users.vue"),
       },
     ],
   },
@@ -107,62 +123,66 @@ async function isUserAllowedInOrganization(orgId: string | undefined) {
   );
 }
 
-const navigationGuards: Record<string, RouteGuard> = {
-  requiresAuth: async (to, _from, next) => {
+const navigationGuards = {
+  requiresAuth: async (to: RouteLocationNormalized) => {
     if (to.matched.some((record) => record.meta.requiresAuth)) {
       if (!isLoggedIn()) {
-        next("/auth/sign-in");
-        return;
+        return "/auth/sign-in";
       }
     }
-    next();
   },
-  redirectIfLoggedIn: async (to, _from, next) => {
+  redirectIfLoggedIn: async (to: RouteLocationNormalized) => {
     if (to.matched.some((record) => record.meta.redirectIfLoggedIn)) {
       if (isLoggedIn()) {
-        next("/");
-        return;
+        return "/";
       }
     }
-    next();
   },
-  requiresOrganization: async (to, _from, next) => {
+  requiresOrganization: async (to: RouteLocationNormalized) => {
     if (to.matched.some((record) => record.meta.requiresOrganization)) {
       const userHasOrganizations = await hasOrganizations();
       if (!userHasOrganizations) {
-        next("/no-organizations");
-        return;
+        return "/no-organizations";
       }
     }
-    next();
   },
-  belongsToOrganization: async (to, _from, next) => {
+  belongsToOrganization: async (to: RouteLocationNormalized) => {
     if (to.matched.some((record) => record.meta.belongsToOrganization)) {
       const orgId = to.params.orgId;
       const userBelongsToOrganization = await isUserAllowedInOrganization(
         orgId.toString()
       );
       if (!userBelongsToOrganization) {
-        next("/unauthorized");
-        return;
+        return "/unauthorized";
       }
     }
-    next();
+  },
+  hasAdminRole: async (to: RouteLocationNormalized) => {
+    if (to.matched.some((record) => record.meta.hasAdminRole)) {
+      const roleServices = useRoleServices();
+      const roleResponse = await roleServices.getUserRole();
+
+      const authStore = useAuthStore();
+      authStore.setRole(roleResponse.data?.i_roles?.role_name);
+
+      if (roleResponse.data?.i_roles?.role_name !== "admin") {
+        return "/unauthorized";
+      }
+    }
   },
 };
 
-router.beforeEach(async (to, _from, next) => {
+router.beforeEach(async (to, _from) => {
   const guards = [
     navigationGuards.requiresAuth,
     navigationGuards.redirectIfLoggedIn,
     navigationGuards.requiresOrganization,
     navigationGuards.belongsToOrganization,
+    navigationGuards.hasAdminRole,
   ];
 
   for (const guard of guards) {
-    await guard(to, _from, next);
-    if (to !== router.currentRoute.value) return;
+    const redirectPath = await guard(to);
+    if (redirectPath) return redirectPath;
   }
-
-  next();
 });

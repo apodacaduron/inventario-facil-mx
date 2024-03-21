@@ -1,17 +1,27 @@
 import { supabase } from "@/config/supabase";
 import { Session } from "@supabase/supabase-js";
 import { defineStore } from "pinia";
-import { computed, ref } from "vue";
+import { ref, toRef } from "vue";
+import { Database } from "../../types_db";
+
+type UserRole =
+  | Database["public"]["Tables"]["i_roles"]["Row"]["role_name"]
+  | undefined;
 
 export const useAuthStore = defineStore("auth", () => {
   const session = ref<Session | null>(null);
+  const userRole = ref<UserRole>(null);
 
-  const isLoggedIn = computed(() => Boolean(session.value));
-  const user = computed(() => session.value?.user.user_metadata);
-  const avatar = computed(() => session.value?.user.user_metadata.avatar_url);
+  const isLoggedIn = toRef(() => Boolean(session.value));
+  const user = toRef(() => session.value?.user.user_metadata);
+  const avatar = toRef(() => session.value?.user.user_metadata.avatar_url);
 
   function setSession(nextSession: Session | null) {
     session.value = nextSession;
+  }
+
+  function setRole(nextRole: UserRole) {
+    userRole.value = nextRole;
   }
 
   async function signOut() {
@@ -19,5 +29,14 @@ export const useAuthStore = defineStore("auth", () => {
     setSession(null);
   }
 
-  return { session, isLoggedIn, user, avatar, setSession, signOut };
+  return {
+    userRole,
+    session,
+    isLoggedIn,
+    user,
+    avatar,
+    setSession,
+    signOut,
+    setRole,
+  };
 });
