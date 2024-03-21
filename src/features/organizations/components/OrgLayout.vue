@@ -19,6 +19,7 @@ import { useRoute, useRouter } from "vue-router";
 import {
   ArrowLeftOnRectangleIcon,
   BanknotesIcon,
+  BuildingOffice2Icon,
   HomeIcon,
   MoonIcon,
   ShoppingBagIcon,
@@ -177,10 +178,10 @@ const menuList = {
                 <DropdownMenuContent>
                   <router-link
                     v-if="authStore.userRole === 'admin'"
-                    to="/admin"
+                    to="/admin/users"
                   >
                     <DropdownMenuItem>
-                      <ArrowLeftOnRectangleIcon class="w-4 h-4 mr-2" />
+                      <BuildingOffice2Icon class="w-4 h-4 mr-2" />
                       <span>Ir al panel de administrador</span>
                     </DropdownMenuItem>
                   </router-link>
