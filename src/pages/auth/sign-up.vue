@@ -19,8 +19,20 @@ const router = useRouter();
 const signUpMutation = useMutation({
   mutationFn: signUp,
 });
-function signUp(formValues: { email: string; password: string }) {
-  return supabase.auth.signUp(formValues);
+async function signUp(formValues: {
+  email: string;
+  full_name: string;
+  password: string;
+}) {
+  const response = await supabase.auth.signUp(formValues);
+  if (response.data.user?.id) {
+    await supabase
+      .from("users")
+      .update({ full_name: formValues.full_name })
+      .eq("id", response.data.user.id);
+  }
+
+  return response;
 }
 
 const formSchema = toTypedSchema(
@@ -30,6 +42,7 @@ const formSchema = toTypedSchema(
         .string()
         .min(1, "Correo es requerido")
         .email("Ingresa un correo válido"),
+      full_name: z.string().min(1, "Nombre es requerido"),
       password: z
         .string()
         .min(8, "La contraseña debe tener al menos 8 caracteres"),
@@ -89,6 +102,19 @@ const onSubmit = handleSubmit(async (formValues) => {
               <Input
                 type="text"
                 placeholder="Ingresa tu correo"
+                v-bind="componentField"
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        </FormField>
+        <FormField v-slot="{ componentField }" name="full_name">
+          <FormItem v-auto-animate>
+            <FormLabel>Nombre</FormLabel>
+            <FormControl>
+              <Input
+                type="text"
+                placeholder="Ingresa tu nombre"
                 v-bind="componentField"
               />
             </FormControl>
