@@ -2,7 +2,7 @@ import { PostgrestSingleResponse } from "@supabase/supabase-js";
 import { InfiniteData, UseInfiniteQueryReturnType } from "@tanstack/vue-query";
 import { MaybeRefOrGetter, computed, toValue } from "vue";
 
-export function useTableLoadingStates<
+export function useTableStates<
   T extends PostgrestSingleResponse<unknown[]>,
   S extends string
 >(

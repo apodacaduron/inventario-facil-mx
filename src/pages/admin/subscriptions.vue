@@ -36,11 +36,7 @@ import {
 } from "@heroicons/vue/24/outline";
 import { refDebounced, useInfiniteScroll } from "@vueuse/core";
 import { useMutation, useQueryClient } from "@tanstack/vue-query";
-import {
-  FeedbackCard,
-  useTableLoadingStates,
-  useTableOrder,
-} from "@/features/global";
+import { FeedbackCard, useTableStates, useTableOrder } from "@/features/global";
 import { useSubscriptionsQuery } from "@/features/subscriptions";
 import { useCurrencyFormatter } from "@/features/products";
 
@@ -83,10 +79,7 @@ useInfiniteScroll(
   },
   { distance: 10, canLoadMore: () => subscriptionsQuery.hasNextPage.value }
 );
-const tableLoadingStates = useTableLoadingStates(
-  subscriptionsQuery,
-  userSearch
-);
+const tableLoadingStates = useTableStates(subscriptionsQuery, userSearch);
 
 function openDeleteSubscriptionDialog(subscription: Subscription) {
   activeSubscription.value = subscription;
