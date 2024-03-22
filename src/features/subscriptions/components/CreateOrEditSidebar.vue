@@ -300,7 +300,11 @@ watch(
                       ]"
                     >
                       <span>{{
-                        new Date(value).toDateString() || "Escoge fecha inicial"
+                        new Date(value).toLocaleDateString("es-MX", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        }) || "Escoge fecha inicial"
                       }}</span>
                       <CalendarIcon class="ms-auto h-4 w-4 opacity-50" />
                     </Button>
@@ -338,7 +342,11 @@ watch(
                       ]"
                     >
                       <span>{{
-                        new Date(value).toDateString() || "Escoge fecha final"
+                        new Date(value).toLocaleDateString("es-MX", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        }) || "Escoge fecha final"
                       }}</span>
                       <CalendarIcon class="ms-auto h-4 w-4 opacity-50" />
                     </Button>

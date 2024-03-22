@@ -48,12 +48,12 @@ export function useSubscriptionServices() {
 
     let subscriptionQuery = supabase
       .from("subscriptions")
-      .select("*, plans(*), users(*)")
+      .select("*, plans(*), users!inner(*)")
       .range(from, to);
 
     if (options?.search) {
       subscriptionQuery = subscriptionQuery.ilike(
-        "name",
+        "users.full_name",
         `%${options.search}%`
       );
     }
