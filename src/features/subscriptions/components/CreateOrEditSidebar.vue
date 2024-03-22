@@ -19,8 +19,14 @@ import {
   PopoverTrigger,
   PopoverContent,
   Calendar,
+  Input,
+  Card,
+  CardContent,
+  Avatar,
+  AvatarFallback,
+  CardFooter,
 } from "@/components/ui";
-import { toRef, watch } from "vue";
+import { ref, toRef, watch } from "vue";
 import { z } from "zod";
 import {
   CreateSubscription,
@@ -34,6 +40,9 @@ import Select from "@/components/ui/select/Select.vue";
 import SelectTrigger from "@/components/ui/select/SelectTrigger.vue";
 import SelectValue from "@/components/ui/select/SelectValue.vue";
 import { CalendarIcon } from "@heroicons/vue/24/outline";
+import { Database } from "../../../../types_db";
+import { refDebounced, useInfiniteScroll } from "@vueuse/core";
+import { useUsersQuery } from "@/features/admin";
 
 type CreateOrEditSidebarProps = {
   isLoading?: boolean;
@@ -49,14 +58,22 @@ const emit = defineEmits<{
   (e: "save", formValues: CreateSubscription | UpdateSubscription): void;
 }>();
 
-const locale = {
-  create: {
-    title: "Crear suscripción",
-    subtitle: "Crea rápidamente un nuevo suscripción para tu inventario.",
+const LOCALE = {
+  CREATE: {
+    TITLE: "Crear suscripción",
+    SUBTITLE: "Crea rápidamente un nuevo suscripción para tu inventario.",
   },
-  update: {
-    title: "Actualizar suscripción",
-    subtitle: "Actualiza rápidamente un suscripción de tu inventario.",
+  UPDATE: {
+    TITLE: "Actualizar suscripción",
+    SUBTITLE: "Actualiza rápidamente un suscripción de tu inventario.",
+  },
+  VIEW: {
+    TITLE: "Detalle de suscripción",
+    SUBTITLE: "Ve más a detalle tu suscripción",
+  },
+  SELECT_USERS: {
+    TITLE: "Selecciona usuario",
+    SUBTITLE: "Selecciona facilmente un usuario para tu suscripción",
   },
 };
 const initialForm = {
@@ -73,8 +90,6 @@ const initialForm = {
 };
 
 const suffixes = new Map([
-  // Note: in real-world scenarios, you wouldn’t hardcode the plurals
-  // like this; they’d be part of your translation files.
   ["one", "mes"],
   ["other", "meses"],
 ]);
@@ -85,6 +100,29 @@ const formatMonths = (n: number) => {
   return `${n} ${suffix}`;
 };
 
+const usersRef = ref<HTMLElement | null>(null);
+const userSearch = ref("");
+const userSearchDebounced = refDebounced(userSearch, 400);
+const subscriptionSidebarMode = ref<"subscriptions" | "users">("subscriptions");
+const activeUser = ref<Database["public"]["Tables"]["users"]["Row"] | null>(
+  null
+);
+const usersQuery = useUsersQuery({
+  options: {
+    enabled: true,
+    search: userSearchDebounced,
+    order: ["full_name", "asc"],
+  },
+});
+useInfiniteScroll(
+  usersRef,
+  () => {
+    if (usersQuery.isFetching.value) return;
+    usersQuery.fetchNextPage();
+  },
+  { distance: 10, canLoadMore: () => usersQuery.hasNextPage.value }
+);
+
 const formSchema = toTypedSchema(
   z.object({
     plan_id: z.string().uuid().min(1, "Plan es requerido"),
@@ -92,10 +130,12 @@ const formSchema = toTypedSchema(
     start_date: z.string().datetime(),
     end_date: z.string().datetime().nullable().optional(),
     subscription_id: z.string().uuid().optional(),
-    month_amount: z.preprocess(
-      (x) => (x ? x : undefined),
-      z.coerce.number().int().min(1).max(12).optional()
-    ),
+    month_amount: z
+      .preprocess(
+        (x) => (x ? x : undefined),
+        z.coerce.number().int().min(1).max(12).optional()
+      )
+      .or(z.literal("custom")),
   })
 );
 const formInstance = useForm({
@@ -109,7 +149,7 @@ const plansQuery = usePlansQuery({
   },
 });
 
-const formMode = toRef(() => (props.subscription ? "update" : "create"));
+const formMode = toRef(() => (props.subscription ? "UPDATE" : "CREATE"));
 
 const onSubmit = formInstance.handleSubmit(async (formValues) => {
   if (typeof formValues.subscription_id === "undefined") {
@@ -186,152 +226,228 @@ watch(
 <template>
   <Sheet v-model:open="openModel">
     <SheetContent side="right" class="overflow-y-auto">
-      <SheetHeader>
-        <SheetTitle>
-          {{ locale[formMode].title }}
-        </SheetTitle>
-        <SheetDescription>
-          {{ locale[formMode].subtitle }}
-        </SheetDescription>
-      </SheetHeader>
-      <form @submit="onSubmit" class="flex flex-col gap-6 mt-6 mb-6">
-        <FormField v-slot="{ componentField }" name="plan_id">
-          <FormItem v-auto-animate>
-            <FormLabel>Plan de suscripción</FormLabel>
-            <Select v-bind="componentField">
-              <FormControl>
-                <SelectTrigger>
-                  <SelectValue
-                    placeholder="Escoge un plan para la suscripción"
-                  />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectItem
-                    v-for="plan in plansQuery.data.value?.data"
-                    :value="plan.id"
-                    :key="plan.id"
-                    >{{ plan.name?.toUpperCase() }}</SelectItem
-                  >
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-            <FormMessage />
-          </FormItem>
-        </FormField>
-        <FormField
-          v-slot="{ componentField, value, handleChange }"
-          name="start_date"
-        >
-          <FormItem class="flex flex-col">
-            <FormLabel>Fecha inicio</FormLabel>
-            <Popover>
-              <PopoverTrigger as-child>
+      <div v-show="subscriptionSidebarMode === 'subscriptions'">
+        <SheetHeader>
+          <SheetTitle>
+            {{ LOCALE[formMode].TITLE }}
+          </SheetTitle>
+          <SheetDescription>
+            {{ LOCALE[formMode].SUBTITLE }}
+          </SheetDescription>
+        </SheetHeader>
+        <form @submit="onSubmit" class="flex flex-col gap-6 mt-6 mb-6">
+          <FormField v-if="!subscription?.id" name="user_id">
+            <FormItem class="flex flex-col">
+              <FormLabel>Usuario</FormLabel>
+              <Button
+                class="h-12"
+                variant="outline"
+                type="button"
+                @click="subscriptionSidebarMode = 'users'"
+              >
+                <span v-if="formInstance.values.user_id">
+                  {{ activeUser?.full_name }} <br />
+                  <span class="text-xs">
+                    {{ activeUser?.email }}
+                  </span>
+                </span>
+                <span v-else>Seleccionar usuario</span>
+              </Button>
+              <FormMessage />
+            </FormItem>
+          </FormField>
+          <FormField v-slot="{ componentField }" name="plan_id">
+            <FormItem v-auto-animate>
+              <FormLabel>Plan de suscripción</FormLabel>
+              <Select v-bind="componentField">
                 <FormControl>
-                  <Button
-                    variant="outline"
-                    :class="[
-                      'ps-3 text-start font-normal',
-                      {
-                        'text-muted-foreground': !value,
-                      },
-                    ]"
-                  >
-                    <span>{{
-                      new Date(value).toDateString() || "Escoge fecha inicial"
-                    }}</span>
-                    <CalendarIcon class="ms-auto h-4 w-4 opacity-50" />
-                  </Button>
+                  <SelectTrigger>
+                    <SelectValue
+                      placeholder="Escoge un plan para la suscripción"
+                    />
+                  </SelectTrigger>
                 </FormControl>
-              </PopoverTrigger>
-              <PopoverContent class="p-0">
-                <Calendar
-                  @update:model-value="
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectItem
+                      v-for="plan in plansQuery.data.value?.data"
+                      :value="plan.id"
+                      :key="plan.id"
+                      >{{ plan.name?.toUpperCase() }}</SelectItem
+                    >
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          </FormField>
+          <FormField
+            v-slot="{ componentField, value, handleChange }"
+            name="start_date"
+          >
+            <FormItem class="flex flex-col">
+              <FormLabel>Fecha inicio</FormLabel>
+              <Popover>
+                <PopoverTrigger as-child>
+                  <FormControl>
+                    <Button
+                      variant="outline"
+                      :class="[
+                        'ps-3 text-start font-normal',
+                        {
+                          'text-muted-foreground': !value,
+                        },
+                      ]"
+                    >
+                      <span>{{
+                        new Date(value).toDateString() || "Escoge fecha inicial"
+                      }}</span>
+                      <CalendarIcon class="ms-auto h-4 w-4 opacity-50" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent class="p-0">
+                  <Calendar
+                    @update:model-value="
                     (date) => handleChange((date as Date)?.toISOString())
                   "
-                  :modelValue="componentField.modelValue"
-                  :name="componentField.name"
-                />
-              </PopoverContent>
-            </Popover>
-            <FormMessage />
-          </FormItem>
-        </FormField>
-        <FormField
-          v-slot="{ componentField, value, handleChange }"
-          name="end_date"
-        >
-          <FormItem class="flex flex-col">
-            <FormLabel>Fecha expiración</FormLabel>
-            <Popover>
-              <PopoverTrigger as-child>
-                <FormControl>
-                  <Button
-                    variant="outline"
-                    :class="[
-                      'ps-3 text-start font-normal',
-                      {
-                        'text-muted-foreground': !value,
-                      },
-                    ]"
-                  >
-                    <span>{{
-                      new Date(value).toDateString() || "Escoge fecha final"
-                    }}</span>
-                    <CalendarIcon class="ms-auto h-4 w-4 opacity-50" />
-                  </Button>
-                </FormControl>
-              </PopoverTrigger>
-              <PopoverContent class="p-0">
-                <Calendar
-                  @update:model-value="
+                    :modelValue="componentField.modelValue"
+                    :name="componentField.name"
+                  />
+                </PopoverContent>
+              </Popover>
+              <FormMessage />
+            </FormItem>
+          </FormField>
+          <FormField
+            v-slot="{ componentField, value, handleChange }"
+            name="end_date"
+          >
+            <FormItem class="flex flex-col">
+              <FormLabel>Fecha expiración</FormLabel>
+              <Popover>
+                <PopoverTrigger as-child>
+                  <FormControl>
+                    <Button
+                      variant="outline"
+                      :class="[
+                        'ps-3 text-start font-normal',
+                        {
+                          'text-muted-foreground': !value,
+                        },
+                      ]"
+                    >
+                      <span>{{
+                        new Date(value).toDateString() || "Escoge fecha final"
+                      }}</span>
+                      <CalendarIcon class="ms-auto h-4 w-4 opacity-50" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent class="p-0">
+                  <Calendar
+                    @update:model-value="
                     (date) => {handleChange((date as Date)?.toISOString()); formInstance.setFieldTouched('end_date', true)}
                   "
-                  :modelValue="componentField.modelValue"
-                  :name="componentField.name"
-                />
-              </PopoverContent>
-            </Popover>
-            <FormMessage />
-          </FormItem>
-        </FormField>
-        <FormField v-slot="{ componentField }" name="month_amount">
-          <FormItem v-auto-animate>
-            <FormLabel>Cantidad de meses</FormLabel>
-            <Select v-bind="componentField">
-              <FormControl>
-                <SelectTrigger>
-                  <SelectValue placeholder="Asigna cantidad de meses" />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectItem value="custom">Personalizada</SelectItem>
-                  <SelectItem
-                    v-for="(_, index) in Array.from({ length: 12 })"
-                    :value="(index + 1).toString()"
-                    >{{ formatMonths(index + 1) }}</SelectItem
-                  >
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-            <FormMessage />
-          </FormItem>
-        </FormField>
-        <SheetFooter class="gap-4 sm:gap-0">
-          <Button :disabled="isLoading" type="submit" class="w-full"
-            >Guardar</Button
+                    :modelValue="componentField.modelValue"
+                    :name="componentField.name"
+                  />
+                </PopoverContent>
+              </Popover>
+              <FormMessage />
+            </FormItem>
+          </FormField>
+          <FormField v-slot="{ componentField }" name="month_amount">
+            <FormItem v-auto-animate>
+              <FormLabel>Cantidad de meses</FormLabel>
+              <Select v-bind="componentField">
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Asigna cantidad de meses" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectItem value="custom">Personalizada</SelectItem>
+                    <SelectItem
+                      v-for="(_, index) in Array.from({ length: 12 })"
+                      :value="(index + 1).toString()"
+                      >{{ formatMonths(index + 1) }}</SelectItem
+                    >
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          </FormField>
+          <SheetFooter class="gap-4 sm:gap-0">
+            <Button :disabled="isLoading" type="submit" class="w-full"
+              >Guardar</Button
+            >
+            <Button
+              :disabled="isLoading"
+              @click="openModel = false"
+              variant="outline"
+              type="button"
+              >Cancelar</Button
+            >
+          </SheetFooter>
+        </form>
+      </div>
+      <div ref="usersRef" v-show="subscriptionSidebarMode === 'users'">
+        <SheetHeader class="mb-6">
+          <SheetTitle>{{ LOCALE.SELECT_USERS.TITLE }}</SheetTitle>
+          <SheetDescription>
+            {{ LOCALE.SELECT_USERS.SUBTITLE }}
+          </SheetDescription>
+        </SheetHeader>
+        <Input
+          v-model="userSearch"
+          type="search"
+          placeholder="Busca clientes..."
+        />
+        <div class="grid grid-cols-2 gap-3 mt-4 mb-10">
+          <Card
+            v-for="user in usersQuery.data.value?.pages.flatMap(
+              (page) => page.data
+            )"
+            :key="user?.id"
+            class="flex flex-col"
           >
-          <Button
-            :disabled="isLoading"
-            @click="openModel = false"
-            variant="outline"
-            type="button"
-            >Cancelar</Button
-          >
-        </SheetFooter>
-      </form>
+            <CardContent class="p-4 text-center">
+              <Avatar>
+                <AvatarFallback>{{
+                  `${user?.full_name?.substring(0, 1).toLocaleUpperCase()}`
+                }}</AvatarFallback>
+              </Avatar>
+              <div class="text-sm font-semibold line-clamp-2">
+                {{ user?.full_name }}
+              </div>
+            </CardContent>
+            <CardFooter class="p-2 mt-auto">
+              <Button
+                @click="
+                  formInstance.setFieldValue('user_id', user?.id ?? '');
+                  activeUser = user;
+                  subscriptionSidebarMode = 'subscriptions';
+                "
+                class="w-full text-left"
+                type="button"
+                :variant="
+                  formInstance.values.user_id === user?.id
+                    ? 'default'
+                    : 'outline'
+                "
+                >{{
+                  formInstance.values.user_id === user?.id
+                    ? "Seleccionado"
+                    : "Seleccionar"
+                }}</Button
+              >
+            </CardFooter>
+          </Card>
+        </div>
+      </div>
     </SheetContent>
   </Sheet>
 </template>
