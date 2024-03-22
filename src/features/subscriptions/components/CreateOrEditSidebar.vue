@@ -130,12 +130,7 @@ const formSchema = toTypedSchema(
     start_date: z.string().datetime(),
     end_date: z.string().datetime().nullable().optional(),
     subscription_id: z.string().uuid().optional(),
-    month_amount: z
-      .preprocess(
-        (x) => (x ? x : undefined),
-        z.coerce.number().int().min(1).max(12).optional()
-      )
-      .or(z.literal("custom")),
+    month_amount: z.string(),
   })
 );
 const formInstance = useForm({
@@ -156,8 +151,6 @@ const onSubmit = formInstance.handleSubmit(async (formValues) => {
     delete formValues.subscription_id;
   }
 
-  delete formValues.month_amount;
-
   const nextFormValues = {
     ...formValues,
     start_date: formValues.start_date,
@@ -170,15 +163,16 @@ const onSubmit = formInstance.handleSubmit(async (formValues) => {
 watch(
   () => formInstance.values.start_date,
   (nextStartDate) => {
-    if (!nextStartDate) return;
+    if (!nextStartDate || !formInstance.isFieldDirty("start_date")) return;
+
     const startDate = new Date(nextStartDate);
     const monthAmount = formInstance.values.month_amount;
     const isCustomAmount = formInstance.values.month_amount === "custom";
     const nextMonthAmount = isCustomAmount ? 1 : Number(monthAmount);
     startDate?.setMonth(startDate.getMonth() + nextMonthAmount);
-    const nextEndDate = startDate;
+    const nextEndDate = startDate.toISOString();
 
-    formInstance.setFieldValue("end_date", nextEndDate.toISOString());
+    formInstance.setFieldValue("end_date", nextEndDate);
     formInstance.setFieldValue("month_amount", nextMonthAmount.toString());
   }
 );
@@ -211,8 +205,14 @@ watch(
         values: {
           plan_id: nextSubscription.plan_id ?? "",
           user_id: nextSubscription.user_id ?? "",
-          start_date: nextSubscription.start_date ?? initialForm.start_date,
-          end_date: nextSubscription.end_date ?? initialForm.end_date,
+          start_date: new Date(
+            nextSubscription.start_date ?? initialForm.start_date
+          ).toISOString(),
+          end_date: new Date(
+            nextSubscription.end_date ?? initialForm.end_date
+          ).toISOString(),
+          month_amount:
+            nextSubscription.month_amount ?? initialForm.month_amount,
           subscription_id: nextSubscription.id,
         },
       });
@@ -226,6 +226,8 @@ watch(
 <template>
   <Sheet v-model:open="openModel">
     <SheetContent side="right" class="overflow-y-auto">
+      {{ typeof formInstance.values.month_amount }}
+      {{ typeof subscription?.month_amount }}
       <div v-show="subscriptionSidebarMode === 'subscriptions'">
         <SheetHeader>
           <SheetTitle>

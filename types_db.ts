@@ -384,6 +384,7 @@ export type Database = {
           created_at: string
           end_date: string | null
           id: string
+          month_amount: string | null
           plan_id: string | null
           start_date: string | null
           user_id: string | null
@@ -392,6 +393,7 @@ export type Database = {
           created_at?: string
           end_date?: string | null
           id?: string
+          month_amount?: string | null
           plan_id?: string | null
           start_date?: string | null
           user_id?: string | null
@@ -400,6 +402,7 @@ export type Database = {
           created_at?: string
           end_date?: string | null
           id?: string
+          month_amount?: string | null
           plan_id?: string | null
           start_date?: string | null
           user_id?: string | null
