@@ -78,6 +78,35 @@ export function useSubscriptionServices() {
     return await subscriptionQuery;
   }
 
+  async function loadPlanList(options?: LoadListOptions) {
+    const [from, to] = serviceHelpers.getPaginationRange(options?.offset);
+
+    let planQuery = supabase.from("plans").select("*").range(from, to);
+
+    if (options?.search) {
+      planQuery = planQuery.ilike("name", `%${options.search}%`);
+    }
+
+    if (options?.order) {
+      const [column = "created_at", order = "desc"] = options?.order;
+      planQuery = planQuery.order(column, {
+        ascending: order === "asc",
+      });
+    }
+
+    if (options?.filters) {
+      options?.filters.forEach((filter) => {
+        planQuery = planQuery.filter(
+          filter.column,
+          filter.operator,
+          filter.value
+        );
+      });
+    }
+
+    return await planQuery;
+  }
+
   async function createSubscription(formValues: CreateSubscription) {
     const { subscription_id, ...otherFormValues } = formValues;
     await supabase.from("subscriptions").insert([
@@ -106,6 +135,7 @@ export function useSubscriptionServices() {
 
   return {
     loadList,
+    loadPlanList,
     createSubscription,
     deleteSubscription,
     updateSubscription,
