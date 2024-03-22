@@ -28,7 +28,7 @@ async function signUp(formValues: {
   if (response.data.user?.id) {
     await supabase
       .from("users")
-      .update({ full_name: formValues.full_name })
+      .update({ full_name: formValues.full_name, email: formValues.email })
       .eq("id", response.data.user.id);
   }
 
