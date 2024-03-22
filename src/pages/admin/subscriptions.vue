@@ -21,6 +21,8 @@ import {
   TableHead,
   TableBody,
   TableCell,
+  Avatar,
+  AvatarFallback,
 } from "@/components/ui";
 import {
   CalendarDaysIcon,
@@ -161,6 +163,7 @@ watchEffect(() => {
     <Table>
       <TableHeader>
         <TableRow>
+          <TableHead class="pl-4"> Usuario </TableHead>
           <TableHead class="pl-4"> Nombre de plan </TableHead>
           <TableHead class="text-center"> Precio </TableHead>
           <TableHead class="text-center">Fecha inicio</TableHead>
@@ -175,7 +178,30 @@ watchEffect(() => {
           :key="index"
         >
           <TableRow v-for="subscription in page.data" :key="subscription.id">
-            <TableCell class="p-4 text-foreground whitespace-nowrap w-max">
+            <TableCell
+              class="flex items-center p-4 text-foreground whitespace-nowrap w-max"
+            >
+              <Avatar>
+                <AvatarImage :src="subscription?.users?.avatar_url ?? ''" />
+                <AvatarFallback>{{
+                  `${subscription?.users?.full_name
+                    ?.substring(0, 1)
+                    .toLocaleUpperCase()}`
+                }}</AvatarFallback>
+              </Avatar>
+              <div class="ps-3">
+                <div class="text-base font-semibold">
+                  {{ subscription?.users?.full_name }}
+                </div>
+                <div
+                  v-if="subscription?.users?.email"
+                  class="font-normal text-slate-500"
+                >
+                  {{ subscription?.users?.email }}
+                </div>
+              </div>
+            </TableCell>
+            <TableCell class="text-center">
               {{ subscription.plans?.name }}
             </TableCell>
             <TableCell class="text-center">{{
