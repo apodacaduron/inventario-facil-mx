@@ -11,7 +11,6 @@ import {
 import { ref, toRef, watchEffect } from "vue";
 import {
   Button,
-  Input,
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
@@ -24,21 +23,24 @@ import {
   TableCell,
 } from "@/components/ui";
 import {
+  CalendarDaysIcon,
   EllipsisVerticalIcon,
   PencilIcon,
   PlusIcon,
   TrashIcon,
 } from "@heroicons/vue/24/outline";
-import { refDebounced, useInfiniteScroll } from "@vueuse/core";
+import { useInfiniteScroll } from "@vueuse/core";
 import { useMutation, useQueryClient } from "@tanstack/vue-query";
-import { useTableOrder } from "@/features/global";
+import {
+  FeedbackCard,
+  useTableLoadingStates,
+  useTableOrder,
+} from "@/features/global";
 import { useSubscriptionsQuery } from "@/features/subscriptions";
 import { useCurrencyFormatter } from "@/features/products";
 
 const tableRef = ref<HTMLElement | null>(null);
 
-const subscriptionSearch = ref("");
-const subscriptionSearchDebounced = refDebounced(subscriptionSearch, 400);
 const isCreateOrUpdateSidebarOpen = ref(false);
 const isDeleteSubscriptionDialogOpen = ref(false);
 const activeSubscription = ref<Subscription | null>(null);
@@ -63,7 +65,6 @@ const currencyFormatter = useCurrencyFormatter();
 const subscriptionsQuery = useSubscriptionsQuery({
   options: {
     enabled: true,
-    search: subscriptionSearchDebounced,
     order: toRef(() => subscriptionsTableOrder.tableOrder.value),
   },
 });
@@ -75,6 +76,7 @@ useInfiniteScroll(
   },
   { distance: 10, canLoadMore: () => subscriptionsQuery.hasNextPage.value }
 );
+const tableLoadingStates = useTableLoadingStates(subscriptionsQuery);
 
 function openDeleteSubscriptionDialog(subscription: Subscription) {
   activeSubscription.value = subscription;
@@ -146,12 +148,7 @@ watchEffect(() => {
   </div>
 
   <div class="flex items-center justify-between pb-4 gap-4 mx-4 md:mx-0">
-    <Input
-      v-model="subscriptionSearch"
-      type="search"
-      placeholder="Buscar suscripciones"
-      class="max-w-[256px]"
-    />
+    <div />
 
     <div class="flex lg:hidden gap-2">
       <Button @click="isCreateOrUpdateSidebarOpen = true" size="icon">
@@ -218,6 +215,22 @@ watchEffect(() => {
         </template>
       </TableBody>
     </Table>
+
+    <FeedbackCard v-if="!tableLoadingStates.hasRecordList.value" class="mt-24">
+      <template #icon>
+        <CalendarDaysIcon class="w-10 h-10 stroke-[1px]" />
+      </template>
+      <template #title>Comienza creando una suscripción</template>
+      <template #description
+        >Suscripciones creadas se mostraran aqui. <br />
+        Comienza creando la primera suscripción.
+      </template>
+      <template #action
+        ><Button @click="isCreateOrUpdateSidebarOpen = true">
+          <PlusIcon class="w-5 h-5 stroke-[2px] mr-2" /> Crear suscripción
+        </Button>
+      </template>
+    </FeedbackCard>
   </div>
 
   <DeleteSubscriptionDialog

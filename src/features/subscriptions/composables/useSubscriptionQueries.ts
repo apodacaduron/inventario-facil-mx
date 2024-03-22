@@ -6,7 +6,7 @@ import { LoadListOptions } from "@/features/global";
 export function useSubscriptionsQuery(context: {
   options: {
     enabled: MaybeRefOrGetter<boolean | undefined>;
-    search: MaybeRefOrGetter<string | undefined>;
+    search?: MaybeRefOrGetter<string | undefined>;
     filters?: MaybeRefOrGetter<LoadListOptions["filters"] | undefined>;
     order?: MaybeRefOrGetter<LoadListOptions["order"] | undefined>;
   };
