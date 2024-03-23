@@ -26,6 +26,7 @@ import {
   AvatarImage,
   Input,
   Skeleton,
+Badge,
 } from "@/components/ui";
 import {
   CalendarDaysIcon,
@@ -174,6 +175,7 @@ watchEffect(() => {
           <TableHead class="text-center"> Precio </TableHead>
           <TableHead class="text-center">Fecha inicio</TableHead>
           <TableHead class="text-center"> Fecha expiración </TableHead>
+          <TableHead class="text-center"> Status </TableHead>
           <TableHead class="text-center"> - </TableHead>
         </TableRow>
       </TableHeader>
@@ -198,6 +200,9 @@ watchEffect(() => {
           <TableCell class="text-center"
             ><Skeleton class="h-4 w-[180px]"
           /></TableCell>
+          <TableCell class="text-center">
+            <Skeleton class="h-4 w-[180px]" />
+          </TableCell>
           <TableCell class="text-center">
             <Skeleton class="h-4 w-[180px]" />
           </TableCell>
@@ -270,6 +275,11 @@ watchEffect(() => {
                     )
                   : "-"
               }}
+            </TableCell>
+            <TableCell class="text-center">
+              <Badge>
+                {{new Date() <= new Date(subscription.end_date ?? '') ? 'ACTIVA' : 'EXPIRADA'}}
+              </Badge>
             </TableCell>
             <TableCell class="text-center">
               <DropdownMenu>
