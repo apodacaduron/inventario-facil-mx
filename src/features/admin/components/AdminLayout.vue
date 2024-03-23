@@ -19,6 +19,7 @@ import { useRouter } from "vue-router";
 import {
   ArrowLeftOnRectangleIcon,
   BuildingStorefrontIcon,
+  CalendarDaysIcon,
   MoonIcon,
   SunIcon,
   UsersIcon,
@@ -41,6 +42,11 @@ function signOut() {
 }
 
 const menuList = {
+  subscriptions: {
+    path: `/admin/subscriptions`,
+    text: "Suscripciones",
+    icon: CalendarDaysIcon,
+  },
   users: {
     path: `/admin/users`,
     text: "Usuarios",

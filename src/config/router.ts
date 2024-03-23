@@ -72,6 +72,11 @@ export const routes: RouteWithMeta[] = [
         meta: adminMeta,
         component: () => import("@/pages/admin/users.vue"),
       },
+      {
+        path: "subscriptions",
+        meta: adminMeta,
+        component: () => import("@/pages/admin/subscriptions.vue"),
+      },
     ],
   },
   {
