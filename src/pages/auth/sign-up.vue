@@ -24,13 +24,15 @@ async function signUp(formValues: {
   full_name: string;
   password: string;
 }) {
-  const response = await supabase.auth.signUp(formValues);
-  if (response.data.user?.id) {
-    await supabase
-      .from("users")
-      .update({ full_name: formValues.full_name, email: formValues.email })
-      .eq("id", response.data.user.id);
-  }
+  const response = await supabase.auth.signUp({
+    ...formValues,
+    options: {
+      data: {
+        full_name: formValues.full_name,
+        email: formValues.email,
+      },
+    },
+  });
 
   return response;
 }
