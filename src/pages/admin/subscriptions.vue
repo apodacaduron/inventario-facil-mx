@@ -178,7 +178,7 @@ watchEffect(() => {
         </TableRow>
       </TableHeader>
       <TableBody v-if="tableLoadingStates.showLoadingState.value">
-        <TableRow v-for="(_, index) in Array.from({ length: 8 })" :key="index">
+        <TableRow v-for="(_, index) in Array.from({ length: 15 })" :key="index">
           <TableCell
             class="flex items-center p-4 text-foreground whitespace-nowrap w-max"
           >

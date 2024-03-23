@@ -13,6 +13,9 @@ import {
   SheetTitle,
   SheetDescription,
   SheetClose,
+  Avatar,
+  AvatarImage,
+  AvatarFallback,
 } from "@/components/ui";
 import { useDark, useToggle } from "@vueuse/core";
 import { useRoute, useRouter } from "vue-router";
@@ -163,16 +166,18 @@ const menuList = {
                 <DropdownMenuTrigger as-child>
                   <button
                     type="button"
-                    class="flex text-sm bg-slate-800 rounded-full focus:ring-4 focus:ring-slate-300 dark:focus:ring-slate-600"
                     aria-expanded="false"
                     data-dropdown-toggle="dropdown-user"
                   >
                     <span class="sr-only">Open user menu</span>
-                    <img
-                      class="w-8 h-8 rounded-full"
-                      :src="authStore.avatar"
-                      alt="user photo"
-                    />
+                    <Avatar>
+                      <AvatarImage :src="authStore.avatar" />
+                      <AvatarFallback>{{
+                        `${authStore.session?.user.email
+                          ?.substring(0, 1)
+                          .toLocaleUpperCase()}`
+                      }}</AvatarFallback>
+                    </Avatar>
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>

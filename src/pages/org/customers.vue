@@ -9,7 +9,7 @@ import {
   DeleteCustomerDialog,
 } from "@/features/customers";
 import { ref, toRef, watchEffect } from "vue";
-import { useTableOrder } from "@/features/global";
+import { FeedbackCard, useTableOrder, useTableStates } from "@/features/global";
 import {
   Button,
   Input,
@@ -25,6 +25,7 @@ import {
   TableHead,
   TableBody,
   TableCell,
+  Skeleton,
 } from "@/components/ui";
 import { Badge } from "@/components";
 import {
@@ -35,6 +36,7 @@ import {
   PencilIcon,
   PlusIcon,
   TrashIcon,
+  UserGroupIcon,
 } from "@heroicons/vue/24/outline";
 import { refDebounced, useInfiniteScroll } from "@vueuse/core";
 import { useOrganizationStore } from "@/stores";
@@ -80,6 +82,7 @@ useInfiniteScroll(
   },
   { distance: 10, canLoadMore: () => customersQuery.hasNextPage.value }
 );
+const tableLoadingStates = useTableStates(customersQuery, customerSearch);
 
 function openDeleteCustomerDialog(customer: Customer) {
   activeCustomer.value = customer;
@@ -203,6 +206,41 @@ watchEffect(() => {
           <TableHead class="text-center"> - </TableHead>
         </TableRow>
       </TableHeader>
+      <TableBody v-if="tableLoadingStates.showLoadingState.value">
+        <TableRow v-for="(_, index) in Array.from({ length: 15 })" :key="index">
+          <TableCell
+            class="flex items-center p-4 text-foreground whitespace-nowrap w-max"
+          >
+            <Skeleton class="w-[40px] h-[40px] rounded-full" />
+            <div class="ps-3 flex flex-col gap-1">
+              <div class="text-base font-semibold">
+                <Skeleton class="h-[20px] w-[180px]" />
+              </div>
+              <div class="font-normal text-slate-500">
+                <Skeleton class="h-4 w-[160px]" />
+              </div>
+            </div>
+          </TableCell>
+          <TableCell class="text-center items-center">
+            <Skeleton class="h-4 w-[180px]" />
+          </TableCell>
+          <TableCell class="text-center items-center">
+            <Skeleton class="h-4 w-[180px]" />
+          </TableCell>
+          <TableCell class="text-center"
+            ><Skeleton class="h-4 w-[180px]"
+          /></TableCell>
+          <TableCell class="text-center">
+            <Skeleton class="h-4 w-[180px]" />
+          </TableCell>
+          <TableCell class="text-center">
+            <Skeleton class="h-4 w-[180px]" />
+          </TableCell>
+          <TableCell class="text-center">
+            <Skeleton class="w-[54px] h-[36px]" />
+          </TableCell>
+        </TableRow>
+      </TableBody>
       <TableBody>
         <!-- @vue-ignore -->
         <template
@@ -287,6 +325,46 @@ watchEffect(() => {
         </template>
       </TableBody>
     </Table>
+
+    <FeedbackCard v-if="tableLoadingStates.showEmptyState.value" class="mt-24">
+      <template #icon>
+        <UserGroupIcon class="w-10 h-10 stroke-[1px]" />
+      </template>
+      <template #title>Comienza creando una cliente</template>
+      <template #description
+        >Clientes creados se mostraran aqui. <br />
+        Comienza creando la primera cliente.
+      </template>
+      <template #action
+        ><Button @click="isCreateOrUpdateSidebarOpen = true">
+          <PlusIcon class="w-5 h-5 stroke-[2px] mr-2" /> Crear cliente
+        </Button>
+      </template>
+    </FeedbackCard>
+    <FeedbackCard
+      v-if="tableLoadingStates.showNoResultsState.value"
+      class="mt-24"
+    >
+      <template #icon>
+        <UserGroupIcon class="w-10 h-10 stroke-[1px]" />
+      </template>
+      <template #title>No se encontraron suscripciones</template>
+      <template #description
+        >Tu busqueda "{{ customerSearch }}" no coincidio con alguna cliente.
+        <br />
+        Por favor intente de nuevo a agregue una nueva cliente.
+      </template>
+      <template #action>
+        <div class="flex gap-4">
+          <Button @click="customerSearch = ''" variant="outline">
+            Clear search
+          </Button>
+          <Button @click="isCreateOrUpdateSidebarOpen = true">
+            <PlusIcon class="w-5 h-5 stroke-[2px] mr-2" /> Crear cliente
+          </Button>
+        </div>
+      </template>
+    </FeedbackCard>
   </div>
 
   <DeleteCustomerDialog
