@@ -40,7 +40,7 @@ import Select from "@/components/ui/select/Select.vue";
 import SelectTrigger from "@/components/ui/select/SelectTrigger.vue";
 import SelectValue from "@/components/ui/select/SelectValue.vue";
 import { CalendarIcon } from "@heroicons/vue/24/outline";
-import { Database } from "../../../../types_db";
+import { Tables } from "../../../../types_db";
 import { refDebounced, useInfiniteScroll } from "@vueuse/core";
 import { useUsersQuery } from "@/features/admin";
 
@@ -104,7 +104,7 @@ const usersRef = ref<HTMLElement | null>(null);
 const userSearch = ref("");
 const userSearchDebounced = refDebounced(userSearch, 400);
 const subscriptionSidebarMode = ref<"subscriptions" | "users">("subscriptions");
-const activeUser = ref<Database["public"]["Tables"]["users"]["Row"] | null>(
+const activeUser = ref<Tables<'users'> | null>(
   null
 );
 const usersQuery = useUsersQuery({

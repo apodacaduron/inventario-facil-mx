@@ -1,4 +1,4 @@
-import { useInfiniteQuery } from "@tanstack/vue-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/vue-query";
 import { useCustomerServices } from "./useCustomerServices";
 import { MaybeRefOrGetter, toValue } from "vue";
 import { LoadListOptions } from "@/features/global";
@@ -36,5 +36,16 @@ export function useCustomersQuery(context: {
       return lastPageParam + 1;
     },
     enabled: context.options.enabled,
+  });
+}
+
+export function useCustomersCountQuery() {
+  const customerServices = useCustomerServices();
+
+  return useQuery({
+    queryKey: ['customers-count'],
+    queryFn() {
+      return customerServices.getCustomerCount();
+    },
   });
 }

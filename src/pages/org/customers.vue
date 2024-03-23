@@ -7,8 +7,9 @@ import {
   customerServicesTypeguards,
   useCustomerServices,
   DeleteCustomerDialog,
+  useCustomersCountQuery
 } from "@/features/customers";
-import { ref, toRef, watchEffect } from "vue";
+import { computed, ref, toRef, watchEffect } from "vue";
 import { FeedbackCard, useTableOrder, useTableStates } from "@/features/global";
 import {
   Button,
@@ -39,7 +40,7 @@ import {
   UserGroupIcon,
 } from "@heroicons/vue/24/outline";
 import { refDebounced, useInfiniteScroll } from "@vueuse/core";
-import { useOrganizationStore } from "@/stores";
+import { useOrganizationStore, useSubscriptionStore } from "@/stores";
 import { useCustomersQuery } from "@/features/customers/composables/useCustomerQueries";
 import { useMutation, useQueryClient } from "@tanstack/vue-query";
 
@@ -57,6 +58,7 @@ const customersTableOrder = useTableOrder({
 });
 const queryClient = useQueryClient();
 const organizationStore = useOrganizationStore();
+const subscriptionStore = useSubscriptionStore()
 const customerServices = useCustomerServices();
 const createCustomerMutation = useMutation({
   mutationFn: createCustomerMutationFn,
@@ -67,6 +69,7 @@ const updateCustomerMutation = useMutation({
 const deleteCustomerMutation = useMutation({
   mutationFn: deleteCustomerMutationFn,
 });
+const customersCountQuery = useCustomersCountQuery()
 const customersQuery = useCustomersQuery({
   options: {
     enabled: toRef(() => organizationStore.hasOrganizations),
@@ -83,6 +86,8 @@ useInfiniteScroll(
   { distance: 10, canLoadMore: () => customersQuery.hasNextPage.value }
 );
 const tableLoadingStates = useTableStates(customersQuery, customerSearch);
+
+const customersCount = computed(() => customersCountQuery.data.value?.count ?? 0)
 
 function openDeleteCustomerDialog(customer: Customer) {
   activeCustomer.value = customer;
@@ -153,7 +158,7 @@ watchEffect(() => {
       </p>
     </div>
     <div class="hidden lg:flex gap-2">
-      <Button @click="isCreateOrUpdateSidebarOpen = true" label="">
+      <Button v-if="subscriptionStore.hasPlan && subscriptionStore.canAddCustomers(customersCount)" @click="isCreateOrUpdateSidebarOpen = true" label="">
         <PlusIcon class="w-5 h-5 stroke-[2px] mr-2" /> Crear cliente
       </Button>
     </div>
@@ -168,7 +173,7 @@ watchEffect(() => {
     />
 
     <div class="flex lg:hidden gap-2">
-      <Button @click="isCreateOrUpdateSidebarOpen = true" label="" size="icon">
+      <Button v-if="subscriptionStore.hasPlan && subscriptionStore.canAddCustomers(customersCount)" @click="isCreateOrUpdateSidebarOpen = true" label="" size="icon">
         <PlusIcon class="w-5 h-5 stroke-[2px]" />
       </Button>
     </div>

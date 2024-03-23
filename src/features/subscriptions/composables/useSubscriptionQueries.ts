@@ -66,3 +66,14 @@ export function usePlansQuery(context: {
     enabled: context.options.enabled,
   });
 }
+
+export function useCurrentSubscriptionQuery() {
+  const subscriptionServices = useSubscriptionServices();
+
+  return useQuery({
+    queryKey: ["subscription"],
+    queryFn() {
+      return subscriptionServices.getCurrentSubscription();
+    },
+  });
+}

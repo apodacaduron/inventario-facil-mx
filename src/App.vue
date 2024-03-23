@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import { onMounted, watchEffect } from "vue";
 import { supabase } from "./config/supabase";
-import { useAuthStore } from "@/stores";
+import { useAuthStore, useSubscriptionStore } from "@/stores";
 import { useOrganizationList } from "@/features/organizations";
 import { useRoleQuery } from "./features/global/composables/useRoleQueries";
+import { useCurrentSubscriptionQuery } from "./features/subscriptions";
 
 const authStore = useAuthStore();
+const subscriptionStore = useSubscriptionStore();
 const roleQuery = useRoleQuery();
+const currentSubscription = useCurrentSubscriptionQuery()
 useOrganizationList();
 
 onMounted(() => {
@@ -21,6 +24,9 @@ onMounted(() => {
 
 watchEffect(() => {
   authStore.setRole(roleQuery.data.value?.data?.i_roles?.role_name);
+});
+watchEffect(() => {
+  subscriptionStore.setCurrentSubscription(currentSubscription.data.value?.data);
 });
 </script>
 

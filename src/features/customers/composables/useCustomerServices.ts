@@ -116,5 +116,22 @@ export function useCustomerServices() {
     await supabase.from("i_customers").delete().eq("id", customerId);
   }
 
-  return { loadList, createCustomer, deleteCustomer, updateCustomer };
+  async function getCustomerCount() {
+    const organization = serviceHelpers.getCurrentOrganization();
+    if (!organization?.org_id)
+      throw new Error('Organization is required to get customer count');
+
+    return await supabase
+      .from('i_customers')
+      .select('*', { count: 'estimated' })
+      .eq('org_id', organization.org_id);
+  }
+
+  return {
+    loadList,
+    createCustomer,
+    deleteCustomer,
+    updateCustomer,
+    getCustomerCount,
+  };
 }

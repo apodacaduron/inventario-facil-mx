@@ -110,10 +110,22 @@ export function useProductServices() {
     await supabase.from("i_products").delete().eq("id", productId);
   }
 
+  async function getProductCount() {
+    const organization = serviceHelpers.getCurrentOrganization();
+    if (!organization?.org_id)
+      throw new Error('Organization is required to get product count');
+
+    return await supabase
+      .from('i_products')
+      .select('*', { count: 'estimated' })
+      .eq('org_id', organization.org_id);
+  }
+
   return {
     loadList,
     createProduct,
     deleteProduct,
     updateProduct,
+    getProductCount,
   };
 }
