@@ -2,7 +2,6 @@ import { useInfiniteQuery, useQuery } from "@tanstack/vue-query";
 import { useCustomerServices } from "./useCustomerServices";
 import { MaybeRefOrGetter, toValue } from "vue";
 import { LoadListOptions } from "@/features/global";
-import { useProductServices } from "@/features/products";
 
 export function useCustomersQuery(context: {
   options: {

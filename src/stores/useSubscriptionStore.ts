@@ -1,4 +1,4 @@
-import { subscriptionServicesTypeguards, useCurrentSubscriptionQuery, useSubscriptionServices } from "@/features/subscriptions";
+import { subscriptionServicesTypeguards, useSubscriptionServices } from "@/features/subscriptions";
 import { defineStore } from "pinia";
 import { ref, toRef } from "vue";
 
