@@ -1,4 +1,4 @@
-import { useInfiniteQuery } from "@tanstack/vue-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/vue-query";
 import { useProductServices } from "./useProductServices";
 import { MaybeRefOrGetter, toValue } from "vue";
 import { LoadListOptions } from "@/features/global";
@@ -36,5 +36,18 @@ export function useProductsQuery(context: {
       return lastPageParam + 1;
     },
     enabled: context.options.enabled,
+  });
+}
+
+export function useProductsCountQuery() {
+  const productServices = useProductServices();
+
+  return useQuery({
+    queryKey: [
+      "products-count",
+    ],
+    queryFn() {
+      return productServices.getProductCount();
+    },
   });
 }

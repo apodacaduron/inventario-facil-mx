@@ -2,11 +2,9 @@ import { supabase } from "@/config/supabase";
 import { Session } from "@supabase/supabase-js";
 import { defineStore } from "pinia";
 import { ref, toRef } from "vue";
-import { Database } from "../../types_db";
+import { Tables } from "../../types_db";
 
-type UserRole =
-  | Database["public"]["Tables"]["i_roles"]["Row"]["role_name"]
-  | undefined;
+type UserRole = Tables<'i_roles'>['role_name'] | undefined;
 
 export const useAuthStore = defineStore("auth", () => {
   const session = ref<Session | null>(null);

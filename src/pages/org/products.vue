@@ -10,8 +10,9 @@ import {
   productServicesTypeguards,
   useCurrencyFormatter,
   useProductServices,
+  useProductsCountQuery
 } from "@/features/products";
-import { ref, toRef, watchEffect } from "vue";
+import { computed, ref, toRef, watchEffect } from "vue";
 import {
   Button,
   Input,
@@ -42,7 +43,7 @@ import {
   TrashIcon,
 } from "@heroicons/vue/24/outline";
 import { refDebounced, useInfiniteScroll } from "@vueuse/core";
-import { useOrganizationStore } from "@/stores";
+import { useOrganizationStore, useSubscriptionStore } from "@/stores";
 import { useProductsQuery } from "@/features/products/composables/useProductQueries";
 import { useMutation, useQueryClient } from "@tanstack/vue-query";
 import { FeedbackCard, useTableOrder, useTableStates } from "@/features/global";
@@ -63,6 +64,7 @@ const productsTableOrder = useTableOrder({
 });
 const queryClient = useQueryClient();
 const organizationStore = useOrganizationStore();
+const subscriptionStore = useSubscriptionStore()
 const productServices = useProductServices();
 const createProductMutation = useMutation({
   mutationFn: createProductMutationFn,
@@ -75,6 +77,7 @@ const deleteProductMutation = useMutation({
 });
 
 const currencyFormatter = useCurrencyFormatter();
+const productsCountQuery = useProductsCountQuery()
 const productsQuery = useProductsQuery({
   options: {
     enabled: toRef(() => organizationStore.hasOrganizations),
@@ -91,6 +94,8 @@ useInfiniteScroll(
   { distance: 10, canLoadMore: () => productsQuery.hasNextPage.value }
 );
 const tableLoadingStates = useTableStates(productsQuery, productSearch);
+
+const productsCount = computed(() => productsCountQuery.data.value?.count ?? 0)
 
 function openDeleteProductDialog(product: Product) {
   activeProduct.value = product;
@@ -160,7 +165,7 @@ watchEffect(() => {
       </p>
     </div>
     <div class="hidden lg:flex gap-2">
-      <Button @click="isCreateOrUpdateSidebarOpen = true">
+      <Button v-if="subscriptionStore.hasPlan && subscriptionStore.canAddProducts(productsCount)" @click="isCreateOrUpdateSidebarOpen = true">
         <PlusIcon class="w-5 h-5 stroke-[2px] mr-2" /> Crear producto
       </Button>
       <Button
@@ -182,7 +187,7 @@ watchEffect(() => {
     />
 
     <div class="flex lg:hidden gap-2">
-      <Button @click="isCreateOrUpdateSidebarOpen = true" size="icon">
+      <Button v-if="subscriptionStore.hasPlan && subscriptionStore.canAddProducts(productsCount)" @click="isCreateOrUpdateSidebarOpen = true" size="icon">
         <PlusIcon class="w-5 h-5 stroke-[2px]" />
       </Button>
       <Button

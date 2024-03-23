@@ -358,6 +358,8 @@ export type Database = {
           currency: string | null
           description: string | null
           id: string
+          max_customers: number | null
+          max_products: number | null
           name: string | null
           price: number | null
         }
@@ -366,6 +368,8 @@ export type Database = {
           currency?: string | null
           description?: string | null
           id?: string
+          max_customers?: number | null
+          max_products?: number | null
           name?: string | null
           price?: number | null
         }
@@ -374,6 +378,8 @@ export type Database = {
           currency?: string | null
           description?: string | null
           id?: string
+          max_customers?: number | null
+          max_products?: number | null
           name?: string | null
           price?: number | null
         }

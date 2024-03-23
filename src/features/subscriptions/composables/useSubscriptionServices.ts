@@ -1,5 +1,6 @@
 import { supabase } from "@/config/supabase";
 import { LoadListOptions, useServiceHelpers } from "@/features/global";
+import { useAuthStore } from "@/stores";
 
 export type CreateSubscription = {
   subscription_id?: Subscription["id"];
@@ -24,13 +25,13 @@ export const subscriptionServicesTypeguards = {
   ): maybeSubscription is CreateSubscription {
     return (
       !(
-        "subscription_id" in maybeSubscription &&
+        'subscription_id' in maybeSubscription &&
         maybeSubscription.subscription_id
       ) &&
-      "plan_id" in maybeSubscription &&
-      "user_id" in maybeSubscription &&
-      "start_date" in maybeSubscription &&
-      "end_date" in maybeSubscription
+      'plan_id' in maybeSubscription &&
+      'user_id' in maybeSubscription &&
+      'start_date' in maybeSubscription &&
+      'end_date' in maybeSubscription
     );
   },
   isUpdateSubscription(
@@ -38,10 +39,25 @@ export const subscriptionServicesTypeguards = {
   ): maybeSubscription is UpdateSubscription {
     return !this.isCreateSubscription(maybeSubscription);
   },
+  isSubscription(
+    maybeSubscription: unknown
+  ): maybeSubscription is Subscription {
+    return (
+      maybeSubscription !== null &&
+      typeof maybeSubscription === 'object' &&
+      'start_date' in maybeSubscription &&
+      'end_date' in maybeSubscription
+    );
+  },
+  isPlan(maybePlan: unknown): maybePlan is Subscription['plans'] {
+    return maybePlan !== null &&
+      typeof maybePlan === 'object' && 'name' in maybePlan && 'price' in maybePlan && 'max_products' in maybePlan;
+  },
 };
 
 export function useSubscriptionServices() {
   const serviceHelpers = useServiceHelpers();
+  const authStore = useAuthStore();
 
   async function loadList(options?: LoadListOptions) {
     const [from, to] = serviceHelpers.getPaginationRange(options?.offset);
@@ -107,6 +123,30 @@ export function useSubscriptionServices() {
     return await planQuery;
   }
 
+  async function getCurrentSubscription() {
+    const userId = authStore.session?.user.id;
+    if (!userId) throw new Error('User id is required to get current subscription')
+    const currentDate = new Date();
+
+    let subscriptionQuery = supabase
+      .from('subscriptions')
+      .select('*, plans(*)')
+      .eq('user_id', userId)
+      .lte('start_date', currentDate.toISOString())
+      .gte('end_date', currentDate.toISOString())
+      .single();
+
+    const response = await subscriptionQuery;
+    const hasSubscription = Boolean(response.data)
+
+    if (!hasSubscription) {
+      const freemiumPlanQuery = supabase.from('plans').select('*').eq('name', 'freemium').single()
+      return await freemiumPlanQuery;
+    }
+
+    return response
+  }
+
   async function createSubscription(formValues: CreateSubscription) {
     const { subscription_id, ...otherFormValues } = formValues;
     await supabase.from("subscriptions").insert([
@@ -139,5 +179,6 @@ export function useSubscriptionServices() {
     createSubscription,
     deleteSubscription,
     updateSubscription,
+    getCurrentSubscription,
   };
 }
