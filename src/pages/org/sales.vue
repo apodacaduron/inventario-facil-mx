@@ -25,8 +25,10 @@ import {
   TableBody,
   TableCell,
   AvatarImage,
+  Skeleton,
 } from "@/components/ui";
 import {
+  BanknotesIcon,
   EllipsisVerticalIcon,
   EyeIcon,
   PencilIcon,
@@ -39,6 +41,7 @@ import { useSalesQuery } from "@/features/sales/composables/useSaleQueries";
 import { useMutation, useQueryClient } from "@tanstack/vue-query";
 import { useCurrencyFormatter } from "@/features/products";
 import { Badge } from "@/components";
+import { FeedbackCard, useTableStates } from "@/features/global";
 
 const WHATSAPP_URL = import.meta.env.VITE_WHATSAPP_URL;
 const tableRef = ref<HTMLElement | null>(null);
@@ -69,6 +72,7 @@ useInfiniteScroll(
   },
   { distance: 10, canLoadMore: () => salesQuery.hasNextPage.value }
 );
+const tableLoadingStates = useTableStates(salesQuery, saleSearch);
 
 function openDeleteSaleDialog(sale: Sale) {
   activeSale.value = sale;
@@ -181,6 +185,44 @@ watchEffect(() => {
           <TableHead class="text-center"> - </TableHead>
         </TableRow>
       </TableHeader>
+      <TableBody v-if="tableLoadingStates.showLoadingState.value">
+        <TableRow v-for="(_, index) in Array.from({ length: 15 })" :key="index">
+          <TableCell
+            class="flex items-center p-4 text-foreground whitespace-nowrap w-max"
+          >
+            <Skeleton class="w-[40px] h-[40px] rounded-full" />
+            <div class="ps-3 flex flex-col gap-1">
+              <div class="text-base font-semibold">
+                <Skeleton class="h-[20px] w-[180px]" />
+              </div>
+              <div class="font-normal text-slate-500">
+                <Skeleton class="h-4 w-[160px]" />
+              </div>
+            </div>
+          </TableCell>
+          <TableCell class="text-center items-center">
+            <Skeleton class="h-4 w-[180px]" />
+          </TableCell>
+          <TableCell class="text-center items-center">
+            <Skeleton class="h-4 w-[180px]" />
+          </TableCell>
+          <TableCell class="text-center">
+            <Skeleton class="h-4 w-[180px]" />
+          </TableCell>
+          <TableCell class="text-center">
+            <Skeleton class="h-4 w-[180px]" />
+          </TableCell>
+          <TableCell class="text-center">
+            <Skeleton class="h-4 w-[180px]" />
+          </TableCell>
+          <TableCell class="text-center">
+            <Skeleton class="h-4 w-[180px]" />
+          </TableCell>
+          <TableCell class="text-center">
+            <Skeleton class="w-[54px] h-[36px]" />
+          </TableCell>
+        </TableRow>
+      </TableBody>
       <TableBody>
         <!-- @vue-ignore -->
         <template
@@ -310,6 +352,46 @@ watchEffect(() => {
         </template>
       </TableBody>
     </Table>
+
+    <FeedbackCard v-if="tableLoadingStates.showEmptyState.value" class="mt-24">
+      <template #icon>
+        <BanknotesIcon class="w-10 h-10 stroke-[1px]" />
+      </template>
+      <template #title>Comienza creando una cliente</template>
+      <template #description
+        >Clientes creados se mostraran aqui. <br />
+        Comienza creando la primera cliente.
+      </template>
+      <template #action
+        ><Button @click="isCreateOrUpdateSidebarOpen = true">
+          <PlusIcon class="w-5 h-5 stroke-[2px] mr-2" /> Crear cliente
+        </Button>
+      </template>
+    </FeedbackCard>
+    <FeedbackCard
+      v-if="tableLoadingStates.showNoResultsState.value"
+      class="mt-24"
+    >
+      <template #icon>
+        <BanknotesIcon class="w-10 h-10 stroke-[1px]" />
+      </template>
+      <template #title>No se encontraron suscripciones</template>
+      <template #description
+        >Tu busqueda "{{ saleSearch }}" no coincidio con alguna cliente.
+        <br />
+        Por favor intente de nuevo a agregue una nueva cliente.
+      </template>
+      <template #action>
+        <div class="flex gap-4">
+          <Button @click="saleSearch = ''" variant="outline">
+            Clear search
+          </Button>
+          <Button @click="isCreateOrUpdateSidebarOpen = true">
+            <PlusIcon class="w-5 h-5 stroke-[2px] mr-2" /> Crear cliente
+          </Button>
+        </div>
+      </template>
+    </FeedbackCard>
   </div>
 
   <DeleteSaleDialog
