@@ -34,21 +34,23 @@ import {
   SelectContent,
   SelectGroup,
   Badge,
-} from "@/components/ui";
-import { ref, toRef, watch } from "vue";
-import { z } from "zod";
-import { CreateSale, SALE_STATUS, Sale, UpdateSale } from "../composables";
-import { refDebounced, useInfiniteScroll } from "@vueuse/core";
-import { Customer, useCustomersQuery } from "@/features/customers";
-import { PlusCircleIcon, XMarkIcon } from "@heroicons/vue/24/outline";
+  Switch,
+  Label,
+} from '@/components/ui';
+import { ref, toRef, watch } from 'vue';
+import { z } from 'zod';
+import { CreateSale, SALE_STATUS, Sale, UpdateSale } from '../composables';
+import { refDebounced, useInfiniteScroll } from '@vueuse/core';
+import { Customer, useCustomersQuery } from '@/features/customers';
+import { PlusCircleIcon, XMarkIcon } from '@heroicons/vue/24/outline';
 import {
   Product,
   useCurrencyFormatter,
   useProductsQuery,
-} from "@/features/products";
-import { toTypedSchema } from "@vee-validate/zod";
-import { useFieldArray, useForm } from "vee-validate";
-import { useOrganizationStore } from "@/stores";
+} from '@/features/products';
+import { toTypedSchema } from '@vee-validate/zod';
+import { useFieldArray, useForm } from 'vee-validate';
+import { useOrganizationStore } from '@/stores';
 
 type CreateOrEditSidebarProps = {
   viewOnly?: boolean;
@@ -56,76 +58,77 @@ type CreateOrEditSidebarProps = {
   sale?: Sale | null;
 };
 
-const openModel = defineModel<boolean>("open");
+const openModel = defineModel<boolean>('open');
 const props = withDefaults(defineProps<CreateOrEditSidebarProps>(), {
   viewOnly: false,
   isLoading: false,
   sale: null,
 });
 const emit = defineEmits<{
-  (e: "save", formValues: CreateSale): void;
+  (e: 'save', formValues: CreateSale): void;
 }>();
 
 const WHATSAPP_URL = import.meta.env.VITE_WHATSAPP_URL;
 const LOCALE = {
   CREATE: {
-    TITLE: "Crear venta",
-    SUBTITLE: "Crea rápidamente una nueva venta para tu inventario.",
+    TITLE: 'Crear venta',
+    SUBTITLE: 'Crea rápidamente una nueva venta para tu inventario.',
   },
   UPDATE: {
-    TITLE: "Actualizar venta",
-    SUBTITLE: "Actualiza rápidamente una venta de tu inventario.",
+    TITLE: 'Actualizar venta',
+    SUBTITLE: 'Actualiza rápidamente una venta de tu inventario.',
   },
   VIEW: {
-    TITLE: "Detalle de venta",
-    SUBTITLE: "Ve más a detalle tu venta",
+    TITLE: 'Detalle de venta',
+    SUBTITLE: 'Ve más a detalle tu venta',
   },
   SELECT_PRODUCTS: {
-    TITLE: "Selecciona productos",
-    SUBTITLE: "Selecciona facilmente productos para agregar a tu venta",
+    TITLE: 'Selecciona productos',
+    SUBTITLE: 'Selecciona facilmente productos para agregar a tu venta',
   },
   SELECT_CUSTOMERS: {
-    TITLE: "Selecciona cliente",
-    SUBTITLE: "Selecciona facilmente un cliente para tu venta",
+    TITLE: 'Selecciona cliente',
+    SUBTITLE: 'Selecciona facilmente un cliente para tu venta',
   },
 };
 const statusOptions = [
   {
-    value: "in_progress",
-    text: "En progreso",
+    value: 'in_progress',
+    text: 'En progreso',
     description:
-      "La venta se está procesando activamente, se están seleccionando o empaquetando los artículos.",
-    status: "blue",
+      'La venta se está procesando activamente, se están seleccionando o empaquetando los artículos.',
+    status: 'blue',
   },
   {
-    value: "completed",
-    text: "Completada",
-    description: "La venta se ha procesado y completado con éxito.",
-    status: "green",
+    value: 'completed',
+    text: 'Completada',
+    description: 'La venta se ha procesado y completado con éxito.',
+    status: 'green',
   },
   {
-    value: "cancelled",
-    text: "Cancelada",
+    value: 'cancelled',
+    text: 'Cancelada',
     description:
-      "La venta fue anulada antes de completarse, posiblemente a solicitud del cliente u otras razones.",
-    status: "red",
+      'La venta fue anulada antes de completarse, posiblemente a solicitud del cliente u otras razones.',
+    status: 'red',
   },
 ];
 const initialForm: CreateSale = {
-  status: "in_progress",
+  status: 'in_progress',
   sale_date: new Date().toISOString(),
   products: [],
-  customer_id: "",
+  customer_id: '',
   shipping_cost: 0,
-  notes: "",
+  notes: '',
 };
 
-const saleSidebarMode = ref<"sales" | "products" | "customers">("sales");
+const allowOutOfStockProducts = ref(false);
+const saleSidebarMode = ref<'sales' | 'products' | 'customers'>('sales');
 const activeCustomer = ref<Customer | null>(null);
 const productsRef = ref<HTMLElement | null>(null);
 const customersRef = ref<HTMLElement | null>(null);
-const customerSearch = ref("");
-const productSearch = ref("");
+const customerSearch = ref('');
+const productSearch = ref('');
 const customerSearchDebounced = refDebounced(customerSearch, 400);
 const productSearchDebounced = refDebounced(productSearch, 400);
 
@@ -135,22 +138,26 @@ const customersQuery = useCustomersQuery({
   options: {
     enabled: toRef(() => organizationStore.hasOrganizations),
     search: customerSearchDebounced,
-    filters: [{ column: "trust_status", operator: "eq", value: "trusted" }],
-    order: ["name", "asc"],
+    filters: [{ column: 'trust_status', operator: 'eq', value: 'trusted' }],
+    order: ['name', 'asc'],
   },
 });
 const productsQuery = useProductsQuery({
   options: {
     enabled: toRef(() => organizationStore.hasOrganizations),
     search: productSearchDebounced,
-    filters: [
-      {
-        column: "current_stock",
-        operator: "gt",
-        value: 0,
-      },
-    ],
-    order: ["name", "asc"],
+    filters: toRef(() => {
+      if (allowOutOfStockProducts.value) return [];
+
+      return [
+        {
+          column: 'current_stock',
+          operator: 'gt',
+          value: 0,
+        },
+      ];
+    }),
+    order: ['name', 'asc'],
   },
 });
 useInfiniteScroll(
@@ -170,16 +177,16 @@ useInfiniteScroll(
   { distance: 10, canLoadMore: () => productsQuery.hasNextPage.value }
 );
 
-const sidebarMode = toRef(() => (props.sale ? "UPDATE" : "CREATE"));
+const sidebarMode = toRef(() => (props.sale ? 'UPDATE' : 'CREATE'));
 
 const formSchema = toTypedSchema(
   z.object({
     sale_id: z.string().uuid().optional(),
     status: z.enum(SALE_STATUS),
     sale_date: z.string().datetime(),
-    customer_id: z.string().uuid("Por favor seleccione a un cliente"),
+    customer_id: z.string().uuid('Por favor seleccione a un cliente'),
     shipping_cost: z
-      .number({ invalid_type_error: "Ingresa un número válido" })
+      .number({ invalid_type_error: 'Ingresa un número válido' })
       .nonnegative()
       .finite()
       .safe(),
@@ -196,7 +203,7 @@ const formSchema = toTypedSchema(
           image_url: z.string().nullish().optional(),
         })
       )
-      .min(1, "Por favor seleccione al menos un producto"),
+      .min(1, 'Por favor seleccione al menos un producto'),
   })
 );
 
@@ -204,7 +211,7 @@ const formInstance = useForm<CreateSale | UpdateSale>({
   initialValues: initialForm,
   validationSchema: formSchema,
 });
-const productsFormFieldArray = useFieldArray("products");
+const productsFormFieldArray = useFieldArray('products');
 
 const onSubmit = formInstance.handleSubmit(async (formValues) => {
   const modifiedProducts = formValues.products.map((formProduct) => ({
@@ -218,13 +225,13 @@ const onSubmit = formInstance.handleSubmit(async (formValues) => {
     shipping_cost: nextShippingCost ?? 0,
     products: modifiedProducts,
   };
-  emit("save", modifiedFormValues);
+  emit('save', modifiedFormValues);
 });
 
 function formatProductToSaleDetail(
   product: Product | null
-): CreateSale["products"][number] {
-  if (!product) throw new Error("Cannot add product to sale missing data");
+): CreateSale['products'][number] {
+  if (!product) throw new Error('Cannot add product to sale missing data');
 
   return {
     product_id: product.id,
@@ -239,7 +246,7 @@ function formatProductToSaleDetail(
 function hasProductInFieldList(product: Product | null) {
   return productsFormFieldArray.fields.value.some(
     (productField) =>
-      (productField.value as CreateSale["products"][number])?.product_id ===
+      (productField.value as CreateSale['products'][number])?.product_id ===
       product?.id
   );
 }
@@ -247,7 +254,7 @@ function hasProductInFieldList(product: Product | null) {
 function findIndexProductInFieldList(product: Product | null) {
   return productsFormFieldArray.fields.value.findIndex(
     (productField) =>
-      (productField.value as CreateSale["products"][number])?.product_id ===
+      (productField.value as CreateSale['products'][number])?.product_id ===
       product?.id
   );
 }
@@ -262,8 +269,8 @@ function handleAddToProductsForm(product: Product | null) {
 }
 
 function handleCloseSidebar() {
-  if (saleSidebarMode.value !== "sales") {
-    return (saleSidebarMode.value = "sales");
+  if (saleSidebarMode.value !== 'sales') {
+    return (saleSidebarMode.value = 'sales');
   }
   openModel.value = false;
 }
@@ -275,24 +282,24 @@ watch(
       formInstance.resetForm({
         values: {
           sale_id: nextSale?.id,
-          notes: nextSale?.notes ?? "",
+          notes: nextSale?.notes ?? '',
           products:
             nextSale?.i_sale_products.map((saleProduct) => ({
               sale_detail_id: saleProduct.id,
-              image_url: saleProduct.image_url ?? "",
-              product_id: saleProduct.product_id ?? "",
-              name: saleProduct.name ?? "",
+              image_url: saleProduct.image_url ?? '',
+              product_id: saleProduct.product_id ?? '',
+              name: saleProduct.name ?? '',
               price: currencyFormatter.parseRaw(saleProduct?.price ?? 0),
               unit_price: saleProduct?.unit_price ?? 0,
               qty: saleProduct.qty,
             })) ?? [],
-          customer_id: nextSale?.customer_id ?? "",
+          customer_id: nextSale?.customer_id ?? '',
           sale_date: nextSale?.sale_date
             ? new Date(nextSale.sale_date).toISOString()
             : new Date().toISOString(),
           shipping_cost:
             currencyFormatter.parseRaw(nextSale?.shipping_cost) ?? 0,
-          status: nextSale?.status ?? "in_progress",
+          status: nextSale?.status ?? 'in_progress',
         },
       });
     } else {
@@ -533,6 +540,15 @@ watch(
           type="search"
           placeholder="Busca productos..."
         />
+        <div class="flex items-center space-x-2 mt-4">
+          <Switch
+            id="allow-out-of-stock"
+            v-model:checked="allowOutOfStockProducts"
+          />
+          <Label for="allow-out-of-stock"
+            >Mostrar productos sin existencias</Label
+          >
+        </div>
         <div class="grid grid-cols-2 gap-3 mt-4 mb-10">
           <Card
             v-for="product in productsQuery.data.value?.pages.flatMap(
@@ -567,8 +583,8 @@ watch(
                 "
                 >{{
                   hasProductInFieldList(product)
-                    ? "Seleccionado"
-                    : "Seleccionar"
+                    ? 'Seleccionado'
+                    : 'Seleccionar'
                 }}</Button
               >
             </CardFooter>
@@ -632,8 +648,8 @@ watch(
                 "
                 >{{
                   formInstance.values.customer_id === customer?.id
-                    ? "Seleccionado"
-                    : "Seleccionar"
+                    ? 'Seleccionado'
+                    : 'Seleccionar'
                 }}</Button
               >
             </CardFooter>
