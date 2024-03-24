@@ -546,7 +546,7 @@ watch(
             v-model:checked="allowOutOfStockProducts"
           />
           <Label for="allow-out-of-stock"
-            >Mostrar productos sin existencias</Label
+            >Mostrar productos fuera de stock</Label
           >
         </div>
         <div class="grid grid-cols-2 gap-3 mt-4 mb-10">
