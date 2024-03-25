@@ -34,7 +34,7 @@ const emit = defineEmits<{
   (e: "save", formValues: UpdateProduct): void;
 }>();
 
-const [ModalBody, StockNumbers] = createReusableTemplate();
+const [ModalBodyTemplate, ModalBody] = createReusableTemplate();
 const isDesktop = useMediaQuery("(min-width: 768px)");
 
 const stockAmount = ref(0);
@@ -69,7 +69,7 @@ watch(
 </script>
 
 <template>
-  <ModalBody>
+  <ModalBodyTemplate>
     <div class="text-center mb-6 flex justify-between items-center">
       <Button @click="updateStock(stockAmount - 1)" variant="outline">
         <MinusIcon class="w-6 h-6 stroke-[2px]" />
@@ -99,7 +99,7 @@ watch(
         <PlusIcon class="w-6 h-6 stroke-[2px]" />
       </Button>
     </div>
-  </ModalBody>
+  </ModalBodyTemplate>
 
   <Dialog v-if="isDesktop" v-model:open="openModel">
     <DialogContent>
@@ -119,7 +119,7 @@ watch(
           Aumenta o reduce la cantidad de producto disponible
         </DialogDescription>
       </DialogHeader>
-      <StockNumbers />
+      <ModalBody />
       <DialogFooter>
         <Button
           :disabled="isLoading"
@@ -143,7 +143,7 @@ watch(
 
   <Drawer v-else v-model:open="openModel">
     <DrawerContent>
-      <div class="mx-auto w-full max-w-sm">
+      <div class="mx-auto w-full max-w-sm mt-8 mb-16">
         <DrawerHeader>
           <div
             class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100"
@@ -160,7 +160,7 @@ watch(
             Aumenta o reduce la cantidad de producto disponible
           </DrawerDescription>
         </DrawerHeader>
-        <StockNumbers />
+        <ModalBody />
         <DrawerFooter>
           <Button
             :disabled="isLoading"
