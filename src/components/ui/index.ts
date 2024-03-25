@@ -16,3 +16,4 @@ export * from "./badge";
 export * from "./switch";
 export * from "./label";
 export * from "./calendar";
+export * from "./drawer";
