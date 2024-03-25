@@ -30,7 +30,8 @@ const emit = defineEmits<{
 const stockAmount = ref(0);
 
 function updateStock(nextStockAmount: number) {
-  if (nextStockAmount < 0) return;
+  const isSubstracting = nextStockAmount < stockAmount.value;
+  if (isSubstracting && nextStockAmount < 0) return;
   stockAmount.value = nextStockAmount;
 }
 
