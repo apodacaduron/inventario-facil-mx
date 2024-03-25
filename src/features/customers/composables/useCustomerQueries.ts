@@ -1,21 +1,21 @@
-import { useInfiniteQuery, useQuery } from "@tanstack/vue-query";
-import { useCustomerServices } from "./useCustomerServices";
-import { MaybeRefOrGetter, toValue } from "vue";
-import { LoadListOptions } from "@/features/global";
+import { useInfiniteQuery, useQuery } from '@tanstack/vue-query';
+import { useCustomerServices } from './useCustomerServices';
+import { MaybeRefOrGetter, toValue } from 'vue';
+import { LoadListOptions } from '@/features/global';
 
 export function useCustomersQuery(context: {
   options: {
     enabled: MaybeRefOrGetter<boolean | undefined>;
     search?: MaybeRefOrGetter<string | undefined>;
-    filters?: MaybeRefOrGetter<LoadListOptions["filters"] | undefined>;
-    order?: MaybeRefOrGetter<LoadListOptions["order"] | undefined>;
+    filters?: MaybeRefOrGetter<LoadListOptions['filters'] | undefined>;
+    order?: MaybeRefOrGetter<LoadListOptions['order'] | undefined>;
   };
 }) {
   const customerServices = useCustomerServices();
 
   return useInfiniteQuery({
     queryKey: [
-      "customers",
+      'customers',
       context.options.search,
       context.options.filters,
       context.options.order,
@@ -43,7 +43,7 @@ export function useCustomersCountQuery() {
   const customerServices = useCustomerServices();
 
   return useQuery({
-    queryKey: ['customers-count'],
+    queryKey: ['customers', 'count'],
     queryFn() {
       return customerServices.getCustomerCount();
     },

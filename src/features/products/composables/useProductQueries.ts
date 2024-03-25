@@ -1,21 +1,21 @@
-import { useInfiniteQuery, useQuery } from "@tanstack/vue-query";
-import { useProductServices } from "./useProductServices";
-import { MaybeRefOrGetter, toValue } from "vue";
-import { LoadListOptions } from "@/features/global";
+import { useInfiniteQuery, useQuery } from '@tanstack/vue-query';
+import { useProductServices } from './useProductServices';
+import { MaybeRefOrGetter, toValue } from 'vue';
+import { LoadListOptions } from '@/features/global';
 
 export function useProductsQuery(context: {
   options: {
     enabled: MaybeRefOrGetter<boolean | undefined>;
     search: MaybeRefOrGetter<string | undefined>;
-    filters?: MaybeRefOrGetter<LoadListOptions["filters"] | undefined>;
-    order?: MaybeRefOrGetter<LoadListOptions["order"] | undefined>;
+    filters?: MaybeRefOrGetter<LoadListOptions['filters'] | undefined>;
+    order?: MaybeRefOrGetter<LoadListOptions['order'] | undefined>;
   };
 }) {
   const productServices = useProductServices();
 
   return useInfiniteQuery({
     queryKey: [
-      "products",
+      'products',
       context.options.search,
       context.options.filters,
       context.options.order,
@@ -43,9 +43,7 @@ export function useProductsCountQuery() {
   const productServices = useProductServices();
 
   return useQuery({
-    queryKey: [
-      "products-count",
-    ],
+    queryKey: ['products', 'total'],
     queryFn() {
       return productServices.getProductCount();
     },
