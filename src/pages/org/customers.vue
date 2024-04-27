@@ -7,17 +7,13 @@ import {
   customerServicesTypeguards,
   useCustomerServices,
   DeleteCustomerDialog,
-  useCustomersCountQuery
-} from "@/features/customers";
-import { computed, ref, toRef, watchEffect } from "vue";
-import { FeedbackCard, useTableOrder, useTableStates } from "@/features/global";
+  useCustomersCountQuery,
+} from '@/features/customers';
+import { computed, ref, toRef, watchEffect } from 'vue';
+import { FeedbackCard, useTableOrder, useTableStates } from '@/features/global';
 import {
   Button,
   Input,
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
   Avatar,
   AvatarFallback,
   Table,
@@ -27,38 +23,37 @@ import {
   TableBody,
   TableCell,
   Skeleton,
-} from "@/components/ui";
-import { Badge } from "@/components";
+} from '@/components/ui';
+import { Badge } from '@/components';
 import {
   ChevronDownIcon,
   ChevronUpIcon,
-  EllipsisVerticalIcon,
   MapIcon,
   PencilIcon,
   PlusIcon,
   TrashIcon,
   UserGroupIcon,
-} from "@heroicons/vue/24/outline";
-import { refDebounced, useInfiniteScroll } from "@vueuse/core";
-import { useOrganizationStore, useSubscriptionStore } from "@/stores";
-import { useCustomersQuery } from "@/features/customers/composables/useCustomerQueries";
-import { useMutation, useQueryClient } from "@tanstack/vue-query";
+} from '@heroicons/vue/24/outline';
+import { refDebounced, useInfiniteScroll } from '@vueuse/core';
+import { useOrganizationStore, useSubscriptionStore } from '@/stores';
+import { useCustomersQuery } from '@/features/customers/composables/useCustomerQueries';
+import { useMutation, useQueryClient } from '@tanstack/vue-query';
 
 const WHATSAPP_URL = import.meta.env.VITE_WHATSAPP_URL;
 const tableRef = ref<HTMLElement | null>(null);
-const customerSearch = ref("");
+const customerSearch = ref('');
 const customerSearchDebounced = refDebounced(customerSearch, 400);
 const isCreateOrUpdateSidebarOpen = ref(false);
 const isDeleteCustomerDialogOpen = ref(false);
 const activeCustomer = ref<Customer | null>(null);
 const customersTableOrder = useTableOrder({
   options: {
-    initialOrder: ["created_at", "desc"],
+    initialOrder: ['created_at', 'desc'],
   },
 });
 const queryClient = useQueryClient();
 const organizationStore = useOrganizationStore();
-const subscriptionStore = useSubscriptionStore()
+const subscriptionStore = useSubscriptionStore();
 const customerServices = useCustomerServices();
 const createCustomerMutation = useMutation({
   mutationFn: createCustomerMutationFn,
@@ -69,7 +64,7 @@ const updateCustomerMutation = useMutation({
 const deleteCustomerMutation = useMutation({
   mutationFn: deleteCustomerMutationFn,
 });
-const customersCountQuery = useCustomersCountQuery()
+const customersCountQuery = useCustomersCountQuery();
 const customersQuery = useCustomersQuery({
   options: {
     enabled: toRef(() => organizationStore.hasOrganizations),
@@ -87,7 +82,9 @@ useInfiniteScroll(
 );
 const tableLoadingStates = useTableStates(customersQuery, customerSearch);
 
-const customersCount = computed(() => customersCountQuery.data.value?.count ?? 0)
+const customersCount = computed(
+  () => customersCountQuery.data.value?.count ?? 0
+);
 
 function openDeleteCustomerDialog(customer: Customer) {
   activeCustomer.value = customer;
@@ -110,30 +107,30 @@ function openUpdateCustomerSidebar(customer: Customer) {
 
 async function createCustomerMutationFn(formValues: CreateCustomer) {
   await customerServices.createCustomer(formValues);
-  await queryClient.invalidateQueries({ queryKey: ["customers"] });
+  await queryClient.invalidateQueries({ queryKey: ['customers'] });
 }
 async function updateCustomerMutationFn(formValues: UpdateCustomer) {
   const customerId = formValues.customer_id;
-  if (!customerId) throw new Error("Customer id required to perform update");
+  if (!customerId) throw new Error('Customer id required to perform update');
   await customerServices.updateCustomer(formValues);
-  await queryClient.invalidateQueries({ queryKey: ["customers"] });
+  await queryClient.invalidateQueries({ queryKey: ['customers'] });
 }
 async function deleteCustomerMutationFn() {
   const customerId = activeCustomer.value?.id;
-  if (!customerId) throw new Error("Customer id required to perform delete");
+  if (!customerId) throw new Error('Customer id required to perform delete');
   await customerServices.deleteCustomer(customerId);
   isDeleteCustomerDialogOpen.value = false;
-  await queryClient.invalidateQueries({ queryKey: ["customers"] });
+  await queryClient.invalidateQueries({ queryKey: ['customers'] });
 }
 
-function getBadgeColorFromStatus(status: Customer["trust_status"]) {
+function getBadgeColorFromStatus(status: Customer['trust_status']) {
   switch (status) {
-    case "trusted":
-      return "green";
-    case "not_trusted":
-      return "red";
+    case 'trusted':
+      return 'green';
+    case 'not_trusted':
+      return 'red';
     default:
-      return "green";
+      return 'green';
   }
 }
 
@@ -158,7 +155,14 @@ watchEffect(() => {
       </p>
     </div>
     <div class="hidden lg:flex gap-2">
-      <Button v-if="subscriptionStore.hasPlan && subscriptionStore.canAddCustomers(customersCount)" @click="isCreateOrUpdateSidebarOpen = true" label="">
+      <Button
+        v-if="
+          subscriptionStore.hasPlan &&
+          subscriptionStore.canAddCustomers(customersCount)
+        "
+        @click="isCreateOrUpdateSidebarOpen = true"
+        label=""
+      >
         <PlusIcon class="w-5 h-5 stroke-[2px] mr-2" /> Crear cliente
       </Button>
     </div>
@@ -173,7 +177,15 @@ watchEffect(() => {
     />
 
     <div class="flex lg:hidden gap-2">
-      <Button v-if="subscriptionStore.hasPlan && subscriptionStore.canAddCustomers(customersCount)" @click="isCreateOrUpdateSidebarOpen = true" label="" size="icon">
+      <Button
+        v-if="
+          subscriptionStore.hasPlan &&
+          subscriptionStore.canAddCustomers(customersCount)
+        "
+        @click="isCreateOrUpdateSidebarOpen = true"
+        label=""
+        size="icon"
+      >
         <PlusIcon class="w-5 h-5 stroke-[2px]" />
       </Button>
     </div>
@@ -269,7 +281,7 @@ watchEffect(() => {
               </div>
             </TableCell>
             <TableCell class="text-center">{{
-              customer.notes || "-"
+              customer.notes || '-'
             }}</TableCell>
             <TableCell class="text-center"
               ><a
@@ -282,7 +294,7 @@ watchEffect(() => {
               </a></TableCell
             >
             <TableCell class="text-center">
-              {{ customer.address || "-" }}
+              {{ customer.address || '-' }}
             </TableCell>
             <TableCell class="text-center">
               <a
@@ -301,30 +313,23 @@ watchEffect(() => {
                 {{ customer.trust_status?.toLocaleUpperCase() }}
               </Badge>
             </TableCell>
-            <TableCell class="text-center">
-              <DropdownMenu>
-                <DropdownMenuTrigger as-child>
-                  <Button variant="outline">
-                    <EllipsisVerticalIcon class="w-5 h-5 stroke-[2px]" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuItem
-                    @click="openUpdateCustomerSidebar(customer)"
-                  >
-                    <PencilIcon class="w-5 h-5 mr-2" />
-                    <span>Actualizar</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    v-if="customer.trust_status === 'not_trusted'"
-                    class="text-red-500 dark:text-red-500"
-                    @click="openDeleteCustomerDialog(customer)"
-                  >
-                    <TrashIcon class="w-5 h-5 mr-2" />
-                    <span>Eliminar</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+            <TableCell class="text-center flex justify-center gap-2">
+              <Button
+                size="icon"
+                variant="outline"
+                @click="openUpdateCustomerSidebar(customer)"
+              >
+                <PencilIcon class="w-4 h4" />
+              </Button>
+              <Button
+                v-if="customer.trust_status === 'not_trusted'"
+                size="icon"
+                variant="outline"
+                class="text-red-500 dark:text-red-500"
+                @click="openDeleteCustomerDialog(customer)"
+              >
+                <TrashIcon class="w-4 h4" />
+              </Button>
             </TableCell>
           </TableRow>
         </template>
