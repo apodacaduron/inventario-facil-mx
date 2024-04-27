@@ -1,43 +1,43 @@
-import { supabase } from "@/config/supabase";
-import { LoadListOptions, useServiceHelpers } from "@/features/global";
-import { useProductServices } from "@/features/products";
+import { supabase } from '@/config/supabase';
+import { LoadListOptions, useServiceHelpers } from '@/features/global';
+import { useProductServices } from '@/features/products';
 
 export type CreateSale = {
-  sale_id?: Sale["id"];
-  sale_date: Sale["sale_date"];
-  status: NonNullable<Sale["status"]>;
-  customer_id: NonNullable<Sale["customer_id"]>;
-  notes: NonNullable<Sale["notes"]>;
-  shipping_cost: NonNullable<Sale["shipping_cost"]>;
+  sale_id?: Sale['id'];
+  sale_date: Sale['sale_date'];
+  status: NonNullable<Sale['status']>;
+  customer_id: NonNullable<Sale['customer_id']>;
+  notes: NonNullable<Sale['notes']>;
+  shipping_cost: NonNullable<Sale['shipping_cost']>;
   products: {
-    product_id: SaleProduct["product_id"];
-    price: SaleProduct["price"];
-    unit_price: SaleProduct["unit_price"];
-    qty: SaleProduct["qty"];
-    name: SaleProduct["name"];
-    image_url: SaleProduct["image_url"];
+    product_id: SaleProduct['product_id'];
+    price: SaleProduct['price'];
+    unit_price: SaleProduct['unit_price'];
+    qty: SaleProduct['qty'];
+    name: SaleProduct['name'];
+    image_url: SaleProduct['image_url'];
   }[];
 };
 export type UpdateSale = {
-  sale_id: Sale["id"];
+  sale_id: Sale['id'];
 } & CreateSale;
-export type DeleteSale = Sale["id"];
+export type DeleteSale = Sale['id'];
 
 export type SaleList = Awaited<
-  ReturnType<ReturnType<typeof useSaleServices>["loadList"]>
->["data"];
+  ReturnType<ReturnType<typeof useSaleServices>['loadList']>
+>['data'];
 export type Sale = NonNullable<SaleList>[number];
-export const SALE_STATUS = ["in_progress", "completed", "cancelled"] as const;
-export type SaleProductList = Sale["i_sale_products"];
-export type SaleProduct = Sale["i_sale_products"][number];
+export const SALE_STATUS = ['in_progress', 'completed', 'cancelled'] as const;
+export type SaleProductList = Sale['i_sale_products'];
+export type SaleProduct = Sale['i_sale_products'][number];
 
 export const saleServicesTypeguards = {
   isCreateSale(maybeSale: CreateSale | UpdateSale): maybeSale is CreateSale {
     return (
-      !("sale_id" in maybeSale && maybeSale.sale_id) &&
-      "sale_date" in maybeSale &&
-      "status" in maybeSale &&
-      "customer_id" in maybeSale
+      !('sale_id' in maybeSale && maybeSale.sale_id) &&
+      'sale_date' in maybeSale &&
+      'status' in maybeSale &&
+      'customer_id' in maybeSale
     );
   },
   isUpdateSale(maybeSale: CreateSale | UpdateSale): maybeSale is UpdateSale {
@@ -58,9 +58,9 @@ const helpers = {
       saleProducts?.map(async (saleProduct) => {
         if (!saleProduct.product_id) return;
         const productResponse = await supabase
-          .from("i_products")
-          .select("current_stock")
-          .eq("id", saleProduct.product_id)
+          .from('i_products')
+          .select('current_stock')
+          .eq('id', saleProduct.product_id)
           .single();
 
         const saleQuantity = saleProduct?.qty ?? 0;
@@ -74,7 +74,7 @@ const helpers = {
       }) ?? []
     );
   },
-  formatSaleProduct(product: UpdateSale["products"][number]) {
+  formatSaleProduct(product: UpdateSale['products'][number]) {
     return {
       product_id: product.product_id,
       price: product.price,
@@ -94,17 +94,34 @@ export function useSaleServices() {
 
     const organization = serviceHelpers.getCurrentOrganization();
     if (!organization?.org_id)
-      throw new Error("Organization is required to get sale list");
+      throw new Error('Organization is required to get sale list');
 
     let saleQuery = supabase
-      .from("i_sales")
-      .select("*, i_sale_products(*), i_customers!inner(*)")
-      .eq("org_id", organization.org_id)
+      .from('i_sales')
+      .select('*, i_sale_products(*), i_customers!inner(*)')
+      .eq('org_id', organization.org_id)
       .range(from, to)
-      .order("created_at", { ascending: false });
+      .order('created_at', { ascending: false });
 
     if (options?.search) {
-      saleQuery = saleQuery.ilike("i_customers.name", `%${options.search}%`);
+      saleQuery = saleQuery.ilike('i_customers.name', `%${options.search}%`);
+    }
+
+    if (options?.order) {
+      const [column = 'created_at', order = 'desc'] = options?.order;
+      saleQuery = saleQuery.order(column, {
+        ascending: order === 'asc',
+      });
+    }
+
+    if (options?.filters) {
+      options?.filters.forEach((filter) => {
+        saleQuery = saleQuery.filter(
+          filter.column,
+          filter.operator,
+          filter.value
+        );
+      });
     }
 
     return await saleQuery;
@@ -113,11 +130,11 @@ export function useSaleServices() {
   async function createSale(formValues: CreateSale) {
     const organization = serviceHelpers.getCurrentOrganization();
     if (!organization?.org_id)
-      throw new Error("Organization is required to create a sale");
+      throw new Error('Organization is required to create a sale');
 
     const { products, sale_id, ...otherFormValues } = formValues;
     const createdSaleResponse = await supabase
-      .from("i_sales")
+      .from('i_sales')
       .insert([
         {
           ...otherFormValues,
@@ -127,9 +144,9 @@ export function useSaleServices() {
       .select()
       .single();
     if (!createdSaleResponse.data?.id)
-      throw new Error("Sale id is required to add to sale detail");
+      throw new Error('Sale id is required to add to sale detail');
 
-    await supabase.from("i_sale_products").insert(
+    await supabase.from('i_sale_products').insert(
       formValues.products.map((product) => ({
         ...helpers.formatSaleProduct(product),
         sale_id: createdSaleResponse.data.id,
@@ -148,23 +165,23 @@ export function useSaleServices() {
   async function updateSale(formValues: UpdateSale) {
     const organization = serviceHelpers.getCurrentOrganization();
     if (!organization?.org_id)
-      throw new Error("Organization is required to update a sale");
+      throw new Error('Organization is required to update a sale');
     const { sale_id, products, ...otherFormValues } = formValues;
 
     await supabase
-      .from("i_sales")
+      .from('i_sales')
       .update({
         ...otherFormValues,
       })
-      .eq("id", formValues.sale_id);
+      .eq('id', formValues.sale_id);
 
-    if (formValues.status === "completed") return;
+    if (formValues.status === 'completed') return;
 
-    if (formValues.status === "in_progress") {
+    if (formValues.status === 'in_progress') {
       const oldSaleProductsQuery = await supabase
-        .from("i_sale_products")
+        .from('i_sale_products')
         .delete()
-        .eq("sale_id", formValues.sale_id)
+        .eq('sale_id', formValues.sale_id)
         .select();
 
       await (async function restoreOldStock() {
@@ -179,7 +196,7 @@ export function useSaleServices() {
         sale_id: formValues.sale_id,
         org_id: organization.org_id,
       }));
-      await supabase.from("i_sale_products").insert(formattedSaleProducts);
+      await supabase.from('i_sale_products').insert(formattedSaleProducts);
 
       await (async function updateNewStock() {
         await helpers.updateStockBasedOnSaleProducts(
@@ -187,7 +204,7 @@ export function useSaleServices() {
           (currentStock, saleProductQty) => currentStock - saleProductQty
         );
       })();
-    } else if (formValues.status === "cancelled") {
+    } else if (formValues.status === 'cancelled') {
       await (async function restoreOldStock() {
         await helpers.updateStockBasedOnSaleProducts(
           formValues.products,
@@ -198,9 +215,9 @@ export function useSaleServices() {
   }
 
   async function deleteSale(saleId: DeleteSale) {
-    if (!saleId) throw new Error("Sale id is required to delete a sale");
+    if (!saleId) throw new Error('Sale id is required to delete a sale');
 
-    await supabase.from("i_sales").delete().eq("id", saleId);
+    await supabase.from('i_sales').delete().eq('id', saleId);
   }
 
   return { loadList, createSale, deleteSale, updateSale };
