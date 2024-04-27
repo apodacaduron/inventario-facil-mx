@@ -136,7 +136,7 @@ const organizationStore = useOrganizationStore();
 const currencyFormatter = useCurrencyFormatter();
 const customersQuery = useCustomersQuery({
   options: {
-    enabled: toRef(() => organizationStore.hasOrganizations),
+    enabled: toRef(() => organizationStore.hasOrganizations && saleSidebarMode.value === 'customers'),
     search: customerSearchDebounced,
     filters: [{ column: 'trust_status', operator: 'eq', value: 'trusted' }],
     order: ['name', 'asc'],
@@ -144,7 +144,7 @@ const customersQuery = useCustomersQuery({
 });
 const productsQuery = useProductsQuery({
   options: {
-    enabled: toRef(() => organizationStore.hasOrganizations),
+    enabled: toRef(() => organizationStore.hasOrganizations && saleSidebarMode.value === 'products'),
     search: productSearchDebounced,
     filters: toRef(() => {
       if (allowOutOfStockProducts.value) return [];
