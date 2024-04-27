@@ -1,8 +1,17 @@
-import { subscriptionServicesTypeguards, useSubscriptionServices } from "@/features/subscriptions";
-import { defineStore } from "pinia";
-import { ref, toRef } from "vue";
+import {
+  subscriptionServicesTypeguards,
+  useSubscriptionServices,
+} from '@/features/subscriptions';
+import { defineStore } from 'pinia';
+import { ref, toRef } from 'vue';
 
-type CurrentSubscription = Awaited<ReturnType<ReturnType<typeof useSubscriptionServices>['getCurrentSubscription']>>['data'] | undefined
+type CurrentSubscription =
+  | Awaited<
+      ReturnType<
+        ReturnType<typeof useSubscriptionServices>['getCurrentSubscription']
+      >
+    >['data']
+  | undefined;
 
 const DEFAULT_PLAN = {
   id: '8e020f6b-7f66-45a2-a614-04f282eae656',
@@ -15,16 +24,18 @@ const DEFAULT_PLAN = {
   max_customers: 50,
 };
 
-export const useSubscriptionStore = defineStore("subscription", () => {
-  const currentSubscription = ref<CurrentSubscription>()
+export const useSubscriptionStore = defineStore('subscription', () => {
+  const currentSubscription = ref<CurrentSubscription>();
 
   const currentPlan = toRef(() => {
-      if (
-        subscriptionServicesTypeguards.isSubscription(currentSubscription.value) &&
-        currentSubscription.value.plans
-      ) {
-        return currentSubscription.value.plans;
-      }
+    if (
+      subscriptionServicesTypeguards.isSubscription(
+        currentSubscription.value
+      ) &&
+      currentSubscription.value.plans
+    ) {
+      return currentSubscription.value.plans;
+    }
 
     if (
       subscriptionServicesTypeguards.isPlan(currentSubscription.value) &&
@@ -34,23 +45,23 @@ export const useSubscriptionStore = defineStore("subscription", () => {
     }
 
     return DEFAULT_PLAN;
-  })
+  });
   const hasPlan = toRef(() => Boolean(currentSubscription.value));
 
   function setCurrentSubscription(_currentSubscription: CurrentSubscription) {
-    currentSubscription.value = _currentSubscription
+    currentSubscription.value = _currentSubscription;
   }
 
-  function canAddProducts(productCount: number) {
-    if (currentPlan.value.max_products === null) return true
-    
-    return productCount <= currentPlan.value.max_products;
+  function canAddProducts(productCount: number | null | undefined) {
+    if (currentPlan.value.max_products === null) return true;
+
+    return (productCount ?? 0) <= currentPlan.value.max_products;
   }
 
-  function canAddCustomers(customerCount: number) {
-    if (currentPlan.value.max_customers === null) return true
-    
-    return customerCount <= currentPlan.value.max_customers;
+  function canAddCustomers(customerCount: number | null | undefined) {
+    if (currentPlan.value.max_customers === null) return true;
+
+    return (customerCount ?? 0) <= currentPlan.value.max_customers;
   }
 
   return {

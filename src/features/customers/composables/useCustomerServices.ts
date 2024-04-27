@@ -121,10 +121,7 @@ export function useCustomerServices() {
     if (!organization?.org_id)
       throw new Error('Organization is required to get customer count');
 
-    return await supabase
-      .from('i_customers')
-      .select('*', { count: 'estimated' })
-      .eq('org_id', organization.org_id);
+    return await supabase.rpc('get_customers_count', { organization_id: organization.org_id })
   }
 
   return {

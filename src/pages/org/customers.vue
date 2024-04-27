@@ -82,10 +82,6 @@ useInfiniteScroll(
 );
 const tableLoadingStates = useTableStates(customersQuery, customerSearch);
 
-const customersCount = computed(
-  () => customersCountQuery.data.value?.count ?? 0
-);
-
 function openDeleteCustomerDialog(customer: Customer) {
   activeCustomer.value = customer;
   isDeleteCustomerDialogOpen.value = true;
@@ -158,7 +154,7 @@ watchEffect(() => {
       <Button
         :disabled="
           !subscriptionStore.hasPlan ||
-          !subscriptionStore.canAddCustomers(customersCount)
+          !subscriptionStore.canAddCustomers(customersCountQuery.data.value)
         "
         @click="isCreateOrUpdateSidebarOpen = true"
         label=""
@@ -180,7 +176,7 @@ watchEffect(() => {
       <Button
         :disabled="
           !subscriptionStore.hasPlan ||
-          !subscriptionStore.canAddCustomers(customersCount)
+          !subscriptionStore.canAddCustomers(customersCountQuery.data.value)
         "
         @click="isCreateOrUpdateSidebarOpen = true"
         label=""

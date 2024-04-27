@@ -503,7 +503,23 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_customers_count: {
+        Args: {
+          organization_id: string
+        }
+        Returns: number
+      }
+      get_products_count:
+        | {
+            Args: Record<PropertyKey, never>
+            Returns: number
+          }
+        | {
+            Args: {
+              organization_id: string
+            }
+            Returns: number
+          }
     }
     Enums: {
       basic_sale_status: "in_progress" | "completed" | "cancelled"

@@ -43,9 +43,11 @@ export function useProductsCountQuery() {
   const productServices = useProductServices();
 
   return useQuery({
-    queryKey: ['products', 'total'],
-    queryFn() {
-      return productServices.getProductCount();
+    queryKey: ['products', 'count'],
+    async queryFn() {
+      const response = await productServices.getProductCount();
+
+      return response.data ?? 0
     },
   });
 }

@@ -44,8 +44,10 @@ export function useCustomersCountQuery() {
 
   return useQuery({
     queryKey: ['customers', 'count'],
-    queryFn() {
-      return customerServices.getCustomerCount();
+    async queryFn() {
+      const response = await customerServices.getCustomerCount();
+
+      return response.data ?? 0;
     },
   });
 }

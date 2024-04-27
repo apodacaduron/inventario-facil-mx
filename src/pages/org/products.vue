@@ -90,8 +90,6 @@ useInfiniteScroll(
 );
 const tableLoadingStates = useTableStates(productsQuery, productSearch);
 
-const productsCount = computed(() => productsCountQuery.data.value?.count ?? 0);
-
 function openDeleteProductDialog(product: Product) {
   activeProduct.value = product;
   isDeleteProductDialogOpen.value = true;
@@ -163,7 +161,7 @@ watchEffect(() => {
       <Button
         :disabled="
           !subscriptionStore.hasPlan ||
-          !subscriptionStore.canAddProducts(productsCount)
+          !subscriptionStore.canAddProducts(productsCountQuery.data.value)
         "
         @click="isCreateOrUpdateSidebarOpen = true"
       >
@@ -191,7 +189,7 @@ watchEffect(() => {
       <Button
         :disabled="
           !subscriptionStore.hasPlan ||
-          !subscriptionStore.canAddProducts(productsCount)
+          !subscriptionStore.canAddProducts(productsCountQuery.data.value)
         "
         @click="isCreateOrUpdateSidebarOpen = true"
         size="icon"

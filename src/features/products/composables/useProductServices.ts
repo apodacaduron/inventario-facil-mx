@@ -116,9 +116,7 @@ export function useProductServices() {
       throw new Error('Organization is required to get product count');
 
     return await supabase
-      .from('i_products')
-      .select('*', { count: 'estimated' })
-      .eq('org_id', organization.org_id);
+      .rpc('get_products_count', { organization_id: organization.org_id });
   }
 
   return {
