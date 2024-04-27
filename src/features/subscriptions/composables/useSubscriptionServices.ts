@@ -42,7 +42,6 @@ export const subscriptionServicesTypeguards = {
   isSubscription(
     maybeSubscription: unknown
   ): maybeSubscription is Subscription {
-    console.log('maybeSubscription', maybeSubscription)
     return (
       maybeSubscription !== null &&
       typeof maybeSubscription === 'object' &&
