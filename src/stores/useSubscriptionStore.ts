@@ -20,10 +20,10 @@ export const useSubscriptionStore = defineStore("subscription", () => {
 
   const currentPlan = toRef(() => {
       if (
-        subscriptionServicesTypeguards.isSubscription(currentSubscription) &&
-        currentSubscription.plans
+        subscriptionServicesTypeguards.isSubscription(currentSubscription.value) &&
+        currentSubscription.value.plans
       ) {
-        return currentSubscription.plans;
+        return currentSubscription.value.plans;
       }
 
     if (

@@ -156,9 +156,9 @@ watchEffect(() => {
     </div>
     <div class="hidden lg:flex gap-2">
       <Button
-        v-if="
-          subscriptionStore.hasPlan &&
-          subscriptionStore.canAddCustomers(customersCount)
+        :disabled="
+          !subscriptionStore.hasPlan ||
+          !subscriptionStore.canAddCustomers(customersCount)
         "
         @click="isCreateOrUpdateSidebarOpen = true"
         label=""
@@ -178,9 +178,9 @@ watchEffect(() => {
 
     <div class="flex lg:hidden gap-2">
       <Button
-        v-if="
-          subscriptionStore.hasPlan &&
-          subscriptionStore.canAddCustomers(customersCount)
+        :disabled="
+          !subscriptionStore.hasPlan ||
+          !subscriptionStore.canAddCustomers(customersCount)
         "
         @click="isCreateOrUpdateSidebarOpen = true"
         label=""
