@@ -1,21 +1,31 @@
 import { useInfiniteQuery } from "@tanstack/vue-query";
 import { useSaleServices } from "./useSaleServices";
 import { MaybeRefOrGetter, toValue } from "vue";
+import { LoadListOptions } from "@/features/global";
 
 export function useSalesQuery(context: {
   options: {
     enabled: MaybeRefOrGetter<boolean | undefined>;
-    search: MaybeRefOrGetter<string | undefined>;
+    search?: MaybeRefOrGetter<string | undefined>;
+    filters?: MaybeRefOrGetter<LoadListOptions['filters'] | undefined>;
+    order?: MaybeRefOrGetter<LoadListOptions['order'] | undefined>;
   };
 }) {
   const saleServices = useSaleServices();
 
   return useInfiniteQuery({
-    queryKey: ["sales", context.options.search],
+    queryKey: [
+      'sales',
+      context.options.search,
+      context.options.filters,
+      context.options.order,
+    ],
     queryFn({ pageParam }) {
       return saleServices.loadList({
         offset: pageParam,
         search: toValue(context.options.search),
+        filters: toValue(context.options.filters),
+        order: toValue(context.options.order),
       });
     },
     initialPageParam: 0,
