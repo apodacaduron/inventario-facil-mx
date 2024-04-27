@@ -8,7 +8,7 @@ import {
   saleServicesTypeguards,
   useSaleServices,
 } from '@/features/sales';
-import { computed, ref, watchEffect } from 'vue';
+import { ref, toRef, watchEffect } from 'vue';
 import {
   Button,
   Input,
@@ -22,6 +22,13 @@ import {
   TableCell,
   AvatarImage,
   Skeleton,
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
 } from '@/components/ui';
 import {
   BanknotesIcon,
@@ -29,6 +36,7 @@ import {
   PencilIcon,
   PlusIcon,
   TrashIcon,
+  FunnelIcon,
 } from '@heroicons/vue/24/outline';
 import { refDebounced, useInfiniteScroll } from '@vueuse/core';
 import { useOrganizationStore } from '@/stores';
@@ -37,8 +45,12 @@ import { useMutation, useQueryClient } from '@tanstack/vue-query';
 import { useCurrencyFormatter } from '@/features/products';
 import { Badge } from '@/components';
 import { FeedbackCard, useTableStates } from '@/features/global';
+import { Tables } from '../../../types_db';
 
 const WHATSAPP_URL = import.meta.env.VITE_WHATSAPP_URL;
+const saleStatusFilterRef = ref<NonNullable<Tables<'i_sales'>['status']> | 'all'>(
+  'in_progress'
+);
 const tableRef = ref<HTMLElement | null>(null);
 const saleSearch = ref('');
 const saleSearchDebounced = refDebounced(saleSearch, 400);
@@ -55,8 +67,19 @@ const deleteSaleMutation = useMutation({ mutationFn: deleteSaleMutationFn });
 const currencyFormatter = useCurrencyFormatter();
 const salesQuery = useSalesQuery({
   options: {
-    enabled: computed(() => organizationStore.hasOrganizations),
+    enabled: toRef(() => organizationStore.hasOrganizations),
     search: saleSearchDebounced,
+    filters: toRef(() => {
+      if (saleStatusFilterRef.value === 'all') return [];
+
+      return [
+        {
+          column: 'status',
+          operator: 'eq',
+          value: saleStatusFilterRef.value,
+        },
+      ];
+    }),
   },
 });
 useInfiniteScroll(
@@ -152,12 +175,38 @@ watchEffect(() => {
   </div>
 
   <div class="flex items-center justify-between pb-4 gap-4 mx-4 md:mx-0">
-    <Input
-      v-model="saleSearch"
-      type="search"
-      placeholder="Buscar ventas"
-      class="max-w-[256px]"
-    />
+    <div class="flex gap-2">
+      <Input
+        v-model="saleSearch"
+        type="search"
+        placeholder="Buscar ventas"
+        class="max-w-[256px]"
+      />
+
+      <DropdownMenu>
+        <DropdownMenuTrigger as-child>
+          <Button variant="outline" size="icon">
+            <FunnelIcon class="w-4 h-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent class="w-56">
+          <DropdownMenuLabel>Estatus</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuRadioGroup v-model="saleStatusFilterRef">
+            <DropdownMenuRadioItem value="in_progress">
+              En progreso
+            </DropdownMenuRadioItem>
+            <DropdownMenuRadioItem value="completed">
+              Completado
+            </DropdownMenuRadioItem>
+            <DropdownMenuRadioItem value="cancelled">
+              Cancelado
+            </DropdownMenuRadioItem>
+            <DropdownMenuRadioItem value="all"> Todo </DropdownMenuRadioItem>
+          </DropdownMenuRadioGroup>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
 
     <div class="flex lg:hidden gap-2">
       <Button @click="isCreateOrUpdateSidebarOpen = true" size="icon">
