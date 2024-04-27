@@ -123,18 +123,6 @@ const menuList = {
                     </li>
                   </ul>
 
-                  <amp-ad
-                    width="100vw"
-                    height="320"
-                    type="adsense"
-                    data-ad-client="ca-pub-8254295768324190"
-                    data-ad-slot="1701455631"
-                    data-auto-format="rspv"
-                    data-full-width=""
-                  >
-                    <div overflow=""></div>
-                  </amp-ad>
-
                   <div
                     id="dropdown-cta"
                     class="p-4 mt-6 rounded-lg border border-border"
@@ -237,18 +225,6 @@ const menuList = {
           </router-link>
         </li>
       </ul>
-
-      <amp-ad
-        width="100vw"
-        height="320"
-        type="adsense"
-        data-ad-client="ca-pub-8254295768324190"
-        data-ad-slot="1701455631"
-        data-auto-format="rspv"
-        data-full-width=""
-      >
-        <div overflow=""></div>
-      </amp-ad>
 
       <div
         id="dropdown-cta"

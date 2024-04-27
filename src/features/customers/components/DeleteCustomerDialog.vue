@@ -7,8 +7,15 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  Drawer,
+  DrawerContent,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerDescription,
 } from "@/components/ui";
 import { Customer } from "../composables";
+import { useMediaQuery } from "@vueuse/core";
 
 type DeleteCustomerDialogProps = {
   isLoading?: boolean;
@@ -20,10 +27,12 @@ defineProps<DeleteCustomerDialogProps>();
 const emit = defineEmits<{
   (e: "confirmDelete", formValues: Customer | null): void;
 }>();
+
+const isDesktop = useMediaQuery("(min-width: 768px)");
 </script>
 
 <template>
-  <Dialog v-model:open="openModel">
+  <Dialog v-if="isDesktop" v-model:open="openModel">
     <DialogContent class="sm:max-w-[425px]">
       <DialogHeader>
         <DialogTitle>Eliminar {{ customer?.name }}</DialogTitle>
@@ -52,4 +61,36 @@ const emit = defineEmits<{
       </DialogFooter>
     </DialogContent>
   </Dialog>
+
+  <Drawer v-else v-model:open="openModel">
+    <DrawerContent>
+      <div class="mx-auto w-full max-w-sm mt-8 mb-16">
+        <DrawerHeader>
+          <DrawerTitle>Eliminar {{ customer?.name }}</DrawerTitle>
+          <DrawerDescription>
+            Esta acción eliminará permanentemente a este cliente. ¿Estás seguro
+            de que deseas proceder con la eliminación?
+          </DrawerDescription>
+        </DrawerHeader>
+        <DrawerFooter>
+          <Button
+            :disabled="isLoading"
+            type="button"
+            variant="destructive"
+            @click="$emit('confirmDelete', customer)"
+          >
+            Si, eliminar
+          </Button>
+          <Button
+            :disabled="isLoading"
+            type="button"
+            variant="secondary"
+            @click="openModel = false"
+          >
+            Cancelar
+          </Button>
+        </DrawerFooter>
+      </div>
+    </DrawerContent>
+  </Drawer>
 </template>

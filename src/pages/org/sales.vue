@@ -7,15 +7,11 @@ import {
   UpdateSale,
   saleServicesTypeguards,
   useSaleServices,
-} from "@/features/sales";
-import { computed, ref, watchEffect } from "vue";
+} from '@/features/sales';
+import { computed, ref, watchEffect } from 'vue';
 import {
   Button,
   Input,
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
   Avatar,
   AvatarFallback,
   Table,
@@ -26,26 +22,25 @@ import {
   TableCell,
   AvatarImage,
   Skeleton,
-} from "@/components/ui";
+} from '@/components/ui';
 import {
   BanknotesIcon,
-  EllipsisVerticalIcon,
   EyeIcon,
   PencilIcon,
   PlusIcon,
   TrashIcon,
-} from "@heroicons/vue/24/outline";
-import { refDebounced, useInfiniteScroll } from "@vueuse/core";
-import { useOrganizationStore } from "@/stores";
-import { useSalesQuery } from "@/features/sales/composables/useSaleQueries";
-import { useMutation, useQueryClient } from "@tanstack/vue-query";
-import { useCurrencyFormatter } from "@/features/products";
-import { Badge } from "@/components";
-import { FeedbackCard, useTableStates } from "@/features/global";
+} from '@heroicons/vue/24/outline';
+import { refDebounced, useInfiniteScroll } from '@vueuse/core';
+import { useOrganizationStore } from '@/stores';
+import { useSalesQuery } from '@/features/sales/composables/useSaleQueries';
+import { useMutation, useQueryClient } from '@tanstack/vue-query';
+import { useCurrencyFormatter } from '@/features/products';
+import { Badge } from '@/components';
+import { FeedbackCard, useTableStates } from '@/features/global';
 
 const WHATSAPP_URL = import.meta.env.VITE_WHATSAPP_URL;
 const tableRef = ref<HTMLElement | null>(null);
-const saleSearch = ref("");
+const saleSearch = ref('');
 const saleSearchDebounced = refDebounced(saleSearch, 400);
 const isCreateOrUpdateSidebarOpen = ref(false);
 const isSaleSidebarViewOnly = ref(false);
@@ -99,32 +94,32 @@ function handleSaleSidebar(options: {
 
 async function createSaleMutationFn(formValues: CreateSale) {
   await saleServices.createSale(formValues);
-  await queryClient.invalidateQueries({ queryKey: ["sales"] });
+  await queryClient.invalidateQueries({ queryKey: ['sales'] });
 }
 async function updateSaleMutationFn(formValues: UpdateSale) {
   const saleId = formValues.sale_id;
-  if (!saleId) throw new Error("Sale id required to perform update");
+  if (!saleId) throw new Error('Sale id required to perform update');
   await saleServices.updateSale(formValues);
-  await queryClient.invalidateQueries({ queryKey: ["sales"] });
+  await queryClient.invalidateQueries({ queryKey: ['sales'] });
 }
 async function deleteSaleMutationFn() {
   const saleId = activeSale.value?.id;
-  if (!saleId) throw new Error("Sale id required to perform delete");
+  if (!saleId) throw new Error('Sale id required to perform delete');
   await saleServices.deleteSale(saleId);
   isDeleteSaleDialogOpen.value = false;
-  await queryClient.invalidateQueries({ queryKey: ["sales"] });
+  await queryClient.invalidateQueries({ queryKey: ['sales'] });
 }
 
-function getBadgeColorFromStatus(status: Sale["status"]) {
+function getBadgeColorFromStatus(status: Sale['status']) {
   switch (status) {
-    case "cancelled":
-      return "red";
-    case "in_progress":
-      return "blue";
-    case "completed":
-      return "green";
+    case 'cancelled':
+      return 'red';
+    case 'in_progress':
+      return 'blue';
+    case 'completed':
+      return 'green';
     default:
-      return "blue";
+      return 'blue';
   }
 }
 
@@ -309,44 +304,38 @@ watchEffect(() => {
             </TableCell>
             <TableCell class="text-center">
               {{
-                new Date(sale.created_at).toLocaleDateString("es-MX", {
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
+                new Date(sale.created_at).toLocaleDateString('es-MX', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
                 })
               }}
             </TableCell>
-            <TableCell class="text-center">
-              <DropdownMenu>
-                <DropdownMenuTrigger as-child>
-                  <Button variant="outline">
-                    <EllipsisVerticalIcon class="w-5 h-5 stroke-[2px]" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuItem
-                    @click="handleSaleSidebar({ sale, viewOnly: true })"
-                  >
-                    <EyeIcon class="w-5 h-5 mr-2" />
-                    <span>Ver</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    v-if="sale.status === 'in_progress'"
-                    @click="handleSaleSidebar({ sale })"
-                  >
-                    <PencilIcon class="w-5 h-5 mr-2" />
-                    <span>Actualizar</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    v-if="sale.status === 'cancelled'"
-                    class="text-red-500 dark:text-red-500"
-                    @click="openDeleteSaleDialog(sale)"
-                  >
-                    <TrashIcon class="w-5 h-5 mr-2" />
-                    <span>Eliminar</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+            <TableCell class="text-center flex justify-center gap-2">
+              <Button
+                size="icon"
+                variant="outline"
+                @click="handleSaleSidebar({ sale, viewOnly: true })"
+              >
+                <EyeIcon class="w-4 h-4" />
+              </Button>
+              <Button
+                size="icon"
+                variant="outline"
+                v-if="sale.status === 'in_progress'"
+                @click="handleSaleSidebar({ sale })"
+              >
+                <PencilIcon class="w-4 h-4" />
+              </Button>
+              <Button
+                size="icon"
+                variant="outline"
+                v-if="sale.status === 'cancelled'"
+                class="text-red-500 dark:text-red-500"
+                @click="openDeleteSaleDialog(sale)"
+              >
+                <TrashIcon class="w-4 h-4" />
+              </Button>
             </TableCell>
           </TableRow>
         </template>

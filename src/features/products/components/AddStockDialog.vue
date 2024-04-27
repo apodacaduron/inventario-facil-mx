@@ -7,6 +7,12 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
+  Drawer,
+  DrawerContent,
+  DrawerFooter,
+  DrawerTitle,
+  DrawerDescription,
+  DrawerHeader,
 } from "@/components/ui";
 import {
   InboxArrowDownIcon,
@@ -14,7 +20,8 @@ import {
   PlusIcon,
 } from "@heroicons/vue/24/outline";
 import { Product, UpdateProduct } from "../composables";
-import { ref, watch } from "vue";
+import { ref, toRef, watch } from "vue";
+import { createReusableTemplate, useMediaQuery } from "@vueuse/core";
 
 type AddStockDialogProps = {
   isLoading?: boolean;
@@ -27,7 +34,15 @@ const emit = defineEmits<{
   (e: "save", formValues: UpdateProduct): void;
 }>();
 
+const [ModalBodyTemplate, ModalBody] = createReusableTemplate();
+const isDesktop = useMediaQuery("(min-width: 768px)");
+
 const stockAmount = ref(0);
+
+const originalStockAmount = toRef(() => props.product?.current_stock ?? 0);
+const stockDifference = toRef(
+  () => stockAmount.value - originalStockAmount.value
+);
 
 function updateStock(nextStockAmount: number) {
   const isSubstracting = nextStockAmount < stockAmount.value;
@@ -48,13 +63,45 @@ watch(
   () => openModel.value,
   (nextIsDialogOpen) => {
     if (!nextIsDialogOpen) return;
-    stockAmount.value = props.product?.current_stock ?? 0;
+    stockAmount.value = originalStockAmount.value;
   }
 );
 </script>
 
 <template>
-  <Dialog v-model:open="openModel">
+  <ModalBodyTemplate>
+    <div class="text-center mb-6 flex justify-between items-center">
+      <Button @click="updateStock(stockAmount - 1)" variant="outline">
+        <MinusIcon class="w-6 h-6 stroke-[2px]" />
+      </Button>
+
+      <div class="mb-2 mt-5 flex justify-center gap-2">
+        <div
+          v-if="
+            originalStockAmount !== stockAmount && originalStockAmount !== 0
+          "
+          class="text-2xl text-red-500"
+        >
+          {{ originalStockAmount }}
+        </div>
+        <div class="font-semibold text-8xl">{{ stockAmount }}</div>
+        <div
+          v-if="
+            originalStockAmount !== stockAmount && originalStockAmount !== 0
+          "
+          class="text-2xl"
+        >
+          <template v-if="stockDifference > 0">+</template>{{ stockDifference }}
+        </div>
+      </div>
+
+      <Button @click="updateStock(stockAmount + 1)" variant="outline">
+        <PlusIcon class="w-6 h-6 stroke-[2px]" />
+      </Button>
+    </div>
+  </ModalBodyTemplate>
+
+  <Dialog v-if="isDesktop" v-model:open="openModel">
     <DialogContent>
       <DialogHeader>
         <div
@@ -72,20 +119,7 @@ watch(
           Aumenta o reduce la cantidad de producto disponible
         </DialogDescription>
       </DialogHeader>
-      <div class="text-center mb-6">
-        <div class="mb-2 mt-5">
-          <div class="font-semibold text-7xl">{{ stockAmount }}</div>
-        </div>
-
-        <div class="flex justify-center gap-4">
-          <Button @click="updateStock(stockAmount - 1)">
-            <MinusIcon class="w-6 h-6 stroke-[2px]" />
-          </Button>
-          <Button @click="updateStock(stockAmount + 1)">
-            <PlusIcon class="w-6 h-6 stroke-[2px]" />
-          </Button>
-        </div>
-      </div>
+      <ModalBody />
       <DialogFooter>
         <Button
           :disabled="isLoading"
@@ -106,4 +140,46 @@ watch(
       </DialogFooter>
     </DialogContent>
   </Dialog>
+
+  <Drawer v-else v-model:open="openModel">
+    <DrawerContent>
+      <div class="mx-auto w-full max-w-sm mt-8 mb-16">
+        <DrawerHeader>
+          <div
+            class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100"
+          >
+            <InboxArrowDownIcon
+              class="h-6 w-6 stroke-[2px] text-green-600"
+              aria-hidden="true"
+            />
+          </div>
+          <DrawerTitle class="text-center">
+            🎉 Actualiza stock de {{ product?.name }}
+          </DrawerTitle>
+          <DrawerDescription class="text-center">
+            Aumenta o reduce la cantidad de producto disponible
+          </DrawerDescription>
+        </DrawerHeader>
+        <ModalBody />
+        <DrawerFooter>
+          <Button
+            :disabled="isLoading"
+            @click="saveStock"
+            type="button"
+            class="w-full"
+          >
+            Guardar
+          </Button>
+          <Button
+            :disabled="isLoading"
+            @click="openModel = false"
+            type="button"
+            variant="outline"
+          >
+            Cancelar
+          </Button>
+        </DrawerFooter>
+      </div>
+    </DrawerContent>
+  </Drawer>
 </template>

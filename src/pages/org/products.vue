@@ -10,16 +10,12 @@ import {
   productServicesTypeguards,
   useCurrencyFormatter,
   useProductServices,
-  useProductsCountQuery
-} from "@/features/products";
-import { computed, ref, toRef, watchEffect } from "vue";
+  useProductsCountQuery,
+} from '@/features/products';
+import { computed, ref, toRef, watchEffect } from 'vue';
 import {
   Button,
   Input,
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
   Avatar,
   AvatarImage,
   AvatarFallback,
@@ -30,27 +26,26 @@ import {
   TableBody,
   TableCell,
   Skeleton,
-} from "@/components/ui";
+} from '@/components/ui';
 import {
   ChevronDownIcon,
   ChevronUpIcon,
-  EllipsisVerticalIcon,
   InboxArrowDownIcon,
   PencilIcon,
   PlusIcon,
   ShareIcon,
   ShoppingBagIcon,
   TrashIcon,
-} from "@heroicons/vue/24/outline";
-import { refDebounced, useInfiniteScroll } from "@vueuse/core";
-import { useOrganizationStore, useSubscriptionStore } from "@/stores";
-import { useProductsQuery } from "@/features/products/composables/useProductQueries";
-import { useMutation, useQueryClient } from "@tanstack/vue-query";
-import { FeedbackCard, useTableOrder, useTableStates } from "@/features/global";
+} from '@heroicons/vue/24/outline';
+import { refDebounced, useInfiniteScroll } from '@vueuse/core';
+import { useOrganizationStore, useSubscriptionStore } from '@/stores';
+import { useProductsQuery } from '@/features/products/composables/useProductQueries';
+import { useMutation, useQueryClient } from '@tanstack/vue-query';
+import { FeedbackCard, useTableOrder, useTableStates } from '@/features/global';
 
 const tableRef = ref<HTMLElement | null>(null);
 
-const productSearch = ref("");
+const productSearch = ref('');
 const productSearchDebounced = refDebounced(productSearch, 400);
 const isCreateOrUpdateSidebarOpen = ref(false);
 const isDeleteProductDialogOpen = ref(false);
@@ -59,12 +54,12 @@ const isAddStockDialogOpen = ref(false);
 const activeProduct = ref<Product | null>(null);
 const productsTableOrder = useTableOrder({
   options: {
-    initialOrder: ["created_at", "desc"],
+    initialOrder: ['created_at', 'desc'],
   },
 });
 const queryClient = useQueryClient();
 const organizationStore = useOrganizationStore();
-const subscriptionStore = useSubscriptionStore()
+const subscriptionStore = useSubscriptionStore();
 const productServices = useProductServices();
 const createProductMutation = useMutation({
   mutationFn: createProductMutationFn,
@@ -77,7 +72,7 @@ const deleteProductMutation = useMutation({
 });
 
 const currencyFormatter = useCurrencyFormatter();
-const productsCountQuery = useProductsCountQuery()
+const productsCountQuery = useProductsCountQuery();
 const productsQuery = useProductsQuery({
   options: {
     enabled: toRef(() => organizationStore.hasOrganizations),
@@ -95,7 +90,7 @@ useInfiniteScroll(
 );
 const tableLoadingStates = useTableStates(productsQuery, productSearch);
 
-const productsCount = computed(() => productsCountQuery.data.value?.count ?? 0)
+const productsCount = computed(() => productsCountQuery.data.value?.count ?? 0);
 
 function openDeleteProductDialog(product: Product) {
   activeProduct.value = product;
@@ -124,23 +119,23 @@ function openAddStockDialog(product: Product) {
 
 async function createProductMutationFn(formValues: CreateProduct) {
   await productServices.createProduct(formValues);
-  await queryClient.invalidateQueries({ queryKey: ["products"] });
+  await queryClient.invalidateQueries({ queryKey: ['products'] });
 }
 async function updateProductMutationFn(formValues: UpdateProduct) {
   const productId = formValues.product_id;
-  if (!productId) throw new Error("Product id required to perform update");
+  if (!productId) throw new Error('Product id required to perform update');
   await productServices.updateProduct({
     ...formValues,
     product_id: productId,
   });
-  await queryClient.invalidateQueries({ queryKey: ["products"] });
+  await queryClient.invalidateQueries({ queryKey: ['products'] });
 }
 async function deleteProductMutationFn(product: Product | null) {
   const productId = product?.id;
-  if (!productId) throw new Error("Product id required to perform delete");
+  if (!productId) throw new Error('Product id required to perform delete');
   await productServices.deleteProduct(productId);
   isDeleteProductDialogOpen.value = false;
-  await queryClient.invalidateQueries({ queryKey: ["products"] });
+  await queryClient.invalidateQueries({ queryKey: ['products'] });
 }
 
 watchEffect(() => {
@@ -165,7 +160,13 @@ watchEffect(() => {
       </p>
     </div>
     <div class="hidden lg:flex gap-2">
-      <Button v-if="subscriptionStore.hasPlan && subscriptionStore.canAddProducts(productsCount)" @click="isCreateOrUpdateSidebarOpen = true">
+      <Button
+        :disabled="
+          !subscriptionStore.hasPlan ||
+          !subscriptionStore.canAddProducts(productsCount)
+        "
+        @click="isCreateOrUpdateSidebarOpen = true"
+      >
         <PlusIcon class="w-5 h-5 stroke-[2px] mr-2" /> Crear producto
       </Button>
       <Button
@@ -187,7 +188,14 @@ watchEffect(() => {
     />
 
     <div class="flex lg:hidden gap-2">
-      <Button v-if="subscriptionStore.hasPlan && subscriptionStore.canAddProducts(productsCount)" @click="isCreateOrUpdateSidebarOpen = true" size="icon">
+      <Button
+        :disabled="
+          !subscriptionStore.hasPlan ||
+          !subscriptionStore.canAddProducts(productsCount)
+        "
+        @click="isCreateOrUpdateSidebarOpen = true"
+        size="icon"
+      >
         <PlusIcon class="w-5 h-5 stroke-[2px]" />
       </Button>
       <Button
@@ -310,36 +318,34 @@ watchEffect(() => {
               product.current_stock
             }}</TableCell>
             <TableCell class="text-center">{{
-              currencyFormatter.parse(product.unit_price) ?? "-"
+              currencyFormatter.parse(product.unit_price) ?? '-'
             }}</TableCell>
             <TableCell class="text-center">
-              {{ currencyFormatter.parse(product.retail_price) ?? "-" }}
+              {{ currencyFormatter.parse(product.retail_price) ?? '-' }}
             </TableCell>
-            <TableCell class="text-center">
-              <DropdownMenu>
-                <DropdownMenuTrigger as-child>
-                  <Button variant="outline">
-                    <EllipsisVerticalIcon class="w-5 h-5 stroke-[2px]" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuItem @click="openUpdateProductSidebar(product)">
-                    <PencilIcon class="w-5 h-5 mr-2" />
-                    <span>Actualizar</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem @click="openAddStockDialog(product)">
-                    <InboxArrowDownIcon class="w-5 h-5 mr-2" />
-                    <span>Actualizar stock</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    class="text-red-500 dark:text-red-500"
-                    @click="openDeleteProductDialog(product)"
-                  >
-                    <TrashIcon class="w-5 h-5 mr-2" />
-                    <span>Eliminar</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+            <TableCell class="text-center flex justify-center gap-2">
+              <Button
+                size="icon"
+                variant="outline"
+                @click="openUpdateProductSidebar(product)"
+              >
+                <PencilIcon class="w-4 h-4" />
+              </Button>
+              <Button
+                size="icon"
+                variant="outline"
+                @click="openAddStockDialog(product)"
+              >
+                <InboxArrowDownIcon class="w-4 h-4" />
+              </Button>
+              <Button
+                size="icon"
+                variant="outline"
+                class="text-red-500 dark:text-red-500"
+                @click="openDeleteProductDialog(product)"
+              >
+                <TrashIcon class="w-4 h-4" />
+              </Button>
             </TableCell>
           </TableRow>
         </template>
