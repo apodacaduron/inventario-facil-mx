@@ -225,7 +225,6 @@ watchEffect(() => {
           <TableHead class="text-center"> Total </TableHead>
           <TableHead class="text-center"> Costo de envio </TableHead>
           <TableHead class="text-center"> Estatus</TableHead>
-          <TableHead class="text-center"> Creado</TableHead>
           <TableHead class="text-center"> - </TableHead>
         </TableRow>
       </TableHeader>
@@ -350,15 +349,6 @@ watchEffect(() => {
               <Badge :color="getBadgeColorFromStatus(sale.status)"
                 >{{ sale.status?.toLocaleUpperCase() }}
               </Badge>
-            </TableCell>
-            <TableCell class="text-center">
-              {{
-                new Date(sale.created_at).toLocaleDateString('es-MX', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                })
-              }}
             </TableCell>
             <TableCell class="text-center flex justify-center gap-2">
               <Button

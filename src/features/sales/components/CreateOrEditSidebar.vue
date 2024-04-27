@@ -718,59 +718,70 @@ watch(
           </div>
         </div>
         <div>
-          <div>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead class="w-[100px]"> Producto </TableHead>
-                  <TableHead class="text-center">Cantidad</TableHead>
-                  <TableHead class="text-center">Precio</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                <TableRow
-                  v-for="(saleProduct, idx) in sale?.i_sale_products"
-                  :key="saleProduct?.id ?? idx"
-                >
-                  <TableCell class="font-medium min-w-[80px]">
-                    {{ saleProduct?.name }}
-                  </TableCell>
-                  <TableCell class="text-center flex justify-center">
-                    {{ saleProduct.qty }}
-                  </TableCell>
-                  <TableCell class="text-center">
-                    {{
-                      currencyFormatter.parse(
-                        (saleProduct.price ?? 0) * (saleProduct.qty ?? 0)
-                      )
-                    }}
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell class="font-medium min-w-[80px]"> </TableCell>
-                  <TableCell class="text-center flex justify-center">
-                    {{
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead class="w-[100px]"> Producto </TableHead>
+                <TableHead class="text-center">Cantidad</TableHead>
+                <TableHead class="text-center">Precio</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <TableRow
+                v-for="(saleProduct, idx) in sale?.i_sale_products"
+                :key="saleProduct?.id ?? idx"
+              >
+                <TableCell class="font-medium min-w-[80px]">
+                  {{ saleProduct?.name }}
+                </TableCell>
+                <TableCell class="text-center flex justify-center">
+                  {{ saleProduct.qty }}
+                </TableCell>
+                <TableCell class="text-center">
+                  {{
+                    currencyFormatter.parse(
+                      (saleProduct.price ?? 0) * (saleProduct.qty ?? 0)
+                    )
+                  }}
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell class="font-medium min-w-[80px]"> </TableCell>
+                <TableCell class="text-center flex justify-center">
+                  {{
+                    sale?.i_sale_products.reduce(
+                      (acc, saleProduct) => acc + (saleProduct.qty ?? 0),
+                      0
+                    )
+                  }}
+                </TableCell>
+                <TableCell class="text-center">
+                  {{
+                    currencyFormatter.parse(
                       sale?.i_sale_products.reduce(
-                        (acc, saleProduct) => acc + (saleProduct.qty ?? 0),
+                        (acc, saleProduct) =>
+                          acc +
+                          (saleProduct.qty ?? 0) * (saleProduct.price ?? 0),
                         0
-                      )
-                    }}
-                  </TableCell>
-                  <TableCell class="text-center">
-                    {{
-                      currencyFormatter.parse(
-                        sale?.i_sale_products.reduce(
-                          (acc, saleProduct) =>
-                            acc +
-                            (saleProduct.qty ?? 0) * (saleProduct.price ?? 0),
-                          0
-                        ) ?? 0
-                      )
-                    }}
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
+                      ) ?? 0
+                    )
+                  }}
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+          <div
+            v-if="sale?.created_at"
+            class="text-muted-foreground text-xs mt-4"
+          >
+            Creado el
+            {{
+              new Date(sale.created_at).toLocaleDateString('es-MX', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              })
+            }}
           </div>
         </div>
       </div>
