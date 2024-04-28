@@ -144,52 +144,18 @@ export function useSaleServices() {
     const organization = serviceHelpers.getCurrentOrganization();
     if (!organization?.org_id)
       throw new Error('Organization is required to update a sale');
-    const { sale_id, products, ...otherFormValues } = formValues;
 
-    await supabase
-      .from('i_sales')
-      .update({
-        ...otherFormValues,
-      })
-      .eq('id', formValues.sale_id);
-
-    if (formValues.status === 'completed') return;
-
-    if (formValues.status === 'in_progress') {
-      const oldSaleProductsQuery = await supabase
-        .from('i_sale_products')
-        .delete()
-        .eq('sale_id', formValues.sale_id)
-        .select();
-
-      await (async function restoreOldStock() {
-        await helpers.updateStockBasedOnSaleProducts(
-          oldSaleProductsQuery.data,
-          (currentStock, saleProductQty) => currentStock + saleProductQty
-        );
-      })();
-
-      const formattedSaleProducts = formValues.products.map((product) => ({
-        ...helpers.formatSaleProduct(product),
-        sale_id: formValues.sale_id,
-        org_id: organization.org_id,
-      }));
-      await supabase.from('i_sale_products').insert(formattedSaleProducts);
-
-      await (async function updateNewStock() {
-        await helpers.updateStockBasedOnSaleProducts(
-          formValues.products,
-          (currentStock, saleProductQty) => currentStock - saleProductQty
-        );
-      })();
-    } else if (formValues.status === 'cancelled') {
-      await (async function restoreOldStock() {
-        await helpers.updateStockBasedOnSaleProducts(
-          formValues.products,
-          (currentStock, saleProductQty) => currentStock + saleProductQty
-        );
-      })();
-    }
+    await supabase.rpc('update_sale', {
+      cancellation_notes_input: formValues.cancellation_notes,
+      notes_input: formValues.notes,
+      customer_id_input: formValues.customer_id,
+      products_input: formValues.products,
+      sale_date_input: formValues.sale_date,
+      sale_id_input: formValues.sale_id,
+      shipping_cost_input: formValues.shipping_cost,
+      status_input: formValues.status,
+      organization_id_input: organization?.org_id,
+    });
   }
 
   async function deleteSale(saleId: DeleteSale) {

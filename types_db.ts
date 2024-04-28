@@ -615,6 +615,20 @@ export type Database = {
         }
         Returns: number
       }
+      update_sale: {
+        Args: {
+          organization_id_input: string
+          sale_id_input: string
+          sale_date_input: string
+          status_input: string
+          customer_id_input: string
+          notes_input: string
+          cancellation_notes_input: string
+          shipping_cost_input: number
+          products_input: Json[]
+        }
+        Returns: string
+      }
     }
     Enums: {
       basic_sale_status: "in_progress" | "completed" | "cancelled"
