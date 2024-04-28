@@ -26,10 +26,18 @@ import {
   TableBody,
   TableCell,
   Skeleton,
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
 } from '@/components/ui';
 import {
   ChevronDownIcon,
   ChevronUpIcon,
+  FunnelIcon,
   InboxArrowDownIcon,
   PencilIcon,
   PlusIcon,
@@ -47,6 +55,7 @@ const tableRef = ref<HTMLElement | null>(null);
 
 const productSearch = ref('');
 const productSearchDebounced = refDebounced(productSearch, 400);
+const stockFilterRef = ref<'in_stock' | 'out_of_stock' | 'all'>('in_stock');
 const isCreateOrUpdateSidebarOpen = ref(false);
 const isDeleteProductDialogOpen = ref(false);
 const isShareStockDialogOpen = ref(false);
@@ -78,6 +87,27 @@ const productsQuery = useProductsQuery({
     enabled: toRef(() => organizationStore.hasOrganizations),
     search: productSearchDebounced,
     order: toRef(() => productsTableOrder.tableOrder.value),
+    filters: toRef(() => {
+      if (stockFilterRef.value === 'all') return [];
+
+      if (stockFilterRef.value === 'in_stock') {
+        return [
+          {
+            column: 'current_stock',
+            operator: 'gt',
+            value: 0,
+          },
+        ];
+      }
+
+      return [
+        {
+          column: 'current_stock',
+          operator: 'eq',
+          value: 0,
+        },
+      ];
+    }),
   },
 });
 useInfiniteScroll(
@@ -178,12 +208,35 @@ watchEffect(() => {
   </div>
 
   <div class="flex items-center justify-between pb-4 gap-4 mx-4 md:mx-0">
-    <Input
-      v-model="productSearch"
-      type="search"
-      placeholder="Buscar productos"
-      class="max-w-[256px]"
-    />
+    <div class="flex gap-2">
+      <Input
+        v-model="productSearch"
+        type="search"
+        placeholder="Buscar productos"
+        class="max-w-[256px]"
+      />
+
+      <DropdownMenu>
+        <DropdownMenuTrigger as-child>
+          <Button variant="outline" size="icon">
+            <FunnelIcon class="w-4 h-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent class="w-56">
+          <DropdownMenuLabel>Stock</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuRadioGroup v-model="stockFilterRef">
+            <DropdownMenuRadioItem value="in_stock">
+              En stock
+            </DropdownMenuRadioItem>
+            <DropdownMenuRadioItem value="out_of_stock">
+              Fuera de stock
+            </DropdownMenuRadioItem>
+            <DropdownMenuRadioItem value="all"> Todo </DropdownMenuRadioItem>
+          </DropdownMenuRadioGroup>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
 
     <div class="flex lg:hidden gap-2">
       <Button

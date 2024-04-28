@@ -1,6 +1,5 @@
 import { supabase } from '@/config/supabase';
 import { LoadListOptions, useServiceHelpers } from '@/features/global';
-import { useProductServices } from '@/features/products';
 import { Tables } from '../../../../types_db';
 
 export type CreateSale = {
@@ -44,47 +43,6 @@ export const saleServicesTypeguards = {
   },
   isUpdateSale(maybeSale: CreateSale | UpdateSale): maybeSale is UpdateSale {
     return !this.isCreateSale(maybeSale);
-  },
-};
-
-const helpers = {
-  async updateStockBasedOnSaleProducts(
-    saleProducts: Array<{
-      qty: number | null;
-      product_id: string | null;
-    }> | null,
-    callback: (currentStock: number, saleProductQty: number) => number
-  ) {
-    const productServices = useProductServices();
-    await Promise.all(
-      saleProducts?.map(async (saleProduct) => {
-        if (!saleProduct.product_id) return;
-        const productResponse = await supabase
-          .from('i_products')
-          .select('current_stock')
-          .eq('id', saleProduct.product_id)
-          .single();
-
-        const saleQuantity = saleProduct?.qty ?? 0;
-        const currentStock = productResponse.data?.current_stock ?? 0;
-        const nextCurrentStock = callback(currentStock, saleQuantity);
-
-        await productServices.updateProduct({
-          product_id: saleProduct.product_id,
-          current_stock: nextCurrentStock,
-        });
-      }) ?? []
-    );
-  },
-  formatSaleProduct(product: UpdateSale['products'][number]) {
-    return {
-      product_id: product.product_id,
-      price: product.price,
-      unit_price: product.unit_price,
-      qty: product.qty,
-      name: product.name,
-      image_url: product.image_url,
-    };
   },
 };
 
