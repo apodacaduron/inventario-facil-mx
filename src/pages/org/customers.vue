@@ -9,7 +9,7 @@ import {
   DeleteCustomerDialog,
   useCustomersCountQuery,
 } from '@/features/customers';
-import { computed, ref, toRef, watchEffect } from 'vue';
+import { ref, toRef, watchEffect } from 'vue';
 import { FeedbackCard, useTableOrder, useTableStates } from '@/features/global';
 import {
   Button,

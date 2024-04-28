@@ -120,6 +120,7 @@ const initialForm: CreateSale = {
   customer_id: '',
   shipping_cost: 0,
   notes: '',
+  cancellation_notes: '',
 };
 
 const allowOutOfStockProducts = ref(false);
@@ -191,6 +192,7 @@ const formSchema = toTypedSchema(
       .finite()
       .safe(),
     notes: z.string().optional(),
+    cancellation_notes: z.string().optional(),
     products: z
       .array(
         z.object({

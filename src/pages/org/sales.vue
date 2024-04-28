@@ -99,6 +99,7 @@ function openDeleteSaleDialog(sale: Sale) {
 
 function handleSaveSidebar(formValues: CreateSale | UpdateSale) {
   if (saleServicesTypeguards.isCreateSale(formValues)) {
+    delete formValues.sale_id;
     createSaleMutation.mutate(formValues);
   } else {
     updateSaleMutation.mutate(formValues);

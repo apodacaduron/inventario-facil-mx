@@ -503,6 +503,19 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_sale: {
+        Args: {
+          organization_id: string
+          sale_date: string
+          status: string
+          customer_id: string
+          notes: string
+          cancellation_notes: string
+          shipping_cost: number
+          products: Json[]
+        }
+        Returns: string
+      }
       get_best_customers: {
         Args: {
           organization_id_input: string

@@ -1,13 +1,15 @@
 import { supabase } from '@/config/supabase';
 import { LoadListOptions, useServiceHelpers } from '@/features/global';
 import { useProductServices } from '@/features/products';
+import { Tables } from '../../../../types_db';
 
 export type CreateSale = {
-  sale_id?: Sale['id'];
-  sale_date: Sale['sale_date'];
+  sale_id?: NonNullable<Tables<'i_sales'>['id']>;
+  sale_date: NonNullable<Tables<'i_sales'>['sale_date']>;
   status: NonNullable<Sale['status']>;
   customer_id: NonNullable<Sale['customer_id']>;
   notes: NonNullable<Sale['notes']>;
+  cancellation_notes: NonNullable<Sale['cancellation_notes']>;
   shipping_cost: NonNullable<Sale['shipping_cost']>;
   products: {
     product_id: SaleProduct['product_id'];
@@ -132,34 +134,10 @@ export function useSaleServices() {
     if (!organization?.org_id)
       throw new Error('Organization is required to create a sale');
 
-    const { products, sale_id, ...otherFormValues } = formValues;
-    const createdSaleResponse = await supabase
-      .from('i_sales')
-      .insert([
-        {
-          ...otherFormValues,
-          org_id: organization.org_id,
-        },
-      ])
-      .select()
-      .single();
-    if (!createdSaleResponse.data?.id)
-      throw new Error('Sale id is required to add to sale detail');
-
-    await supabase.from('i_sale_products').insert(
-      formValues.products.map((product) => ({
-        ...helpers.formatSaleProduct(product),
-        sale_id: createdSaleResponse.data.id,
-        org_id: organization.org_id,
-      }))
-    );
-
-    await (async function updateNewStock() {
-      await helpers.updateStockBasedOnSaleProducts(
-        formValues.products,
-        (currentStock, saleProductQty) => currentStock - saleProductQty
-      );
-    })();
+    await supabase.rpc('create_sale', {
+      ...formValues,
+      organization_id: organization?.org_id,
+    });
   }
 
   async function updateSale(formValues: UpdateSale) {

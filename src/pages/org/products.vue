@@ -12,7 +12,7 @@ import {
   useProductServices,
   useProductsCountQuery,
 } from '@/features/products';
-import { computed, ref, toRef, watchEffect } from 'vue';
+import { ref, toRef, watchEffect } from 'vue';
 import {
   Button,
   Input,
