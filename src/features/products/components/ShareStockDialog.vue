@@ -8,41 +8,55 @@ import {
   Label,
   Drawer,
   DrawerContent,
-} from "@/components/ui";
-import { useProductsInStockQuery } from "@/features/dashboard";
-import { CheckIcon, ShareIcon } from "@heroicons/vue/24/outline";
+} from '@/components/ui';
+import { CheckIcon, ShareIcon } from '@heroicons/vue/24/outline';
 import {
   createReusableTemplate,
   useClipboard,
   useMediaQuery,
-} from "@vueuse/core";
-import { computed, ref, toRef } from "vue";
+} from '@vueuse/core';
+import { computed, ref, toRef } from 'vue';
+import { useProductsQuery } from '../composables';
 
-const openModel = defineModel<boolean>("open");
+const openModel = defineModel<boolean>('open');
 
 const showCurrentStock = ref(false);
 const hasBeenCopied = ref(false);
 
 const [ModalBodyTemplate, ModalBody] = createReusableTemplate();
-const isDesktop = useMediaQuery("(min-width: 768px)");
+const isDesktop = useMediaQuery('(min-width: 768px)');
 const clipboard = useClipboard();
-const productsInStockQuery = useProductsInStockQuery({
+const productsQuery = useProductsQuery({
   options: {
     enabled: toRef(() => Boolean(openModel.value)),
+    search: '',
+    filters: toRef(() => {
+      return [
+        {
+          column: 'current_stock',
+          operator: 'gt',
+          value: 0,
+        },
+      ];
+    }),
   },
 });
 
-const inventoryString = computed(
-  () =>
-    productsInStockQuery.data.value?.data
+const inventoryString = computed(() => {
+  const productsList = productsQuery.data.value?.pages.flatMap(
+    (page) => page.data
+  );
+  return (
+    productsList
       ?.map((product) => {
         if (showCurrentStock.value) {
-          return `${product.name}: ${product.current_stock}`;
+          return `${product?.name}: ${product?.current_stock}`;
         }
-        return product.name;
+        return product?.name ?? '';
       })
-      .join("\r\n") ?? ""
-);
+      .join('\r\n') ?? ''
+  );
+});
 
 function copyText() {
   if (hasBeenCopied.value) return;
@@ -103,7 +117,7 @@ function copyText() {
           @click="copyText"
         >
           <CheckIcon v-if="hasBeenCopied" class="mr-2 w-4 h-4" />
-          {{ hasBeenCopied ? "Copied" : "Copy" }}
+          {{ hasBeenCopied ? 'Copied' : 'Copy' }}
         </Button>
         <Button
           type="button"
@@ -129,7 +143,7 @@ function copyText() {
             @click="copyText"
           >
             <CheckIcon v-if="hasBeenCopied" class="mr-2 w-4 h-4" />
-            {{ hasBeenCopied ? "Copied" : "Copy" }}
+            {{ hasBeenCopied ? 'Copied' : 'Copy' }}
           </Button>
           <Button
             type="button"

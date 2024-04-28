@@ -39,15 +39,40 @@ export function useCustomersQuery(context: {
   });
 }
 
-export function useCustomersCountQuery() {
+export function useCustomersCountQuery(context?: {
+  options?: {
+    range?: MaybeRefOrGetter<{ from: string; to: string } | undefined>;
+  };
+}) {
   const customerServices = useCustomerServices();
 
   return useQuery({
-    queryKey: ['customers', 'count'],
+    queryKey: ['customers', 'count', context?.options?.range],
     async queryFn() {
-      const response = await customerServices.getCustomerCount();
+      const response = await customerServices.getCustomerCount(
+        toValue(context?.options?.range)
+      );
 
       return response.data ?? 0;
+    },
+  });
+}
+
+export function useBestCustomersQuery(context?: {
+  options?: {
+    range?: MaybeRefOrGetter<{ from: string; to: string } | undefined>;
+  };
+}) {
+  const customerServices = useCustomerServices();
+
+  return useQuery({
+    queryKey: ['customers', 'best-customers', context?.options?.range],
+    async queryFn() {
+      const response = await customerServices.getBestCustomers(
+        toValue(context?.options?.range)
+      );
+
+      return response.data;
     },
   });
 }

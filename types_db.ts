@@ -503,11 +503,45 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      get_customers_count: {
+      get_best_customers: {
         Args: {
-          organization_id: string
+          organization_id_input: string
+          start_date_input?: string
+          end_date_input?: string
         }
-        Returns: number
+        Returns: {
+          customer_id: string
+          name: string
+          qty: number
+        }[]
+      }
+      get_customers_count:
+        | {
+            Args: {
+              organization_id: string
+            }
+            Returns: number
+          }
+        | {
+            Args: {
+              organization_id_input: string
+              start_date_input?: string
+              end_date_input?: string
+            }
+            Returns: number
+          }
+      get_most_sold_products: {
+        Args: {
+          organization_id_input: string
+          start_date_input?: string
+          end_date_input?: string
+        }
+        Returns: {
+          product_id: string
+          name: string
+          image_url: string
+          qty: number
+        }[]
       }
       get_products_count:
         | {
@@ -520,6 +554,54 @@ export type Database = {
             }
             Returns: number
           }
+        | {
+            Args: {
+              organization_id_input: string
+              start_date_input?: string
+              end_date_input?: string
+            }
+            Returns: number
+          }
+      get_products_in_stock_count: {
+        Args: {
+          organization_id_input: string
+          start_date_input?: string
+          end_date_input?: string
+        }
+        Returns: number
+      }
+      get_sales_count: {
+        Args: {
+          organization_id_input: string
+          start_date_input?: string
+          end_date_input?: string
+        }
+        Returns: number
+      }
+      get_sales_income_count: {
+        Args: {
+          organization_id_input: string
+          start_date_input?: string
+          end_date_input?: string
+        }
+        Returns: number
+      }
+      get_sales_total_income: {
+        Args: {
+          organization_id_input: string
+          start_date_input?: string
+          end_date_input?: string
+        }
+        Returns: number
+      }
+      get_sales_total_profit: {
+        Args: {
+          organization_id_input: string
+          start_date_input?: string
+          end_date_input?: string
+        }
+        Returns: number
+      }
     }
     Enums: {
       basic_sale_status: "in_progress" | "completed" | "cancelled"

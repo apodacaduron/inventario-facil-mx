@@ -1,16 +1,8 @@
 <script setup lang="ts">
 import { useRoute } from "vue-router";
 import { isDefined } from "@vueuse/core";
-import {
-  useProductsInStockQuery,
-  useSalesPricesQuery,
-  useTotalCustomersQuery,
-  useTotalSalesQuery,
-  useMostSoldProductsQuery,
-  useBestCustomersQuery
-} from "../composable";
 import { toRef } from "vue";
-import { useCurrencyFormatter } from "@/features/products";
+import { useCurrencyFormatter, useMostSoldProductsQuery, useProductsInStockCountQuery } from "@/features/products";
 import {
   Avatar,
   AvatarFallback,
@@ -29,12 +21,14 @@ import {
   InboxStackIcon,
   UserGroupIcon,
 } from "@heroicons/vue/24/outline";
+import { useBestCustomersQuery, useCustomersCountQuery } from "@/features/customers";
+import { useSalesCountQuery, useSalesTotalIncomeQuery, useSalesTotalProfitQuery } from "@/features/sales";
 
 const props = defineProps<{ from: string; to: string }>();
 
 const route = useRoute();
 const currencyFormatter = useCurrencyFormatter();
-const totalSalesQuery = useTotalSalesQuery({
+const salesCountQuery = useSalesCountQuery({
   options: {
     range: toRef(() => ({
       from: props.from,
@@ -42,7 +36,7 @@ const totalSalesQuery = useTotalSalesQuery({
     })),
   },
 });
-const totalCustomersQuery = useTotalCustomersQuery({
+const customersCountQuery = useCustomersCountQuery({
   options: {
     range: toRef(() => ({
       from: props.from,
@@ -50,7 +44,7 @@ const totalCustomersQuery = useTotalCustomersQuery({
     })),
   },
 });
-const salesPricesQuery = useSalesPricesQuery({
+const salesTotalIncomeQuery = useSalesTotalIncomeQuery({
   options: {
     range: toRef(() => ({
       from: props.from,
@@ -58,14 +52,21 @@ const salesPricesQuery = useSalesPricesQuery({
     })),
   },
 });
-const productsInStockQuery = useProductsInStockQuery();
+const salesTotalProfitQuery = useSalesTotalProfitQuery({
+  options: {
+    range: toRef(() => ({
+      from: props.from,
+      to: props.to,
+    })),
+  },
+});
+const productsInStockCountQuery = useProductsInStockCountQuery();
 const mostSoldProductsQuery = useMostSoldProductsQuery({
   options: {
     range: toRef(() => ({
       from: props.from,
       to: props.to,
     })),
-    limit: 5,
   },
 });
 const bestCustomersQuery = useBestCustomersQuery({
@@ -74,7 +75,6 @@ const bestCustomersQuery = useBestCustomersQuery({
       from: props.from,
       to: props.to,
     })),
-    limit: 3,
   },
 });
 </script>
@@ -91,8 +91,8 @@ const bestCustomersQuery = useBestCustomersQuery({
         </CardHeader>
         <CardContent>
           <div class="text-2xl font-bold">
-            <template v-if="isDefined(totalSalesQuery.data.value)">
-              {{ totalSalesQuery.data.value }} / mes
+            <template v-if="isDefined(salesCountQuery.data.value)">
+              {{ salesCountQuery.data.value }} / mes
             </template>
             <Skeleton class="h-[32px] w-[64px]" v-else :count="1" />
           </div>
@@ -108,9 +108,9 @@ const bestCustomersQuery = useBestCustomersQuery({
         </CardHeader>
         <CardContent>
           <div class="text-2xl font-bold">
-            <template v-if="isDefined(salesPricesQuery.data.value?.sale_price_total)">{{
+            <template v-if="isDefined(salesTotalIncomeQuery.data.value)">{{
               currencyFormatter.parse(
-                salesPricesQuery.data.value?.sale_price_total
+                salesTotalIncomeQuery.data.value
               )
             }} / mes
             </template>
@@ -130,9 +130,9 @@ const bestCustomersQuery = useBestCustomersQuery({
         </CardHeader>
         <CardContent>
           <div class="text-2xl font-bold">
-            <template v-if="isDefined(salesPricesQuery.data.value?.profit_total)">{{
+            <template v-if="isDefined(salesTotalProfitQuery.data.value)">{{
               currencyFormatter.parse(
-                salesPricesQuery.data.value?.profit_total
+                salesTotalProfitQuery.data.value
               )
             }} / mes
             </template>
@@ -150,7 +150,7 @@ const bestCustomersQuery = useBestCustomersQuery({
         </CardHeader>
         <CardContent>
           <div class="text-2xl font-bold">
-            <template v-if="isDefined(totalCustomersQuery.data.value)">{{ totalCustomersQuery.data.value }} / mes
+            <template v-if="isDefined(customersCountQuery.data.value)">{{ customersCountQuery.data.value }} / mes
             </template>
             <Skeleton class="h-[32px] w-[64px]" v-else :count="1" />
           </div>
@@ -166,11 +166,8 @@ const bestCustomersQuery = useBestCustomersQuery({
         </CardHeader>
         <CardContent>
           <div class="text-2xl font-bold">
-            <template v-if="isDefined(productsInStockQuery.data.value)">{{
-              productsInStockQuery.data.value.data?.reduce<number>(
-                (acc, product) => acc + (product.current_stock || 0),
-                0
-              ) || 0
+            <template v-if="isDefined(productsInStockCountQuery.data.value)">{{
+              productsInStockCountQuery.data.value
             }}
             </template>
             <Skeleton class="h-[32px] w-[64px]" v-else :count="1" />
@@ -188,14 +185,14 @@ const bestCustomersQuery = useBestCustomersQuery({
         <CardContent>
           <div class="text-2xl font-bold h-[32px] flex flex-row">
             <template v-if="isDefined(mostSoldProductsQuery.data.value)">
-              <div class="relative" v-for="(soldProduct, index) in mostSoldProductsQuery.data.value"
-                :key="soldProduct.id">
+              <div class="relative" v-for="(product, index) in mostSoldProductsQuery.data.value"
+                :key="product.product_id">
 
                 <Avatar class="border-muted border-2">
-                  <AvatarImage :src="soldProduct?.image_url ?? ''" />
+                  <AvatarImage :src="product?.image_url ?? ''" />
                   <AvatarFallback>
                     {{
-                      `${soldProduct?.name
+                      `${product?.name
                         ?.substring(0, 1)
                         .toLocaleUpperCase()}`
                     }}
@@ -222,7 +219,7 @@ const bestCustomersQuery = useBestCustomersQuery({
         <CardContent>
           <div class="text-2xl font-bold flex flex-row gap-2 lg:h-[32px]">
             <template v-if="isDefined(bestCustomersQuery.data.value)">
-              <div class="relative" v-for="(customer, index) in bestCustomersQuery.data.value" :key="customer.id">
+              <div class="relative" v-for="(customer, index) in bestCustomersQuery.data.value" :key="customer.customer_id">
                 <Badge>
                   {{ customer.name }}
                 </Badge>

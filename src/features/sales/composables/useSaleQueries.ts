@@ -1,4 +1,4 @@
-import { useInfiniteQuery } from "@tanstack/vue-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/vue-query";
 import { useSaleServices } from "./useSaleServices";
 import { MaybeRefOrGetter, toValue } from "vue";
 import { LoadListOptions } from "@/features/global";
@@ -36,5 +36,62 @@ export function useSalesQuery(context: {
       return lastPageParam + 1;
     },
     enabled: context.options.enabled,
+  });
+}
+
+export function useSalesCountQuery(context?: {
+  options?: {
+    range?: MaybeRefOrGetter<{ from: string; to: string } | undefined>;
+  };
+}) {
+  const saleServices = useSaleServices();
+
+  return useQuery({
+    queryKey: ['sales', 'count', context?.options?.range],
+    async queryFn() {
+      const response = await saleServices.getSalesCount(
+        toValue(context?.options?.range)
+      );
+
+      return response.data ?? 0;
+    },
+  });
+}
+
+export function useSalesTotalIncomeQuery(context?: {
+  options?: {
+    range?: MaybeRefOrGetter<{ from: string; to: string } | undefined>;
+  };
+}) {
+  const saleServices = useSaleServices();
+
+  return useQuery({
+    queryKey: ['sales', 'total-income', context?.options?.range],
+    async queryFn() {
+      const response = await saleServices.getSalesTotalIncome(
+        toValue(context?.options?.range)
+      );
+
+      return response.data ?? 0;
+    },
+  });
+}
+
+export function useSalesTotalProfitQuery(context?: {
+  options?: {
+    range?: MaybeRefOrGetter<{ from: string; to: string } | undefined>;
+  };
+}) {
+  const saleServices = useSaleServices();
+
+  return useQuery({
+    queryKey: ['sales', 'total-profit', context?.options?.range],
+    async queryFn() {
+      const response = await saleServices.getSalesTotalProfit(
+        toValue(context?.options?.range)
+      );
+
+      return response.data ?? 0;
+    },
   });
 }

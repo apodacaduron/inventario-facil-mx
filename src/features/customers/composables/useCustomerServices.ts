@@ -116,12 +116,26 @@ export function useCustomerServices() {
     await supabase.from("i_customers").delete().eq("id", customerId);
   }
 
-  async function getCustomerCount() {
+  async function getCustomerCount(range?: { from: string; to: string }) {
     const organization = serviceHelpers.getCurrentOrganization();
     if (!organization?.org_id)
       throw new Error('Organization is required to get customer count');
 
-    return await supabase.rpc('get_customers_count', { organization_id: organization.org_id })
+    return await supabase.rpc('get_customers_count', {
+      organization_id_input: organization.org_id,
+      ...(range ? { start_date_input: range.from, end_date_input: range.to } : {})
+    });
+  }
+
+  async function getBestCustomers(range?: { from: string; to: string }) {
+    const organization = serviceHelpers.getCurrentOrganization();
+    if (!organization?.org_id)
+      throw new Error('Organization is required to get customer count');
+
+    return await supabase.rpc('get_best_customers', {
+      organization_id_input: organization.org_id,
+      ...(range ? { start_date_input: range.from, end_date_input: range.to } : {})
+    });
   }
 
   return {
@@ -130,5 +144,6 @@ export function useCustomerServices() {
     deleteCustomer,
     updateCustomer,
     getCustomerCount,
+    getBestCustomers,
   };
 }

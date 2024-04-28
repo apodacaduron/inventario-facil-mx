@@ -39,15 +39,57 @@ export function useProductsQuery(context: {
   });
 }
 
-export function useProductsCountQuery() {
+export function useProductsCountQuery(context?: {
+  options?: {
+    range?: MaybeRefOrGetter<{ from: string; to: string } | undefined>;
+  };
+}) {
   const productServices = useProductServices();
 
   return useQuery({
-    queryKey: ['products', 'count'],
+    queryKey: ['products', 'count', context?.options?.range],
     async queryFn() {
-      const response = await productServices.getProductCount();
+      const response = await productServices.getProductCount(
+        toValue(context?.options?.range)
+      );
 
-      return response.data ?? 0
+      return response.data ?? 0;
+    },
+  });
+}
+export function useProductsInStockCountQuery(context?: {
+  options?: {
+    range?: MaybeRefOrGetter<{ from: string; to: string } | undefined>;
+  };
+}) {
+  const productServices = useProductServices();
+
+  return useQuery({
+    queryKey: ['products', 'count', 'in-stock', context?.options?.range],
+    async queryFn() {
+      const response = await productServices.getProductsInStockCount(
+        toValue(context?.options?.range)
+      );
+
+      return response.data ?? 0;
+    },
+  });
+}
+export function useMostSoldProductsQuery(context?: {
+  options?: {
+    range?: MaybeRefOrGetter<{ from: string; to: string } | undefined>;
+  };
+}) {
+  const productServices = useProductServices();
+
+  return useQuery({
+    queryKey: ['products', 'most-sold', context?.options?.range],
+    async queryFn() {
+      const response = await productServices.getMostSoldProducts(
+        toValue(context?.options?.range)
+      );
+
+      return response.data;
     },
   });
 }

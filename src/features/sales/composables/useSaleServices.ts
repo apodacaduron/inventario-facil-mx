@@ -220,5 +220,52 @@ export function useSaleServices() {
     await supabase.from('i_sales').delete().eq('id', saleId);
   }
 
-  return { loadList, createSale, deleteSale, updateSale };
+  async function getSalesCount(range?: { from: string; to: string }) {
+    const organization = serviceHelpers.getCurrentOrganization();
+    if (!organization?.org_id)
+      throw new Error('Organization is required to get customer count');
+
+    return await supabase.rpc('get_sales_count', {
+      organization_id_input: organization.org_id,
+      ...(range
+        ? { start_date_input: range.from, end_date_input: range.to }
+        : {}),
+    });
+  }
+
+  async function getSalesTotalIncome(range?: { from: string; to: string }) {
+    const organization = serviceHelpers.getCurrentOrganization();
+    if (!organization?.org_id)
+      throw new Error('Organization is required to get customer count');
+
+    return await supabase.rpc('get_sales_total_income', {
+      organization_id_input: organization.org_id,
+      ...(range
+        ? { start_date_input: range.from, end_date_input: range.to }
+        : {}),
+    });
+  }
+
+  async function getSalesTotalProfit(range?: { from: string; to: string }) {
+    const organization = serviceHelpers.getCurrentOrganization();
+    if (!organization?.org_id)
+      throw new Error('Organization is required to get customer count');
+
+    return await supabase.rpc('get_sales_total_profit', {
+      organization_id_input: organization.org_id,
+      ...(range
+        ? { start_date_input: range.from, end_date_input: range.to }
+        : {}),
+    });
+  }
+
+  return {
+    loadList,
+    createSale,
+    deleteSale,
+    updateSale,
+    getSalesCount,
+    getSalesTotalIncome,
+    getSalesTotalProfit,
+  };
 }
