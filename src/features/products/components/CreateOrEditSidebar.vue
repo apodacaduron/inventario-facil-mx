@@ -109,19 +109,19 @@ const onSubmit = formInstance.handleSubmit(async (formValues) => {
 });
 
 watch(
-  () => props.product,
-  (nextProduct) => {
-    if (nextProduct) {
+  openModel,
+  (nextOpenValue) => {
+    if (nextOpenValue && props.product) {
       formInstance.resetForm({
         values: {
-          name: nextProduct.name ?? "",
-          description: nextProduct.description ?? "",
-          image_url: nextProduct.image_url ?? "",
-          current_stock: nextProduct.current_stock ?? 0,
-          product_id: nextProduct.id,
-          unit_price: currencyFormatter.parseRaw(nextProduct.unit_price) ?? 0,
+          name: props.product.name ?? "",
+          description: props.product.description ?? "",
+          image_url: props.product.image_url ?? "",
+          current_stock: props.product.current_stock ?? 0,
+          product_id: props.product.id,
+          unit_price: currencyFormatter.parseRaw(props.product.unit_price) ?? 0,
           retail_price:
-            currencyFormatter.parseRaw(nextProduct.retail_price) ?? 0,
+            currencyFormatter.parseRaw(props.product.retail_price) ?? 0,
         },
       });
     } else {

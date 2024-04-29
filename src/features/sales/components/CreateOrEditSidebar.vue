@@ -278,15 +278,15 @@ function handleCloseSidebar() {
 }
 
 watch(
-  () => props.sale,
-  (nextSale) => {
-    if (nextSale) {
+  openModel,
+  (nextOpenValue) => {
+    if (nextOpenValue && props.sale) {
       formInstance.resetForm({
         values: {
-          sale_id: nextSale?.id,
-          notes: nextSale?.notes ?? '',
+          sale_id: props.sale?.id,
+          notes: props.sale?.notes ?? '',
           products:
-            nextSale?.i_sale_products.map((saleProduct) => ({
+            props.sale?.i_sale_products.map((saleProduct) => ({
               sale_detail_id: saleProduct.id,
               image_url: saleProduct.image_url ?? '',
               product_id: saleProduct.product_id ?? '',
@@ -295,13 +295,13 @@ watch(
               unit_price: saleProduct?.unit_price ?? 0,
               qty: saleProduct.qty,
             })) ?? [],
-          customer_id: nextSale?.customer_id ?? '',
-          sale_date: nextSale?.sale_date
-            ? new Date(nextSale.sale_date).toISOString()
+          customer_id: props.sale?.customer_id ?? '',
+          sale_date: props.sale?.sale_date
+            ? new Date(props.sale.sale_date).toISOString()
             : new Date().toISOString(),
           shipping_cost:
-            currencyFormatter.parseRaw(nextSale?.shipping_cost) ?? 0,
-          status: nextSale?.status ?? 'in_progress',
+            currencyFormatter.parseRaw(props.sale?.shipping_cost) ?? 0,
+          status: props.sale?.status ?? 'in_progress',
         },
       });
     } else {

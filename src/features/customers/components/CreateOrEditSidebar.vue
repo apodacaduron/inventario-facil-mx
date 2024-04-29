@@ -92,19 +92,19 @@ const onSubmit = formInstance.handleSubmit(async (formValues) => {
 });
 
 watch(
-  () => props.customer,
-  (nextCustomer) => {
-    if (nextCustomer) {
+  openModel,
+  (nextOpenValue) => {
+    if (nextOpenValue && props.customer) {
       formInstance.resetForm({
         values: {
-          name: nextCustomer.name ?? "",
-          phone: nextCustomer.phone ?? "",
-          email: nextCustomer.email ?? "",
-          address: nextCustomer.address ?? "",
-          map_url: nextCustomer.map_url ?? "",
-          customer_id: nextCustomer.id,
-          trust_status: nextCustomer.trust_status ?? "trusted",
-          notes: nextCustomer.notes ?? "",
+          name: props.customer.name ?? "",
+          phone: props.customer.phone ?? "",
+          email: props.customer.email ?? "",
+          address: props.customer.address ?? "",
+          map_url: props.customer.map_url ?? "",
+          customer_id: props.customer.id,
+          trust_status: props.customer.trust_status ?? "trusted",
+          notes: props.customer.notes ?? "",
         },
       });
     } else {

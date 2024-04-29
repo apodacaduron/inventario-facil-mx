@@ -197,23 +197,24 @@ watch(
     formInstance.setFieldValue("end_date", nextEndDate.toISOString());
   }
 );
+
 watch(
-  () => props.subscription,
-  (nextSubscription) => {
-    if (nextSubscription) {
+  openModel,
+  (nextOpenValue) => {
+    if (nextOpenValue && props.subscription) {
       formInstance.resetForm({
         values: {
-          plan_id: nextSubscription.plan_id ?? "",
-          user_id: nextSubscription.user_id ?? "",
+          plan_id: props.subscription.plan_id ?? "",
+          user_id: props.subscription.user_id ?? "",
           start_date: new Date(
-            nextSubscription.start_date ?? initialForm.start_date
+            props.subscription.start_date ?? initialForm.start_date
           ).toISOString(),
           end_date: new Date(
-            nextSubscription.end_date ?? initialForm.end_date
+            props.subscription.end_date ?? initialForm.end_date
           ).toISOString(),
           month_amount:
-            nextSubscription.month_amount ?? initialForm.month_amount,
-          subscription_id: nextSubscription.id,
+            props.subscription.month_amount ?? initialForm.month_amount,
+          subscription_id: props.subscription.id,
         },
       });
     } else {
