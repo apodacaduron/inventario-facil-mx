@@ -18,3 +18,4 @@ export * from "./label";
 export * from "./calendar";
 export * from "./drawer";
 export * from "./tabs";
+export * from "./tooltip";
