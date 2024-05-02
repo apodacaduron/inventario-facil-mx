@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { StatsGrid, useDashboardDates } from "@/features/dashboard";
+import { StatsGrid, useDashboardDates } from '@/features/dashboard';
 import {
   CheckIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
-} from "@heroicons/vue/24/outline";
+} from '@heroicons/vue/24/outline';
 import {
   Badge,
   Button,
@@ -15,9 +15,16 @@ import {
   DropdownMenuGroup,
   DropdownMenuSeparator,
   DropdownMenuLabel,
-} from "@/components/ui";
+  DropdownMenuRadioItem,
+  DropdownMenuRadioGroup,
+} from '@/components/ui';
+import { useStorage } from '@vueuse/core';
+import { toRef } from 'vue';
 
-const dashboardDates = useDashboardDates();
+const statsFiltersRef = useStorage<{
+  period: 'daily' | 'weekly' | 'monthly' | 'yearly';
+}>('dashboard-stats-filters', { period: 'monthly' });
+const dashboardDates = useDashboardDates({ period: toRef(() => statsFiltersRef.value.period) });
 </script>
 
 <template>
@@ -25,9 +32,29 @@ const dashboardDates = useDashboardDates();
     <div class="flex flex-col gap-3">
       <div class="text-slate-500 dark:text-slate-400 font-semibold">
         Estadísticas
-        <Badge variant="secondary">MENSUAL</Badge>
-
         <DropdownMenu>
+        <DropdownMenuTrigger as-child>
+          <Badge variant="secondary">{{ statsFiltersRef.period?.toUpperCase() }}</Badge>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent class="w-56">
+          <DropdownMenuLabel>Periodo</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuRadioGroup v-model="statsFiltersRef.period">
+            <DropdownMenuRadioItem value="daily"> Diario </DropdownMenuRadioItem>
+            <DropdownMenuRadioItem value="weekly">
+              Semanal
+            </DropdownMenuRadioItem>
+            <DropdownMenuRadioItem value="monthly">
+              Mensual
+            </DropdownMenuRadioItem>
+            <DropdownMenuRadioItem value="yearly">
+              Anual
+            </DropdownMenuRadioItem>
+          </DropdownMenuRadioGroup>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+        <DropdownMenu v-if="statsFiltersRef.period === 'monthly'">
           <DropdownMenuTrigger as-child>
             <Button variant="ghost"
               ><Badge>{{ dashboardDates.selectedMonthName.value }}</Badge>
@@ -73,8 +100,8 @@ const dashboardDates = useDashboardDates();
       </div>
 
       <StatsGrid
-        :from="dashboardDates.firstDayOfTheSelectedMonth.value.toISOString()"
-        :to="dashboardDates.lastDayOfTheSelectedMonth.value.toISOString()"
+        :from="dashboardDates.dateRangeFromPeriod.value.from.toISOString()"
+        :to="dashboardDates.dateRangeFromPeriod.value.to.toISOString()"
       />
     </div>
   </div>
