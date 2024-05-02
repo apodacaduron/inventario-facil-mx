@@ -228,7 +228,7 @@ watchEffect(() => {
 
       <DropdownMenu>
         <DropdownMenuTrigger as-child>
-          <Button variant="outline" size="icon">
+          <Button :variant="tableFiltersRef.status === 'all' ? 'outline' : 'default'" size="icon">
             <FunnelIcon class="w-4 h-4" />
           </Button>
         </DropdownMenuTrigger>

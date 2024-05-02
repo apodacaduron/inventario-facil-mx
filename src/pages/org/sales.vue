@@ -190,7 +190,7 @@ watchEffect(() => {
 
       <DropdownMenu>
         <DropdownMenuTrigger as-child>
-          <Button variant="outline" size="icon">
+          <Button :variant="tableFiltersRef.status === 'all' ? 'outline' : 'default'" size="icon">
             <FunnelIcon class="w-4 h-4" />
           </Button>
         </DropdownMenuTrigger>
@@ -417,14 +417,14 @@ watchEffect(() => {
       <template #icon>
         <BanknotesIcon class="w-10 h-10 stroke-[1px]" />
       </template>
-      <template #title>Comienza creando una cliente</template>
+      <template #title>Comienza creando una venta</template>
       <template #description
-        >Clientes creados se mostraran aqui. <br />
-        Comienza creando la primera cliente.
+        >Ventas creadas se mostraran aqui. <br />
+        Comienza creando tu primera venta.
       </template>
       <template #action
         ><Button @click="isCreateOrUpdateSidebarOpen = true">
-          <PlusIcon class="w-5 h-5 stroke-[2px] mr-2" /> Crear cliente
+          <PlusIcon class="w-5 h-5 stroke-[2px] mr-2" /> Crear venta
         </Button>
       </template>
     </FeedbackCard>
@@ -435,11 +435,11 @@ watchEffect(() => {
       <template #icon>
         <BanknotesIcon class="w-10 h-10 stroke-[1px]" />
       </template>
-      <template #title>No se encontraron suscripciones</template>
+      <template #title>No se encontraron ventas</template>
       <template #description
-        >Tu busqueda "{{ saleSearch }}" no coincidio con alguna cliente.
+        >Tu búsqueda "{{ saleSearch }}" no coincidio con alguna venta.
         <br />
-        Por favor intente de nuevo a agregue una nueva cliente.
+        Por favor intente de nuevo o agregue una nueva venta.
       </template>
       <template #action>
         <div class="flex gap-4">
@@ -447,7 +447,7 @@ watchEffect(() => {
             Clear search
           </Button>
           <Button @click="isCreateOrUpdateSidebarOpen = true">
-            <PlusIcon class="w-5 h-5 stroke-[2px] mr-2" /> Crear cliente
+            <PlusIcon class="w-5 h-5 stroke-[2px] mr-2" /> Crear venta
           </Button>
         </div>
       </template>
