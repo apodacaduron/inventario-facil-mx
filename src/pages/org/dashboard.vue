@@ -24,7 +24,9 @@ import { toRef } from 'vue';
 const statsFiltersRef = useStorage<{
   period: 'daily' | 'weekly' | 'monthly' | 'yearly';
 }>('dashboard-stats-filters', { period: 'monthly' });
-const dashboardDates = useDashboardDates({ period: toRef(() => statsFiltersRef.value.period) });
+const dashboardDates = useDashboardDates({
+  period: toRef(() => statsFiltersRef.value.period),
+});
 </script>
 
 <template>
@@ -33,31 +35,37 @@ const dashboardDates = useDashboardDates({ period: toRef(() => statsFiltersRef.v
       <div class="text-slate-500 dark:text-slate-400 font-semibold">
         Estadísticas
         <DropdownMenu>
-        <DropdownMenuTrigger as-child>
-          <Badge variant="secondary">{{ statsFiltersRef.period?.toUpperCase() }}</Badge>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent class="w-56">
-          <DropdownMenuLabel>Periodo</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuRadioGroup v-model="statsFiltersRef.period">
-            <DropdownMenuRadioItem value="daily"> Diario </DropdownMenuRadioItem>
-            <DropdownMenuRadioItem value="weekly">
-              Semanal
-            </DropdownMenuRadioItem>
-            <DropdownMenuRadioItem value="monthly">
-              Mensual
-            </DropdownMenuRadioItem>
-            <DropdownMenuRadioItem value="yearly">
-              Anual
-            </DropdownMenuRadioItem>
-          </DropdownMenuRadioGroup>
-        </DropdownMenuContent>
-      </DropdownMenu>
+          <DropdownMenuTrigger as-child>
+            <Button variant="ghost">
+              <Badge variant="secondary">
+                {{ statsFiltersRef.period?.toUpperCase() }}
+              </Badge>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent class="w-56">
+            <DropdownMenuLabel>Periodo</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuRadioGroup v-model="statsFiltersRef.period">
+              <DropdownMenuRadioItem value="daily">
+                Diario
+              </DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="weekly">
+                Semanal
+              </DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="monthly">
+                Mensual
+              </DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="yearly">
+                Anual
+              </DropdownMenuRadioItem>
+            </DropdownMenuRadioGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
 
         <DropdownMenu v-if="statsFiltersRef.period === 'monthly'">
           <DropdownMenuTrigger as-child>
-            <Button variant="ghost"
-              ><Badge>{{ dashboardDates.selectedMonthName.value }}</Badge>
+            <Button variant="ghost">
+              <Badge>{{ dashboardDates.selectedMonthName.value }}</Badge>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent class="w-[200px]">
