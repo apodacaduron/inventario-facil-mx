@@ -37,8 +37,7 @@ export const saleServicesTypeguards = {
     return (
       !('sale_id' in maybeSale && maybeSale.sale_id) &&
       'sale_date' in maybeSale &&
-      'status' in maybeSale &&
-      'customer_id' in maybeSale
+      'status' in maybeSale
     );
   },
   isUpdateSale(maybeSale: CreateSale | UpdateSale): maybeSale is UpdateSale {

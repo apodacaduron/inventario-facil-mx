@@ -185,7 +185,7 @@ const bestCustomersQuery = useBestCustomersQuery({
         <CardContent>
           <div class="text-2xl font-bold h-[32px] flex flex-row">
             <template v-if="isDefined(mostSoldProductsQuery.data.value)">
-              <div class="relative" v-for="(product, index) in mostSoldProductsQuery.data.value"
+              <div class="relative" v-for="(product) in mostSoldProductsQuery.data.value"
                 :key="product.product_id">
 
                 <Avatar :class="`border-muted border-2`">

@@ -172,10 +172,6 @@ async function deleteProductMutationFn(product: Product | null) {
   await queryClient.invalidateQueries({ queryKey: ['products'] });
 }
 
-function test(t: any) {
-  console.log(t)
-}
-
 watchEffect(() => {
   if (isDeleteProductDialogOpen.value) return;
   if (isAddStockDialogOpen.value) return;
