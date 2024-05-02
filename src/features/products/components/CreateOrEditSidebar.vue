@@ -202,6 +202,7 @@ watch(
               <Input
                 type="number"
                 placeholder="Ingresa el costo unitario de producto"
+                step=".01"
                 v-bind="componentField"
               />
             </FormControl>
@@ -215,6 +216,7 @@ watch(
               <Input
                 type="number"
                 placeholder="Ingresa el precio de venta del producto"
+                step=".01"
                 v-bind="componentField"
               />
             </FormControl>

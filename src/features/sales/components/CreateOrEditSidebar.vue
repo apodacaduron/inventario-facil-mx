@@ -200,7 +200,7 @@ const formSchema = toTypedSchema(
           product_id: z.string().uuid(),
           price: z.number().positive().finite().safe(),
           unit_price: z.number().positive().finite().safe(),
-          qty: z.number().int().positive().finite().safe(),
+          qty: z.number().int('Cantidad debe ser número entero').positive().finite().safe(),
           name: z.string(),
           image_url: z.string().nullish().optional(),
         })
@@ -392,6 +392,7 @@ watch(
                 <Input
                   type="number"
                   placeholder="Ingresa el costo de envio"
+                  step=".01"
                   v-bind="componentField"
                 />
               </FormControl>
@@ -452,6 +453,7 @@ watch(
                             <Input
                               type="number"
                               placeholder="Precio"
+                              step=".01"
                               v-bind="componentField"
                               class="w-20"
                             />
