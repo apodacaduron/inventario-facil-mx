@@ -33,6 +33,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
+  TooltipProvider,
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
 } from '@/components/ui';
 import {
   ChevronDownIcon,
@@ -45,7 +49,7 @@ import {
   ShoppingBagIcon,
   TrashIcon,
 } from '@heroicons/vue/24/outline';
-import { refDebounced, useInfiniteScroll } from '@vueuse/core';
+import { refDebounced, useInfiniteScroll, useStorage } from '@vueuse/core';
 import { useOrganizationStore, useSubscriptionStore } from '@/stores';
 import { useProductsQuery } from '@/features/products/composables/useProductQueries';
 import { useMutation, useQueryClient } from '@tanstack/vue-query';
@@ -55,7 +59,9 @@ const tableRef = ref<HTMLElement | null>(null);
 
 const productSearch = ref('');
 const productSearchDebounced = refDebounced(productSearch, 400);
-const stockFilterRef = ref<'in_stock' | 'out_of_stock' | 'all'>('in_stock');
+const tableFiltersRef = useStorage<{
+  status: 'in_stock' | 'out_of_stock' | 'all';
+}>('products-table-filters', { status: 'all' });
 const isCreateOrUpdateSidebarOpen = ref(false);
 const isDeleteProductDialogOpen = ref(false);
 const isShareStockDialogOpen = ref(false);
@@ -88,9 +94,9 @@ const productsQuery = useProductsQuery({
     search: productSearchDebounced,
     order: toRef(() => productsTableOrder.tableOrder.value),
     filters: toRef(() => {
-      if (stockFilterRef.value === 'all') return [];
+      if (tableFiltersRef.value.status === 'all') return [];
 
-      if (stockFilterRef.value === 'in_stock') {
+      if (tableFiltersRef.value.status === 'in_stock') {
         return [
           {
             column: 'current_stock',
@@ -166,6 +172,10 @@ async function deleteProductMutationFn(product: Product | null) {
   await queryClient.invalidateQueries({ queryKey: ['products'] });
 }
 
+function test(t: any) {
+  console.log(t)
+}
+
 watchEffect(() => {
   if (isDeleteProductDialogOpen.value) return;
   if (isAddStockDialogOpen.value) return;
@@ -225,14 +235,14 @@ watchEffect(() => {
         <DropdownMenuContent class="w-56">
           <DropdownMenuLabel>Stock</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuRadioGroup v-model="stockFilterRef">
+          <DropdownMenuRadioGroup v-model="tableFiltersRef.status">
+            <DropdownMenuRadioItem value="all"> Todo </DropdownMenuRadioItem>
             <DropdownMenuRadioItem value="in_stock">
               En stock
             </DropdownMenuRadioItem>
             <DropdownMenuRadioItem value="out_of_stock">
               Fuera de stock
             </DropdownMenuRadioItem>
-            <DropdownMenuRadioItem value="all"> Todo </DropdownMenuRadioItem>
           </DropdownMenuRadioGroup>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -375,28 +385,55 @@ watchEffect(() => {
               {{ currencyFormatter.parse(product.retail_price) ?? '-' }}
             </TableCell>
             <TableCell class="text-center flex justify-center gap-2">
-              <Button
-                size="icon"
-                variant="outline"
-                @click="openUpdateProductSidebar(product)"
-              >
-                <PencilIcon class="w-4 h-4" />
-              </Button>
-              <Button
-                size="icon"
-                variant="outline"
-                @click="openAddStockDialog(product)"
-              >
-                <InboxArrowDownIcon class="w-4 h-4" />
-              </Button>
-              <Button
-                size="icon"
-                variant="outline"
-                class="text-red-500 dark:text-red-500"
-                @click="openDeleteProductDialog(product)"
-              >
-                <TrashIcon class="w-4 h-4" />
-              </Button>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger as-child>
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      @click="openUpdateProductSidebar(product)"
+                    >
+                      <PencilIcon class="w-4 h-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Editar producto</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger as-child>
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      @click="openAddStockDialog(product)"
+                    >
+                      <InboxArrowDownIcon class="w-4 h-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Actualizar stock</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger as-child>
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      class="text-red-500 dark:text-red-500"
+                      @click="openDeleteProductDialog(product)"
+                    >
+                      <TrashIcon class="w-4 h-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Eliminar producto</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </TableCell>
           </TableRow>
         </template>

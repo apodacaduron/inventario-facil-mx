@@ -23,6 +23,10 @@ import {
   TableBody,
   TableCell,
   Skeleton,
+  TooltipProvider,
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
 } from '@/components/ui';
 import { Badge } from '@/components';
 import {
@@ -310,22 +314,40 @@ watchEffect(() => {
               </Badge>
             </TableCell>
             <TableCell class="text-center flex justify-center gap-2">
-              <Button
-                size="icon"
-                variant="outline"
-                @click="openUpdateCustomerSidebar(customer)"
-              >
-                <PencilIcon class="w-4 h4" />
-              </Button>
-              <Button
-                v-if="customer.trust_status === 'not_trusted'"
-                size="icon"
-                variant="outline"
-                class="text-red-500 dark:text-red-500"
-                @click="openDeleteCustomerDialog(customer)"
-              >
-                <TrashIcon class="w-4 h4" />
-              </Button>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger as-child>
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      @click="openUpdateCustomerSidebar(customer)"
+                    >
+                      <PencilIcon class="w-4 h4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Editar cliente</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger as-child>
+                    <Button
+                      v-if="customer.trust_status === 'not_trusted'"
+                      size="icon"
+                      variant="outline"
+                      class="text-red-500 dark:text-red-500"
+                      @click="openDeleteCustomerDialog(customer)"
+                    >
+                      <TrashIcon class="w-4 h4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Eliminar cliente</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </TableCell>
           </TableRow>
         </template>

@@ -29,6 +29,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
+  TooltipProvider,
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
 } from '@/components/ui';
 import {
   BanknotesIcon,
@@ -38,7 +42,7 @@ import {
   TrashIcon,
   FunnelIcon,
 } from '@heroicons/vue/24/outline';
-import { refDebounced, useInfiniteScroll } from '@vueuse/core';
+import { refDebounced, useInfiniteScroll, useStorage } from '@vueuse/core';
 import { useOrganizationStore } from '@/stores';
 import { useSalesQuery } from '@/features/sales/composables/useSaleQueries';
 import { useMutation, useQueryClient } from '@tanstack/vue-query';
@@ -48,9 +52,9 @@ import { FeedbackCard, useTableStates } from '@/features/global';
 import { Tables } from '../../../types_db';
 
 const WHATSAPP_URL = import.meta.env.VITE_WHATSAPP_URL;
-const saleStatusFilterRef = ref<NonNullable<Tables<'i_sales'>['status']> | 'all'>(
-  'in_progress'
-);
+const tableFiltersRef = useStorage<
+{status: NonNullable<Tables<'i_sales'>['status']> | 'all'}
+>('sales-table-filters', {status: 'all'});
 const tableRef = ref<HTMLElement | null>(null);
 const saleSearch = ref('');
 const saleSearchDebounced = refDebounced(saleSearch, 400);
@@ -70,13 +74,13 @@ const salesQuery = useSalesQuery({
     enabled: toRef(() => organizationStore.hasOrganizations),
     search: saleSearchDebounced,
     filters: toRef(() => {
-      if (saleStatusFilterRef.value === 'all') return [];
+      if (tableFiltersRef.value.status === 'all') return [];
 
       return [
         {
           column: 'status',
           operator: 'eq',
-          value: saleStatusFilterRef.value,
+          value: tableFiltersRef.value.status,
         },
       ];
     }),
@@ -193,7 +197,8 @@ watchEffect(() => {
         <DropdownMenuContent class="w-56">
           <DropdownMenuLabel>Estatus</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuRadioGroup v-model="saleStatusFilterRef">
+          <DropdownMenuRadioGroup v-model="tableFiltersRef.status">
+            <DropdownMenuRadioItem value="all"> Todo </DropdownMenuRadioItem>
             <DropdownMenuRadioItem value="in_progress">
               En progreso
             </DropdownMenuRadioItem>
@@ -203,7 +208,6 @@ watchEffect(() => {
             <DropdownMenuRadioItem value="cancelled">
               Cancelado
             </DropdownMenuRadioItem>
-            <DropdownMenuRadioItem value="all"> Todo </DropdownMenuRadioItem>
           </DropdownMenuRadioGroup>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -352,30 +356,57 @@ watchEffect(() => {
               </Badge>
             </TableCell>
             <TableCell class="text-center flex justify-center gap-2">
-              <Button
-                size="icon"
-                variant="outline"
-                @click="handleSaleSidebar({ sale, viewOnly: true })"
-              >
-                <EyeIcon class="w-4 h-4" />
-              </Button>
-              <Button
-                size="icon"
-                variant="outline"
-                v-if="sale.status === 'in_progress'"
-                @click="handleSaleSidebar({ sale })"
-              >
-                <PencilIcon class="w-4 h-4" />
-              </Button>
-              <Button
-                size="icon"
-                variant="outline"
-                v-if="sale.status === 'cancelled'"
-                class="text-red-500 dark:text-red-500"
-                @click="openDeleteSaleDialog(sale)"
-              >
-                <TrashIcon class="w-4 h-4" />
-              </Button>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger as-child>
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      @click="handleSaleSidebar({ sale, viewOnly: true })"
+                    >
+                      <EyeIcon class="w-4 h-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Ver detalles</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger as-child>
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      v-if="sale.status === 'in_progress'"
+                      @click="handleSaleSidebar({ sale })"
+                    >
+                      <PencilIcon class="w-4 h-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Editar venta</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger as-child>
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      v-if="sale.status === 'cancelled'"
+                      class="text-red-500 dark:text-red-500"
+                      @click="openDeleteSaleDialog(sale)"
+                    >
+                      <TrashIcon class="w-4 h-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Eliminar venta</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </TableCell>
           </TableRow>
         </template>
