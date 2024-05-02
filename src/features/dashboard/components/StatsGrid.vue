@@ -80,7 +80,7 @@ const bestCustomersQuery = useBestCustomersQuery({
 </script>
 
 <template>
-  <div class="grid grid-cols-1 gap-5 lg:grid-cols-2 xl:grid-cols-4">
+  <div class="grid grid-cols-1 gap-5 lg:grid-cols-2">
     <router-link :to="`/org/${route.params.orgId}/sales`">
       <Card>
         <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -188,7 +188,7 @@ const bestCustomersQuery = useBestCustomersQuery({
               <div class="relative" v-for="(product, index) in mostSoldProductsQuery.data.value"
                 :key="product.product_id">
 
-                <Avatar class="border-muted border-2">
+                <Avatar :class="`border-muted border-2`">
                   <AvatarImage :src="product?.image_url ?? ''" />
                   <AvatarFallback>
                     {{
@@ -198,9 +198,6 @@ const bestCustomersQuery = useBestCustomersQuery({
                     }}
                   </AvatarFallback>
                 </Avatar>
-                <div class="absolute -top-1 -right-1 text-xs bg-red-500 text-white rounded-full w-4 h-4 text-center">
-                  {{ index + 1 }}
-                </div>
               </div>
               <span class="ml-2">/ mes</span>
             </template>
@@ -210,7 +207,7 @@ const bestCustomersQuery = useBestCustomersQuery({
       </Card>
     </router-link>
 
-    <router-link :to="`/org/${route.params.orgId}/customers`" class="lg:col-span-2">
+    <router-link :to="`/org/${route.params.orgId}/customers`">
       <Card>
         <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle class="text-sm font-medium">Los mejores clientes</CardTitle>
@@ -219,13 +216,10 @@ const bestCustomersQuery = useBestCustomersQuery({
         <CardContent>
           <div class="text-2xl font-bold flex flex-row gap-2 lg:h-[32px]">
             <template v-if="isDefined(bestCustomersQuery.data.value)">
-              <div class="relative" v-for="(customer, index) in bestCustomersQuery.data.value" :key="customer.customer_id">
+              <div class="relative" v-for="(customer) in bestCustomersQuery.data.value" :key="customer.customer_id">
                 <Badge>
                   {{ customer.name }}
                 </Badge>
-                <div class="absolute top-0 -right-1 text-xs bg-red-500 text-white rounded-full w-4 h-4 text-center">{{
-                  index + 1 }}
-                </div>
               </div>
               / mes
             </template>
