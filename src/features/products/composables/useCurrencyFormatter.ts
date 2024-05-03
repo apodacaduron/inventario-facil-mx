@@ -1,5 +1,5 @@
 export function useCurrencyFormatter() {
-  function parse(cents: number | null) {
+  function parse(cents: number | null | undefined) {
     if (!cents) return cents;
 
     return (cents / 100).toLocaleString("en-US", {
@@ -8,13 +8,13 @@ export function useCurrencyFormatter() {
     });
   }
 
-  function parseRaw(cents: number | null) {
+  function parseRaw(cents: number | null | undefined) {
     if (!cents) return cents;
 
     return cents / 100;
   }
 
-  function toCents(price: number | null) {
+  function toCents(price: number | null | undefined) {
     if (!price) return price;
 
     return Math.trunc((price ?? 0) * 100);

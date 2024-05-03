@@ -4,6 +4,7 @@ import {
   CreateSale,
   DeleteSaleDialog,
   Sale,
+  TodaySalesSidebar,
   UpdateSale,
   saleServicesTypeguards,
   useSaleServices,
@@ -41,6 +42,7 @@ import {
   PlusIcon,
   TrashIcon,
   FunnelIcon,
+  ShoppingBagIcon,
 } from '@heroicons/vue/24/outline';
 import { refDebounced, useInfiniteScroll, useStorage } from '@vueuse/core';
 import { useOrganizationStore } from '@/stores';
@@ -58,6 +60,7 @@ const tableFiltersRef = useStorage<
 const tableRef = ref<HTMLElement | null>(null);
 const saleSearch = ref('');
 const saleSearchDebounced = refDebounced(saleSearch, 400);
+const isTodaySalesSidebarOpen = ref(false);
 const isCreateOrUpdateSidebarOpen = ref(false);
 const isSaleSidebarViewOnly = ref(false);
 const isDeleteSaleDialogOpen = ref(false);
@@ -173,6 +176,9 @@ watchEffect(() => {
       </p>
     </div>
     <div class="hidden lg:flex gap-2">
+      <Button variant="outline" @click="isTodaySalesSidebarOpen = true">
+        <ShoppingBagIcon class="w-5 h-5 stroke-[2px] mr-2" /> Ventas de hoy
+      </Button>
       <Button @click="isCreateOrUpdateSidebarOpen = true">
         <PlusIcon class="w-5 h-5 stroke-[2px] mr-2" /> Crear venta
       </Button>
@@ -214,6 +220,9 @@ watchEffect(() => {
     </div>
 
     <div class="flex lg:hidden gap-2">
+      <Button variant="outline" size="icon" @click="isTodaySalesSidebarOpen = true">
+        <ShoppingBagIcon class="w-5 h-5 stroke-[2px]" />
+      </Button>
       <Button @click="isCreateOrUpdateSidebarOpen = true" size="icon">
         <PlusIcon class="w-5 h-5 stroke-[2px]" />
       </Button>
@@ -470,4 +479,6 @@ watchEffect(() => {
     :sale="activeSale"
     @save="handleSaveSidebar"
   />
+
+  <TodaySalesSidebar v-model:open="isTodaySalesSidebarOpen" />
 </template>

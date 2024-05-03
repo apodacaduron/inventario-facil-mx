@@ -1,0 +1,216 @@
+<script setup lang="ts">
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+  SheetFooter,
+  Table,
+  TableHeader,
+  TableRow,
+  TableHead,
+  TableBody,
+  TableCell,
+  Skeleton,
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from '@/components/ui';
+import { useSalesQuery, useSalesTotalIncomeQuery } from '../composables';
+import { useDashboardDates } from '@/features/dashboard';
+import { toRef } from 'vue';
+import { useCurrencyFormatter } from '@/features/products';
+import { useTableStates } from '@/features/global';
+
+const openModel = defineModel<boolean>('open');
+
+const currencyFormatter = useCurrencyFormatter();
+const dashboardDates = useDashboardDates({
+  period: 'daily',
+});
+
+const salesQuery = useSalesQuery({
+  options: {
+    enabled: true,
+    filters: toRef(() => {
+      return [
+        {
+          column: 'created_at',
+          operator: 'gte',
+          value: dashboardDates.dateRangeFromPeriod.value.from.toISOString(),
+        },
+        {
+          column: 'created_at',
+          operator: 'lte',
+          value: dashboardDates.dateRangeFromPeriod.value.to.toISOString(),
+        },
+      ];
+    }),
+  },
+});
+const tableLoadingStates = useTableStates(salesQuery, '');
+const salesTotalIncomeQuery = useSalesTotalIncomeQuery({
+  options: {
+    range: toRef(() => ({
+      from: dashboardDates.dateRangeFromPeriod.value.from.toISOString(),
+      to: dashboardDates.dateRangeFromPeriod.value.to.toISOString(),
+    })),
+  },
+});
+</script>
+
+<template>
+  <Sheet v-model:open="openModel">
+    <SheetContent side="right" class="overflow-y-auto">
+      <SheetHeader>
+        <SheetTitle> Ventas del día </SheetTitle>
+        <SheetDescription>
+          Consulta las ventas realizadas durante el día de hoy
+        </SheetDescription>
+      </SheetHeader>
+
+      <Table class="mt-4">
+        <TableHeader>
+          <TableRow>
+            <TableHead class="pl-4"> Nombre </TableHead>
+            <TableHead class="text-center">Productos</TableHead>
+            <TableHead class="text-center">Cantidad</TableHead>
+            <TableHead class="text-center"> Total </TableHead>
+            <TableHead class="text-center"> Costo de envio </TableHead>
+            <TableHead class="text-center"> Estatus</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody v-if="tableLoadingStates.showLoadingState.value">
+          <TableRow
+            v-for="(_, index) in Array.from({ length: 15 })"
+            :key="index"
+          >
+            <TableCell
+              class="flex items-center p-4 text-foreground whitespace-nowrap w-max"
+            >
+              <Skeleton class="w-[40px] h-[40px] rounded-full" />
+              <div class="ps-3 flex flex-col gap-1">
+                <div class="text-base font-semibold">
+                  <Skeleton class="h-[20px] w-[180px]" />
+                </div>
+                <div class="font-normal text-slate-500">
+                  <Skeleton class="h-4 w-[160px]" />
+                </div>
+              </div>
+            </TableCell>
+            <TableCell class="text-center items-center">
+              <Skeleton class="h-4 w-[180px]" />
+            </TableCell>
+            <TableCell class="text-center items-center">
+              <Skeleton class="h-4 w-[180px]" />
+            </TableCell>
+            <TableCell class="text-center">
+              <Skeleton class="h-4 w-[180px]" />
+            </TableCell>
+            <TableCell class="text-center">
+              <Skeleton class="h-4 w-[180px]" />
+            </TableCell>
+            <TableCell class="text-center">
+              <Skeleton class="h-4 w-[180px]" />
+            </TableCell>
+            <TableCell class="text-center">
+              <Skeleton class="h-4 w-[180px]" />
+            </TableCell>
+            <TableCell class="text-center">
+              <Skeleton class="w-[54px] h-[36px]" />
+            </TableCell>
+          </TableRow>
+        </TableBody>
+        <TableBody>
+          <!-- @vue-ignore -->
+          <template
+            v-for="(page, index) in salesQuery.data.value?.pages"
+            :key="index"
+          >
+            <TableRow v-for="sale in page.data" :key="sale.id">
+              <TableCell
+                class="flex items-center p-4 text-foreground whitespace-nowrap w-max"
+              >
+                <Avatar>
+                  <AvatarFallback>{{
+                    `${sale.i_customers?.name
+                      ?.substring(0, 1)
+                      .toLocaleUpperCase()}`
+                  }}</AvatarFallback>
+                </Avatar>
+                <div class="ps-3">
+                  <div class="text-base font-semibold">
+                    {{ sale.i_customers?.name }}
+                  </div>
+                  <div
+                    v-if="sale.i_customers?.phone"
+                    class="font-normal text-slate-500"
+                  >
+                    <a target="_blank" rel="noopener noreferrer" class="block">
+                      {{ sale.i_customers.phone }}
+                    </a>
+                  </div>
+                </div>
+              </TableCell>
+              <TableCell class="text-center"
+                ><div
+                  class="flex -space-x-4 rtl:space-x-reverse w-fit mx-auto cursor-pointer"
+                >
+                  <Avatar
+                    v-for="saleProduct in sale.i_sale_products.slice(0, 3)"
+                    :key="saleProduct.id"
+                    class="border-muted border-2"
+                  >
+                    <AvatarImage :src="saleProduct.image_url ?? ''" />
+                    <AvatarFallback>{{
+                      `${saleProduct.name?.substring(0, 1).toLocaleUpperCase()}`
+                    }}</AvatarFallback>
+                  </Avatar>
+                  <div
+                    v-if="sale.i_sale_products.length > 3"
+                    class="flex items-center justify-center w-10 h-10 text-xs font-medium border-2 rounded-full bg-background border-muted"
+                  >
+                    {{ sale.i_sale_products.length - 3 }}
+                  </div>
+                </div></TableCell
+              >
+              <TableCell class="text-center">{{
+                sale.i_sale_products.reduce(
+                  (acc, saleProduct) => acc + (saleProduct.qty ?? 0),
+                  0
+                )
+              }}</TableCell>
+              <TableCell class="text-center">
+                {{
+                  currencyFormatter.parse(
+                    sale.i_sale_products.reduce(
+                      (acc, saleProduct) =>
+                        acc + (saleProduct.qty ?? 0) * (saleProduct.price ?? 0),
+                      0
+                    )
+                  )
+                }}
+              </TableCell>
+              <TableCell class="text-center">
+                {{ currencyFormatter.parse(sale.shipping_cost) }}
+              </TableCell>
+              <TableCell class="text-center">
+                {{ sale.status?.toLocaleUpperCase() }}
+              </TableCell>
+            </TableRow>
+          </template>
+        </TableBody>
+      </Table>
+
+      <SheetFooter class="mt-4">
+        <div class="text-right">
+          <span class="text-muted-foreground">Total</span>
+          <div class="text-4xl font-medium">
+            {{currencyFormatter.parse(salesTotalIncomeQuery.data.value)}}
+          </div>
+        </div>
+      </SheetFooter>
+    </SheetContent>
+  </Sheet>
+</template>
