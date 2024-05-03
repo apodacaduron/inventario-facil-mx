@@ -103,8 +103,12 @@ export const router = createRouter({
   routes,
 });
 
-function isLoggedIn() {
+async function isLoggedIn() {
   const authStore = useAuthStore();
+  const { isLoadingSession } = storeToRefs(authStore);
+
+  await until(isLoadingSession).toBe(false);
+
   return authStore.isLoggedIn;
 }
 async function hasOrganizations() {
@@ -131,14 +135,14 @@ async function isUserAllowedInOrganization(orgId: string | undefined) {
 const navigationGuards = {
   requiresAuth: async (to: RouteLocationNormalized) => {
     if (to.matched.some((record) => record.meta.requiresAuth)) {
-      if (!isLoggedIn()) {
+      if (!await isLoggedIn()) {
         return "/auth/sign-in";
       }
     }
   },
   redirectIfLoggedIn: async (to: RouteLocationNormalized) => {
     if (to.matched.some((record) => record.meta.redirectIfLoggedIn)) {
-      if (isLoggedIn()) {
+      if (await isLoggedIn()) {
         return "/";
       }
     }

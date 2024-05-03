@@ -7,6 +7,7 @@ import { Tables } from "../../types_db";
 type UserRole = Tables<'i_roles'>['role_name'] | undefined;
 
 export const useAuthStore = defineStore("auth", () => {
+  const isLoadingSession = ref(true);
   const session = ref<Session | null>(null);
   const userRole = ref<UserRole>(null);
 
@@ -16,6 +17,7 @@ export const useAuthStore = defineStore("auth", () => {
 
   function setSession(nextSession: Session | null) {
     session.value = nextSession;
+    isLoadingSession.value = false;
   }
 
   function setRole(nextRole: UserRole) {
@@ -33,6 +35,7 @@ export const useAuthStore = defineStore("auth", () => {
     isLoggedIn,
     user,
     avatar,
+    isLoadingSession,
     setSession,
     signOut,
     setRole,
