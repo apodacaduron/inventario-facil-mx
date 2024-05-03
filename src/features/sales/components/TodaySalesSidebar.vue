@@ -21,7 +21,8 @@ import { useSalesQuery, useSalesTotalIncomeQuery } from '../composables';
 import { useDashboardDates } from '@/features/dashboard';
 import { toRef } from 'vue';
 import { useCurrencyFormatter } from '@/features/products';
-import { useTableStates } from '@/features/global';
+import { FeedbackCard, useTableStates } from '@/features/global';
+import { FaceFrownIcon } from '@heroicons/vue/24/outline';
 
 const openModel = defineModel<boolean>('open');
 
@@ -32,7 +33,7 @@ const dashboardDates = useDashboardDates({
 
 const salesQuery = useSalesQuery({
   options: {
-    enabled: true,
+    enabled: toRef(() => Boolean(openModel.value)),
     filters: toRef(() => {
       return [
         {
@@ -70,7 +71,19 @@ const salesTotalIncomeQuery = useSalesTotalIncomeQuery({
         </SheetDescription>
       </SheetHeader>
 
-      <Table class="mt-4">
+      <FeedbackCard class="mt-8" v-if="tableLoadingStates.showEmptyState.value">
+        <template #icon>
+          <FaceFrownIcon class="w-10 h-10 stroke-[1px]" />
+        </template>
+        <template #title>
+          ¡Sin Ventas Hoy!
+        </template>
+        <template #description>
+          ¡Comienza un Nuevo Día de Oportunidades!
+        </template>
+      </FeedbackCard>
+
+      <Table v-else class="mt-4">
         <TableHeader>
           <TableRow>
             <TableHead class="pl-4"> Nombre </TableHead>
@@ -116,9 +129,6 @@ const salesTotalIncomeQuery = useSalesTotalIncomeQuery({
             </TableCell>
             <TableCell class="text-center">
               <Skeleton class="h-4 w-[180px]" />
-            </TableCell>
-            <TableCell class="text-center">
-              <Skeleton class="w-[54px] h-[36px]" />
             </TableCell>
           </TableRow>
         </TableBody>
@@ -207,7 +217,7 @@ const salesTotalIncomeQuery = useSalesTotalIncomeQuery({
         <div class="text-right">
           <span class="text-muted-foreground">Total</span>
           <div class="text-4xl font-medium">
-            {{currencyFormatter.parse(salesTotalIncomeQuery.data.value)}}
+            {{ currencyFormatter.parse(salesTotalIncomeQuery.data.value) }}
           </div>
         </div>
       </SheetFooter>
