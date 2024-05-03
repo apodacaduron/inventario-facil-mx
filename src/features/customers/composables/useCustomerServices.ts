@@ -57,7 +57,9 @@ export function useCustomerServices() {
       .range(from, to);
 
     if (options?.search) {
-      customerQuery = customerQuery.ilike("name", `%${options.search}%`);
+      customerQuery = customerQuery.or(
+        `name.ilike.%${options.search}%, phone.ilike.%${options.search}%`
+      );
     }
 
     if (options?.order) {
