@@ -1,6 +1,6 @@
 export function useCurrencyFormatter() {
   function parse(cents: number | null | undefined) {
-    if (!cents) return cents ?? null;
+    if (typeof cents !== 'number') return cents ?? null;
 
     return (cents / 100).toLocaleString("en-US", {
       style: "currency",
