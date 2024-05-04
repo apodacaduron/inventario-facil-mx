@@ -21,12 +21,23 @@ import {
 import { useStorage } from '@vueuse/core';
 import { toRef } from 'vue';
 
+const locale = {
+  DAILY: 'Diario',
+  WEEKLY: 'Semanal',
+  MONTHLY: 'Mensual',
+  YEARLY: 'Anual'
+}
+
 const statsFiltersRef = useStorage<{
   period: 'daily' | 'weekly' | 'monthly' | 'yearly';
 }>('dashboard-stats-filters', { period: 'monthly' });
 const dashboardDates = useDashboardDates({
   period: toRef(() => statsFiltersRef.value.period),
 });
+
+function toUpperCase<T extends string>(text: T) {
+  return text.toUpperCase() as Uppercase<T>
+}
 </script>
 
 <template>
@@ -38,7 +49,7 @@ const dashboardDates = useDashboardDates({
           <DropdownMenuTrigger as-child>
             <Button variant="ghost">
               <Badge variant="secondary">
-                {{ statsFiltersRef.period?.toUpperCase() }}
+                {{ locale[toUpperCase(statsFiltersRef.period)] }}
               </Badge>
             </Button>
           </DropdownMenuTrigger>
@@ -108,8 +119,9 @@ const dashboardDates = useDashboardDates({
       </div>
 
       <StatsGrid
-        :from="dashboardDates.dateRangeFromPeriod.value.from.toISOString()"
-        :to="dashboardDates.dateRangeFromPeriod.value.to.toISOString()"
+        :period="statsFiltersRef.period"
+        :from="dashboardDates.dateRangeFromPeriod.value!.from.toISOString()"
+        :to="dashboardDates.dateRangeFromPeriod.value!.to.toISOString()"
       />
     </div>
   </div>

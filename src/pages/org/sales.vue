@@ -52,11 +52,16 @@ import { useCurrencyFormatter } from '@/features/products';
 import { Badge } from '@/components';
 import { FeedbackCard, useTableStates } from '@/features/global';
 import { Tables } from '../../../types_db';
+import { useDashboardDates } from '@/features/dashboard';
 
 const WHATSAPP_URL = import.meta.env.VITE_WHATSAPP_URL;
-const tableFiltersRef = useStorage<
-{status: NonNullable<Tables<'i_sales'>['status']> | 'all'}
->('sales-table-filters', {status: 'all'});
+const tableFiltersRef = useStorage<{
+  status: NonNullable<Tables<'i_sales'>['status']> | 'all';
+  period?: 'daily' | 'weekly' | 'monthly';
+}>('sales-table-filters', { status: 'all' });
+const dashboardDates = useDashboardDates({
+  period: toRef(() => tableFiltersRef.value.period),
+});
 const tableRef = ref<HTMLElement | null>(null);
 const saleSearch = ref('');
 const saleSearchDebounced = refDebounced(saleSearch, 400);
@@ -77,15 +82,33 @@ const salesQuery = useSalesQuery({
     enabled: toRef(() => organizationStore.hasOrganizations),
     search: saleSearchDebounced,
     filters: toRef(() => {
-      if (tableFiltersRef.value.status === 'all') return [];
+      const filters = [];
 
-      return [
-        {
-          column: 'status',
-          operator: 'eq',
-          value: tableFiltersRef.value.status,
-        },
-      ];
+      if ('status' in tableFiltersRef.value) {
+        if (tableFiltersRef.value.status !== 'all') {
+          filters.push({
+            column: 'status',
+            operator: 'eq',
+            value: tableFiltersRef.value.status,
+          });
+        }
+      }
+      if ('period' in tableFiltersRef.value) {
+        if (tableFiltersRef.value.period) {
+          filters.push({
+            column: 'created_at',
+            operator: 'gte',
+            value: dashboardDates.dateRangeFromPeriod.value?.from.toISOString(),
+          });
+          filters.push({
+            column: 'created_at',
+            operator: 'lte',
+            value: dashboardDates.dateRangeFromPeriod.value?.to.toISOString(),
+          });
+        }
+      }
+
+      return filters;
     }),
   },
 });
@@ -154,6 +177,10 @@ function getBadgeColorFromStatus(status: Sale['status']) {
   }
 }
 
+function resetFilters() {
+  tableFiltersRef.value = { status: 'all' }
+}
+
 watchEffect(() => {
   if (isDeleteSaleDialogOpen.value) return;
   if (isCreateOrUpdateSidebarOpen.value) return;
@@ -196,7 +223,10 @@ watchEffect(() => {
 
       <DropdownMenu>
         <DropdownMenuTrigger as-child>
-          <Button :variant="tableFiltersRef.status === 'all' ? 'outline' : 'default'" size="icon">
+          <Button
+            :variant="tableFiltersRef.status === 'all' ? 'outline' : 'default'"
+            size="icon"
+          >
             <FunnelIcon class="w-4 h-4" />
           </Button>
         </DropdownMenuTrigger>
@@ -215,12 +245,31 @@ watchEffect(() => {
               Cancelado
             </DropdownMenuRadioItem>
           </DropdownMenuRadioGroup>
+          <DropdownMenuLabel>Periodo</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuRadioGroup v-model="tableFiltersRef.period">
+            <DropdownMenuRadioItem value="daily">
+              Diario
+            </DropdownMenuRadioItem>
+            <DropdownMenuRadioItem value="weekly">
+              Semanal
+            </DropdownMenuRadioItem>
+            <DropdownMenuRadioItem value="monthly">
+              Mensual
+            </DropdownMenuRadioItem>
+          </DropdownMenuRadioGroup>
+          <DropdownMenuSeparator />
+          <Button @click="resetFilters" size="sm" class="my-1 mx-2">Limpiar</Button>
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
 
     <div class="flex lg:hidden gap-2">
-      <Button variant="outline" size="icon" @click="isTodaySalesSidebarOpen = true">
+      <Button
+        variant="outline"
+        size="icon"
+        @click="isTodaySalesSidebarOpen = true"
+      >
         <ShoppingBagIcon class="w-5 h-5 stroke-[2px]" />
       </Button>
       <Button @click="isCreateOrUpdateSidebarOpen = true" size="icon">
