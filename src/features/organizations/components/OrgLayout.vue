@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useAuthStore } from "@/stores";
+import { useAuthStore } from '@/stores';
 import {
   Button,
   DropdownMenu,
@@ -16,9 +16,9 @@ import {
   Avatar,
   AvatarImage,
   AvatarFallback,
-} from "@/components/ui";
-import { useDark, useToggle } from "@vueuse/core";
-import { useRoute, useRouter } from "vue-router";
+} from '@/components/ui';
+import { useDark, useToggle } from '@vueuse/core';
+import { useRoute, useRouter } from 'vue-router';
 import {
   ArrowLeftOnRectangleIcon,
   BanknotesIcon,
@@ -28,7 +28,7 @@ import {
   ShoppingBagIcon,
   SunIcon,
   UserGroupIcon,
-} from "@heroicons/vue/24/outline";
+} from '@heroicons/vue/24/outline';
 
 const route = useRoute();
 const router = useRouter();
@@ -38,28 +38,28 @@ const authStore = useAuthStore();
 
 function signOut() {
   authStore.signOut();
-  router.push("/");
+  router.push('/');
 }
 
 const menuList = {
   dashboard: {
     path: `/org/${route.params.orgId}/dashboard`,
-    text: "Inicio",
+    text: 'Inicio',
     icon: HomeIcon,
   },
   products: {
     path: `/org/${route.params.orgId}/products`,
-    text: "Productos",
+    text: 'Productos',
     icon: ShoppingBagIcon,
   },
   customers: {
     path: `/org/${route.params.orgId}/customers`,
-    text: "Clientes",
+    text: 'Clientes',
     icon: UserGroupIcon,
   },
   sales: {
     path: `/org/${route.params.orgId}/sales`,
-    text: "Ventas",
+    text: 'Ventas',
     icon: BanknotesIcon,
   },
 };
@@ -246,9 +246,7 @@ const menuList = {
   </aside>
 
   <div class="sm:ml-64">
-    <div class="p-0 md:p-8 mt-20 md:mt-14">
-      <router-view />
-    </div>
+    <router-view />
   </div>
 </template>
 
