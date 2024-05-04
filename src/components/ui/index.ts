@@ -19,3 +19,4 @@ export * from "./calendar";
 export * from "./drawer";
 export * from "./tabs";
 export * from "./tooltip";
+export * from "./toast";
