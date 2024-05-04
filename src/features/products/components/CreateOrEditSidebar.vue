@@ -14,46 +14,46 @@ import {
   FormLabel,
   Textarea,
   SheetFooter,
-} from "@/components/ui";
-import { toRef, watch } from "vue";
-import { z } from "zod";
+} from '@/components/ui';
+import { toRef, watch } from 'vue';
+import { z } from 'zod';
 import {
   CreateProduct,
   Product,
   UpdateProduct,
   useCurrencyFormatter,
-} from "../composables";
-import { useForm } from "vee-validate";
-import { toTypedSchema } from "@vee-validate/zod";
+} from '../composables';
+import { useForm } from 'vee-validate';
+import { toTypedSchema } from '@vee-validate/zod';
 
 type CreateOrEditSidebarProps = {
   isLoading?: boolean;
   product?: Product | null;
 };
 
-const openModel = defineModel<boolean>("open");
+const openModel = defineModel<boolean>('open');
 const props = withDefaults(defineProps<CreateOrEditSidebarProps>(), {
   isLoading: false,
   product: null,
 });
 const emit = defineEmits<{
-  (e: "save", formValues: CreateProduct | UpdateProduct): void;
+  (e: 'save', formValues: CreateProduct | UpdateProduct): void;
 }>();
 
 const locale = {
   create: {
-    title: "Crear producto",
-    subtitle: "Crea rápidamente un nuevo producto para tu inventario.",
+    title: 'Crear producto',
+    subtitle: 'Crea rápidamente un nuevo producto para tu inventario.',
   },
   update: {
-    title: "Actualizar producto",
-    subtitle: "Actualiza rápidamente un producto de tu inventario.",
+    title: 'Actualizar producto',
+    subtitle: 'Actualiza rápidamente un producto de tu inventario.',
   },
 };
 const initialForm = {
-  name: "",
-  description: "",
-  image_url: "",
+  name: '',
+  description: '',
+  image_url: '',
   current_stock: null,
   unit_price: null,
   retail_price: null,
@@ -62,21 +62,21 @@ const initialForm = {
 const currencyFormatter = useCurrencyFormatter();
 const formSchema = toTypedSchema(
   z.object({
-    name: z.string().min(1, "Nombre de producto es requerido"),
+    name: z.string().min(1, 'Nombre de producto es requerido'),
     description: z.string().optional(),
     image_url: z.string().optional(),
-    current_stock: z
-      .number({ invalid_type_error: "Ingresa un número válido" })
+    current_stock: z.coerce
+      .number({ invalid_type_error: 'Ingresa un número válido' })
       .nonnegative()
       .finite()
       .safe(),
-    unit_price: z
-      .number({ invalid_type_error: "Ingresa un número válido" })
+    unit_price: z.coerce
+      .number({ invalid_type_error: 'Ingresa un número válido' })
       .nonnegative()
       .finite()
       .safe(),
-    retail_price: z
-      .number({ invalid_type_error: "Ingresa un número válido" })
+    retail_price: z.coerce
+      .number({ invalid_type_error: 'Ingresa un número válido' })
       .nonnegative()
       .finite()
       .safe(),
@@ -87,10 +87,10 @@ const formInstance = useForm<CreateProduct | UpdateProduct>({
   validationSchema: formSchema,
 });
 
-const formMode = toRef(() => (props.product ? "update" : "create"));
+const formMode = toRef(() => (props.product ? 'update' : 'create'));
 
 const onSubmit = formInstance.handleSubmit(async (formValues) => {
-  if (typeof formValues.product_id === "undefined") {
+  if (typeof formValues.product_id === 'undefined') {
     delete formValues.product_id;
   }
 
@@ -105,30 +105,27 @@ const onSubmit = formInstance.handleSubmit(async (formValues) => {
     retail_price: nextRetailPrice,
   };
 
-  emit("save", modifiedFormValues);
+  emit('save', modifiedFormValues);
 });
 
-watch(
-  openModel,
-  (nextOpenValue) => {
-    if (nextOpenValue && props.product) {
-      formInstance.resetForm({
-        values: {
-          name: props.product.name ?? "",
-          description: props.product.description ?? "",
-          image_url: props.product.image_url ?? "",
-          current_stock: props.product.current_stock ?? 0,
-          product_id: props.product.id,
-          unit_price: currencyFormatter.parseRaw(props.product.unit_price) ?? 0,
-          retail_price:
-            currencyFormatter.parseRaw(props.product.retail_price) ?? 0,
-        },
-      });
-    } else {
-      formInstance.resetForm({ values: initialForm }, { force: true });
-    }
+watch(openModel, (nextOpenValue) => {
+  if (nextOpenValue && props.product) {
+    formInstance.resetForm({
+      values: {
+        name: props.product.name ?? '',
+        description: props.product.description ?? '',
+        image_url: props.product.image_url ?? '',
+        current_stock: props.product.current_stock ?? 0,
+        product_id: props.product.id,
+        unit_price: currencyFormatter.parseRaw(props.product.unit_price) ?? 0,
+        retail_price:
+          currencyFormatter.parseRaw(props.product.retail_price) ?? 0,
+      },
+    });
+  } else {
+    formInstance.resetForm({ values: initialForm }, { force: true });
   }
-);
+});
 </script>
 
 <template>
@@ -187,6 +184,7 @@ watch(
             <FormLabel>Unidades disponibles</FormLabel>
             <FormControl>
               <Input
+                inputmode="numeric"
                 type="number"
                 placeholder="Ingresa las unidades disponibles de producto"
                 v-bind="componentField"
@@ -200,9 +198,8 @@ watch(
             <FormLabel>Precio unitario</FormLabel>
             <FormControl>
               <Input
-                type="number"
+                inputmode="numeric"
                 placeholder="Ingresa el costo unitario de producto"
-                step=".01"
                 v-bind="componentField"
               />
             </FormControl>
@@ -214,9 +211,8 @@ watch(
             <FormLabel>Precio de venta</FormLabel>
             <FormControl>
               <Input
-                type="number"
+                inputmode="numeric"
                 placeholder="Ingresa el precio de venta del producto"
-                step=".01"
                 v-bind="componentField"
               />
             </FormControl>

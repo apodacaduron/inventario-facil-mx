@@ -186,7 +186,7 @@ const formSchema = toTypedSchema(
     status: z.enum(SALE_STATUS),
     sale_date: z.string().datetime(),
     customer_id: z.string().uuid('Por favor seleccione a un cliente'),
-    shipping_cost: z
+    shipping_cost: z.coerce
       .number({ invalid_type_error: 'Ingresa un número válido' })
       .nonnegative()
       .finite()
@@ -198,9 +198,9 @@ const formSchema = toTypedSchema(
         z.object({
           sale_detail_id: z.string().uuid().optional(),
           product_id: z.string().uuid(),
-          price: z.number().positive().finite().safe(),
-          unit_price: z.number().positive().finite().safe(),
-          qty: z.number().int('Cantidad debe ser número entero').positive().finite().safe(),
+          price: z.coerce.number().positive().finite().safe(),
+          unit_price: z.coerce.number().positive().finite().safe(),
+          qty: z.coerce.number().int('Cantidad debe ser número entero').positive().finite().safe(),
           name: z.string(),
           image_url: z.string().nullish().optional(),
         })
@@ -390,9 +390,8 @@ watch(
               <FormLabel>Costo de envio</FormLabel>
               <FormControl>
                 <Input
-                  type="number"
                   placeholder="Ingresa el costo de envio"
-                  step=".01"
+                  inputmode="numeric"
                   v-bind="componentField"
                 />
               </FormControl>
@@ -433,7 +432,7 @@ watch(
                         <FormItem v-auto-animate>
                           <FormControl>
                             <Input
-                              type="number"
+                              inputmode="numeric"
                               placeholder="Cantidad"
                               v-bind="componentField"
                               class="w-16"
@@ -451,9 +450,8 @@ watch(
                         <FormItem v-auto-animate>
                           <FormControl>
                             <Input
-                              type="number"
+                              inputmode="numeric"
                               placeholder="Precio"
-                              step=".01"
                               v-bind="componentField"
                               class="w-20"
                             />
