@@ -137,7 +137,11 @@ const organizationStore = useOrganizationStore();
 const currencyFormatter = useCurrencyFormatter();
 const customersQuery = useCustomersQuery({
   options: {
-    enabled: toRef(() => organizationStore.hasOrganizations && saleSidebarMode.value === 'customers'),
+    enabled: toRef(
+      () =>
+        organizationStore.hasOrganizations &&
+        saleSidebarMode.value === 'customers'
+    ),
     search: customerSearchDebounced,
     filters: [{ column: 'trust_status', operator: 'eq', value: 'trusted' }],
     order: ['name', 'asc'],
@@ -145,7 +149,11 @@ const customersQuery = useCustomersQuery({
 });
 const productsQuery = useProductsQuery({
   options: {
-    enabled: toRef(() => organizationStore.hasOrganizations && saleSidebarMode.value === 'products'),
+    enabled: toRef(
+      () =>
+        organizationStore.hasOrganizations &&
+        saleSidebarMode.value === 'products'
+    ),
     search: productSearchDebounced,
     filters: toRef(() => {
       if (allowOutOfStockProducts.value) return [];
@@ -198,9 +206,18 @@ const formSchema = toTypedSchema(
         z.object({
           sale_detail_id: z.string().uuid().optional(),
           product_id: z.string().uuid(),
-          price: z.coerce.number().positive().finite().safe(),
+          price: z.coerce
+            .number({ message: 'Ingrese un número válido' })
+            .positive()
+            .finite()
+            .safe(),
           unit_price: z.coerce.number().positive().finite().safe(),
-          qty: z.coerce.number().int('Cantidad debe ser número entero').positive().finite().safe(),
+          qty: z.coerce
+            .number({ message: 'Ingrese un número válido' })
+            .int('Cantidad debe ser número entero')
+            .positive()
+            .finite()
+            .safe(),
           name: z.string(),
           image_url: z.string().nullish().optional(),
         })
@@ -277,38 +294,35 @@ function handleCloseSidebar() {
   openModel.value = false;
 }
 
-watch(
-  openModel,
-  (nextOpenValue) => {
-    if (nextOpenValue && props.sale) {
-      formInstance.resetForm({
-        values: {
-          sale_id: props.sale?.id,
-          notes: props.sale?.notes ?? '',
-          products:
-            props.sale?.i_sale_products.map((saleProduct) => ({
-              sale_detail_id: saleProduct.id,
-              image_url: saleProduct.image_url ?? '',
-              product_id: saleProduct.product_id ?? '',
-              name: saleProduct.name ?? '',
-              price: currencyFormatter.parseRaw(saleProduct?.price ?? 0),
-              unit_price: saleProduct?.unit_price ?? 0,
-              qty: saleProduct.qty,
-            })) ?? [],
-          customer_id: props.sale?.customer_id ?? '',
-          sale_date: props.sale?.sale_date
-            ? new Date(props.sale.sale_date).toISOString()
-            : new Date().toISOString(),
-          shipping_cost:
-            currencyFormatter.parseRaw(props.sale?.shipping_cost) ?? 0,
-          status: props.sale?.status ?? 'in_progress',
-        },
-      });
-    } else {
-      formInstance.resetForm({ values: initialForm }, { force: true });
-    }
+watch(openModel, (nextOpenValue) => {
+  if (nextOpenValue && props.sale) {
+    formInstance.resetForm({
+      values: {
+        sale_id: props.sale?.id,
+        notes: props.sale?.notes ?? '',
+        products:
+          props.sale?.i_sale_products.map((saleProduct) => ({
+            sale_detail_id: saleProduct.id,
+            image_url: saleProduct.image_url ?? '',
+            product_id: saleProduct.product_id ?? '',
+            name: saleProduct.name ?? '',
+            price: currencyFormatter.parseRaw(saleProduct?.price ?? 0),
+            unit_price: saleProduct?.unit_price ?? 0,
+            qty: saleProduct.qty,
+          })) ?? [],
+        customer_id: props.sale?.customer_id ?? '',
+        sale_date: props.sale?.sale_date
+          ? new Date(props.sale.sale_date).toISOString()
+          : new Date().toISOString(),
+        shipping_cost:
+          currencyFormatter.parseRaw(props.sale?.shipping_cost) ?? 0,
+        status: props.sale?.status ?? 'in_progress',
+      },
+    });
+  } else {
+    formInstance.resetForm({ values: initialForm }, { force: true });
   }
-);
+});
 </script>
 
 <template>
