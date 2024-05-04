@@ -5,6 +5,7 @@ import { useAuthStore, useSubscriptionStore } from "@/stores";
 import { useOrganizationList } from "@/features/organizations";
 import { useRoleQuery } from "./features/global/composables/useRoleQueries";
 import { useCurrentSubscriptionQuery } from "./features/subscriptions";
+import Toaster from '@/components/ui/toast/Toaster.vue'
 
 const authStore = useAuthStore();
 const subscriptionStore = useSubscriptionStore();
@@ -31,5 +32,6 @@ watchEffect(() => {
 </script>
 
 <template>
+  <Toaster />
   <router-view />
 </template>
