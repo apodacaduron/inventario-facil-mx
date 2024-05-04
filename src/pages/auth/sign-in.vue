@@ -1,20 +1,22 @@
 <script setup lang="ts">
-import { supabase } from "@/config/supabase";
-import { AuthLayout } from "@/features/auth";
-import { Input, Button } from "@/components/ui";
-import { useMutation } from "@tanstack/vue-query";
-import { useRouter } from "vue-router";
-import z from "zod";
-import { toTypedSchema } from "@vee-validate/zod";
-import { useForm } from "vee-validate";
+import { supabase } from '@/config/supabase';
+import { AuthLayout } from '@/features/auth';
+import { Input, Button, useToast } from '@/components/ui';
+import { useMutation } from '@tanstack/vue-query';
+import { useRouter } from 'vue-router';
+import z from 'zod';
+import { toTypedSchema } from '@vee-validate/zod';
+import { useForm } from 'vee-validate';
 import {
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
+} from '@/components/ui/form';
 
+const { toast } = useToast();
 const router = useRouter();
 const signInWithPasswordMutation = useMutation({
   mutationFn: signInWithPassword,
@@ -26,9 +28,9 @@ const formSchema = toTypedSchema(
   z.object({
     email: z
       .string()
-      .min(1, "Correo es requerido")
-      .email("Ingresa un correo válido"),
-    password: z.string().min(1, "Contraseña es requerida"),
+      .min(1, 'Correo es requerido')
+      .email('Ingresa un correo válido'),
+    password: z.string().min(1, 'Contraseña es requerida'),
   })
 );
 
@@ -38,11 +40,16 @@ const { handleSubmit } = useForm({
 
 const onSubmit = handleSubmit(async (formValues) => {
   const response = await signInWithPasswordMutation.mutateAsync(formValues);
-  if (response?.error) {
-    alert(response?.error?.message);
-  } else {
-    router.push("/");
+  const hasError = Boolean(response?.error);
+  if (hasError) {
+    toast({
+      title: 'Uh oh! Something went wrong.',
+      description: response?.error?.message ?? 'There was a problem with your request.',
+      variant: 'destructive',
+    });
+    return;
   }
+  router.push('/');
 });
 </script>
 
@@ -91,6 +98,13 @@ const onSubmit = handleSubmit(async (formValues) => {
                 v-bind="componentField"
               />
             </FormControl>
+            <FormDescription class="text-right">
+              <router-link
+                to="/auth/forgot"
+                class="font-medium text-primary hover:underline"
+                >Olvidaste tu contraseña?</router-link
+              >
+            </FormDescription>
             <FormMessage />
           </FormItem>
         </FormField>
