@@ -1,7 +1,7 @@
 import { MaybeRef, computed, ref, toRef, toValue, watch } from 'vue';
 
 export function useDashboardDates(options: {
-  period: MaybeRef<'daily' | 'weekly' | 'monthly' | 'yearly'>;
+  period: MaybeRef<'daily' | 'weekly' | 'monthly' | 'yearly' | undefined>;
 }) {
   const selectedMonth = ref(new Date().getMonth());
   const selectedYear = ref(new Date().getFullYear());
@@ -44,17 +44,6 @@ export function useDashboardDates(options: {
         to: getEndOfYear(date.getFullYear()),
       };
     }
-
-    return {
-      from: getFirstDayOfMonth({
-        year: selectedYear.value,
-        month: selectedMonth.value,
-      }),
-      to: getLastDayOfMonth({
-        year: selectedYear.value,
-        month: selectedMonth.value,
-      }),
-    };
   });
 
   function generateMonthName(data: { year: number; month: number }) {

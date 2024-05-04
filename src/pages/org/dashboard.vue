@@ -120,8 +120,8 @@ function toUpperCase<T extends string>(text: T) {
 
       <StatsGrid
         :period="statsFiltersRef.period"
-        :from="dashboardDates.dateRangeFromPeriod.value.from.toISOString()"
-        :to="dashboardDates.dateRangeFromPeriod.value.to.toISOString()"
+        :from="dashboardDates.dateRangeFromPeriod.value!.from.toISOString()"
+        :to="dashboardDates.dateRangeFromPeriod.value!.to.toISOString()"
       />
     </div>
   </div>
