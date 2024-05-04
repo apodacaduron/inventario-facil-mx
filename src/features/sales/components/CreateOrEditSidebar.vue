@@ -598,11 +598,10 @@ watch(
         <SheetFooter>
           <Button
             @click="saleSidebarMode = 'sales'"
-            variant="outline"
             class="w-full"
             type="button"
           >
-            Cerrar
+            Aceptar
           </Button>
         </SheetFooter>
       </div>
