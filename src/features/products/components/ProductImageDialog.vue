@@ -199,6 +199,16 @@ async function uploadFile() {
     });
     await queryClient.invalidateQueries({ queryKey: ['products'] });
   } else if (productImageUrl.value) {
+    if (!isValidHttpUrl(productImageUrl.value)) {
+      toast({
+        title: 'Uh oh! Something went wrong.',
+        description:
+          'The link provided is not a valid URL',
+        variant: 'destructive',
+      });
+      return;
+    };
+
     const filename = productImageUrl.value.split('/').pop();
     if (!filename) return;
 
@@ -238,6 +248,18 @@ async function uploadFile() {
     await queryClient.invalidateQueries({ queryKey: ['products'] });
   }
   openModel.value = false;
+}
+
+function isValidHttpUrl(maybeUrl: string) {
+  let url;
+  
+  try {
+    url = new URL(maybeUrl);
+  } catch (_) {
+    return false;  
+  }
+
+  return url.protocol === "http:" || url.protocol === "https:";
 }
 
 async function compressFile(imageFile: File) {
