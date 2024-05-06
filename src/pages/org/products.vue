@@ -5,6 +5,7 @@ import {
   CreateProduct,
   DeleteProductDialog,
   Product,
+  ProductImageDialog,
   ShareStockDialog,
   UpdateProduct,
   productServicesTypeguards,
@@ -66,6 +67,7 @@ const isCreateOrUpdateSidebarOpen = ref(false);
 const isDeleteProductDialogOpen = ref(false);
 const isShareStockDialogOpen = ref(false);
 const isAddStockDialogOpen = ref(false);
+const isProductImageDialogOpen = ref(false);
 const activeProduct = ref<Product | null>(null);
 const productsTableOrder = useTableOrder({
   options: {
@@ -176,6 +178,7 @@ watchEffect(() => {
   if (isDeleteProductDialogOpen.value) return;
   if (isAddStockDialogOpen.value) return;
   if (isCreateOrUpdateSidebarOpen.value) return;
+  if (isProductImageDialogOpen.value) return;
 
   activeProduct.value = null;
 });
@@ -367,7 +370,7 @@ watchEffect(() => {
               <TableCell
                 class="flex items-center p-4 text-foreground whitespace-nowrap w-max"
               >
-                <Avatar>
+                <Avatar class="cursor-pointer" @click="isProductImageDialogOpen = true; activeProduct = product">
                   <AvatarImage :src="product?.image_url ?? ''" />
                   <AvatarFallback>{{
                     `${product?.name?.substring(0, 1).toLocaleUpperCase()}`
@@ -511,6 +514,12 @@ watchEffect(() => {
     />
     <AddStockDialog
       v-model:open="isAddStockDialogOpen"
+      :product="activeProduct"
+      :isLoading="updateProductMutation.isPending.value"
+      @save="handleSaveModal"
+    />
+    <ProductImageDialog
+      v-model:open="isProductImageDialogOpen"
       :product="activeProduct"
       :isLoading="updateProductMutation.isPending.value"
       @save="handleSaveModal"
