@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/vue-query';
 import { useAssetServices } from './useAssetServices';
-import { MaybeRefOrGetter, toValue } from 'vue';
+import { MaybeRefOrGetter, toRef, toValue } from 'vue';
 
 export function useAssetByUrlQuery(context?: {
   options: {
@@ -19,6 +19,6 @@ export function useAssetByUrlQuery(context?: {
 
       return response?.data;
     },
-    enabled: Boolean(context?.options?.enabled)
+    enabled: toRef(() => Boolean(toValue(context?.options?.enabled)))
   });
 }
