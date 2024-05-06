@@ -521,8 +521,6 @@ watchEffect(() => {
     <ProductImageDialog
       v-model:open="isProductImageDialogOpen"
       :product="activeProduct"
-      :isLoading="updateProductMutation.isPending.value"
-      @save="handleSaveModal"
     />
   </div>
 </template>

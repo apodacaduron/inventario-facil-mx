@@ -28,7 +28,6 @@ export const productServicesTypeguards = {
       !("product_id" in maybeProduct && maybeProduct.product_id) &&
       "name" in maybeProduct &&
       "description" in maybeProduct &&
-      "image_url" in maybeProduct &&
       "current_stock" in maybeProduct
     );
   },
