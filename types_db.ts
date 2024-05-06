@@ -9,6 +9,60 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      assets: {
+        Row: {
+          created_at: string
+          file_type: string | null
+          filename: string | null
+          id: string
+          is_external: boolean | null
+          org_id: string | null
+          path: string | null
+          related_id: string | null
+          url: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          file_type?: string | null
+          filename?: string | null
+          id?: string
+          is_external?: boolean | null
+          org_id?: string | null
+          path?: string | null
+          related_id?: string | null
+          url?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          file_type?: string | null
+          filename?: string | null
+          id?: string
+          is_external?: boolean | null
+          org_id?: string | null
+          path?: string | null
+          related_id?: string | null
+          url?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assets_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "i_organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assets_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       i_customers: {
         Row: {
           address: string | null
@@ -257,6 +311,7 @@ export type Database = {
           cancellation_notes: string | null
           created_at: string
           customer_id: string | null
+          delivery_date: string | null
           id: string
           notes: string | null
           org_id: string | null
@@ -269,6 +324,7 @@ export type Database = {
           cancellation_notes?: string | null
           created_at?: string
           customer_id?: string | null
+          delivery_date?: string | null
           id?: string
           notes?: string | null
           org_id?: string | null
@@ -281,6 +337,7 @@ export type Database = {
           cancellation_notes?: string | null
           created_at?: string
           customer_id?: string | null
+          delivery_date?: string | null
           id?: string
           notes?: string | null
           org_id?: string | null

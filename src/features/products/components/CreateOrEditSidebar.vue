@@ -53,7 +53,6 @@ const locale = {
 const initialForm = {
   name: '',
   description: '',
-  image_url: '',
   current_stock: null,
   unit_price: null,
   retail_price: null,
@@ -64,7 +63,6 @@ const formSchema = toTypedSchema(
   z.object({
     name: z.string().min(1, 'Nombre de producto es requerido'),
     description: z.string().optional(),
-    image_url: z.string().optional(),
     current_stock: z.coerce
       .number({ invalid_type_error: 'Ingresa un número válido' })
       .nonnegative()
@@ -114,7 +112,6 @@ watch(openModel, (nextOpenValue) => {
       values: {
         name: props.product.name ?? '',
         description: props.product.description ?? '',
-        image_url: props.product.image_url ?? '',
         current_stock: props.product.current_stock ?? 0,
         product_id: props.product.id,
         unit_price: currencyFormatter.parseRaw(props.product.unit_price) ?? 0,
@@ -140,19 +137,6 @@ watch(openModel, (nextOpenValue) => {
         </SheetDescription>
       </SheetHeader>
       <form @submit="onSubmit" class="flex flex-col gap-6 mt-6 mb-6">
-        <FormField v-slot="{ componentField }" name="image_url">
-          <FormItem v-auto-animate>
-            <FormLabel>Imagen de producto</FormLabel>
-            <FormControl>
-              <Input
-                type="text"
-                placeholder="URL de la imagen de tu producto"
-                v-bind="componentField"
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        </FormField>
         <FormField v-slot="{ componentField }" name="name">
           <FormItem v-auto-animate>
             <FormLabel>Nombre de producto</FormLabel>
