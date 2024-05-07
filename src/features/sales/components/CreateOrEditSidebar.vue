@@ -12,7 +12,6 @@ import {
   FormItem,
   FormLabel,
   FormControl,
-  FormDescription,
   FormMessage,
   Textarea,
   Card,
@@ -196,31 +195,38 @@ const formSchema = toTypedSchema(
     customer_id: z.string().uuid('Por favor seleccione a un cliente'),
     shipping_cost: z.coerce
       .number({ invalid_type_error: 'Ingresa un número válido' })
-      .nonnegative()
+      .nonnegative({ message: 'Ingrese un número mayor o igual a cero' })
       .finite()
       .safe(),
     notes: z.string().optional(),
     cancellation_notes: z.string().optional(),
     products: z
       .array(
-        z.object({
-          sale_detail_id: z.string().uuid().optional(),
-          product_id: z.string().uuid(),
-          price: z.coerce
-            .number({ message: 'Ingrese un número válido' })
-            .positive()
-            .finite()
-            .safe(),
-          unit_price: z.coerce.number().positive().finite().safe(),
-          qty: z.coerce
-            .number({ message: 'Ingrese un número válido' })
-            .int('Cantidad debe ser número entero')
-            .positive()
-            .finite()
-            .safe(),
-          name: z.string(),
-          image_url: z.string().nullish().optional(),
-        })
+        z
+          .object({
+            sale_detail_id: z.string().uuid().optional(),
+            product_id: z.string().uuid(),
+            price: z.coerce
+              .number({ message: 'Ingrese un número válido' })
+              .positive({ message: 'Ingrese un número positivo' })
+              .finite()
+              .safe(),
+            unit_price: z.coerce.number({ message: 'Ingrese un número válido' }).positive({ message: 'Ingrese un número positivo' }).finite().safe(),
+            qty: z.coerce
+              .number({ message: 'Ingrese un número válido' })
+              .int('Cantidad debe ser número entero')
+              .positive({ message: 'Ingrese un número positivo' })
+              .finite()
+              .safe(),
+            name: z.string(),
+            image_url: z.string().nullish().optional(),
+          })
+          .refine((data) => {
+            return data.unit_price < (currencyFormatter.toCents(data.price) ?? 0)
+          }, {
+            message: 'Precio de venta debe de ser mayor al precio unitario',
+            path: ['price'],
+          })
       )
       .min(1, 'Por favor seleccione al menos un producto'),
   })
@@ -379,10 +385,6 @@ watch(openModel, (nextOpenValue) => {
                 </span>
                 <span v-else>Seleccionar cliente</span>
               </Button>
-              <FormDescription>
-                Por favor, registra al cliente antes de proceder con la venta,
-                en caso de que no esté registrado en nuestra base de datos.
-              </FormDescription>
               <FormMessage />
             </FormItem>
           </FormField>

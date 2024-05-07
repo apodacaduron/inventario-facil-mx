@@ -63,22 +63,25 @@ const formSchema = toTypedSchema(
   z.object({
     name: z.string().min(1, 'Nombre de producto es requerido'),
     description: z.string().optional(),
-    current_stock: z.coerce
+    current_stock: z
       .number({ invalid_type_error: 'Ingresa un número válido' })
-      .nonnegative()
+      .nonnegative({ message: 'Ingrese un número mayor o igual a cero' })
       .finite()
       .safe(),
     unit_price: z.coerce
       .number({ invalid_type_error: 'Ingresa un número válido' })
-      .nonnegative()
+      .positive({ message: 'Ingrese un número positivo' })
       .finite()
       .safe(),
     retail_price: z.coerce
       .number({ invalid_type_error: 'Ingresa un número válido' })
-      .nonnegative()
+      .positive({ message: 'Ingrese un número positivo' })
       .finite()
       .safe(),
     product_id: z.string().uuid().optional(),
+  }).refine((data)=> data.unit_price < data.retail_price, {
+    message: 'Precio de venta debe de ser mayor al precio unitario',
+    path: ['retail_price']
   })
 );
 const formInstance = useForm<CreateProduct | UpdateProduct>({
