@@ -63,7 +63,7 @@ const formSchema = toTypedSchema(
   z.object({
     name: z.string().min(1, 'Nombre de producto es requerido'),
     description: z.string().optional(),
-    current_stock: z.coerce
+    current_stock: z
       .number({ invalid_type_error: 'Ingresa un número válido' })
       .nonnegative()
       .finite()
@@ -79,6 +79,9 @@ const formSchema = toTypedSchema(
       .finite()
       .safe(),
     product_id: z.string().uuid().optional(),
+  }).refine((data)=> data.unit_price < data.retail_price, {
+    message: 'Precio de venta debe de ser mayor al precio unitario',
+    path: ['retail_price']
   })
 );
 const formInstance = useForm<CreateProduct | UpdateProduct>({
