@@ -39,12 +39,12 @@ const salesQuery = useSalesQuery({
         {
           column: 'created_at',
           operator: 'gte',
-          value: dashboardDates.dateRangeFromPeriod.value.from.toISOString(),
+          value: dashboardDates.dateRangeFromPeriod.value?.from.toISOString(),
         },
         {
           column: 'created_at',
           operator: 'lte',
-          value: dashboardDates.dateRangeFromPeriod.value.to.toISOString(),
+          value: dashboardDates.dateRangeFromPeriod.value?.to.toISOString(),
         },
       ];
     }),
@@ -54,8 +54,8 @@ const tableLoadingStates = useTableStates(salesQuery, '');
 const salesTotalIncomeQuery = useSalesTotalIncomeQuery({
   options: {
     range: toRef(() => ({
-      from: dashboardDates.dateRangeFromPeriod.value.from.toISOString(),
-      to: dashboardDates.dateRangeFromPeriod.value.to.toISOString(),
+      from: dashboardDates.dateRangeFromPeriod.value?.from.toISOString() ?? '',
+      to: dashboardDates.dateRangeFromPeriod.value?.to.toISOString() ?? '',
     })),
   },
 });
