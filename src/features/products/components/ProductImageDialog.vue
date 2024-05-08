@@ -119,6 +119,7 @@ async function uploadFile() {
     );
     if (assetForThisProductExists && assetByRelatedIdResponse?.data?.id) {
       await assetServices.deleteAsset(assetByRelatedIdResponse?.data?.id);
+      await assetServices.deleteFile({ bucket: 'product-images', path: `${organization?.org_id}/${props.product?.id}/${assetByRelatedIdResponse?.data.filename}` })
     }
     await productServices.updateProduct({
       product_id: props.product.id,
@@ -215,8 +216,8 @@ async function uploadFile() {
     const assetByUrlResponse = await assetServices.getAssetByUrl(
       productImageUrl.value
     );
-    const assetExistsInTable = Boolean(assetByUrlResponse?.data?.id);
-    if (assetExistsInTable && assetByUrlResponse?.data?.id) return;
+    const assetUrlExistsInTable = Boolean(assetByUrlResponse?.data?.id);
+    if (assetUrlExistsInTable && assetByUrlResponse?.data?.id) return;
 
     const assetByRelatedIdResponse = await assetServices.getAssetByRelatedId(
       props.product.id
@@ -225,8 +226,13 @@ async function uploadFile() {
       assetByRelatedIdResponse?.data?.id
     );
     if (assetForThisProductExists && assetByRelatedIdResponse?.data?.id) {
+      await assetServices.deleteFile({ bucket: 'product-images', path: `${organization?.org_id}/${props.product?.id}/${assetByRelatedIdResponse?.data.filename}` })
       await assetServices.updateAsset(assetByRelatedIdResponse?.data?.id, {
         url: productImageUrl.value,
+        file_type: 'image',
+        filename: '',
+        is_external: true,
+        path: '',
       });
     } else {
       await assetServices.createAsset({
