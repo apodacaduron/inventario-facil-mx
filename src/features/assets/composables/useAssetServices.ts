@@ -51,6 +51,17 @@ export function useAssetServices() {
     return response;
   }
 
+  async function deleteFile(options: {
+    bucket: string;
+    path: string;
+  }) {
+    const response = await supabase.storage
+      .from(options.bucket)
+      .remove([options.path]);
+
+    return response;
+  }
+
   async function getPublicUrlFromFile(options: {
     bucket: string;
     path: string;
@@ -70,5 +81,6 @@ export function useAssetServices() {
     deleteAsset,
     updateAsset,
     getAssetByRelatedId,
+    deleteFile,
   };
 }
