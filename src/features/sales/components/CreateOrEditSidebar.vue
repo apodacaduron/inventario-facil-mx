@@ -495,7 +495,7 @@ watch(openModel, (nextOpenValue) => {
                     <TableCell class="text-center flex justify-center">
                       {{
                         formInstance.values.products.reduce(
-                          (acc, formProduct) => acc + (formProduct.qty ?? 0),
+                          (acc, formProduct) => acc + (Number(formProduct.qty ?? 0)),
                           0
                         )
                       }}
