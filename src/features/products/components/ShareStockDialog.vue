@@ -88,14 +88,14 @@ function copyText() {
         >
           🎉 Lista de Productos disponibles
         </h3>
-        <div class="mt-2">
+        <div class="my-2">
           <p class="text-sm text-slate-500 dark:text-slate-400">
             A continuación se muestra una lista de productos disponibles
             actualmente en stock. Puedes copiar y compartir esta lista según sea
             necesario.
           </p>
         </div>
-        <div class="my-2">
+        <div class="my-4">
           <Textarea
             class="min-h-[128px]"
             autosize

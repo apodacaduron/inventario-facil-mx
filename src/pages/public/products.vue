@@ -36,7 +36,7 @@ const productsQuery = useProductsQuery({
   <nav class="h-[56px] flex justify-center">
     <router-link to="/" class="flex">
       <span
-        class="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap dark:text-white"
+        class="self-center text-xl sm:text-2xl whitespace-nowrap dark:text-white"
         >inventariofacil.mx
       </span>
     </router-link>
