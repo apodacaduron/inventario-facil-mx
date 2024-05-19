@@ -3,7 +3,6 @@ import { ArrowLeftOnRectangleIcon, MoonIcon, SunIcon } from "@heroicons/vue/24/o
 import { useDark, useToggle } from "@vueuse/core";
 import { useAuthStore, useOrganizationStore } from "@/stores";
 import { Button } from "@/components/ui";
-import { supabase } from "@/config/supabase";
 
 const authStore = useAuthStore();
 const organizationStore = useOrganizationStore();
