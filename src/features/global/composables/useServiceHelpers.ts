@@ -10,6 +10,7 @@ export type LoadListOptions = {
     value: any;
   }>;
   order?: [string, "asc" | "desc"];
+  organization_id?: string;
 };
 
 export function useServiceHelpers() {

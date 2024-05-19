@@ -34,6 +34,7 @@ const authMeta: RouteWithMeta['meta'] = {
 
 export const routes: RouteWithMeta[] = [
   { path: '/', component: () => import('@/pages/Home.vue') },
+  { path: '/public/org/:orgId/products', component: () => import('@/pages/public/products.vue') },
   {
     path: '/org/:orgId',
     meta: organizationMeta,

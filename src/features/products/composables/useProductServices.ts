@@ -42,8 +42,7 @@ export function useProductServices() {
   const serviceHelpers = useServiceHelpers();
 
   async function loadList(options?: LoadListOptions) {
-    const organization = serviceHelpers.getCurrentOrganization();
-    if (!organization?.org_id)
+    if (!options?.organization_id)
       throw new Error("Organization is required to get product list");
 
     const [from, to] = serviceHelpers.getPaginationRange(options?.offset);
@@ -51,7 +50,7 @@ export function useProductServices() {
     let productQuery = supabase
       .from("i_products")
       .select("*")
-      .eq("org_id", organization.org_id)
+      .eq("org_id", options?.organization_id)
       .range(from, to);
 
     if (options?.search) {
