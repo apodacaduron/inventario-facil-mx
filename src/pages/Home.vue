@@ -25,6 +25,7 @@ const isDark = useDark();
           La solución perfecta para llevar el control de tu inventario de manera
           rápida y sencilla, ¡sin complicaciones ni papeleo!
         </p>
+
         <router-link
           v-if="authStore.isLoggedIn"
           :to="`/org/${
@@ -41,43 +42,20 @@ const isDark = useDark();
             :disabled="!organizationStore.hasOrganizations"
           >
             Dashboard
-            <svg
-              class="w-3.5 h-3.5 ms-2 rtl:rotate-180"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 14 10"
-            >
-              <path
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M1 5h12m0 0L9 1m4 4L9 9"
-              />
-            </svg>
           </Button>
         </router-link>
-        <router-link v-else to="/auth/sign-up">
-          <Button class="px-8 py-3 text-base">
-            Regístrate
-            <svg
-              class="w-3.5 h-3.5 ms-2 rtl:rotate-180"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 14 10"
-            >
-              <path
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M1 5h12m0 0L9 1m4 4L9 9"
-              />
-            </svg>
-          </Button>
-        </router-link>
+        <div v-else class="flex gap-4 justify-center">
+          <router-link to="/auth/sign-in">
+            <Button variant="outline" class="px-8 py-3 text-base">
+              Inicia sesion
+            </Button>
+          </router-link>
+          <router-link to="/auth/sign-up">
+            <Button class="px-8 py-3 text-base">
+              Regístrate
+            </Button>
+          </router-link>
+        </div>
       </div>
       <img
         :src="`/hero-${isDark ? 'dark' : 'light'}.svg`"

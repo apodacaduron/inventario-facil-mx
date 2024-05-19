@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { MoonIcon, SunIcon } from "@heroicons/vue/24/outline";
+import { ArrowLeftOnRectangleIcon, MoonIcon, SunIcon } from "@heroicons/vue/24/outline";
 import { useDark, useToggle } from "@vueuse/core";
 import { useAuthStore, useOrganizationStore } from "@/stores";
 import { Button } from "@/components/ui";
+import { supabase } from "@/config/supabase";
 
 const authStore = useAuthStore();
 const organizationStore = useOrganizationStore();
@@ -27,12 +28,13 @@ const toggleDark = useToggle(isDark);
         <MoonIcon class="w-4 h-4 stroke-[2px]" v-if="isDark" />
         <SunIcon class="w-4 h-4 stroke-[2px]" v-else />
       </Button>
-      <div v-if="authStore.isLoggedIn" class="hidden gap-4 md:flex">
+      <div v-if="authStore.isLoggedIn" class="flex gap-4">
         <router-link
           :to="`/org/${
             organizationStore.organizations?.find(Boolean)?.org_id
           }/dashboard`"
           :class="[
+            'hidden md:block',
             {
               'pointer-events-none': !organizationStore.hasOrganizations,
               'opacity-80': !organizationStore.hasOrganizations,
@@ -46,6 +48,17 @@ const toggleDark = useToggle(isDark);
             Dashboard
           </Button>
         </router-link>
+        <Button
+          variant="outline"
+          :loading="!organizationStore.hasOrganizations"
+          :disabled="!organizationStore.hasOrganizations"
+          @click="authStore.signOut"
+        >
+          <ArrowLeftOnRectangleIcon class="w-4 h-4 md:hidden" />
+          <span class="hidden md:block">
+            Cerrar sesion
+          </span>
+        </Button>
       </div>
       <div v-else class="hidden gap-4 md:flex">
         <router-link to="/auth/sign-in">
