@@ -2,14 +2,14 @@ import { useQuery } from '@tanstack/vue-query';
 import { MaybeRefOrGetter, toValue } from 'vue';
 import { useOrganizationServices } from './useOrganizationServices';
 
+const organizationServices = useOrganizationServices();
+
 export function useOrganizationByIdQuery(context: {
   options: {
     enabled?: MaybeRefOrGetter<boolean | undefined>;
     organization_id?: MaybeRefOrGetter<string | undefined>;
   };
 }) {
-  const organizationServices = useOrganizationServices();
-
   return useQuery({
     queryKey: [
       'organization',
