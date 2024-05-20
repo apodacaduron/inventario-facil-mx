@@ -50,7 +50,7 @@ import {
 import { toTypedSchema } from '@vee-validate/zod';
 import { useFieldArray, useForm } from 'vee-validate';
 import { useOrganizationStore } from '@/stores';
-import { useServiceHelpers } from '@/features/global';
+import { useRoute } from 'vue-router';
 
 type CreateOrEditSidebarProps = {
   viewOnly?: boolean;
@@ -132,9 +132,8 @@ const customerSearch = ref('');
 const productSearch = ref('');
 const customerSearchDebounced = refDebounced(customerSearch, 400);
 const productSearchDebounced = refDebounced(productSearch, 400);
+const route = useRoute()
 
-const serviceHelpers = useServiceHelpers();
-const organization = serviceHelpers.getCurrentOrganization();
 const organizationStore = useOrganizationStore();
 const currencyFormatter = useCurrencyFormatter();
 const customersQuery = useCustomersQuery({
@@ -156,7 +155,7 @@ const productsQuery = useProductsQuery({
         organizationStore.hasOrganizations &&
         saleSidebarMode.value === 'products'
     ),
-    organization_id: toRef(() => organization?.org_id?.toString()),
+    organization_id: toRef(() => route.params?.orgId?.toString()),
     search: productSearchDebounced,
     filters: toRef(() => {
       if (allowOutOfStockProducts.value) return [];

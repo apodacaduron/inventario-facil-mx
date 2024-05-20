@@ -34,8 +34,8 @@ import {
   useAssetServices,
 } from '@/features/assets/composables';
 import { useMutation, useQueryClient } from '@tanstack/vue-query';
-import { useServiceHelpers } from '@/features/global';
 import { useAuthStore } from '@/stores';
+import { useRoute } from 'vue-router';
 
 type ProductImageDialogProps = {
   product: Product | null;
@@ -53,11 +53,10 @@ const selectedFile = ref<File | null>(null);
 const productImageUrl = ref('');
 const productHoverRef = ref();
 
+const route = useRoute();
 const authStore = useAuthStore();
 const queryClient = useQueryClient();
 const isHovered = useElementHover(productHoverRef);
-const serviceHelpers = useServiceHelpers();
-const organization = serviceHelpers.getCurrentOrganization();
 const { toast } = useToast();
 const assetServices = useAssetServices();
 const productServices = useProductServices();
@@ -106,7 +105,7 @@ function resetImage() {
 }
 
 async function uploadFile() {
-  if (!organization?.org_id) return;
+  if (!route.params.orgId.toString()) return;
   if (!props.product?.id) return;
   if (!authStore.session?.user.id) return;
 
@@ -119,7 +118,7 @@ async function uploadFile() {
     );
     if (assetForThisProductExists && assetByRelatedIdResponse?.data?.id) {
       await assetServices.deleteAsset(assetByRelatedIdResponse?.data?.id);
-      await assetServices.deleteFile({ bucket: 'product-images', path: `${organization?.org_id}/${props.product?.id}/${assetByRelatedIdResponse?.data.filename}` })
+      await assetServices.deleteFile({ bucket: 'product-images', path: `${route.params.orgId.toString()}/${props.product?.id}/${assetByRelatedIdResponse?.data.filename}` })
     }
     await productServices.updateProduct({
       product_id: props.product.id,
@@ -138,7 +137,7 @@ async function uploadFile() {
     const response = await assetServices.uploadFile({
       bucket: 'product-images',
       file: compressedFile,
-      path: `${organization?.org_id}/${props.product?.id}/main.${extension}`,
+      path: `${route.params.orgId.toString()}/${props.product?.id}/main.${extension}`,
     });
     if (response.error) {
       toast({
@@ -175,7 +174,7 @@ async function uploadFile() {
         file_type: selectedFile.value?.type ?? 'image',
         filename: `main.${extension}`,
         is_external: false,
-        org_id: organization?.org_id,
+        org_id: route.params.orgId.toString(),
         path: imagePath,
         url: responsePublicUrl.data.publicUrl,
         related_id: props.product?.id,
@@ -186,7 +185,7 @@ async function uploadFile() {
         file_type: selectedFile.value?.type ?? 'image',
         filename: `main.${extension}`,
         is_external: false,
-        org_id: organization?.org_id,
+        org_id: route.params.orgId.toString(),
         path: imagePath,
         url: responsePublicUrl.data.publicUrl,
         related_id: props.product?.id,
@@ -226,7 +225,7 @@ async function uploadFile() {
       assetByRelatedIdResponse?.data?.id
     );
     if (assetForThisProductExists && assetByRelatedIdResponse?.data?.id) {
-      await assetServices.deleteFile({ bucket: 'product-images', path: `${organization?.org_id}/${props.product?.id}/${assetByRelatedIdResponse?.data.filename}` })
+      await assetServices.deleteFile({ bucket: 'product-images', path: `${route.params.orgId.toString()}/${props.product?.id}/${assetByRelatedIdResponse?.data.filename}` })
       await assetServices.updateAsset(assetByRelatedIdResponse?.data?.id, {
         url: productImageUrl.value,
         file_type: 'image',
@@ -239,7 +238,7 @@ async function uploadFile() {
         file_type: 'image',
         filename: '',
         is_external: true,
-        org_id: organization?.org_id,
+        org_id: route.params.orgId.toString(),
         path: '',
         url: productImageUrl.value,
         related_id: props.product?.id,
