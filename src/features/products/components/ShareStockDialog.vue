@@ -17,6 +17,7 @@ import {
 } from '@vueuse/core';
 import { computed, ref, toRef } from 'vue';
 import { useProductsQuery } from '../composables';
+import { useServiceHelpers } from '@/features/global';
 
 const openModel = defineModel<boolean>('open');
 
@@ -26,10 +27,14 @@ const hasBeenCopied = ref(false);
 const [ModalBodyTemplate, ModalBody] = createReusableTemplate();
 const isDesktop = useMediaQuery('(min-width: 768px)');
 const clipboard = useClipboard();
+const serviceHelpers = useServiceHelpers();
+const organization = serviceHelpers.getCurrentOrganization();
+
 const productsQuery = useProductsQuery({
   options: {
     enabled: toRef(() => Boolean(openModel.value)),
     search: '',
+    organization_id: toRef(() => organization?.org_id?.toString()),
     filters: toRef(() => {
       return [
         {
@@ -83,14 +88,14 @@ function copyText() {
         >
           🎉 Lista de Productos disponibles
         </h3>
-        <div class="mt-2">
+        <div class="my-2">
           <p class="text-sm text-slate-500 dark:text-slate-400">
             A continuación se muestra una lista de productos disponibles
             actualmente en stock. Puedes copiar y compartir esta lista según sea
             necesario.
           </p>
         </div>
-        <div class="my-2">
+        <div class="my-4">
           <Textarea
             class="min-h-[128px]"
             autosize

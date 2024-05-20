@@ -9,6 +9,7 @@ export function useProductsQuery(context: {
     search: MaybeRefOrGetter<string | undefined>;
     filters?: MaybeRefOrGetter<LoadListOptions['filters'] | undefined>;
     order?: MaybeRefOrGetter<LoadListOptions['order'] | undefined>;
+    organization_id?: MaybeRefOrGetter<string | undefined>;
   };
 }) {
   const productServices = useProductServices();
@@ -19,6 +20,7 @@ export function useProductsQuery(context: {
       context.options.search,
       context.options.filters,
       context.options.order,
+      context.options.organization_id,
     ],
     queryFn({ pageParam }) {
       return productServices.loadList({
@@ -26,6 +28,46 @@ export function useProductsQuery(context: {
         search: toValue(context.options.search),
         filters: toValue(context.options.filters),
         order: toValue(context.options.order),
+        organization_id: toValue(context.options.organization_id),
+      });
+    },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, _allPages, lastPageParam) => {
+      if (lastPage.data?.length === 0) {
+        return undefined;
+      }
+      return lastPageParam + 1;
+    },
+    enabled: context.options.enabled,
+  });
+}
+
+export function usePublicPageProductsQuery(context: {
+  options: {
+    enabled: MaybeRefOrGetter<boolean | undefined>;
+    search: MaybeRefOrGetter<string | undefined>;
+    filters?: MaybeRefOrGetter<LoadListOptions['filters'] | undefined>;
+    order?: MaybeRefOrGetter<LoadListOptions['order'] | undefined>;
+    organization_id?: MaybeRefOrGetter<string | undefined>;
+  };
+}) {
+  const productServices = useProductServices();
+
+  return useInfiniteQuery({
+    queryKey: [
+      'products',
+      context.options.search,
+      context.options.filters,
+      context.options.order,
+      context.options.organization_id,
+    ],
+    queryFn({ pageParam }) {
+      return productServices.loadPublicList({
+        offset: pageParam,
+        search: toValue(context.options.search),
+        filters: toValue(context.options.filters),
+        order: toValue(context.options.order),
+        organization_id: toValue(context.options.organization_id),
       });
     },
     initialPageParam: 0,

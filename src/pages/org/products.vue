@@ -54,7 +54,7 @@ import { refDebounced, useInfiniteScroll, useStorage } from '@vueuse/core';
 import { useOrganizationStore, useSubscriptionStore } from '@/stores';
 import { useProductsQuery } from '@/features/products/composables/useProductQueries';
 import { useMutation, useQueryClient } from '@tanstack/vue-query';
-import { FeedbackCard, useTableOrder, useTableStates } from '@/features/global';
+import { FeedbackCard, useServiceHelpers, useTableOrder, useTableStates } from '@/features/global';
 
 const tableRef = ref<HTMLElement | null>(null);
 
@@ -74,6 +74,8 @@ const productsTableOrder = useTableOrder({
     initialOrder: ['created_at', 'desc'],
   },
 });
+const serviceHelpers = useServiceHelpers();
+const organization = serviceHelpers.getCurrentOrganization();
 const queryClient = useQueryClient();
 const organizationStore = useOrganizationStore();
 const subscriptionStore = useSubscriptionStore();
@@ -94,6 +96,7 @@ const productsQuery = useProductsQuery({
   options: {
     enabled: toRef(() => organizationStore.hasOrganizations),
     search: productSearchDebounced,
+    organization_id: toRef(() => organization?.org_id?.toString()),
     order: toRef(() => productsTableOrder.tableOrder.value),
     filters: toRef(() => {
       if (tableFiltersRef.value.status === 'all') return [];

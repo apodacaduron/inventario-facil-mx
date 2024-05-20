@@ -1,4 +1,5 @@
 import { useRoleServices } from '@/features/global/composables/useRoleServices';
+import { useOrganizationServices } from '@/features/organizations/composables/useOrganizationServices';
 import { useAuthStore } from '@/stores';
 import { useOrganizationStore } from '@/stores/useOrganizationStore';
 import { until } from '@vueuse/core';
@@ -16,6 +17,8 @@ type RouteWithMeta = RouteRecordRaw & {
     redirectIfLoggedIn?: boolean;
     requiresOrganization?: boolean;
     belongsToOrganization?: boolean;
+    requiresPublicProductsPageEnabled?: boolean;
+    hasAdminRole?: boolean
   };
 };
 
@@ -34,6 +37,7 @@ const authMeta: RouteWithMeta['meta'] = {
 
 export const routes: RouteWithMeta[] = [
   { path: '/', component: () => import('@/pages/Home.vue') },
+  { path: '/p/org/:orgId/products', meta: {requiresPublicProductsPageEnabled: true}, component: () => import('@/pages/public/products.vue') },
   {
     path: '/org/:orgId',
     meta: organizationMeta,
@@ -187,6 +191,16 @@ const navigationGuards = {
       }
     }
   },
+  requiresPublicProductsPageEnabled: async (to: RouteLocationNormalized) => {
+    if (to.matched.some((record) => record.meta.requiresPublicProductsPageEnabled)) {
+      const organizationServices = useOrganizationServices();
+      const response = await organizationServices.loadById({ organization_id: to.params.orgId.toString() })
+
+      if (!response.data?.is_public_products_page_enabled) {
+        return '/unauthorized';
+      }
+    }
+  },
 };
 
 router.beforeEach(async (to, _from) => {
@@ -196,6 +210,7 @@ router.beforeEach(async (to, _from) => {
     navigationGuards.requiresOrganization,
     navigationGuards.belongsToOrganization,
     navigationGuards.hasAdminRole,
+    navigationGuards.requiresPublicProductsPageEnabled,
   ];
 
   for (const guard of guards) {

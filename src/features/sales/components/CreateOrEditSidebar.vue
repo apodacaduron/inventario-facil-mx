@@ -50,6 +50,7 @@ import {
 import { toTypedSchema } from '@vee-validate/zod';
 import { useFieldArray, useForm } from 'vee-validate';
 import { useOrganizationStore } from '@/stores';
+import { useServiceHelpers } from '@/features/global';
 
 type CreateOrEditSidebarProps = {
   viewOnly?: boolean;
@@ -132,6 +133,8 @@ const productSearch = ref('');
 const customerSearchDebounced = refDebounced(customerSearch, 400);
 const productSearchDebounced = refDebounced(productSearch, 400);
 
+const serviceHelpers = useServiceHelpers();
+const organization = serviceHelpers.getCurrentOrganization();
 const organizationStore = useOrganizationStore();
 const currencyFormatter = useCurrencyFormatter();
 const customersQuery = useCustomersQuery({
@@ -153,6 +156,7 @@ const productsQuery = useProductsQuery({
         organizationStore.hasOrganizations &&
         saleSidebarMode.value === 'products'
     ),
+    organization_id: toRef(() => organization?.org_id?.toString()),
     search: productSearchDebounced,
     filters: toRef(() => {
       if (allowOutOfStockProducts.value) return [];
