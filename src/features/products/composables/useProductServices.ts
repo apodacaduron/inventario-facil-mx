@@ -1,8 +1,9 @@
 import { supabase } from "@/config/supabase";
 import { LoadListOptions, useServiceHelpers } from "@/features/global";
+import { Tables } from "../../../../types_db";
 
 export type CreateProduct = {
-  product_id?: Product["id"];
+  product_id?: Product['id'];
   name: Product["name"];
   description: Product["description"];
   image_url: Product["image_url"];
@@ -15,10 +16,7 @@ export type UpdateProduct = {
 } & Partial<CreateProduct>;
 export type DeleteProduct = Product["id"];
 
-export type ProductList = Awaited<
-  ReturnType<ReturnType<typeof useProductServices>["loadList"]>
->["data"];
-export type Product = NonNullable<ProductList>[number];
+export type Product = Tables<'i_products'>
 
 export const productServicesTypeguards = {
   isCreateProduct(
@@ -50,6 +48,42 @@ export function useProductServices() {
     let productQuery = supabase
       .from("i_products")
       .select("*")
+      .eq("org_id", options?.organization_id)
+      .range(from, to);
+
+    if (options?.search) {
+      productQuery = productQuery.ilike("name", `%${options.search}%`);
+    }
+
+    if (options?.order) {
+      const [column = "created_at", order = "desc"] = options?.order;
+      productQuery = productQuery.order(column, {
+        ascending: order === "asc",
+      });
+    }
+
+    if (options?.filters) {
+      options?.filters.forEach((filter) => {
+        productQuery = productQuery.filter(
+          filter.column,
+          filter.operator,
+          filter.value
+        );
+      });
+    }
+
+    return await productQuery;
+  }
+
+  async function loadPublicList(options?: LoadListOptions) {
+    if (!options?.organization_id)
+      throw new Error("Organization is required to get product list");
+
+    const [from, to] = serviceHelpers.getPaginationRange(options?.offset);
+
+    let productQuery = supabase
+      .from("i_products")
+      .select("id,name,current_stock,image_url")
       .eq("org_id", options?.organization_id)
       .range(from, to);
 
@@ -111,9 +145,9 @@ export function useProductServices() {
   async function getProductCount(range?: { from: string; to: string }) {
     const organization = serviceHelpers.getCurrentOrganization();
     if (!organization?.org_id)
-      throw new Error('Organization is required to get product count');
+      throw new Error("Organization is required to get product count");
 
-    return await supabase.rpc('get_products_count', {
+    return await supabase.rpc("get_products_count", {
       organization_id_input: organization.org_id,
       ...(range
         ? { start_date_input: range.from, end_date_input: range.to }
@@ -123,9 +157,9 @@ export function useProductServices() {
   async function getProductsInStockCount(range?: { from: string; to: string }) {
     const organization = serviceHelpers.getCurrentOrganization();
     if (!organization?.org_id)
-      throw new Error('Organization is required to get product count');
+      throw new Error("Organization is required to get product count");
 
-    return await supabase.rpc('get_products_in_stock_count', {
+    return await supabase.rpc("get_products_in_stock_count", {
       organization_id_input: organization.org_id,
       ...(range
         ? { start_date_input: range.from, end_date_input: range.to }
@@ -135,9 +169,9 @@ export function useProductServices() {
   async function getMostSoldProducts(range?: { from: string; to: string }) {
     const organization = serviceHelpers.getCurrentOrganization();
     if (!organization?.org_id)
-      throw new Error('Organization is required to get product count');
+      throw new Error("Organization is required to get product count");
 
-    return await supabase.rpc('get_most_sold_products', {
+    return await supabase.rpc("get_most_sold_products", {
       organization_id_input: organization.org_id,
       ...(range
         ? { start_date_input: range.from, end_date_input: range.to }
@@ -147,6 +181,7 @@ export function useProductServices() {
 
   return {
     loadList,
+    loadPublicList,
     createProduct,
     deleteProduct,
     updateProduct,

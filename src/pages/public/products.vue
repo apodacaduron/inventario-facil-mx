@@ -6,7 +6,7 @@ import {
   Card,
   CardContent,
 } from "@/components/ui";
-import { useProductsQuery } from "@/features/products";
+import { usePublicPageProductsQuery } from "@/features/products";
 import { toRef } from "vue";
 import { useRoute } from "vue-router";
 
@@ -14,7 +14,7 @@ const route = useRoute();
 const uuidv4 =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-const productsQuery = useProductsQuery({
+const productsQuery = usePublicPageProductsQuery({
   options: {
     enabled: toRef(() => uuidv4.test(route.params.orgId.toString())),
     search: "",
