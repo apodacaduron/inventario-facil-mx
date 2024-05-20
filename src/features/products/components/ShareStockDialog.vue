@@ -8,44 +8,69 @@ import {
   Label,
   Drawer,
   DrawerContent,
-} from '@/components/ui';
-import { CheckIcon, ShareIcon } from '@heroicons/vue/24/outline';
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+  Input,
+} from "@/components/ui";
+import { CheckIcon, ShareIcon } from "@heroicons/vue/24/outline";
 import {
   createReusableTemplate,
+  refDebounced,
   useClipboard,
   useMediaQuery,
-} from '@vueuse/core';
-import { computed, ref, toRef } from 'vue';
-import { useProductsQuery } from '../composables';
-import { useServiceHelpers } from '@/features/global';
+} from "@vueuse/core";
+import { computed, onMounted, ref, toRef, watch } from "vue";
+import { useProductsQuery } from "../composables";
+import { useRoute } from "vue-router";
+import QRCode from "qrcode";
+import { useOrganizationStore, useSubscriptionStore } from "@/stores";
+import { useMutation } from "@tanstack/vue-query";
+import { useOrganizationServices } from "@/features/organizations";
 
-const openModel = defineModel<boolean>('open');
+const openModel = defineModel<boolean>("open");
 
+const organizationStore = useOrganizationStore();
+
+const isPublicProductsPageEnabled = ref(
+  organizationStore.currentOrganization?.i_organizations
+    ?.is_public_products_page_enabled ?? false
+);
+const isPublicProductsPageEnabledRefDebounced = refDebounced(isPublicProductsPageEnabled, 400);
+const productsPageQrCodeUrl = ref("");
 const showCurrentStock = ref(false);
 const hasBeenCopied = ref(false);
 
-const [ModalBodyTemplate, ModalBody] = createReusableTemplate();
-const isDesktop = useMediaQuery('(min-width: 768px)');
+const [ModalListContentTemplate, ModalListContent] = createReusableTemplate();
+const [ModalLinkContentTemplate, ModalLinkContent] = createReusableTemplate();
+const isDesktop = useMediaQuery("(min-width: 768px)");
 const clipboard = useClipboard();
-const serviceHelpers = useServiceHelpers();
-const organization = serviceHelpers.getCurrentOrganization();
+const route = useRoute();
+const subscriptionStore = useSubscriptionStore();
+const organizationServices = useOrganizationServices();
+const updateOrganizationMutation = useMutation({mutationFn: organizationServices.updateOrganization}) 
 
 const productsQuery = useProductsQuery({
   options: {
     enabled: toRef(() => Boolean(openModel.value)),
-    search: '',
-    organization_id: toRef(() => organization?.org_id?.toString()),
+    search: "",
+    organization_id: toRef(() => route.params.orgId.toString()),
     filters: toRef(() => {
       return [
         {
-          column: 'current_stock',
-          operator: 'gt',
+          column: "current_stock",
+          operator: "gt",
           value: 0,
         },
       ];
     }),
   },
 });
+
+const publicProductsPageUrl = toRef(
+  () => `${window.location.origin}/p/org/${route.params.orgId}/products`
+);
 
 const inventoryString = computed(() => {
   const productsList = productsQuery.data.value?.pages.flatMap(
@@ -57,22 +82,51 @@ const inventoryString = computed(() => {
         if (showCurrentStock.value) {
           return `${product?.name}: ${product?.current_stock}`;
         }
-        return product?.name ?? '';
+        return product?.name ?? "";
       })
-      .join('\r\n') ?? ''
+      .join("\r\n") ?? ""
   );
 });
 
-function copyText() {
+function copyText(text: string) {
   if (hasBeenCopied.value) return;
-  clipboard.copy(inventoryString.value);
+  clipboard.copy(text);
   hasBeenCopied.value = true;
   setTimeout(() => (hasBeenCopied.value = false), 2_000);
 }
+
+function downloadQrCode() {
+  const link = document.createElement("a");
+  link.download = "Codigo QR";
+  link.href = productsPageQrCodeUrl.value;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+function openLinkInNewTab(url: string) {
+  window.open(url, '_blank')
+}
+
+onMounted(async () => {
+  productsPageQrCodeUrl.value = await QRCode.toDataURL(
+    publicProductsPageUrl.value,
+    { scale: 8, width: 800 }
+  );
+});
+
+watch(isPublicProductsPageEnabledRefDebounced, (nextIsPublicProductsPageEnabled) => {
+  updateOrganizationMutation.mutate({
+    organizationId: route.params.orgId.toString(),
+    values: {
+      is_public_products_page_enabled: nextIsPublicProductsPageEnabled
+    }
+  })
+})
 </script>
 
 <template>
-  <ModalBodyTemplate>
+  <ModalListContentTemplate>
     <div>
       <div
         class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100"
@@ -108,21 +162,15 @@ function copyText() {
           <Label for="show-current-stock">Mostrar stock actual</Label>
         </div>
       </div>
-    </div>
-  </ModalBodyTemplate>
-
-  <Dialog v-if="isDesktop" v-model:open="openModel">
-    <DialogContent class="sm:max-w-[425px]">
-      <ModalBody />
       <div class="mt-5 sm:mt-6 flex flex-col gap-3">
         <Button
           :disabled="hasBeenCopied"
           type="button"
           class="w-full"
-          @click="copyText"
+          @click="copyText(inventoryString)"
         >
           <CheckIcon v-if="hasBeenCopied" class="mr-2 w-4 h-4" />
-          {{ hasBeenCopied ? 'Copied' : 'Copy' }}
+          {{ hasBeenCopied ? "Copiado" : "Copiar" }}
         </Button>
         <Button
           type="button"
@@ -133,32 +181,87 @@ function copyText() {
           Close
         </Button>
       </div>
+    </div>
+  </ModalListContentTemplate>
+  <ModalLinkContentTemplate>
+    <div class="flex items-center gap-2 mt-8 mb-4">
+      <Switch
+        id="toggle-public-products-page"
+        v-model:checked="isPublicProductsPageEnabled"
+      />
+      <Label for="toggle-public-products-page">Habilitar link publico</Label>
+    </div>
+    <div class="flex w-full max-w-sm items-center gap-1.5">
+      <Input :defaultValue="publicProductsPageUrl" readonly />
+      <Button
+        variant="outline"
+        @click="openLinkInNewTab(publicProductsPageUrl)"
+      >
+        Abrir
+      </Button>
+      <Button
+        :disabled="hasBeenCopied"
+        type="button"
+        @click="copyText(publicProductsPageUrl)"
+      >
+        <CheckIcon v-if="hasBeenCopied" class="mr-2 w-4 h-4" />
+        {{ hasBeenCopied ? "Copiado" : "Copiar" }}
+      </Button>
+    </div>
+    <div>
+      <img :src="productsPageQrCodeUrl" class="w-full" />
+      <Button class="w-full" @click="downloadQrCode"> Descargar QR </Button>
+    </div>
+  </ModalLinkContentTemplate>
+
+  <Dialog v-if="isDesktop" v-model:open="openModel">
+    <DialogContent class="sm:max-w-[425px] pt-12">
+      <Tabs default-value="list">
+        <TabsList class="grid w-full grid-cols-2">
+          <TabsTrigger value="list"> Lista </TabsTrigger>
+          <TabsTrigger
+            value="link"
+            v-if="subscriptionStore.canEnablePublicProductsPage()"
+          >
+            Link publico
+          </TabsTrigger>
+        </TabsList>
+        <TabsContent value="list">
+          <ModalListContent />
+        </TabsContent>
+        <TabsContent
+          value="link"
+          v-if="subscriptionStore.canEnablePublicProductsPage()"
+        >
+          <ModalLinkContent />
+        </TabsContent>
+      </Tabs>
     </DialogContent>
   </Dialog>
 
   <Drawer v-else v-model:open="openModel">
     <DrawerContent>
       <div class="mx-auto w-full max-w-sm mt-8 mb-16">
-        <ModalBody />
-        <div class="mt-5 sm:mt-6 flex flex-col gap-3">
-          <Button
-            :disabled="hasBeenCopied"
-            type="button"
-            class="w-full"
-            @click="copyText"
+        <Tabs default-value="list">
+          <TabsList class="grid w-full grid-cols-2">
+            <TabsTrigger value="list"> Lista </TabsTrigger>
+            <TabsTrigger
+              value="link"
+              v-if="subscriptionStore.canEnablePublicProductsPage()"
+            >
+              Link publico
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="list">
+            <ModalListContent />
+          </TabsContent>
+          <TabsContent
+            value="link"
+            v-if="subscriptionStore.canEnablePublicProductsPage()"
           >
-            <CheckIcon v-if="hasBeenCopied" class="mr-2 w-4 h-4" />
-            {{ hasBeenCopied ? 'Copied' : 'Copy' }}
-          </Button>
-          <Button
-            type="button"
-            class="w-full"
-            variant="outline"
-            @click="openModel = false"
-          >
-            Close
-          </Button>
-        </div>
+            <ModalLinkContent />
+          </TabsContent>
+        </Tabs>
       </div>
     </DrawerContent>
   </Drawer>

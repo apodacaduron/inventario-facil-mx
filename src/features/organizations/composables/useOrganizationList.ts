@@ -13,7 +13,7 @@ export function useOrganizationList() {
 
     const response = await supabase
       .from("i_user_organization_roles")
-      .select("id, org_id, i_organizations(name), i_roles(role_name)")
+      .select("id, org_id, i_organizations(*), i_roles(role_name)")
       .eq("user_id", authStore.session?.user.id);
     organizationStore.setOrganizations(response.data ?? []);
 
