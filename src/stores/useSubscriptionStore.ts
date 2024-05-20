@@ -64,6 +64,10 @@ export const useSubscriptionStore = defineStore('subscription', () => {
     return (customerCount ?? 0) <= currentPlan.value.max_customers;
   }
 
+  function canEnablePublicProductsPage() {
+    return currentPlan.value.name !== 'freemium'
+  }
+
   return {
     currentSubscription,
     currentPlan,
@@ -71,5 +75,6 @@ export const useSubscriptionStore = defineStore('subscription', () => {
     setCurrentSubscription,
     canAddProducts,
     canAddCustomers,
+    canEnablePublicProductsPage,
   };
 });
