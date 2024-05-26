@@ -15,7 +15,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { event } from 'vue-gtag';
+import { analytics } from '@/config/analytics';
 
 const { toast } = useToast();
 const router = useRouter();
@@ -51,7 +51,7 @@ const onSubmit = handleSubmit(async (formValues) => {
     return;
   }
 
-  event('sign-in', { method: 'Credentials' });
+  analytics.event('sign-in', { 'event_category': 'authentication', method: 'Credentials' });
   router.push('/');
 });
 </script>
@@ -68,7 +68,7 @@ const onSubmit = handleSubmit(async (formValues) => {
           @click="
             supabase.auth.signInWithOAuth({
               provider: 'google',
-            }).then(() => event('sign-in', { method: 'Google' }))
+            }).then(() => analytics.event('sign-in', { 'event_category': 'authentication', method: 'Google' }))
           "
           class="w-full"
           variant="outline"

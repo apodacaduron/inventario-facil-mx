@@ -42,7 +42,7 @@ import { refDebounced, useInfiniteScroll } from '@vueuse/core';
 import { useOrganizationStore, useSubscriptionStore } from '@/stores';
 import { useCustomersQuery } from '@/features/customers/composables/useCustomerQueries';
 import { useMutation, useQueryClient } from '@tanstack/vue-query';
-import { event } from 'vue-gtag';
+import { analytics } from '@/config/analytics';
 
 const WHATSAPP_URL = import.meta.env.VITE_WHATSAPP_URL;
 const tableRef = ref<HTMLElement | null>(null);
@@ -109,14 +109,14 @@ function openUpdateCustomerSidebar(customer: Customer) {
 async function createCustomerMutationFn(formValues: CreateCustomer) {
   await customerServices.createCustomer(formValues);
   await queryClient.invalidateQueries({ queryKey: ['customers'] });
-  event('create-customer', formValues);
+  analytics.event('create-customer', formValues);
 }
 async function updateCustomerMutationFn(formValues: UpdateCustomer) {
   const customerId = formValues.customer_id;
   if (!customerId) throw new Error('Customer id required to perform update');
   await customerServices.updateCustomer(formValues);
   await queryClient.invalidateQueries({ queryKey: ['customers'] });
-  event('update-customer', formValues);
+  analytics.event('update-customer', formValues);
 }
 async function deleteCustomerMutationFn() {
   const customerId = activeCustomer.value?.id;
@@ -124,7 +124,7 @@ async function deleteCustomerMutationFn() {
   await customerServices.deleteCustomer(customerId);
   isDeleteCustomerDialogOpen.value = false;
   await queryClient.invalidateQueries({ queryKey: ['customers'] });
-  event('delete-customer', activeCustomer.value ?? {});
+  analytics.event('delete-customer', activeCustomer.value ?? {});
 }
 
 function getBadgeColorFromStatus(status: Customer['trust_status']) {

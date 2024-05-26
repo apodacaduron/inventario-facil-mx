@@ -17,7 +17,7 @@ import {
 import { ref } from 'vue';
 import { FeedbackCard } from '@/features/global';
 import { LockClosedIcon } from '@heroicons/vue/24/outline';
-import { event } from 'vue-gtag';
+import { analytics } from '@/config/analytics';
 
 const isResetPasswordSuccessful = ref(false);
 
@@ -56,7 +56,7 @@ const onSubmit = handleSubmit(async (formValues) => {
     return;
   }
 
-  event('forgot-password', { email: formValues.email });
+  analytics.event('forgot-password', { 'event_category': 'authentication', email: formValues.email });
   isResetPasswordSuccessful.value = true;
   setTimeout(() => {
     router.push('/');

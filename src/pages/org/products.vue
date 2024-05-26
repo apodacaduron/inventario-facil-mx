@@ -55,7 +55,7 @@ import { useOrganizationStore, useSubscriptionStore } from '@/stores';
 import { useProductsQuery } from '@/features/products/composables/useProductQueries';
 import { useMutation, useQueryClient } from '@tanstack/vue-query';
 import { FeedbackCard, useServiceHelpers, useTableOrder, useTableStates } from '@/features/global';
-import { event } from 'vue-gtag';
+import { analytics } from '@/config/analytics';
 
 const tableRef = ref<HTMLElement | null>(null);
 
@@ -160,7 +160,7 @@ function openAddStockDialog(product: Product) {
 async function createProductMutationFn(formValues: CreateProduct) {
   await productServices.createProduct(formValues);
   await queryClient.invalidateQueries({ queryKey: ['products'] });
-  event('create-product', formValues);
+  analytics.event('create-product', formValues);
 }
 async function updateProductMutationFn(formValues: UpdateProduct) {
   const productId = formValues.product_id;
@@ -170,7 +170,7 @@ async function updateProductMutationFn(formValues: UpdateProduct) {
     product_id: productId,
   });
   await queryClient.invalidateQueries({ queryKey: ['products'] });
-  event('update-product', formValues);
+  analytics.event('update-product', formValues);
 }
 async function deleteProductMutationFn(product: Product | null) {
   const productId = product?.id;
@@ -178,7 +178,7 @@ async function deleteProductMutationFn(product: Product | null) {
   await productServices.deleteProduct(productId);
   isDeleteProductDialogOpen.value = false;
   await queryClient.invalidateQueries({ queryKey: ['products'] });
-  event('delete-product', product);
+  analytics.event('delete-product', product);
 }
 
 watchEffect(() => {

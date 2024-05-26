@@ -10,6 +10,7 @@ import {
   createRouter,
   createWebHistory,
 } from 'vue-router';
+import { analytics } from './analytics';
 
 type RouteWithMeta = RouteRecordRaw & {
   meta?: {
@@ -218,4 +219,8 @@ router.beforeEach(async (to, _from) => {
     const redirectPath = await guard(to);
     if (redirectPath) return redirectPath;
   }
+});
+
+router.afterEach((to) => {
+  analytics.pageView(to.fullPath);
 });
