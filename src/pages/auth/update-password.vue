@@ -14,6 +14,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import { event } from 'vue-gtag';
 
 const { toast } = useToast();
 const router = useRouter();
@@ -52,6 +53,8 @@ const onSubmit = handleSubmit(async (formValues) => {
     });
     return;
   }
+
+  event('update-password');
   router.push('/');
 });
 </script>

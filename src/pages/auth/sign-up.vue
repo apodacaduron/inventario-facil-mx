@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/form';
 import { FeedbackCard } from '@/features/global';
 import { ref } from 'vue';
+import { event } from 'vue-gtag';
 
 const isSignUpSuccessful = ref(false);
 
@@ -78,6 +79,7 @@ const onSubmit = handleSubmit(async (formValues) => {
     return;
   }
 
+  event('sign-up', { method: 'Credentials' });
   isSignUpSuccessful.value = true;
   setTimeout(() => {
     router.push('/auth/sign-in');
@@ -106,7 +108,7 @@ const onSubmit = handleSubmit(async (formValues) => {
             @click="
               supabase.auth.signInWithOAuth({
                 provider: 'google',
-              })
+              }).then(() => event('sign-up', { method: 'Google' }))
             "
             class="w-full"
             variant="outline"
