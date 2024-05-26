@@ -37,6 +37,7 @@ const authMeta: RouteWithMeta['meta'] = {
 
 export const routes: RouteWithMeta[] = [
   { path: '/', component: () => import('@/pages/Home.vue') },
+  { path: '/unauthorized', component: () => import('@/pages/unauthorized.vue') },
   { path: '/p/org/:orgId/products', meta: {requiresPublicProductsPageEnabled: true}, component: () => import('@/pages/public/products.vue') },
   {
     path: '/org/:orgId',
