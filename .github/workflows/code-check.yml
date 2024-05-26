@@ -1,0 +1,33 @@
+name: Code Check
+
+on:
+  pull_request:
+    branches:
+      - main  # or the branch you want to trigger the action
+
+jobs:
+  code-check:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Cache Node.js modules
+      uses: actions/cache@v3
+      with:
+        path: node_modules
+        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20'  # or the version you need
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Run code check
+      run: npm run code-check
