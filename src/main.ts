@@ -15,7 +15,11 @@ app.use(pinia);
 app.use(router);
 app.use(VueQueryPlugin, vueQueryPluginOptions);
 app.use(autoAnimatePlugin);
-app.use(VueGtag, {
-  config: { id: "GTM-WT67JCKP" },
-}, router);
+app.use(
+  VueGtag,
+  {
+    config: { id: "GTM-WT67JCKP" },
+  },
+  router
+);
 app.mount("#app");
