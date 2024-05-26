@@ -18,7 +18,7 @@ app.use(autoAnimatePlugin);
 app.use(
   VueGtag,
   {
-    config: { id: "GTM-WT67JCKP" },
+    config: { id: import.meta.env.VITE_GOOGLE_MEASUREMENT_ID },
   },
   router
 );
