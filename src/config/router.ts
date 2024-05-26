@@ -10,6 +10,7 @@ import {
   createRouter,
   createWebHistory,
 } from 'vue-router';
+import { analytics } from './analytics';
 
 type RouteWithMeta = RouteRecordRaw & {
   meta?: {
@@ -37,6 +38,7 @@ const authMeta: RouteWithMeta['meta'] = {
 
 export const routes: RouteWithMeta[] = [
   { path: '/', component: () => import('@/pages/Home.vue') },
+  { path: '/unauthorized', component: () => import('@/pages/unauthorized.vue') },
   { path: '/p/org/:orgId/products', meta: {requiresPublicProductsPageEnabled: true}, component: () => import('@/pages/public/products.vue') },
   {
     path: '/org/:orgId',
@@ -217,4 +219,8 @@ router.beforeEach(async (to, _from) => {
     const redirectPath = await guard(to);
     if (redirectPath) return redirectPath;
   }
+});
+
+router.afterEach((to) => {
+  analytics.pageView(to.fullPath);
 });

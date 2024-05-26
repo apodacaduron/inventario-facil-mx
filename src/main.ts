@@ -6,7 +6,6 @@ import { createPinia } from "pinia";
 import { VueQueryPlugin } from "@tanstack/vue-query";
 import { vueQueryPluginOptions } from "./config/vue-query";
 import { autoAnimatePlugin } from "@formkit/auto-animate/vue";
-import VueGtag from "vue-gtag";
 
 const pinia = createPinia();
 const app = createApp(App);
@@ -15,11 +14,4 @@ app.use(pinia);
 app.use(router);
 app.use(VueQueryPlugin, vueQueryPluginOptions);
 app.use(autoAnimatePlugin);
-app.use(
-  VueGtag,
-  {
-    config: { id: import.meta.env.VITE_GOOGLE_MEASUREMENT_ID },
-  },
-  router
-);
 app.mount("#app");

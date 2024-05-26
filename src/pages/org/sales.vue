@@ -53,7 +53,7 @@ import { Badge } from '@/components';
 import { FeedbackCard, useTableStates } from '@/features/global';
 import { Tables } from '../../../types_db';
 import { useDashboardDates } from '@/features/dashboard';
-import { event } from 'vue-gtag';
+import { analytics } from '@/config/analytics';
 
 const WHATSAPP_URL = import.meta.env.VITE_WHATSAPP_URL;
 const tableFiltersRef = useStorage<{
@@ -150,14 +150,14 @@ function handleSaleSidebar(options: {
 async function createSaleMutationFn(formValues: CreateSale) {
   await saleServices.createSale(formValues);
   await queryClient.invalidateQueries({ queryKey: ['sales'] });
-  event('create-sale', formValues);
+  analytics.event('create-sale', formValues);
 }
 async function updateSaleMutationFn(formValues: UpdateSale) {
   const saleId = formValues.sale_id;
   if (!saleId) throw new Error('Sale id required to perform update');
   await saleServices.updateSale(formValues);
   await queryClient.invalidateQueries({ queryKey: ['sales'] });
-  event('update-sale', formValues);
+  analytics.event('update-sale', formValues);
 }
 async function deleteSaleMutationFn() {
   const saleId = activeSale.value?.id;
@@ -165,7 +165,7 @@ async function deleteSaleMutationFn() {
   await saleServices.deleteSale(saleId);
   isDeleteSaleDialogOpen.value = false;
   await queryClient.invalidateQueries({ queryKey: ['sales'] });
-  event('delete-sale', activeSale.value ?? {});
+  analytics.event('delete-sale', activeSale.value ?? {});
 }
 
 function getBadgeColorFromStatus(status: Sale['status']) {
