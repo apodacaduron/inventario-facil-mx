@@ -6,11 +6,14 @@ import { useOrganizationList } from "@/features/organizations";
 import { useRoleQuery } from "./features/global/composables/useRoleQueries";
 import { useCurrentSubscriptionQuery } from "./features/subscriptions";
 import Toaster from '@/components/ui/toast/Toaster.vue'
+import { useOnline } from "@vueuse/core";
+import { OfflineBanner } from "./features/global";
 
 const authStore = useAuthStore();
 const subscriptionStore = useSubscriptionStore();
 const roleQuery = useRoleQuery();
 const currentSubscription = useCurrentSubscriptionQuery()
+const online = useOnline()
 useOrganizationList();
 
 onMounted(() => {
@@ -20,7 +23,7 @@ onMounted(() => {
 
   supabase.auth.onAuthStateChange((_, _session) => {
     authStore.setSession(_session);
-  });
+  })
 });
 
 watchEffect(() => {
@@ -32,6 +35,7 @@ watchEffect(() => {
 </script>
 
 <template>
+  <OfflineBanner v-if="!online" />
   <Toaster />
   <router-view />
 </template>
