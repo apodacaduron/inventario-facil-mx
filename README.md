@@ -27,8 +27,8 @@ InventarioFacilMX ofrece tres planes de suscripción:
 
 1. **Clonar el repositorio**:
     ```bash
-    git clone https://github.com/tuusuario/inventariofacilmx.git
-    cd inventariofacilmx
+    git clone https://github.com/apodacaduron/inventario-facil-mx.git
+    cd inventario-facil-mx
     ```
 
 2. **Instalar dependencias**:
