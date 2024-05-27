@@ -1,18 +1,81 @@
-# Vue 3 + TypeScript + Vite
+# InventarioFacilMX
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+InventarioFacilMX es una aplicación diseñada para ayudar a pequeños vendedores, especialmente aquellos que venden a través de plataformas como Facebook, a gestionar su inventario de manera fácil y eficiente. La aplicación permite el seguimiento de productos, ventas y clientes, proporcionando una interfaz intuitiva y herramientas útiles para la gestión diaria.
 
-## Recommended IDE Setup
+## Características
 
-- [VS Code](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin).
+- **Inicio**: Visualiza estadísticas y métricas importantes como ventas totales, productos más vendidos, mejores clientes, y ganancias. Permite el filtrado mensual y anual.
+- **Productos**: Gestiona un listado de productos con funcionalidades de búsqueda, adición, edición, eliminación y ajuste de stock.
+- **Clientes**: Administra un listado de clientes con opciones de búsqueda, adición, edición, eliminación y marcaje de estatus de confiabilidad. Enlaces rápidos a WhatsApp y Google Maps.
+- **Ventas**: Lleva un registro de las ventas, permite crear, editar y eliminar ventas. Gestión del estado de las ventas (en progreso, completada, cancelada) y ajuste automático del inventario.
+- **Página pública de productos**: Comparte tu inventario con tus clientes mediante una página pública opcional accesible a través de un QR code.
 
-## Type Support For `.vue` Imports in TS
+## Planes de Suscripción
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin) to make the TypeScript language service aware of `.vue` types.
+InventarioFacilMX ofrece tres planes de suscripción:
 
-If the standalone TypeScript plugin doesn't feel fast enough to you, Volar has also implemented a [Take Over Mode](https://github.com/johnsoncodehk/volar/discussions/471#discussioncomment-1361669) that is more performant. You can enable it by the following steps:
+- **Gratis**: Limitado a 50 productos y 50 clientes.
+- **Premium**: Productos y clientes ilimitados, pagina publica de inventario.
 
-1. Disable the built-in TypeScript Extension
-   1. Run `Extensions: Show Built-in Extensions` from VSCode's command palette
-   2. Find `TypeScript and JavaScript Language Features`, right click and select `Disable (Workspace)`
-2. Reload the VSCode window by running `Developer: Reload Window` from the command palette.
+## Requisitos
+
+- Node.js
+- Supabase
+- Stripe (para la gestión de suscripciones)
+
+## Configuración
+
+1. **Clonar el repositorio**:
+    ```bash
+    git clone https://github.com/tuusuario/inventariofacilmx.git
+    cd inventariofacilmx
+    ```
+
+2. **Instalar dependencias**:
+    ```bash
+    npm install
+    ```
+
+3. **Configurar las variables de entorno**:
+    Crea un archivo `.env` en la raíz del proyecto con las siguientes variables:
+    ```env
+   VITE_GOOGLE_MEASUREMENT_ID=YOUR_SUPABASE_URL
+   VITE_SUPABASE_URL=YOUR_SUPABASE_URL
+   VITE_SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY
+   VITE_WHATSAPP_URL=https://wa.me
+
+    ```
+
+4. **Ejecutar la aplicación**:
+    ```bash
+    npm run dev
+    ```
+
+## Contribuciones
+
+Las contribuciones son bienvenidas. Por favor, abre un issue para discutir cualquier cambio significativo antes de enviar un pull request.
+
+1. **Fork el repositorio**
+2. **Crea una rama feature**
+    ```bash
+    git checkout -b feature/nueva-feature
+    ```
+3. **Commit tus cambios**
+    ```bash
+    git commit -m 'Añadir nueva feature'
+    ```
+4. **Push a la rama**
+    ```bash
+    git push origin feature/nueva-feature
+    ```
+5. **Abre un Pull Request**
+
+## Licencia
+
+Este proyecto está bajo la licencia MIT. Consulta el archivo [LICENSE](LICENSE) para más detalles.
+
+## Contacto
+
+Para más información, puedes contactarnos en [apodacaduron@gmail.com](mailto:apodacaduron@gmail.com).
+
+¡Gracias por utilizar InventarioFacilMX!
