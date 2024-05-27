@@ -111,7 +111,7 @@ function openLinkInNewTab(url: string) {
 onMounted(async () => {
   productsPageQrCodeUrl.value = await QRCode.toDataURL(
     publicProductsPageUrl.value,
-    { scale: 8, width: 800 }
+    { scale: 8, width: 800, margin: 2 }
   );
 });
 
@@ -208,8 +208,8 @@ watch(isPublicProductsPageEnabledRefDebounced, (nextIsPublicProductsPageEnabled)
         {{ hasBeenCopied ? "Copiado" : "Copiar" }}
       </Button>
     </div>
-    <div>
-      <img :src="productsPageQrCodeUrl" class="w-full" />
+    <div class="mt-4">
+      <img :src="productsPageQrCodeUrl" class="w-full rounded-md mb-4" />
       <Button class="w-full" @click="downloadQrCode"> Descargar QR </Button>
     </div>
   </ModalLinkContentTemplate>
