@@ -19,6 +19,7 @@ export type Database = {
           org_id: string | null
           path: string | null
           related_id: string | null
+          updated_at: string | null
           url: string | null
           user_id: string | null
         }
@@ -31,6 +32,7 @@ export type Database = {
           org_id?: string | null
           path?: string | null
           related_id?: string | null
+          updated_at?: string | null
           url?: string | null
           user_id?: string | null
         }
@@ -43,6 +45,7 @@ export type Database = {
           org_id?: string | null
           path?: string | null
           related_id?: string | null
+          updated_at?: string | null
           url?: string | null
           user_id?: string | null
         }
@@ -533,6 +536,7 @@ export type Database = {
           email: string | null
           full_name: string | null
           id: string
+          stripe_customer_id: string | null
         }
         Insert: {
           avatar_url?: string | null
@@ -540,6 +544,7 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id: string
+          stripe_customer_id?: string | null
         }
         Update: {
           avatar_url?: string | null
@@ -547,6 +552,7 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id?: string
+          stripe_customer_id?: string | null
         }
         Relationships: [
           {
