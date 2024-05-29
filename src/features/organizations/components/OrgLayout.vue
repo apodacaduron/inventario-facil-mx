@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useAuthStore } from '@/stores';
+import { useAuthStore } from "@/stores";
 import {
   Button,
   DropdownMenu,
@@ -16,19 +16,24 @@ import {
   Avatar,
   AvatarImage,
   AvatarFallback,
-} from '@/components/ui';
-import { useDark, useToggle } from '@vueuse/core';
-import { useRoute, useRouter } from 'vue-router';
+} from "@/components/ui";
+import { useDark, useToggle } from "@vueuse/core";
+import { useRoute, useRouter } from "vue-router";
 import {
   ArrowLeftOnRectangleIcon,
   BanknotesIcon,
   BuildingOffice2Icon,
   HomeIcon,
   MoonIcon,
+  RocketLaunchIcon,
   ShoppingBagIcon,
   SunIcon,
   UserGroupIcon,
-} from '@heroicons/vue/24/outline';
+} from "@heroicons/vue/24/outline";
+import GoPremiumDialog from "./GoPremiumDialog.vue";
+import { ref } from "vue";
+
+const isGoPremiumDialogOpen = ref(false)
 
 const route = useRoute();
 const router = useRouter();
@@ -38,34 +43,36 @@ const authStore = useAuthStore();
 
 function signOut() {
   authStore.signOut();
-  router.push('/');
+  router.push("/");
 }
 
 const menuList = {
   dashboard: {
     path: `/org/${route.params.orgId}/dashboard`,
-    text: 'Inicio',
+    text: "Inicio",
     icon: HomeIcon,
   },
   products: {
     path: `/org/${route.params.orgId}/products`,
-    text: 'Productos',
+    text: "Productos",
     icon: ShoppingBagIcon,
   },
   customers: {
     path: `/org/${route.params.orgId}/customers`,
-    text: 'Clientes',
+    text: "Clientes",
     icon: UserGroupIcon,
   },
   sales: {
     path: `/org/${route.params.orgId}/sales`,
-    text: 'Ventas',
+    text: "Ventas",
     icon: BanknotesIcon,
   },
 };
 </script>
 
 <template>
+  <GoPremiumDialog v-model:open="isGoPremiumDialogOpen" />
+
   <nav class="fixed top-0 z-20 w-full border-b border-border bg-background">
     <div class="px-3 py-3 lg:px-5 lg:pl-3">
       <div class="flex items-center justify-between">
@@ -153,6 +160,7 @@ const menuList = {
         </div>
         <div class="flex items-center">
           <div class="flex items-center ms-3 gap-4">
+            <Button @click="isGoPremiumDialogOpen = !isGoPremiumDialogOpen"><RocketLaunchIcon class="w-4 h-4 mr-2" /> Premium</Button>
             <Button
               @click="toggleDark()"
               variant="outline"
