@@ -1,5 +1,5 @@
 // Import via bare specifier thanks to the import_map.json file.
-import Stripe from 'https://esm.sh/stripe@11.1.0?target=deno'
+import Stripe from "npm:stripe@^11.16";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const stripe = new Stripe(Deno.env.get('STRIPE_API_KEY') as string, {
