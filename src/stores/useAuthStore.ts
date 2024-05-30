@@ -14,6 +14,9 @@ export const useAuthStore = defineStore("auth", () => {
   const userRole = toRef(() => authedUser.value?.role_name)
 
   function setSession(nextSession: Session | null) {
+    if (nextSession === null) {
+      setAuthedUserData(null)
+    }
     session.value = nextSession;
     isLoadingSession.value = false;
   }
