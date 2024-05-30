@@ -53,6 +53,8 @@ export function useAuthedUserDataQuery(context: {
     queryFn() {
       return userServices.getAuthedUserData();
     },
-    enabled: context.options.enabled
+    enabled: context.options.enabled,
+    refetchOnWindowFocus: true,
+    staleTime: 1_000
   });
 }

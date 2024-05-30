@@ -14,15 +14,56 @@ import {
   DrawerTitle,
   DrawerDescription,
 } from "@/components/ui";
+import { supabase } from "@/config/supabase";
+import { useAuthStore } from "@/stores";
 import { useMediaQuery } from "@vueuse/core";
-import { toRef } from "vue";
+import { watch } from "vue";
 
 const openModel = defineModel<boolean>("open");
 
 const isDesktop = useMediaQuery("(min-width: 768px)");
+const authStore = useAuthStore();
 
-const stripePaymentLink = toRef(() => {
-  return import.meta.env.VITE_STRIPE_PAYMENT_LINK;
+async function handleSubscribeClick() {
+  const customerId = authStore.authedUser?.stripe_customer_id;
+  const priceId = import.meta.env.VITE_STRIPE_PREMIUM_PRICE_ID;
+  const email = authStore.authedUser?.email;
+  if (!email || !priceId || !customerId)
+    throw new Error("Unable to create stripe checkout session, missing params");
+  const response = await supabase.functions.invoke(
+    "create-stripe-checkout-session",
+    {
+      body: JSON.stringify({
+        customer_id: customerId,
+        price_id: priceId,
+        cancel_url: window.location.href,
+        success_url: window.location.href,
+      }),
+    }
+  );
+
+  if (!response?.data?.url) throw new Error("Checkout session url not found");
+
+  window.location.href = response.data.url;
+}
+
+watch(() => openModel.value, async () => {
+  if (!openModel.value) return;
+  const stripeCustomerId = authStore.authedUser?.stripe_customer_id;
+  if (!authStore.authedUser) return;
+  if (stripeCustomerId) return;
+
+  const response = await supabase.functions.invoke("create-stripe-customer", {
+    body: JSON.stringify({
+      user_id: authStore.authedUser.id,
+      email: authStore.authedUser.email,
+    }),
+  });
+  if (!response?.data?.customer_id) return;
+  authStore.setAuthedUserData({
+    ...authStore.authedUser,
+    stripe_customer_id: response.data.customer_id,
+  });
 })
 </script>
 
@@ -39,7 +80,9 @@ const stripePaymentLink = toRef(() => {
         </DialogDescription>
       </DialogHeader>
       <DialogFooter>
-        <a :href="stripePaymentLink"><Button type="button" class="w-full"> Suscribirse </Button></a>
+        <Button :disabled="!authStore.authedUser?.stripe_customer_id" @click="handleSubscribeClick" type="button" class="w-full">
+          Suscribirse
+        </Button>
       </DialogFooter>
     </DialogContent>
   </Dialog>
@@ -58,7 +101,9 @@ const stripePaymentLink = toRef(() => {
           </DrawerDescription>
         </DrawerHeader>
         <DrawerFooter>
-          <a :href="stripePaymentLink"><Button type="button" class="w-full"> Suscribirse </Button></a>
+          <Button :disabled="!authStore.authedUser?.stripe_customer_id" @click="handleSubscribeClick" type="button" class="w-full">
+            Suscribirse
+          </Button>
         </DrawerFooter>
       </div>
     </DrawerContent>

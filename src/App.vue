@@ -39,8 +39,8 @@ watchEffect(async () => {
 
   const response = await supabase.functions.invoke("create-stripe-customer", {
     body: JSON.stringify({
-      user_id: authStore.authedUser?.id,
-      email: authStore.authedUser?.email,
+      user_id: authStore.authedUser.id,
+      email: authStore.authedUser.email,
     }),
   });
   if (!response?.data?.customer_id) return;

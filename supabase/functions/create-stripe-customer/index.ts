@@ -22,13 +22,13 @@ Deno.serve(async (request) => {
     return new Response('ok', { headers: corsHeaders })
   }
   if (request.method !== 'POST') {
-    return new Response('Method not allowed', { status: 405 })
+    return new Response('Method not allowed', { headers: corsHeaders, status: 405 })
   }
 
   const { user_id, email } = await request.json()
   
   if (!user_id || !email) {
-    return new Response('Bad Request', { status: 400 })
+    return new Response('Bad Request', { headers: corsHeaders, status: 400 })
   }
 
   try {
@@ -50,10 +50,10 @@ Deno.serve(async (request) => {
 
     return new Response(JSON.stringify({ customer_id: customer.id }), {
       status: 200,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   } catch (error) {
     console.error('Error creating Stripe customer:', error)
-    return new Response(error.message, { status: 500 })
+    return new Response(error.message, { headers: corsHeaders, status: 500 })
   }
 })
