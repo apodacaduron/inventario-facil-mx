@@ -3,16 +3,18 @@ import { onMounted, toRef, watchEffect } from "vue";
 import { supabase } from "./config/supabase";
 import { useAuthStore } from "@/stores";
 import { useOrganizationList } from "@/features/organizations";
-import Toaster from '@/components/ui/toast/Toaster.vue'
+import Toaster from "@/components/ui/toast/Toaster.vue";
 import { useOnline } from "@vueuse/core";
 import { OfflineBanner } from "./features/global";
 import { useAuthedUserDataQuery } from "./features/admin";
 
 const authStore = useAuthStore();
-const authedUserDataQuery = useAuthedUserDataQuery({ options: {
-  enabled: toRef(() => authStore.isLoggedIn)
-} })
-const online = useOnline()
+const authedUserDataQuery = useAuthedUserDataQuery({
+  options: {
+    enabled: toRef(() => authStore.isLoggedIn),
+  },
+});
+const online = useOnline();
 useOrganizationList();
 
 onMounted(() => {
@@ -22,11 +24,30 @@ onMounted(() => {
 
   supabase.auth.onAuthStateChange((_, _session) => {
     authStore.setSession(_session);
-  })
+  });
 });
 
 watchEffect(() => {
-  authStore.setAuthedUserData(authedUserDataQuery.data.value?.data?.find(Boolean) ?? null);
+  authStore.setAuthedUserData(
+    authedUserDataQuery.data.value?.data?.find(Boolean) ?? null
+  );
+});
+watchEffect(async () => {
+  const stripeCustomerId = authStore.authedUser?.stripe_customer_id;
+  if (!authStore.authedUser) return;
+  if (stripeCustomerId) return;
+
+  const response = await supabase.functions.invoke("create-stripe-customer", {
+    body: JSON.stringify({
+      user_id: authStore.authedUser?.id,
+      email: authStore.authedUser?.email,
+    }),
+  });
+  if (!response?.data?.customer_id) return;
+  authStore.setAuthedUserData({
+    ...authStore.authedUser,
+    stripe_customer_id: response.data.customer_id,
+  });
 });
 </script>
 

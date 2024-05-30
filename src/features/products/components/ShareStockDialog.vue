@@ -221,7 +221,7 @@ watch(isPublicProductsPageEnabledRefDebounced, (nextIsPublicProductsPageEnabled)
           <TabsTrigger value="list"> Lista </TabsTrigger>
           <TabsTrigger
             value="link"
-            v-if="subscriptionStore.canEnablePublicProductsPage()"
+            v-if="subscriptionStore.canEnablePublicProductsPage"
           >
             Link publico
           </TabsTrigger>
@@ -231,7 +231,7 @@ watch(isPublicProductsPageEnabledRefDebounced, (nextIsPublicProductsPageEnabled)
         </TabsContent>
         <TabsContent
           value="link"
-          v-if="subscriptionStore.canEnablePublicProductsPage()"
+          v-if="subscriptionStore.canEnablePublicProductsPage"
         >
           <ModalLinkContent />
         </TabsContent>
@@ -247,7 +247,7 @@ watch(isPublicProductsPageEnabledRefDebounced, (nextIsPublicProductsPageEnabled)
             <TabsTrigger value="list"> Lista </TabsTrigger>
             <TabsTrigger
               value="link"
-              v-if="subscriptionStore.canEnablePublicProductsPage()"
+              v-if="subscriptionStore.canEnablePublicProductsPage"
             >
               Link publico
             </TabsTrigger>
@@ -257,7 +257,7 @@ watch(isPublicProductsPageEnabledRefDebounced, (nextIsPublicProductsPageEnabled)
           </TabsContent>
           <TabsContent
             value="link"
-            v-if="subscriptionStore.canEnablePublicProductsPage()"
+            v-if="subscriptionStore.canEnablePublicProductsPage"
           >
             <ModalLinkContent />
           </TabsContent>
