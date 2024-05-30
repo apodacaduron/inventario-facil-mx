@@ -162,7 +162,6 @@ watchEffect(() => {
       <div class="hidden lg:flex gap-2">
         <Button
           :disabled="
-            !subscriptionStore.hasPlan ||
             !subscriptionStore.canAddCustomers(customersCountQuery.data.value)
           "
           @click="isCreateOrUpdateSidebarOpen = true"
@@ -184,7 +183,6 @@ watchEffect(() => {
       <div class="flex lg:hidden gap-2">
         <Button
           :disabled="
-            !subscriptionStore.hasPlan ||
             !subscriptionStore.canAddCustomers(customersCountQuery.data.value)
           "
           @click="isCreateOrUpdateSidebarOpen = true"

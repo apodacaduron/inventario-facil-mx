@@ -1,4 +1,4 @@
-import { useInfiniteQuery } from "@tanstack/vue-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/vue-query";
 import { useUserServices } from "./useUserServices";
 import { MaybeRefOrGetter, toValue } from "vue";
 import { LoadListOptions } from "@/features/global";
@@ -36,5 +36,23 @@ export function useUsersQuery(context: {
       return lastPageParam + 1;
     },
     enabled: context.options.enabled,
+  });
+}
+
+export function useAuthedUserDataQuery(context: {
+  options: {
+    enabled: MaybeRefOrGetter<boolean | undefined>;
+  };
+}) {
+  const userServices = useUserServices();
+
+  return useQuery({
+    queryKey: [
+      "user",
+    ],
+    queryFn() {
+      return userServices.getAuthedUserData();
+    },
+    enabled: context.options.enabled
   });
 }

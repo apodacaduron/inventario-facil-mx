@@ -425,6 +425,8 @@ export type Database = {
           max_products: number | null
           name: string | null
           price: number | null
+          stripe_price_id: string | null
+          stripe_product_id: string | null
         }
         Insert: {
           created_at?: string
@@ -435,6 +437,8 @@ export type Database = {
           max_products?: number | null
           name?: string | null
           price?: number | null
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
         }
         Update: {
           created_at?: string
@@ -445,6 +449,8 @@ export type Database = {
           max_products?: number | null
           name?: string | null
           price?: number | null
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
         }
         Relationships: []
       }
@@ -581,6 +587,25 @@ export type Database = {
           products: Json[]
         }
         Returns: string
+      }
+      get_authed_user_data: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          id: string
+          full_name: string
+          email: string
+          stripe_customer_id: string
+          role_name: Database["public"]["Enums"]["organization_roles"]
+          start_date: string
+          end_date: string
+          plan_name: string
+          price: number
+          currency: string
+          max_products: number
+          max_customers: number
+          stripe_price_id: string
+          stripe_product_id: string
+        }[]
       }
       get_best_customers: {
         Args: {

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useAuthStore } from "@/stores";
+import { useAuthStore, useSubscriptionStore } from "@/stores";
 import {
   Button,
   DropdownMenu,
@@ -40,6 +40,7 @@ const router = useRouter();
 const isDark = useDark();
 const toggleDark = useToggle(isDark);
 const authStore = useAuthStore();
+const subscriptionStore = useSubscriptionStore();
 
 function signOut() {
   authStore.signOut();
@@ -160,7 +161,7 @@ const menuList = {
         </div>
         <div class="flex items-center">
           <div class="flex items-center ms-3 gap-4">
-            <Button @click="isGoPremiumDialogOpen = !isGoPremiumDialogOpen"><RocketLaunchIcon class="w-4 h-4 mr-2" /> Premium</Button>
+            <Button v-if="!subscriptionStore.isPremium" @click="isGoPremiumDialogOpen = !isGoPremiumDialogOpen"><RocketLaunchIcon class="w-4 h-4 mr-2" /> Premium</Button>
             <Button
               @click="toggleDark()"
               variant="outline"

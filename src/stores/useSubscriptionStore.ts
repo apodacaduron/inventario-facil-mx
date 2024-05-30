@@ -1,80 +1,34 @@
-import {
-  subscriptionServicesTypeguards,
-  useSubscriptionServices,
-} from '@/features/subscriptions';
-import { defineStore } from 'pinia';
-import { ref, toRef } from 'vue';
+import { defineStore } from "pinia";
+import { useAuthStore } from "./useAuthStore";
+import { toRef } from "vue";
 
-type CurrentSubscription =
-  | Awaited<
-      ReturnType<
-        ReturnType<typeof useSubscriptionServices>['getCurrentSubscription']
-      >
-    >['data']
-  | undefined;
+export const useSubscriptionStore = defineStore("subscription", () => {
+  const authStore = useAuthStore();
 
-const DEFAULT_PLAN = {
-  id: '8e020f6b-7f66-45a2-a614-04f282eae656',
-  created_at: '2024-03-23T21:23:58.49884+00:00',
-  name: 'freemium',
-  description: null,
-  price: 0,
-  currency: 'MXN',
-  max_products: 50,
-  max_customers: 50,
-};
+  const isPremium = toRef(
+    () => authStore.authedUser?.plan_name === "premium"
+  );
 
-export const useSubscriptionStore = defineStore('subscription', () => {
-  const currentSubscription = ref<CurrentSubscription>();
+  const canEnablePublicProductsPage = toRef(
+    () => isPremium.value
+  );
 
-  const currentPlan = toRef(() => {
-    if (
-      subscriptionServicesTypeguards.isSubscription(
-        currentSubscription.value
-      ) &&
-      currentSubscription.value.plans
-    ) {
-      return currentSubscription.value.plans;
-    }
+  function canAddProducts(productCount = 0) {
+    if (!authStore.authedUser?.max_products) return true;
 
-    if (
-      subscriptionServicesTypeguards.isPlan(currentSubscription.value) &&
-      currentSubscription.value
-    ) {
-      return currentSubscription.value;
-    }
-
-    return DEFAULT_PLAN;
-  });
-  const hasPlan = toRef(() => Boolean(currentSubscription.value));
-
-  function setCurrentSubscription(_currentSubscription: CurrentSubscription) {
-    currentSubscription.value = _currentSubscription;
+    return productCount <= authStore.authedUser.max_products;
   }
 
-  function canAddProducts(productCount: number | null | undefined) {
-    if (currentPlan.value.max_products === null) return true;
+  function canAddCustomers(customerCount = 0) {
+    if (!authStore.authedUser?.max_customers) return true;
 
-    return (productCount ?? 0) <= currentPlan.value.max_products;
-  }
-
-  function canAddCustomers(customerCount: number | null | undefined) {
-    if (currentPlan.value.max_customers === null) return true;
-
-    return (customerCount ?? 0) <= currentPlan.value.max_customers;
-  }
-
-  function canEnablePublicProductsPage() {
-    return currentPlan.value.name !== 'freemium'
+    return customerCount <= authStore.authedUser.max_customers;
   }
 
   return {
-    currentSubscription,
-    currentPlan,
-    hasPlan,
-    setCurrentSubscription,
     canAddProducts,
     canAddCustomers,
     canEnablePublicProductsPage,
+    isPremium,
   };
 });

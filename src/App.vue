@@ -1,18 +1,17 @@
 <script setup lang="ts">
-import { onMounted, watchEffect } from "vue";
+import { onMounted, toRef, watchEffect } from "vue";
 import { supabase } from "./config/supabase";
-import { useAuthStore, useSubscriptionStore } from "@/stores";
+import { useAuthStore } from "@/stores";
 import { useOrganizationList } from "@/features/organizations";
-import { useRoleQuery } from "./features/global/composables/useRoleQueries";
-import { useCurrentSubscriptionQuery } from "./features/subscriptions";
 import Toaster from '@/components/ui/toast/Toaster.vue'
 import { useOnline } from "@vueuse/core";
 import { OfflineBanner } from "./features/global";
+import { useAuthedUserDataQuery } from "./features/admin";
 
 const authStore = useAuthStore();
-const subscriptionStore = useSubscriptionStore();
-const roleQuery = useRoleQuery();
-const currentSubscription = useCurrentSubscriptionQuery()
+const authedUserDataQuery = useAuthedUserDataQuery({ options: {
+  enabled: toRef(() => authStore.isLoggedIn)
+} })
 const online = useOnline()
 useOrganizationList();
 
@@ -27,10 +26,7 @@ onMounted(() => {
 });
 
 watchEffect(() => {
-  authStore.setRole(roleQuery.data.value?.data?.i_roles?.role_name);
-});
-watchEffect(() => {
-  subscriptionStore.setCurrentSubscription(currentSubscription.data.value?.data);
+  authStore.setAuthedUserData(authedUserDataQuery.data.value?.data?.find(Boolean) ?? null);
 });
 </script>
 

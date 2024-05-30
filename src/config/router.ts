@@ -185,9 +185,6 @@ const navigationGuards = {
       const roleServices = useRoleServices();
       const roleResponse = await roleServices.getUserRole();
 
-      const authStore = useAuthStore();
-      authStore.setRole(roleResponse.data?.i_roles?.role_name);
-
       if (roleResponse.data?.i_roles?.role_name !== 'admin') {
         return '/unauthorized';
       }
