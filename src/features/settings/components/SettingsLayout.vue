@@ -106,7 +106,11 @@ const menuList = {
     </div>
   </nav>
 
-  <div class="mt-[96px] max-w-3xl mx-auto">
+  <div class="mt-[86px] max-w-2xl mx-auto px-4">
+    <div class="mb-6">
+      <div class="text-2xl font-medium">{{ authStore.authedUser?.full_name }}</div>
+      <div>{{ authStore.authedUser?.email }}</div>
+    </div>
     <div class="flex gap-4 overflow-x-auto">
       <router-link
         v-for="(menuItem, index) in menuList"
