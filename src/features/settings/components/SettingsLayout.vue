@@ -31,11 +31,6 @@ function signOut() {
 }
 
 const menuList = {
-  general: {
-    path: `/settings/general`,
-    text: "General",
-    icon: HomeIcon,
-  },
   billing: {
     path: `/settings/billing`,
     text: "Pagos",
