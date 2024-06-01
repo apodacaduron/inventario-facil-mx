@@ -1,16 +1,16 @@
-import { useRoleServices } from '@/features/global/composables/useRoleServices';
-import { useOrganizationServices } from '@/features/organizations/composables/useOrganizationServices';
-import { useAuthStore } from '@/stores';
-import { useOrganizationStore } from '@/stores/useOrganizationStore';
-import { until } from '@vueuse/core';
-import { storeToRefs } from 'pinia';
+import { useRoleServices } from "@/features/global/composables/useRoleServices";
+import { useOrganizationServices } from "@/features/organizations/composables/useOrganizationServices";
+import { useAuthStore } from "@/stores";
+import { useOrganizationStore } from "@/stores/useOrganizationStore";
+import { until } from "@vueuse/core";
+import { storeToRefs } from "pinia";
 import {
   RouteLocationNormalized,
   RouteRecordRaw,
   createRouter,
   createWebHistory,
-} from 'vue-router';
-import { analytics } from './analytics';
+} from "vue-router";
+import { analytics } from "./analytics";
 
 type RouteWithMeta = RouteRecordRaw & {
   meta?: {
@@ -19,94 +19,114 @@ type RouteWithMeta = RouteRecordRaw & {
     requiresOrganization?: boolean;
     belongsToOrganization?: boolean;
     requiresPublicProductsPageEnabled?: boolean;
-    hasAdminRole?: boolean
+    hasAdminRole?: boolean;
   };
 };
 
-const adminMeta: RouteWithMeta['meta'] = {
+const adminMeta: RouteWithMeta["meta"] = {
   requiresAuth: true,
   hasAdminRole: true,
 };
-const organizationMeta: RouteWithMeta['meta'] = {
+const organizationMeta: RouteWithMeta["meta"] = {
   requiresAuth: true,
   requiresOrganization: true,
   belongsToOrganization: true,
 };
-const authMeta: RouteWithMeta['meta'] = {
+const authMeta: RouteWithMeta["meta"] = {
   redirectIfLoggedIn: true,
 };
 
 export const routes: RouteWithMeta[] = [
-  { path: '/', component: () => import('@/pages/Home.vue') },
-  { path: '/unauthorized', component: () => import('@/pages/unauthorized.vue') },
-  { path: '/p/org/:orgId/products', meta: {requiresPublicProductsPageEnabled: true}, component: () => import('@/pages/public/products.vue') },
+  { path: "/", component: () => import("@/pages/home.vue") },
   {
-    path: '/org/:orgId',
+    path: "/unauthorized",
+    component: () => import("@/pages/unauthorized.vue"),
+  },
+  {
+    path: "/p/org/:orgId/products",
+    meta: { requiresPublicProductsPageEnabled: true },
+    component: () => import("@/pages/public/products.vue"),
+  },
+  {
+    path: "/org/:orgId",
     meta: organizationMeta,
     component: () =>
-      import('@/features/organizations/components/OrgLayout.vue'),
+      import("@/features/organizations/components/OrgLayout.vue"),
     children: [
       {
-        path: 'dashboard',
+        path: "dashboard",
         meta: organizationMeta,
-        component: () => import('@/pages/org/dashboard.vue'),
+        component: () => import("@/pages/org/dashboard.vue"),
       },
       {
-        path: 'products',
+        path: "products",
         meta: organizationMeta,
-        component: () => import('@/pages/org/products.vue'),
+        component: () => import("@/pages/org/products.vue"),
       },
       {
-        path: 'sales',
+        path: "sales",
         meta: organizationMeta,
-        component: () => import('@/pages/org/sales.vue'),
+        component: () => import("@/pages/org/sales.vue"),
       },
       {
-        path: 'customers',
+        path: "customers",
         meta: organizationMeta,
-        component: () => import('@/pages/org/customers.vue'),
+        component: () => import("@/pages/org/customers.vue"),
       },
     ],
   },
   {
-    path: '/admin',
+    path: "/settings",
+    meta: { requiresAuth: true },
+    component: () =>
+      import("@/features/settings/components/SettingsLayout.vue"),
+    children: [
+      {
+        path: "billing",
+        meta: { requiresAuth: true },
+        component: () => import("@/pages/settings/billing.vue"),
+      },
+    ],
+  },
+  {
+    path: "/admin",
     meta: adminMeta,
-    component: () => import('@/features/admin/components/AdminLayout.vue'),
+    component: () => import("@/features/admin/components/AdminLayout.vue"),
     children: [
       {
-        path: 'users',
+        path: "users",
         meta: adminMeta,
-        component: () => import('@/pages/admin/users.vue'),
+        component: () => import("@/pages/admin/users.vue"),
       },
       {
-        path: 'subscriptions',
+        path: "subscriptions",
         meta: adminMeta,
-        component: () => import('@/pages/admin/subscriptions.vue'),
+        component: () => import("@/pages/admin/subscriptions.vue"),
       },
     ],
   },
   {
-    path: '/auth',
-    redirect: '/auth/sign-in',
+    path: "/auth",
+    redirect: "/auth/sign-in",
     children: [
       {
-        path: 'sign-in',
+        path: "sign-in",
         meta: authMeta,
-        component: () => import('@/pages/auth/sign-in.vue'),
+        component: () => import("@/pages/auth/sign-in.vue"),
       },
       {
-        path: 'sign-up',
+        path: "sign-up",
         meta: authMeta,
-        component: () => import('@/pages/auth/sign-up.vue'),
+        component: () => import("@/pages/auth/sign-up.vue"),
       },
       {
-        path: 'forgot',
+        path: "forgot",
         meta: authMeta,
-        component: () => import('@/pages/auth/forgot.vue'),
+        component: () => import("@/pages/auth/forgot.vue"),
       },
       {
-        path: 'update-password',
-        component: () => import('@/pages/auth/update-password.vue'),
+        path: "update-password",
+        component: () => import("@/pages/auth/update-password.vue"),
       },
     ],
   },
@@ -150,14 +170,14 @@ const navigationGuards = {
   requiresAuth: async (to: RouteLocationNormalized) => {
     if (to.matched.some((record) => record.meta.requiresAuth)) {
       if (!(await isLoggedIn())) {
-        return '/auth/sign-in';
+        return "/auth/sign-in";
       }
     }
   },
   redirectIfLoggedIn: async (to: RouteLocationNormalized) => {
     if (to.matched.some((record) => record.meta.redirectIfLoggedIn)) {
       if (await isLoggedIn()) {
-        return '/';
+        return "/";
       }
     }
   },
@@ -165,7 +185,7 @@ const navigationGuards = {
     if (to.matched.some((record) => record.meta.requiresOrganization)) {
       const userHasOrganizations = await hasOrganizations();
       if (!userHasOrganizations) {
-        return '/no-organizations';
+        return "/no-organizations";
       }
     }
   },
@@ -176,7 +196,7 @@ const navigationGuards = {
         orgId.toString()
       );
       if (!userBelongsToOrganization) {
-        return '/unauthorized';
+        return "/unauthorized";
       }
     }
   },
@@ -185,18 +205,22 @@ const navigationGuards = {
       const roleServices = useRoleServices();
       const roleResponse = await roleServices.getUserRole();
 
-      if (roleResponse.data?.i_roles?.role_name !== 'admin') {
-        return '/unauthorized';
+      if (roleResponse.data?.i_roles?.role_name !== "admin") {
+        return "/unauthorized";
       }
     }
   },
   requiresPublicProductsPageEnabled: async (to: RouteLocationNormalized) => {
-    if (to.matched.some((record) => record.meta.requiresPublicProductsPageEnabled)) {
+    if (
+      to.matched.some((record) => record.meta.requiresPublicProductsPageEnabled)
+    ) {
       const organizationServices = useOrganizationServices();
-      const response = await organizationServices.loadById({ organization_id: to.params.orgId.toString() })
+      const response = await organizationServices.loadById({
+        organization_id: to.params.orgId.toString(),
+      });
 
       if (!response.data?.is_public_products_page_enabled) {
-        return '/unauthorized';
+        return "/unauthorized";
       }
     }
   },

@@ -1,5 +1,4 @@
 import Stripe from "npm:stripe@^11.16";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const stripe = new Stripe(Deno.env.get("STRIPE_API_KEY") as string, {
   apiVersion: "2024-04-10",
@@ -55,7 +54,7 @@ Deno.serve(async (request) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error("Error creating Stripe customer:", error);
+    console.error("Error creating Stripe Checkout Session:", error);
     return new Response(error.message, { headers: corsHeaders, status: 500 });
   }
 });

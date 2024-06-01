@@ -23,6 +23,7 @@ import {
   ArrowLeftOnRectangleIcon,
   BanknotesIcon,
   BuildingOffice2Icon,
+  CogIcon,
   HomeIcon,
   MoonIcon,
   RocketLaunchIcon,
@@ -33,7 +34,7 @@ import {
 import GoPremiumDialog from "./GoPremiumDialog.vue";
 import { ref } from "vue";
 
-const isGoPremiumDialogOpen = ref(false)
+const isGoPremiumDialogOpen = ref(false);
 
 const route = useRoute();
 const router = useRouter();
@@ -161,7 +162,12 @@ const menuList = {
         </div>
         <div class="flex items-center">
           <div class="flex items-center ms-3 gap-4">
-            <Button v-if="!subscriptionStore.isPremium" @click="isGoPremiumDialogOpen = !isGoPremiumDialogOpen"><RocketLaunchIcon class="w-4 h-4 mr-2" /> Premium</Button>
+            <Button
+              v-if="!subscriptionStore.isPremium"
+              @click="isGoPremiumDialogOpen = !isGoPremiumDialogOpen"
+            >
+              <RocketLaunchIcon class="w-4 h-4 mr-2" /> Premium
+            </Button>
             <Button
               @click="toggleDark()"
               variant="outline"
@@ -197,6 +203,12 @@ const menuList = {
                     <DropdownMenuItem>
                       <BuildingOffice2Icon class="w-4 h-4 mr-2" />
                       <span>Ir al panel de administrador</span>
+                    </DropdownMenuItem>
+                  </router-link>
+                  <router-link to="/settings/billing">
+                    <DropdownMenuItem>
+                      <CogIcon class="w-4 h-4 mr-2" />
+                      <span>Configuracion</span>
                     </DropdownMenuItem>
                   </router-link>
                   <DropdownMenuItem @click="signOut">
