@@ -25,8 +25,13 @@ const isDesktop = useMediaQuery("(min-width: 768px)");
 const authStore = useAuthStore();
 
 async function handleSubscribeClick() {
+  const premiumPlanResponse = await supabase
+        .from("plans")
+        .select('*')
+        .eq('name', 'premium')
+        .single();
   const customerId = authStore.authedUser?.stripe_customer_id;
-  const priceId = import.meta.env.VITE_STRIPE_PREMIUM_PRICE_ID;
+  const priceId = premiumPlanResponse.data?.stripe_price_id;
   const email = authStore.authedUser?.email;
   if (!email || !priceId || !customerId)
     throw new Error("Unable to create stripe checkout session, missing params");

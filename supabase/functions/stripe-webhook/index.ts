@@ -3,7 +3,7 @@ import Stripe from "npm:stripe@^11.16";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const stripe = new Stripe(Deno.env.get("STRIPE_API_KEY") as string, {
-  apiVersion: '2024-04-10',
+  apiVersion: "2024-04-10",
   httpClient: Stripe.createFetchHttpClient(),
 });
 
@@ -17,7 +17,6 @@ const cryptoProvider = Stripe.createSubtleCryptoProvider();
 
 Deno.serve(async (request) => {
   const signature = request.headers.get("Stripe-Signature");
-
   // First step is to verify the event. The .text() method must be used as the
   // verification relies on the raw request body rather than the parsed JSON.
   const body = await request.text();
@@ -34,9 +33,101 @@ Deno.serve(async (request) => {
     return new Response(err.message, { status: 400 });
   }
 
-  console.log(`🔔 Event received: ${receivedEvent.type} ${receivedEvent.id}`);
+  console.log(
+    `🔔 Event received: ${receivedEvent.type} ${receivedEvent.id}`,
+    receivedEvent.data.object
+  );
 
   switch (receivedEvent.type) {
+    case "invoice.payment_failed": {
+      const invoice = receivedEvent.data.object;
+      const user = await supabase
+        .from("users")
+        .select("id")
+        .eq("stripe_customer_id", invoice.customer)
+        .single();
+      const freemiumPlanResponse = await supabase
+        .from("plans")
+        .select("*")
+        .eq("name", "freemium")
+        .single();
+      await supabase.from("subscriptions").update({
+        user_id: user.data.id,
+        plan_id: freemiumPlanResponse.data.id,
+        start_date: new Date().toISOString(),
+        status: "active",
+      }).eq("user_id", user.data.id);
+      break;
+    }
+    case "invoice.paid": {
+      const invoice = receivedEvent.data.object;
+
+      const subscription = await stripe.subscriptions.retrieve(
+        invoice.subscription
+      );
+      const user = await supabase
+        .from("users")
+        .select("id")
+        .eq("stripe_customer_id", invoice.customer)
+        .single();
+      const premiumPlanResponse = await supabase
+        .from("plans")
+        .select("*")
+        .eq("name", "premium")
+        .single();
+      await supabase.from("subscriptions").update({
+        user_id: user.data.id,
+        plan_id: premiumPlanResponse.data.id,
+        start_date: new Date(
+          subscription.current_period_start * 1000
+        ).toISOString(),
+        end_date: new Date(
+          subscription.current_period_end * 1000
+        ).toISOString(),
+        status: subscription.status,
+        stripe_subscription_id: subscription.id,
+        stripe_invoice_id: subscription.latest_invoice,
+      }).eq("user_id", user.data.id);
+      break;
+    }
+    case "customer.subscription.updated": {
+      const subscription = receivedEvent.data.object;
+      await supabase
+        .from("subscriptions")
+        .update({
+          start_date: new Date(
+            subscription.current_period_start * 1000
+          ).toISOString(),
+          end_date: new Date(
+            subscription.current_period_end * 1000
+          ).toISOString(),
+          status: subscription.status,
+          stripe_subscription_id: subscription.id,
+          stripe_invoice_id: subscription.latest_invoice,
+        })
+        .eq("stripe_subscription_id", subscription.id);
+      break;
+    }
+    case "customer.subscription.deleted": {
+      const subscription = receivedEvent.data.object;
+      const user = await supabase
+        .from("users")
+        .select("id")
+        .eq("stripe_customer_id", subscription.customer)
+        .single();
+      const freemiumPlanResponse = await supabase
+        .from("plans")
+        .select("*")
+        .eq("name", "freemium")
+        .single();
+      await supabase.from("subscriptions").update({
+        user_id: user.data.id,
+        plan_id: freemiumPlanResponse.data.id,
+        start_date: new Date().toISOString(),
+        status: "active",
+      }).eq("user_id", user.data.id);
+      break;
+    }
     case "price.created": {
       const price = receivedEvent.data.object;
       await supabase
@@ -82,10 +173,7 @@ Deno.serve(async (request) => {
     }
     case "product.deleted": {
       const product = receivedEvent.data.object;
-      await supabase
-        .from("plans")
-        .delete()
-        .eq("stripe_product_id", product.id);
+      await supabase.from("plans").delete().eq("stripe_product_id", product.id);
       break;
     }
     default:
