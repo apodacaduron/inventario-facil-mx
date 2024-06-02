@@ -16,6 +16,7 @@ import {
   Avatar,
   AvatarImage,
   AvatarFallback,
+  SheetFooter,
 } from "@/components/ui";
 import { useDark, useToggle } from "@vueuse/core";
 import { useRoute, useRouter } from "vue-router";
@@ -24,6 +25,7 @@ import {
   BanknotesIcon,
   BuildingOffice2Icon,
   Cog6ToothIcon,
+  EnvelopeIcon,
   HomeIcon,
   MoonIcon,
   RocketLaunchIcon,
@@ -109,7 +111,7 @@ const menuList = {
                 </SheetDescription>
               </SheetHeader>
 
-              <div class="space-y-6 pb-16 mt-8">
+              <div class="space-y-6 mt-8">
                 <div
                   class="flex flex-col justify-between h-full pb-4 overflow-y-auto"
                 >
@@ -131,25 +133,18 @@ const menuList = {
                       </SheetClose>
                     </li>
                   </ul>
-
-                  <div
-                    id="dropdown-cta"
-                    class="p-4 mt-6 rounded-lg border border-border"
-                    role="alert"
-                  >
-                    <div class="flex items-center mb-3">
-                      <span
-                        class="bg-orange-100 text-orange-800 text-sm me-2 px-2.5 py-0.5 rounded dark:bg-orange-200 dark:text-orange-900"
-                        >Alpha</span
-                      >
-                    </div>
-                    <p class="mb-3 text-sm text-muted-foreground">
-                      Este producto se encuentra en fase alpha. ¡Gracias por
-                      probarlo y ser parte de su desarrollo inicial!
-                    </p>
-                  </div>
                 </div>
               </div>
+              <SheetFooter
+                ><a
+                  href="mailto:inventariofacilmx@gmail.com"
+                  class="flex items-center p-2 rounded-lg"
+                  active-class="active-link"
+                >
+                  <EnvelopeIcon class="w-6 h-6 stroke-[2px] duration-75" />
+                  <span class="ms-3">Soporte</span>
+                </a></SheetFooter
+              >
             </SheetContent>
           </Sheet>
 
@@ -247,22 +242,14 @@ const menuList = {
         </li>
       </ul>
 
-      <div
-        id="dropdown-cta"
-        class="p-4 mt-6 rounded-lg border border-border"
-        role="alert"
+      <a
+        href="mailto:inventariofacilmx@gmail.com"
+        class="flex items-center p-2 rounded-lg"
+        active-class="active-link"
       >
-        <div class="flex items-center mb-3">
-          <span
-            class="bg-orange-100 text-orange-800 text-sm me-2 px-2.5 py-0.5 rounded dark:bg-orange-200 dark:text-orange-900"
-            >Alpha</span
-          >
-        </div>
-        <p class="mb-3 text-sm text-muted-foreground">
-          Este producto se encuentra en fase alpha. ¡Gracias por probarlo y ser
-          parte de su desarrollo inicial!
-        </p>
-      </div>
+        <EnvelopeIcon class="w-6 h-6 stroke-[2px] duration-75" />
+        <span class="ms-3">Soporte</span>
+      </a>
     </div>
   </aside>
 
