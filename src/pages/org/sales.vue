@@ -34,6 +34,7 @@ import {
   Tooltip,
   TooltipTrigger,
   TooltipContent,
+  Badge,
 } from '@/components/ui';
 import {
   BanknotesIcon,
@@ -49,7 +50,6 @@ import { useOrganizationStore } from '@/stores';
 import { useSalesQuery } from '@/features/sales/composables/useSaleQueries';
 import { useMutation, useQueryClient } from '@tanstack/vue-query';
 import { useCurrencyFormatter } from '@/features/products';
-import { Badge } from '@/components';
 import { FeedbackCard, useTableStates } from '@/features/global';
 import { Tables } from '../../../types_db';
 import { useDashboardDates } from '@/features/dashboard';
@@ -171,13 +171,13 @@ async function deleteSaleMutationFn() {
 function getBadgeColorFromStatus(status: Sale['status']) {
   switch (status) {
     case 'cancelled':
-      return 'red';
+      return 'destructive';
     case 'in_progress':
-      return 'blue';
+      return 'outline';
     case 'completed':
-      return 'green';
+      return 'default';
     default:
-      return 'blue';
+      return 'outline';
   }
 }
 
@@ -424,7 +424,7 @@ watchEffect(() => {
                 {{ currencyFormatter.parse(sale.shipping_cost) }}
               </TableCell>
               <TableCell class="text-center">
-                <Badge :color="getBadgeColorFromStatus(sale.status)"
+                <Badge :variant="getBadgeColorFromStatus(sale.status)"
                   >{{ sale.status?.toLocaleUpperCase() }}
                 </Badge>
               </TableCell>

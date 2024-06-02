@@ -27,8 +27,8 @@ import {
   Tooltip,
   TooltipTrigger,
   TooltipContent,
+  Badge
 } from '@/components/ui';
-import { Badge } from '@/components';
 import {
   ChevronDownIcon,
   ChevronUpIcon,
@@ -130,11 +130,11 @@ async function deleteCustomerMutationFn() {
 function getBadgeColorFromStatus(status: Customer['trust_status']) {
   switch (status) {
     case 'trusted':
-      return 'green';
+      return 'default';
     case 'not_trusted':
-      return 'red';
+      return 'destructive';
     default:
-      return 'green';
+      return 'default';
   }
 }
 
@@ -162,7 +162,6 @@ watchEffect(() => {
       <div class="hidden lg:flex gap-2">
         <Button
           :disabled="
-            !subscriptionStore.hasPlan ||
             !subscriptionStore.canAddCustomers(customersCountQuery.data.value)
           "
           @click="isCreateOrUpdateSidebarOpen = true"
@@ -184,7 +183,6 @@ watchEffect(() => {
       <div class="flex lg:hidden gap-2">
         <Button
           :disabled="
-            !subscriptionStore.hasPlan ||
             !subscriptionStore.canAddCustomers(customersCountQuery.data.value)
           "
           @click="isCreateOrUpdateSidebarOpen = true"
@@ -317,7 +315,7 @@ watchEffect(() => {
                 <template v-else>-</template>
               </TableCell>
               <TableCell class="text-center">
-                <Badge :color="getBadgeColorFromStatus(customer.trust_status)">
+                <Badge :variant="getBadgeColorFromStatus(customer.trust_status)">
                   {{ customer.trust_status?.toLocaleUpperCase() }}
                 </Badge>
               </TableCell>

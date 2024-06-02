@@ -1,8 +1,8 @@
 import { supabase } from '@/config/supabase';
 import { Tables } from '../../../../types_db';
 
-export type CreateAsset = Omit<Tables<'assets'>, 'created_at' | 'id'>
-export type UpdateAsset = Partial<Omit<Tables<'assets'>, 'created_at' | 'id'>>
+export type CreateAsset = Omit<Tables<'assets'>, 'created_at' | 'updated_at' | 'id'>
+export type UpdateAsset = Partial<Omit<Tables<'assets'>, 'created_at' | 'updated_at'>>
 
 export function useAssetServices() {
   async function createAsset(asset: CreateAsset) {

@@ -19,6 +19,7 @@ export type Database = {
           org_id: string | null
           path: string | null
           related_id: string | null
+          updated_at: string | null
           url: string | null
           user_id: string | null
         }
@@ -31,6 +32,7 @@ export type Database = {
           org_id?: string | null
           path?: string | null
           related_id?: string | null
+          updated_at?: string | null
           url?: string | null
           user_id?: string | null
         }
@@ -43,6 +45,7 @@ export type Database = {
           org_id?: string | null
           path?: string | null
           related_id?: string | null
+          updated_at?: string | null
           url?: string | null
           user_id?: string | null
         }
@@ -422,6 +425,8 @@ export type Database = {
           max_products: number | null
           name: string | null
           price: number | null
+          stripe_price_id: string | null
+          stripe_product_id: string | null
         }
         Insert: {
           created_at?: string
@@ -432,6 +437,8 @@ export type Database = {
           max_products?: number | null
           name?: string | null
           price?: number | null
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
         }
         Update: {
           created_at?: string
@@ -442,6 +449,8 @@ export type Database = {
           max_products?: number | null
           name?: string | null
           price?: number | null
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
         }
         Relationships: []
       }
@@ -450,27 +459,36 @@ export type Database = {
           created_at: string
           end_date: string | null
           id: string
-          month_amount: string | null
           plan_id: string | null
           start_date: string | null
+          status: string | null
+          stripe_invoice_id: string | null
+          stripe_subscription_id: string | null
+          updated_at: string | null
           user_id: string | null
         }
         Insert: {
           created_at?: string
           end_date?: string | null
           id?: string
-          month_amount?: string | null
           plan_id?: string | null
           start_date?: string | null
+          status?: string | null
+          stripe_invoice_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string | null
           user_id?: string | null
         }
         Update: {
           created_at?: string
           end_date?: string | null
           id?: string
-          month_amount?: string | null
           plan_id?: string | null
           start_date?: string | null
+          status?: string | null
+          stripe_invoice_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string | null
           user_id?: string | null
         }
         Relationships: [
@@ -533,6 +551,7 @@ export type Database = {
           email: string | null
           full_name: string | null
           id: string
+          stripe_customer_id: string | null
         }
         Insert: {
           avatar_url?: string | null
@@ -540,6 +559,7 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id: string
+          stripe_customer_id?: string | null
         }
         Update: {
           avatar_url?: string | null
@@ -547,6 +567,7 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id?: string
+          stripe_customer_id?: string | null
         }
         Relationships: [
           {
@@ -575,6 +596,25 @@ export type Database = {
           products: Json[]
         }
         Returns: string
+      }
+      get_authed_user_data: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          id: string
+          full_name: string
+          email: string
+          stripe_customer_id: string
+          role_name: Database["public"]["Enums"]["organization_roles"]
+          start_date: string
+          end_date: string
+          plan_name: string
+          price: number
+          currency: string
+          max_products: number
+          max_customers: number
+          stripe_price_id: string
+          stripe_product_id: string
+        }[]
       }
       get_best_customers: {
         Args: {
@@ -701,14 +741,7 @@ export type Database = {
         | "completed"
         | "cancelled"
         | "returned"
-      subscription_status:
-        | "trialing"
-        | "active"
-        | "canceled"
-        | "incomplete"
-        | "incomplete_expired"
-        | "past_due"
-        | "unpaid"
+      subscription_status: "active" | "inactive"
       trust_status: "trusted" | "not_trusted"
     }
     CompositeTypes: {

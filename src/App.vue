@@ -1,19 +1,20 @@
 <script setup lang="ts">
-import { onMounted, watchEffect } from "vue";
+import { onMounted, toRef, watchEffect } from "vue";
 import { supabase } from "./config/supabase";
-import { useAuthStore, useSubscriptionStore } from "@/stores";
+import { useAuthStore } from "@/stores";
 import { useOrganizationList } from "@/features/organizations";
-import { useRoleQuery } from "./features/global/composables/useRoleQueries";
-import { useCurrentSubscriptionQuery } from "./features/subscriptions";
-import Toaster from '@/components/ui/toast/Toaster.vue'
+import Toaster from "@/components/ui/toast/Toaster.vue";
 import { useOnline } from "@vueuse/core";
 import { OfflineBanner } from "./features/global";
+import { useAuthedUserDataQuery } from "./features/admin";
 
 const authStore = useAuthStore();
-const subscriptionStore = useSubscriptionStore();
-const roleQuery = useRoleQuery();
-const currentSubscription = useCurrentSubscriptionQuery()
-const online = useOnline()
+const authedUserDataQuery = useAuthedUserDataQuery({
+  options: {
+    enabled: toRef(() => authStore.isLoggedIn),
+  },
+});
+const online = useOnline();
 useOrganizationList();
 
 onMounted(() => {
@@ -23,14 +24,30 @@ onMounted(() => {
 
   supabase.auth.onAuthStateChange((_, _session) => {
     authStore.setSession(_session);
-  })
+  });
 });
 
 watchEffect(() => {
-  authStore.setRole(roleQuery.data.value?.data?.i_roles?.role_name);
+  authStore.setAuthedUserData(
+    authedUserDataQuery.data.value?.data?.find(Boolean) ?? null
+  );
 });
-watchEffect(() => {
-  subscriptionStore.setCurrentSubscription(currentSubscription.data.value?.data);
+watchEffect(async () => {
+  const stripeCustomerId = authStore.authedUser?.stripe_customer_id;
+  if (!authStore.authedUser) return;
+  if (stripeCustomerId) return;
+
+  const response = await supabase.functions.invoke("create-stripe-customer", {
+    body: JSON.stringify({
+      user_id: authStore.authedUser.id,
+      email: authStore.authedUser.email,
+    }),
+  });
+  if (!response?.data?.customer_id) return;
+  authStore.setAuthedUserData({
+    ...authStore.authedUser,
+    stripe_customer_id: response.data.customer_id,
+  });
 });
 </script>
 

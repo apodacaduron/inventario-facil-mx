@@ -12,7 +12,6 @@ import {
   SheetHeader,
   SheetTitle,
   SheetDescription,
-  SheetClose,
   Avatar,
   AvatarFallback,
   AvatarImage,
@@ -92,48 +91,6 @@ const menuList = {
                   necesitas fácilmente.
                 </SheetDescription>
               </SheetHeader>
-
-              <div class="space-y-6 pb-16 mt-8">
-                <div
-                  class="flex flex-col justify-between h-full pb-4 overflow-y-auto"
-                >
-                  <ul class="space-y-2">
-                    <li v-for="(menuItem, index) in menuList" :key="index">
-                      <SheetClose class="w-full">
-                        <router-link
-                          :to="menuItem.path"
-                          class="flex items-center p-2 rounded-lg"
-                          active-class="active-link"
-                        >
-                          <component
-                            :is="menuItem.icon"
-                            v-if="menuItem.icon"
-                            class="w-6 h-6 stroke-[2px] duration-75"
-                          />
-                          <span class="ms-3">{{ menuItem.text }}</span>
-                        </router-link>
-                      </SheetClose>
-                    </li>
-                  </ul>
-
-                  <div
-                    id="dropdown-cta"
-                    class="p-4 mt-6 rounded-lg border border-border"
-                    role="alert"
-                  >
-                    <div class="flex items-center mb-3">
-                      <span
-                        class="bg-orange-100 text-orange-800 text-sm me-2 px-2.5 py-0.5 rounded dark:bg-orange-200 dark:text-orange-900"
-                        >Alpha</span
-                      >
-                    </div>
-                    <p class="mb-3 text-sm text-muted-foreground">
-                      Este producto se encuentra en fase alpha. ¡Gracias por
-                      probarlo y ser parte de su desarrollo inicial!
-                    </p>
-                  </div>
-                </div>
-              </div>
             </SheetContent>
           </Sheet>
 
@@ -215,23 +172,6 @@ const menuList = {
           </router-link>
         </li>
       </ul>
-
-      <div
-        id="dropdown-cta"
-        class="p-4 mt-6 rounded-lg border border-border"
-        role="alert"
-      >
-        <div class="flex items-center mb-3">
-          <span
-            class="bg-orange-100 text-orange-800 text-sm me-2 px-2.5 py-0.5 rounded dark:bg-orange-200 dark:text-orange-900"
-            >Alpha</span
-          >
-        </div>
-        <p class="mb-3 text-sm text-muted-foreground">
-          Este producto se encuentra en fase alpha. ¡Gracias por probarlo y ser
-          parte de su desarrollo inicial!
-        </p>
-      </div>
     </div>
   </aside>
 
