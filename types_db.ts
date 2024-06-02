@@ -315,6 +315,7 @@ export type Database = {
       i_sales: {
         Row: {
           cancellation_notes: string | null
+          completed_at: string | null
           created_at: string
           customer_id: string | null
           delivery_date: string | null
@@ -328,6 +329,7 @@ export type Database = {
         }
         Insert: {
           cancellation_notes?: string | null
+          completed_at?: string | null
           created_at?: string
           customer_id?: string | null
           delivery_date?: string | null
@@ -341,6 +343,7 @@ export type Database = {
         }
         Update: {
           cancellation_notes?: string | null
+          completed_at?: string | null
           created_at?: string
           customer_id?: string | null
           delivery_date?: string | null
