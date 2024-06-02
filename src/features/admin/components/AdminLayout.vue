@@ -12,7 +12,6 @@ import {
   SheetHeader,
   SheetTitle,
   SheetDescription,
-  SheetClose,
   Avatar,
   AvatarFallback,
   AvatarImage,
