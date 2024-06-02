@@ -459,27 +459,36 @@ export type Database = {
           created_at: string
           end_date: string | null
           id: string
-          month_amount: string | null
           plan_id: string | null
           start_date: string | null
+          status: string | null
+          stripe_invoice_id: string | null
+          stripe_subscription_id: string | null
+          updated_at: string | null
           user_id: string | null
         }
         Insert: {
           created_at?: string
           end_date?: string | null
           id?: string
-          month_amount?: string | null
           plan_id?: string | null
           start_date?: string | null
+          status?: string | null
+          stripe_invoice_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string | null
           user_id?: string | null
         }
         Update: {
           created_at?: string
           end_date?: string | null
           id?: string
-          month_amount?: string | null
           plan_id?: string | null
           start_date?: string | null
+          status?: string | null
+          stripe_invoice_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string | null
           user_id?: string | null
         }
         Relationships: [
@@ -732,14 +741,7 @@ export type Database = {
         | "completed"
         | "cancelled"
         | "returned"
-      subscription_status:
-        | "trialing"
-        | "active"
-        | "canceled"
-        | "incomplete"
-        | "incomplete_expired"
-        | "past_due"
-        | "unpaid"
+      subscription_status: "active" | "inactive"
       trust_status: "trusted" | "not_trusted"
     }
     CompositeTypes: {
