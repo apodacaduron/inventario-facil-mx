@@ -124,7 +124,10 @@ Deno.serve(async (request) => {
         user_id: user.data.id,
         plan_id: freemiumPlanResponse.data.id,
         start_date: new Date().toISOString(),
+        end_date: null,
         status: "active",
+        stripe_subscription_id: null,
+        stripe_invoice_id: null,
       }).eq("user_id", user.data.id);
       break;
     }

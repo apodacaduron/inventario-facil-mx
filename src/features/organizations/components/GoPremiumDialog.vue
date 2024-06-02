@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Spinner } from "@/components";
 import {
   Button,
   Dialog,
@@ -16,20 +17,30 @@ import {
 } from "@/components/ui";
 import { supabase } from "@/config/supabase";
 import { useAuthStore } from "@/stores";
+import { useMutation } from "@tanstack/vue-query";
 import { useMediaQuery } from "@vueuse/core";
-import { watch } from "vue";
+import { toRef } from "vue";
 
 const openModel = defineModel<boolean>("open");
 
 const isDesktop = useMediaQuery("(min-width: 768px)");
 const authStore = useAuthStore();
+const createStripeCheckoutMutation = useMutation({
+  mutationFn: createStripeCheckout,
+});
 
-async function handleSubscribeClick() {
+const isSubscribeButtonDisabled = toRef(
+  () =>
+    !authStore.authedUser?.stripe_customer_id ||
+    createStripeCheckoutMutation.isPending.value
+);
+
+async function createStripeCheckout() {
   const premiumPlanResponse = await supabase
-        .from("plans")
-        .select('*')
-        .eq('name', 'premium')
-        .single();
+    .from("plans")
+    .select("*")
+    .eq("name", "premium")
+    .single();
   const customerId = authStore.authedUser?.stripe_customer_id;
   const priceId = premiumPlanResponse.data?.stripe_price_id;
   const email = authStore.authedUser?.email;
@@ -51,25 +62,6 @@ async function handleSubscribeClick() {
 
   window.location.href = response.data.url;
 }
-
-watch(() => openModel.value, async () => {
-  if (!openModel.value) return;
-  const stripeCustomerId = authStore.authedUser?.stripe_customer_id;
-  if (!authStore.authedUser) return;
-  if (stripeCustomerId) return;
-
-  const response = await supabase.functions.invoke("create-stripe-customer", {
-    body: JSON.stringify({
-      user_id: authStore.authedUser.id,
-      email: authStore.authedUser.email,
-    }),
-  });
-  if (!response?.data?.customer_id) return;
-  authStore.setAuthedUserData({
-    ...authStore.authedUser,
-    stripe_customer_id: response.data.customer_id,
-  });
-})
 </script>
 
 <template>
@@ -85,8 +77,19 @@ watch(() => openModel.value, async () => {
         </DialogDescription>
       </DialogHeader>
       <DialogFooter>
-        <Button :disabled="!authStore.authedUser?.stripe_customer_id" @click="handleSubscribeClick" type="button" class="w-full">
-          Suscribirse
+        <Button
+          :disabled="isSubscribeButtonDisabled"
+          @click="createStripeCheckoutMutation.mutate()"
+          type="button"
+          class="w-full"
+        >
+          <div class="flex">
+            <Spinner
+              v-if="createStripeCheckoutMutation.isPending.value"
+              class="mr-3"
+            />
+            Suscribirse
+          </div>
         </Button>
       </DialogFooter>
     </DialogContent>
@@ -106,8 +109,19 @@ watch(() => openModel.value, async () => {
           </DrawerDescription>
         </DrawerHeader>
         <DrawerFooter>
-          <Button :disabled="!authStore.authedUser?.stripe_customer_id" @click="handleSubscribeClick" type="button" class="w-full">
-            Suscribirse
+          <Button
+            :disabled="isSubscribeButtonDisabled"
+            @click="createStripeCheckoutMutation.mutate()"
+            type="button"
+            class="w-full"
+          >
+            <div class="flex">
+              <Spinner
+                v-if="createStripeCheckoutMutation.isPending.value"
+                class="mr-3"
+              />
+              Suscribirse
+            </div>
           </Button>
         </DrawerFooter>
       </div>

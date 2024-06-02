@@ -23,7 +23,7 @@ import {
   ArrowLeftOnRectangleIcon,
   BanknotesIcon,
   BuildingOffice2Icon,
-  CogIcon,
+  Cog6ToothIcon,
   HomeIcon,
   MoonIcon,
   RocketLaunchIcon,
@@ -207,7 +207,7 @@ const menuList = {
                   </router-link>
                   <router-link to="/settings/billing">
                     <DropdownMenuItem>
-                      <CogIcon class="w-4 h-4 mr-2" />
+                      <Cog6ToothIcon class="w-4 h-4 mr-2" />
                       <span>Configuracion</span>
                     </DropdownMenuItem>
                   </router-link>
