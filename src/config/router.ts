@@ -160,7 +160,7 @@ async function isUserAllowedInOrganization(orgId: string | undefined) {
   await until(hasOrganizations).toBe(true);
 
   return Boolean(
-    organizationStore.organizations?.some(
+    organizationStore.userOrganizations?.some(
       (organization) => organization.org_id === orgId
     )
   );

@@ -29,7 +29,7 @@ const isDark = useDark();
         <router-link
           v-if="authStore.isLoggedIn"
           :to="`/org/${
-            organizationStore.organizations?.find(Boolean)?.org_id
+            organizationStore.userOrganizations?.find(Boolean)?.org_id
           }/dashboard`"
           :class="{
             'pointer-events-none': !organizationStore.hasOrganizations,

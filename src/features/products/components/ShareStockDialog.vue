@@ -25,17 +25,17 @@ import { computed, onMounted, ref, toRef, watch } from "vue";
 import { useProductsQuery } from "../composables";
 import { useRoute } from "vue-router";
 import QRCode from "qrcode";
-import { useOrganizationStore, useSubscriptionStore } from "@/stores";
+import { useOrganizationStore } from "@/stores";
 import { useMutation } from "@tanstack/vue-query";
 import { useOrganizationServices } from "@/features/organizations";
 
 const openModel = defineModel<boolean>("open");
 
-const organizationStore = useOrganizationStore();
 
+const organizationStore = useOrganizationStore();
 const isPublicProductsPageEnabled = ref(
-  organizationStore.currentOrganization?.i_organizations
-    ?.is_public_products_page_enabled ?? false
+  organizationStore.currentUserOrganization?.i_organizations
+  ?.is_public_products_page_enabled ?? false
 );
 const isPublicProductsPageEnabledRefDebounced = refDebounced(isPublicProductsPageEnabled, 400);
 const productsPageQrCodeUrl = ref("");
@@ -47,7 +47,6 @@ const [ModalLinkContentTemplate, ModalLinkContent] = createReusableTemplate();
 const isDesktop = useMediaQuery("(min-width: 768px)");
 const clipboard = useClipboard();
 const route = useRoute();
-const subscriptionStore = useSubscriptionStore();
 const organizationServices = useOrganizationServices();
 const updateOrganizationMutation = useMutation({mutationFn: organizationServices.updateOrganization}) 
 
@@ -221,7 +220,7 @@ watch(isPublicProductsPageEnabledRefDebounced, (nextIsPublicProductsPageEnabled)
           <TabsTrigger value="list"> Lista </TabsTrigger>
           <TabsTrigger
             value="link"
-            v-if="subscriptionStore.canEnablePublicProductsPage"
+            v-if="organizationStore.canEnablePublicProductsPage"
           >
             Link publico
           </TabsTrigger>
@@ -231,7 +230,7 @@ watch(isPublicProductsPageEnabledRefDebounced, (nextIsPublicProductsPageEnabled)
         </TabsContent>
         <TabsContent
           value="link"
-          v-if="subscriptionStore.canEnablePublicProductsPage"
+          v-if="organizationStore.canEnablePublicProductsPage"
         >
           <ModalLinkContent />
         </TabsContent>
@@ -247,7 +246,7 @@ watch(isPublicProductsPageEnabledRefDebounced, (nextIsPublicProductsPageEnabled)
             <TabsTrigger value="list"> Lista </TabsTrigger>
             <TabsTrigger
               value="link"
-              v-if="subscriptionStore.canEnablePublicProductsPage"
+              v-if="organizationStore.canEnablePublicProductsPage"
             >
               Link publico
             </TabsTrigger>
@@ -257,7 +256,7 @@ watch(isPublicProductsPageEnabledRefDebounced, (nextIsPublicProductsPageEnabled)
           </TabsContent>
           <TabsContent
             value="link"
-            v-if="subscriptionStore.canEnablePublicProductsPage"
+            v-if="organizationStore.canEnablePublicProductsPage"
           >
             <ModalLinkContent />
           </TabsContent>
