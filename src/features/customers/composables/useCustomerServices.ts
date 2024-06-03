@@ -88,7 +88,7 @@ export function useCustomerServices() {
       throw new Error("Organization is required to create a customer");
 
     const { customer_id, ...otherFormValues } = formValues;
-    await supabase.from("i_customers").insert([
+    return await supabase.from("i_customers").insert([
       {
         ...otherFormValues,
         org_id: organization.org_id,
@@ -102,7 +102,7 @@ export function useCustomerServices() {
       throw new Error("Organization is required to update a customer");
 
     const { customer_id, ...otherFormValues } = formValues;
-    await supabase
+    return await supabase
       .from("i_customers")
       .update({
         ...otherFormValues,
@@ -115,7 +115,7 @@ export function useCustomerServices() {
     if (!customerId)
       throw new Error("Customer id is required to delete a customer");
 
-    await supabase.from("i_customers").delete().eq("id", customerId);
+    return await supabase.from("i_customers").delete().eq("id", customerId);
   }
 
   async function getCustomerCount(range?: { from: string; to: string }) {

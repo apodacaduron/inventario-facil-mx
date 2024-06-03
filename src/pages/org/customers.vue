@@ -8,9 +8,9 @@ import {
   useCustomerServices,
   DeleteCustomerDialog,
   useCustomersCountQuery,
-} from '@/features/customers';
-import { ref, toRef, watchEffect } from 'vue';
-import { FeedbackCard, useTableOrder, useTableStates } from '@/features/global';
+} from "@/features/customers";
+import { ref, toRef, watchEffect } from "vue";
+import { FeedbackCard, useTableOrder, useTableStates } from "@/features/global";
 import {
   Button,
   Input,
@@ -28,8 +28,8 @@ import {
   TooltipTrigger,
   TooltipContent,
   Badge,
-  useToast
-} from '@/components/ui';
+  useToast,
+} from "@/components/ui";
 import {
   ChevronDownIcon,
   ChevronUpIcon,
@@ -38,17 +38,17 @@ import {
   PlusIcon,
   TrashIcon,
   UserGroupIcon,
-} from '@heroicons/vue/24/outline';
-import { refDebounced, useInfiniteScroll } from '@vueuse/core';
-import { useOrganizationStore, useSubscriptionStore } from '@/stores';
-import { useCustomersQuery } from '@/features/customers/composables/useCustomerQueries';
-import { useMutation, useQueryClient } from '@tanstack/vue-query';
-import { analytics } from '@/config/analytics';
-import { errorToString } from '@/features/global/utils';
+} from "@heroicons/vue/24/outline";
+import { refDebounced, useInfiniteScroll } from "@vueuse/core";
+import { useOrganizationStore, useSubscriptionStore } from "@/stores";
+import { useCustomersQuery } from "@/features/customers/composables/useCustomerQueries";
+import { useMutation, useQueryClient } from "@tanstack/vue-query";
+import { analytics } from "@/config/analytics";
+import { errorToString, notifyIfHasError } from "@/features/global/utils";
 
 const WHATSAPP_URL = import.meta.env.VITE_WHATSAPP_URL;
 const tableRef = ref<HTMLElement | null>(null);
-const customerSearch = ref('');
+const customerSearch = ref("");
 const customerSearchDebounced = refDebounced(customerSearch, 400);
 const isCreateOrUpdateSidebarOpen = ref(false);
 const isDeleteCustomerDialogOpen = ref(false);
@@ -56,7 +56,7 @@ const activeCustomer = ref<Customer | null>(null);
 
 const customersTableOrder = useTableOrder({
   options: {
-    initialOrder: ['created_at', 'desc'],
+    initialOrder: ["created_at", "desc"],
   },
 });
 const { toast } = useToast();
@@ -111,58 +111,37 @@ function openUpdateCustomerSidebar(customer: Customer) {
 }
 
 async function createCustomerMutationFn(formValues: CreateCustomer) {
-  try {
-    await customerServices.createCustomer(formValues);
-    await queryClient.invalidateQueries({ queryKey: ['customers'] });
-    analytics.event('create-customer', formValues);
-  } catch (error) {
-    toast({
-      title: 'Uh oh! Something went wrong.',
-      description: errorToString(error) ?? 'There was a problem with your request.',
-      variant: 'destructive',
-    });
-  }
+  const { error } = await customerServices.createCustomer(formValues);
+  notifyIfHasError(error);
+  await queryClient.invalidateQueries({ queryKey: ["customers"] });
+  analytics.event("create-customer", formValues);
 }
 async function updateCustomerMutationFn(formValues: UpdateCustomer) {
-  try {
-    const customerId = formValues.customer_id;
-    if (!customerId) throw new Error('Customer id required to perform update');
-    await customerServices.updateCustomer(formValues);
-    await queryClient.invalidateQueries({ queryKey: ['customers'] });
-    analytics.event('update-customer', formValues);
-  } catch (error) {
-    toast({
-      title: 'Uh oh! Something went wrong.',
-      description: errorToString(error) ?? 'There was a problem with your request.',
-      variant: 'destructive',
-    });
-  }
+  const customerId = formValues.customer_id;
+  if (!customerId) throw new Error("Customer id required to perform update");
+  const { error } = await customerServices.updateCustomer(formValues);
+  notifyIfHasError(error);
+  await queryClient.invalidateQueries({ queryKey: ["customers"] });
+  analytics.event("update-customer", formValues);
 }
 async function deleteCustomerMutationFn() {
-  try {
-    const customerId = activeCustomer.value?.id;
-    if (!customerId) throw new Error('Customer id required to perform delete');
-    await customerServices.deleteCustomer(customerId);
-    isDeleteCustomerDialogOpen.value = false;
-    await queryClient.invalidateQueries({ queryKey: ['customers'] });
-    analytics.event('delete-customer', activeCustomer.value ?? {});
-  } catch (error) {
-    toast({
-      title: 'Uh oh! Something went wrong.',
-      description: errorToString(error) ?? 'There was a problem with your request.',
-      variant: 'destructive',
-    });
-  }
+  const customerId = activeCustomer.value?.id;
+  if (!customerId) throw new Error("Customer id required to perform delete");
+  const { error } = await customerServices.deleteCustomer(customerId);
+  notifyIfHasError(error);
+  isDeleteCustomerDialogOpen.value = false;
+  await queryClient.invalidateQueries({ queryKey: ["customers"] });
+  analytics.event("delete-customer", activeCustomer.value ?? {});
 }
 
-function getBadgeColorFromStatus(status: Customer['trust_status']) {
+function getBadgeColorFromStatus(status: Customer["trust_status"]) {
   switch (status) {
-    case 'trusted':
-      return 'default';
-    case 'not_trusted':
-      return 'destructive';
+    case "trusted":
+      return "default";
+    case "not_trusted":
+      return "destructive";
     default:
-      return 'default';
+      return "default";
   }
 }
 
@@ -175,7 +154,10 @@ watchEffect(() => {
 </script>
 
 <template>
-  <div ref="tableRef" class="py-6 mt-[71px] md:px-6 h-[calc(100vh-71px)] overflow-y-auto">
+  <div
+    ref="tableRef"
+    class="py-6 mt-[71px] md:px-6 h-[calc(100vh-71px)] overflow-y-auto"
+  >
     <div class="flex justify-between flex-col md:flex-row mx-4 md:mx-0">
       <div class="mb-6">
         <h2
@@ -315,7 +297,7 @@ watchEffect(() => {
                 </div>
               </TableCell>
               <TableCell class="text-center">{{
-                customer.notes || '-'
+                customer.notes || "-"
               }}</TableCell>
               <TableCell class="text-center"
                 ><a
@@ -328,7 +310,7 @@ watchEffect(() => {
                 </a></TableCell
               >
               <TableCell class="text-center">
-                {{ customer.address || '-' }}
+                {{ customer.address || "-" }}
               </TableCell>
               <TableCell class="text-center">
                 <a
@@ -343,7 +325,9 @@ watchEffect(() => {
                 <template v-else>-</template>
               </TableCell>
               <TableCell class="text-center">
-                <Badge :variant="getBadgeColorFromStatus(customer.trust_status)">
+                <Badge
+                  :variant="getBadgeColorFromStatus(customer.trust_status)"
+                >
                   {{ customer.trust_status?.toLocaleUpperCase() }}
                 </Badge>
               </TableCell>
@@ -387,7 +371,12 @@ watchEffect(() => {
           </template>
         </TableBody>
       </Table>
-      <div v-if="customersQuery.isFetchingNextPage.value" class="w-full flex justify-center">LOADING...</div>
+      <div
+        v-if="customersQuery.isFetchingNextPage.value"
+        class="w-full flex justify-center"
+      >
+        LOADING...
+      </div>
 
       <FeedbackCard
         v-if="tableLoadingStates.showEmptyState.value"
