@@ -35,7 +35,7 @@ const authStore = useAuthStore();
 const organizationStore = useOrganizationStore();
 
 const orgId = toRef(
-  () => organizationStore.organizations?.find(Boolean)?.org_id
+  () => organizationStore.userOrganizations?.find(Boolean)?.org_id
 );
 
 function signOut() {

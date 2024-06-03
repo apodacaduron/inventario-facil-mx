@@ -116,26 +116,45 @@ export type Database = {
       i_organizations: {
         Row: {
           created_at: string
+          current_customers: number
+          current_members: number
+          current_products: number
           id: string
           is_public_products_page_enabled: boolean
           name: string | null
+          plan_id: string | null
           user_id: string | null
         }
         Insert: {
           created_at?: string
+          current_customers?: number
+          current_members?: number
+          current_products?: number
           id?: string
           is_public_products_page_enabled?: boolean
           name?: string | null
+          plan_id?: string | null
           user_id?: string | null
         }
         Update: {
           created_at?: string
+          current_customers?: number
+          current_members?: number
+          current_products?: number
           id?: string
           is_public_products_page_enabled?: boolean
           name?: string | null
+          plan_id?: string | null
           user_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "i_organizations_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "i_organizations_user_id_fkey"
             columns: ["user_id"]

@@ -30,7 +30,7 @@ const toggleDark = useToggle(isDark);
       <div v-if="authStore.isLoggedIn" class="flex gap-4">
         <router-link
           :to="`/org/${
-            organizationStore.organizations?.find(Boolean)?.org_id
+            organizationStore.userOrganizations?.find(Boolean)?.org_id
           }/dashboard`"
           :class="[
             'hidden md:block',

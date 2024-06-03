@@ -7,7 +7,6 @@ import {
   customerServicesTypeguards,
   useCustomerServices,
   DeleteCustomerDialog,
-  useCustomersCountQuery,
 } from "@/features/customers";
 import { ref, toRef, watchEffect } from "vue";
 import { FeedbackCard, useTableOrder, useTableStates } from "@/features/global";
@@ -28,7 +27,6 @@ import {
   TooltipTrigger,
   TooltipContent,
   Badge,
-  useToast,
 } from "@/components/ui";
 import {
   ChevronDownIcon,
@@ -40,11 +38,11 @@ import {
   UserGroupIcon,
 } from "@heroicons/vue/24/outline";
 import { refDebounced, useInfiniteScroll } from "@vueuse/core";
-import { useOrganizationStore, useSubscriptionStore } from "@/stores";
+import { useOrganizationStore } from "@/stores";
 import { useCustomersQuery } from "@/features/customers/composables/useCustomerQueries";
 import { useMutation, useQueryClient } from "@tanstack/vue-query";
 import { analytics } from "@/config/analytics";
-import { errorToString, notifyIfHasError } from "@/features/global/utils";
+import { notifyIfHasError } from "@/features/global/utils";
 
 const WHATSAPP_URL = import.meta.env.VITE_WHATSAPP_URL;
 const tableRef = ref<HTMLElement | null>(null);
@@ -59,10 +57,8 @@ const customersTableOrder = useTableOrder({
     initialOrder: ["created_at", "desc"],
   },
 });
-const { toast } = useToast();
 const queryClient = useQueryClient();
 const organizationStore = useOrganizationStore();
-const subscriptionStore = useSubscriptionStore();
 const customerServices = useCustomerServices();
 const createCustomerMutation = useMutation({
   mutationFn: createCustomerMutationFn,
@@ -73,7 +69,6 @@ const updateCustomerMutation = useMutation({
 const deleteCustomerMutation = useMutation({
   mutationFn: deleteCustomerMutationFn,
 });
-const customersCountQuery = useCustomersCountQuery();
 const customersQuery = useCustomersQuery({
   options: {
     enabled: toRef(() => organizationStore.hasOrganizations),
@@ -172,7 +167,7 @@ watchEffect(() => {
       <div class="hidden lg:flex gap-2">
         <Button
           :disabled="
-            !subscriptionStore.canAddCustomers(customersCountQuery.data.value)
+            !organizationStore.canAddCustomers
           "
           @click="isCreateOrUpdateSidebarOpen = true"
           label=""
@@ -193,7 +188,7 @@ watchEffect(() => {
       <div class="flex lg:hidden gap-2">
         <Button
           :disabled="
-            !subscriptionStore.canAddCustomers(customersCountQuery.data.value)
+            !organizationStore.canAddCustomers
           "
           @click="isCreateOrUpdateSidebarOpen = true"
           label=""

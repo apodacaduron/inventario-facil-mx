@@ -28,7 +28,8 @@ export const useAuthStore = defineStore("auth", () => {
   async function signOut() {
     await supabase.auth.signOut();
     setSession(null);
-    setAuthedUserData(null)
+    setAuthedUserData(null);
+    window.location.href = window.location.origin
   }
 
   return {

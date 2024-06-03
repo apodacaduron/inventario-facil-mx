@@ -11,9 +11,8 @@ import {
   productServicesTypeguards,
   useCurrencyFormatter,
   useProductServices,
-  useProductsCountQuery,
-} from '@/features/products';
-import { ref, toRef, watchEffect } from 'vue';
+} from "@/features/products";
+import { ref, toRef, watchEffect } from "vue";
 import {
   Button,
   Input,
@@ -38,7 +37,7 @@ import {
   Tooltip,
   TooltipTrigger,
   TooltipContent,
-} from '@/components/ui';
+} from "@/components/ui";
 import {
   ChevronDownIcon,
   ChevronUpIcon,
@@ -49,21 +48,26 @@ import {
   ShareIcon,
   ShoppingBagIcon,
   TrashIcon,
-} from '@heroicons/vue/24/outline';
-import { refDebounced, useInfiniteScroll, useStorage } from '@vueuse/core';
-import { useOrganizationStore, useSubscriptionStore } from '@/stores';
-import { useProductsQuery } from '@/features/products/composables/useProductQueries';
-import { useMutation, useQueryClient } from '@tanstack/vue-query';
-import { FeedbackCard, useServiceHelpers, useTableOrder, useTableStates } from '@/features/global';
-import { analytics } from '@/config/analytics';
+} from "@heroicons/vue/24/outline";
+import { refDebounced, useInfiniteScroll, useStorage } from "@vueuse/core";
+import { useOrganizationStore } from "@/stores";
+import { useProductsQuery } from "@/features/products/composables/useProductQueries";
+import { useMutation, useQueryClient } from "@tanstack/vue-query";
+import {
+  FeedbackCard,
+  useServiceHelpers,
+  useTableOrder,
+  useTableStates,
+} from "@/features/global";
+import { analytics } from "@/config/analytics";
 
 const tableRef = ref<HTMLElement | null>(null);
 
-const productSearch = ref('');
+const productSearch = ref("");
 const productSearchDebounced = refDebounced(productSearch, 400);
 const tableFiltersRef = useStorage<{
-  status: 'in_stock' | 'out_of_stock' | 'all';
-}>('products-table-filters', { status: 'all' });
+  status: "in_stock" | "out_of_stock" | "all";
+}>("products-table-filters", { status: "all" });
 const isCreateOrUpdateSidebarOpen = ref(false);
 const isDeleteProductDialogOpen = ref(false);
 const isShareStockDialogOpen = ref(false);
@@ -72,14 +76,13 @@ const isProductImageDialogOpen = ref(false);
 const activeProduct = ref<Product | null>(null);
 const productsTableOrder = useTableOrder({
   options: {
-    initialOrder: ['created_at', 'desc'],
+    initialOrder: ["created_at", "desc"],
   },
 });
 const serviceHelpers = useServiceHelpers();
 const organization = serviceHelpers.getCurrentOrganization();
 const queryClient = useQueryClient();
 const organizationStore = useOrganizationStore();
-const subscriptionStore = useSubscriptionStore();
 const productServices = useProductServices();
 const createProductMutation = useMutation({
   mutationFn: createProductMutationFn,
@@ -92,7 +95,6 @@ const deleteProductMutation = useMutation({
 });
 
 const currencyFormatter = useCurrencyFormatter();
-const productsCountQuery = useProductsCountQuery();
 const productsQuery = useProductsQuery({
   options: {
     enabled: toRef(() => organizationStore.hasOrganizations),
@@ -100,13 +102,13 @@ const productsQuery = useProductsQuery({
     organization_id: toRef(() => organization?.org_id?.toString()),
     order: toRef(() => productsTableOrder.tableOrder.value),
     filters: toRef(() => {
-      if (tableFiltersRef.value.status === 'all') return [];
+      if (tableFiltersRef.value.status === "all") return [];
 
-      if (tableFiltersRef.value.status === 'in_stock') {
+      if (tableFiltersRef.value.status === "in_stock") {
         return [
           {
-            column: 'current_stock',
-            operator: 'gt',
+            column: "current_stock",
+            operator: "gt",
             value: 0,
           },
         ];
@@ -114,8 +116,8 @@ const productsQuery = useProductsQuery({
 
       return [
         {
-          column: 'current_stock',
-          operator: 'eq',
+          column: "current_stock",
+          operator: "eq",
           value: 0,
         },
       ];
@@ -159,26 +161,26 @@ function openAddStockDialog(product: Product) {
 
 async function createProductMutationFn(formValues: CreateProduct) {
   await productServices.createProduct(formValues);
-  await queryClient.invalidateQueries({ queryKey: ['products'] });
-  analytics.event('create-product', formValues);
+  await queryClient.invalidateQueries({ queryKey: ["products"] });
+  analytics.event("create-product", formValues);
 }
 async function updateProductMutationFn(formValues: UpdateProduct) {
   const productId = formValues.product_id;
-  if (!productId) throw new Error('Product id required to perform update');
+  if (!productId) throw new Error("Product id required to perform update");
   await productServices.updateProduct({
     ...formValues,
     product_id: productId,
   });
-  await queryClient.invalidateQueries({ queryKey: ['products'] });
-  analytics.event('update-product', formValues);
+  await queryClient.invalidateQueries({ queryKey: ["products"] });
+  analytics.event("update-product", formValues);
 }
 async function deleteProductMutationFn(product: Product | null) {
   const productId = product?.id;
-  if (!productId) throw new Error('Product id required to perform delete');
+  if (!productId) throw new Error("Product id required to perform delete");
   await productServices.deleteProduct(productId);
   isDeleteProductDialogOpen.value = false;
-  await queryClient.invalidateQueries({ queryKey: ['products'] });
-  analytics.event('delete-product', product);
+  await queryClient.invalidateQueries({ queryKey: ["products"] });
+  analytics.event("delete-product", product);
 }
 
 watchEffect(() => {
@@ -209,9 +211,7 @@ watchEffect(() => {
       </div>
       <div class="hidden lg:flex gap-2">
         <Button
-          :disabled="
-            !subscriptionStore.canAddProducts(productsCountQuery.data.value)
-          "
+          :disabled="!organizationStore.canAddProducts"
           @click="isCreateOrUpdateSidebarOpen = true"
         >
           <PlusIcon class="w-5 h-5 stroke-[2px] mr-2" /> Crear producto
@@ -264,9 +264,7 @@ watchEffect(() => {
 
       <div class="flex lg:hidden gap-2">
         <Button
-          :disabled="
-            !subscriptionStore.canAddProducts(productsCountQuery.data.value)
-          "
+          :disabled="!organizationStore.canAddProducts"
           @click="isCreateOrUpdateSidebarOpen = true"
           size="icon"
         >
@@ -375,7 +373,13 @@ watchEffect(() => {
               <TableCell
                 class="flex items-center p-4 text-foreground whitespace-nowrap w-max"
               >
-                <Avatar class="cursor-pointer" @click="isProductImageDialogOpen = true; activeProduct = product">
+                <Avatar
+                  class="cursor-pointer"
+                  @click="
+                    isProductImageDialogOpen = true;
+                    activeProduct = product;
+                  "
+                >
                   <AvatarImage :src="product?.image_url ?? ''" />
                   <AvatarFallback>{{
                     `${product?.name?.substring(0, 1).toLocaleUpperCase()}`
@@ -395,10 +399,10 @@ watchEffect(() => {
                 product.current_stock
               }}</TableCell>
               <TableCell class="text-center">{{
-                currencyFormatter.parse(product.unit_price) ?? '-'
+                currencyFormatter.parse(product.unit_price) ?? "-"
               }}</TableCell>
               <TableCell class="text-center">
-                {{ currencyFormatter.parse(product.retail_price) ?? '-' }}
+                {{ currencyFormatter.parse(product.retail_price) ?? "-" }}
               </TableCell>
               <TableCell class="text-center flex justify-center gap-2">
                 <TooltipProvider>
@@ -455,7 +459,12 @@ watchEffect(() => {
           </template>
         </TableBody>
       </Table>
-      <div v-if="productsQuery.isFetchingNextPage.value" class="w-full flex justify-center">LOADING...</div>
+      <div
+        v-if="productsQuery.isFetchingNextPage.value"
+        class="w-full flex justify-center"
+      >
+        LOADING...
+      </div>
 
       <FeedbackCard
         v-if="tableLoadingStates.showEmptyState.value"
