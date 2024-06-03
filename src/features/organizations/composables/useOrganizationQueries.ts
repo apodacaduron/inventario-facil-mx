@@ -22,6 +22,8 @@ export function useUserOrganizationsQuery(context: {
       });
     },
     enabled: context.options.enabled,
+    refetchOnWindowFocus: true,
+    staleTime: 1_000
   });
 }
 
