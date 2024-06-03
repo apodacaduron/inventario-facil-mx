@@ -57,6 +57,9 @@ Deno.serve(async (request) => {
         start_date: new Date().toISOString(),
         status: "active",
       }).eq("user_id", user.data.id);
+      await supabase.from("i_organizations").update({
+        plan_id: freemiumPlanResponse.data.id,
+      }).eq("user_id", user.data.id);
       break;
     }
     case "invoice.paid": {
@@ -87,6 +90,9 @@ Deno.serve(async (request) => {
         status: subscription.status,
         stripe_subscription_id: subscription.id,
         stripe_invoice_id: subscription.latest_invoice,
+      }).eq("user_id", user.data.id);
+      await supabase.from("i_organizations").update({
+        plan_id: premiumPlanResponse.data.id,
       }).eq("user_id", user.data.id);
       break;
     }
@@ -128,6 +134,9 @@ Deno.serve(async (request) => {
         status: "active",
         stripe_subscription_id: null,
         stripe_invoice_id: null,
+      }).eq("user_id", user.data.id);
+      await supabase.from("i_organizations").update({
+        plan_id: freemiumPlanResponse.data.id,
       }).eq("user_id", user.data.id);
       break;
     }

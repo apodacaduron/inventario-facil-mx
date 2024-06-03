@@ -27,7 +27,8 @@ import {
   Tooltip,
   TooltipTrigger,
   TooltipContent,
-  Badge
+  Badge,
+  useToast
 } from '@/components/ui';
 import {
   ChevronDownIcon,
@@ -43,6 +44,7 @@ import { useOrganizationStore, useSubscriptionStore } from '@/stores';
 import { useCustomersQuery } from '@/features/customers/composables/useCustomerQueries';
 import { useMutation, useQueryClient } from '@tanstack/vue-query';
 import { analytics } from '@/config/analytics';
+import { errorToString } from '@/features/global/utils';
 
 const WHATSAPP_URL = import.meta.env.VITE_WHATSAPP_URL;
 const tableRef = ref<HTMLElement | null>(null);
@@ -51,11 +53,13 @@ const customerSearchDebounced = refDebounced(customerSearch, 400);
 const isCreateOrUpdateSidebarOpen = ref(false);
 const isDeleteCustomerDialogOpen = ref(false);
 const activeCustomer = ref<Customer | null>(null);
+
 const customersTableOrder = useTableOrder({
   options: {
     initialOrder: ['created_at', 'desc'],
   },
 });
+const { toast } = useToast();
 const queryClient = useQueryClient();
 const organizationStore = useOrganizationStore();
 const subscriptionStore = useSubscriptionStore();
@@ -107,24 +111,48 @@ function openUpdateCustomerSidebar(customer: Customer) {
 }
 
 async function createCustomerMutationFn(formValues: CreateCustomer) {
-  await customerServices.createCustomer(formValues);
-  await queryClient.invalidateQueries({ queryKey: ['customers'] });
-  analytics.event('create-customer', formValues);
+  try {
+    await customerServices.createCustomer(formValues);
+    await queryClient.invalidateQueries({ queryKey: ['customers'] });
+    analytics.event('create-customer', formValues);
+  } catch (error) {
+    toast({
+      title: 'Uh oh! Something went wrong.',
+      description: errorToString(error) ?? 'There was a problem with your request.',
+      variant: 'destructive',
+    });
+  }
 }
 async function updateCustomerMutationFn(formValues: UpdateCustomer) {
-  const customerId = formValues.customer_id;
-  if (!customerId) throw new Error('Customer id required to perform update');
-  await customerServices.updateCustomer(formValues);
-  await queryClient.invalidateQueries({ queryKey: ['customers'] });
-  analytics.event('update-customer', formValues);
+  try {
+    const customerId = formValues.customer_id;
+    if (!customerId) throw new Error('Customer id required to perform update');
+    await customerServices.updateCustomer(formValues);
+    await queryClient.invalidateQueries({ queryKey: ['customers'] });
+    analytics.event('update-customer', formValues);
+  } catch (error) {
+    toast({
+      title: 'Uh oh! Something went wrong.',
+      description: errorToString(error) ?? 'There was a problem with your request.',
+      variant: 'destructive',
+    });
+  }
 }
 async function deleteCustomerMutationFn() {
-  const customerId = activeCustomer.value?.id;
-  if (!customerId) throw new Error('Customer id required to perform delete');
-  await customerServices.deleteCustomer(customerId);
-  isDeleteCustomerDialogOpen.value = false;
-  await queryClient.invalidateQueries({ queryKey: ['customers'] });
-  analytics.event('delete-customer', activeCustomer.value ?? {});
+  try {
+    const customerId = activeCustomer.value?.id;
+    if (!customerId) throw new Error('Customer id required to perform delete');
+    await customerServices.deleteCustomer(customerId);
+    isDeleteCustomerDialogOpen.value = false;
+    await queryClient.invalidateQueries({ queryKey: ['customers'] });
+    analytics.event('delete-customer', activeCustomer.value ?? {});
+  } catch (error) {
+    toast({
+      title: 'Uh oh! Something went wrong.',
+      description: errorToString(error) ?? 'There was a problem with your request.',
+      variant: 'destructive',
+    });
+  }
 }
 
 function getBadgeColorFromStatus(status: Customer['trust_status']) {
