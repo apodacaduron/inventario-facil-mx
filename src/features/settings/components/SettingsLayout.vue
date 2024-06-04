@@ -25,11 +25,6 @@ const isDark = useDark();
 const toggleDark = useToggle(isDark);
 const authStore = useAuthStore();
 
-function signOut() {
-  authStore.signOut();
-  router.push("/");
-}
-
 const menuList = {
   billing: {
     path: `/settings/billing`,
@@ -88,7 +83,7 @@ const menuList = {
                       <span>Ir al panel de administrador</span>
                     </DropdownMenuItem>
                   </router-link>
-                  <DropdownMenuItem @click="signOut">
+                  <DropdownMenuItem @click="authStore.signOut">
                     <ArrowLeftOnRectangleIcon class="w-4 h-4 mr-2" />
                     <span>Cerrar sesión</span>
                   </DropdownMenuItem>

@@ -38,11 +38,6 @@ const orgId = toRef(
   () => organizationStore.userOrganizations?.find(Boolean)?.org_id
 );
 
-function signOut() {
-  authStore.signOut();
-  router.push("/");
-}
-
 const menuList = {
   subscriptions: {
     path: `/admin/subscriptions`,
@@ -137,7 +132,7 @@ const menuList = {
                       <span>Volver a organización</span>
                     </DropdownMenuItem>
                   </router-link>
-                  <DropdownMenuItem @click="signOut">
+                  <DropdownMenuItem @click="authStore.signOut">
                     <ArrowLeftOnRectangleIcon class="w-4 h-4 mr-2" />
                     <span>Cerrar sesión</span>
                   </DropdownMenuItem>

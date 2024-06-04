@@ -3,8 +3,14 @@ import { Session } from "@supabase/supabase-js";
 import { defineStore } from "pinia";
 import { ref, toRef } from "vue";
 import { AuthedUserData } from "@/features/admin";
+import { resetAllPiniaStores } from ".";
+import { useQueryClient } from "@tanstack/vue-query";
+import { useRouter } from "vue-router";
 
 export const useAuthStore = defineStore("auth", () => {
+  const router = useRouter();
+  const queryClient = useQueryClient();
+
   const isLoadingSession = ref(true);
   const session = ref<Session | null>(null);
   const authedUser = ref<AuthedUserData | null>(null);
@@ -27,9 +33,15 @@ export const useAuthStore = defineStore("auth", () => {
 
   async function signOut() {
     await supabase.auth.signOut({ scope: "local" });
-    setSession(null);
-    setAuthedUserData(null);
-    window.location.href = window.location.origin;
+    queryClient.removeQueries();
+    resetAllPiniaStores();
+    router.push('/')
+  }
+
+  function $reset() {
+    isLoadingSession.value = false;
+    session.value = null
+    authedUser.value = null
   }
 
   return {
@@ -42,5 +54,6 @@ export const useAuthStore = defineStore("auth", () => {
     setSession,
     signOut,
     setAuthedUserData,
+    $reset
   };
 });

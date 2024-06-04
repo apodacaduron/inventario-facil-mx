@@ -46,6 +46,10 @@ export const useOrganizationStore = defineStore("organization", () => {
     return userOrganizations.value?.find((org) => org.org_id === id);
   }
 
+  function $reset() {
+    userOrganizations.value = null
+  }
+
   return {
     userOrganizations,
     hasOrganizations,
@@ -56,5 +60,6 @@ export const useOrganizationStore = defineStore("organization", () => {
     canEnablePublicProductsPage,
     canAddProducts,
     canAddCustomers,
+    $reset
   };
 });

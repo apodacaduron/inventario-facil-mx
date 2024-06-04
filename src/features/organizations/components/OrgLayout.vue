@@ -45,11 +45,6 @@ const toggleDark = useToggle(isDark);
 const authStore = useAuthStore();
 const organizationStore = useOrganizationStore();
 
-function signOut() {
-  authStore.signOut();
-  router.push("/");
-}
-
 const menuList = {
   dashboard: {
     path: `/org/${route.params.orgId}/dashboard`,
@@ -206,7 +201,7 @@ const menuList = {
                       <span>Configuracion</span>
                     </DropdownMenuItem>
                   </router-link>
-                  <DropdownMenuItem @click="signOut">
+                  <DropdownMenuItem @click="authStore.signOut">
                     <ArrowLeftOnRectangleIcon class="w-4 h-4 mr-2" />
                     <span>Cerrar sesión</span>
                   </DropdownMenuItem>
