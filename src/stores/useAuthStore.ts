@@ -11,11 +11,11 @@ export const useAuthStore = defineStore("auth", () => {
 
   const isLoggedIn = toRef(() => Boolean(session.value));
   const avatar = toRef(() => session.value?.user.user_metadata.avatar_url);
-  const userRole = toRef(() => authedUser.value?.role_name)
+  const userRole = toRef(() => authedUser.value?.role_name);
 
   function setSession(nextSession: Session | null) {
     if (nextSession === null) {
-      setAuthedUserData(null)
+      setAuthedUserData(null);
     }
     session.value = nextSession;
     isLoadingSession.value = false;
@@ -26,10 +26,10 @@ export const useAuthStore = defineStore("auth", () => {
   }
 
   async function signOut() {
-    await supabase.auth.signOut();
+    await supabase.auth.signOut({ scope: "local" });
     setSession(null);
     setAuthedUserData(null);
-    window.location.href = window.location.origin
+    window.location.href = window.location.origin;
   }
 
   return {
@@ -41,6 +41,6 @@ export const useAuthStore = defineStore("auth", () => {
     isLoadingSession,
     setSession,
     signOut,
-    setAuthedUserData
+    setAuthedUserData,
   };
 });
