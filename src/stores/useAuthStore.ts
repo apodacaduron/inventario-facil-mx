@@ -3,19 +3,25 @@ import { Session } from "@supabase/supabase-js";
 import { defineStore } from "pinia";
 import { ref, toRef } from "vue";
 import { AuthedUserData } from "@/features/admin";
+import { resetAllPiniaStores } from ".";
+import { useQueryClient } from "@tanstack/vue-query";
+import { useRouter } from "vue-router";
 
 export const useAuthStore = defineStore("auth", () => {
+  const router = useRouter();
+  const queryClient = useQueryClient();
+
   const isLoadingSession = ref(true);
   const session = ref<Session | null>(null);
   const authedUser = ref<AuthedUserData | null>(null);
 
   const isLoggedIn = toRef(() => Boolean(session.value));
   const avatar = toRef(() => session.value?.user.user_metadata.avatar_url);
-  const userRole = toRef(() => authedUser.value?.role_name)
+  const userRole = toRef(() => authedUser.value?.role_name);
 
   function setSession(nextSession: Session | null) {
     if (nextSession === null) {
-      setAuthedUserData(null)
+      setAuthedUserData(null);
     }
     session.value = nextSession;
     isLoadingSession.value = false;
@@ -26,10 +32,16 @@ export const useAuthStore = defineStore("auth", () => {
   }
 
   async function signOut() {
-    await supabase.auth.signOut();
-    setSession(null);
-    setAuthedUserData(null);
-    window.location.href = window.location.origin
+    await supabase.auth.signOut({ scope: "local" });
+    queryClient.removeQueries();
+    resetAllPiniaStores();
+    router.push('/')
+  }
+
+  function $reset() {
+    isLoadingSession.value = false;
+    session.value = null
+    authedUser.value = null
   }
 
   return {
@@ -41,6 +53,7 @@ export const useAuthStore = defineStore("auth", () => {
     isLoadingSession,
     setSession,
     signOut,
-    setAuthedUserData
+    setAuthedUserData,
+    $reset
   };
 });

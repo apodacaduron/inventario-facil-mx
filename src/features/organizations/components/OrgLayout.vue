@@ -19,7 +19,7 @@ import {
   SheetFooter,
 } from "@/components/ui";
 import { useDark, useToggle } from "@vueuse/core";
-import { useRoute, useRouter } from "vue-router";
+import { useRoute } from "vue-router";
 import {
   ArrowLeftOnRectangleIcon,
   BanknotesIcon,
@@ -39,16 +39,10 @@ import { ref } from "vue";
 const isGoPremiumDialogOpen = ref(false);
 
 const route = useRoute();
-const router = useRouter();
 const isDark = useDark();
 const toggleDark = useToggle(isDark);
 const authStore = useAuthStore();
 const organizationStore = useOrganizationStore();
-
-function signOut() {
-  authStore.signOut();
-  router.push("/");
-}
 
 const menuList = {
   dashboard: {
@@ -206,7 +200,7 @@ const menuList = {
                       <span>Configuracion</span>
                     </DropdownMenuItem>
                   </router-link>
-                  <DropdownMenuItem @click="signOut">
+                  <DropdownMenuItem @click="authStore.signOut">
                     <ArrowLeftOnRectangleIcon class="w-4 h-4 mr-2" />
                     <span>Cerrar sesión</span>
                   </DropdownMenuItem>

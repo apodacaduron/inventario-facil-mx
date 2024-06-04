@@ -17,7 +17,6 @@ import {
   AvatarImage,
 } from "@/components/ui";
 import { useDark, useToggle } from "@vueuse/core";
-import { useRouter } from "vue-router";
 import {
   ArrowLeftOnRectangleIcon,
   BuildingStorefrontIcon,
@@ -28,7 +27,6 @@ import {
 } from "@heroicons/vue/24/outline";
 import { toRef } from "vue";
 
-const router = useRouter();
 const isDark = useDark();
 const toggleDark = useToggle(isDark);
 const authStore = useAuthStore();
@@ -37,11 +35,6 @@ const organizationStore = useOrganizationStore();
 const orgId = toRef(
   () => organizationStore.userOrganizations?.find(Boolean)?.org_id
 );
-
-function signOut() {
-  authStore.signOut();
-  router.push("/");
-}
 
 const menuList = {
   subscriptions: {
@@ -137,7 +130,7 @@ const menuList = {
                       <span>Volver a organización</span>
                     </DropdownMenuItem>
                   </router-link>
-                  <DropdownMenuItem @click="signOut">
+                  <DropdownMenuItem @click="authStore.signOut">
                     <ArrowLeftOnRectangleIcon class="w-4 h-4 mr-2" />
                     <span>Cerrar sesión</span>
                   </DropdownMenuItem>
