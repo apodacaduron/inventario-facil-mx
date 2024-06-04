@@ -17,7 +17,6 @@ import {
   AvatarImage,
 } from "@/components/ui";
 import { useDark, useToggle } from "@vueuse/core";
-import { useRouter } from "vue-router";
 import {
   ArrowLeftOnRectangleIcon,
   BuildingStorefrontIcon,
@@ -28,7 +27,6 @@ import {
 } from "@heroicons/vue/24/outline";
 import { toRef } from "vue";
 
-const router = useRouter();
 const isDark = useDark();
 const toggleDark = useToggle(isDark);
 const authStore = useAuthStore();

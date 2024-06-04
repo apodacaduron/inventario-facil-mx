@@ -19,7 +19,7 @@ import {
   SheetFooter,
 } from "@/components/ui";
 import { useDark, useToggle } from "@vueuse/core";
-import { useRoute, useRouter } from "vue-router";
+import { useRoute } from "vue-router";
 import {
   ArrowLeftOnRectangleIcon,
   BanknotesIcon,
@@ -39,7 +39,6 @@ import { ref } from "vue";
 const isGoPremiumDialogOpen = ref(false);
 
 const route = useRoute();
-const router = useRouter();
 const isDark = useDark();
 const toggleDark = useToggle(isDark);
 const authStore = useAuthStore();
