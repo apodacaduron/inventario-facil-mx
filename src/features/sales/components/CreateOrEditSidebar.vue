@@ -677,7 +677,7 @@ watch(openModel, (nextOpenValue) => {
         </div>
       </div>
     </SheetContent>
-    <SheetContent v-else slide="right">
+    <SheetContent v-else slide="right" class="overflow-y-auto">
       <SheetHeader>
         <SheetTitle>
           {{ LOCALE.VIEW.TITLE }}
