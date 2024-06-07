@@ -8,7 +8,7 @@ export type CreateSale = {
   status: NonNullable<Sale['status']>;
   customer_id: NonNullable<Sale['customer_id']>;
   notes: NonNullable<Sale['notes']>;
-  cancellation_notes: NonNullable<Sale['cancellation_notes']>;
+  cancellation_notes?: NonNullable<Sale['cancellation_notes']>;
   shipping_cost: NonNullable<Sale['shipping_cost']>;
   products: {
     product_id: SaleProduct['product_id'];

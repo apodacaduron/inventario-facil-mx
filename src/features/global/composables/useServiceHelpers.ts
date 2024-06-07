@@ -8,6 +8,7 @@ export type LoadListOptions = {
     column: string;
     operator: string;
     value: any;
+    filterType?: string
   }>;
   order?: [string, "asc" | "desc"];
   organization_id?: string;

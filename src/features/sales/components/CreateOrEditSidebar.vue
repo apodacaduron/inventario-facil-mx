@@ -33,15 +33,13 @@ import {
   SelectContent,
   SelectGroup,
   Badge,
-  Switch,
-  Label,
   NumberField,
   NumberFieldContent,
   NumberFieldDecrement,
   NumberFieldInput,
   NumberFieldIncrement,
 } from "@/components/ui";
-import { ref, toRef, watch } from "vue";
+import { computed, ref, toRef, watch } from "vue";
 import { z } from "zod";
 import { CreateSale, SALE_STATUS, Sale, UpdateSale } from "../composables";
 import { refDebounced, useInfiniteScroll } from "@vueuse/core";
@@ -128,7 +126,6 @@ const initialForm: CreateSale = {
   cancellation_notes: "",
 };
 
-const allowOutOfStockProducts = ref(false);
 const saleSidebarMode = ref<"sales" | "products" | "customers">("sales");
 const activeCustomer = ref<Customer | null>(null);
 const productsRef = ref<HTMLElement | null>(null);
@@ -150,29 +147,6 @@ const customersQuery = useCustomersQuery({
     ),
     search: customerSearchDebounced,
     filters: [{ column: "trust_status", operator: "eq", value: "trusted" }],
-    order: ["name", "asc"],
-  },
-});
-const productsQuery = useProductsQuery({
-  options: {
-    enabled: toRef(
-      () =>
-        organizationStore.hasOrganizations &&
-        saleSidebarMode.value === "products"
-    ),
-    organization_id: toRef(() => route.params?.orgId?.toString()),
-    search: productSearchDebounced,
-    filters: toRef(() => {
-      if (allowOutOfStockProducts.value) return [];
-
-      return [
-        {
-          column: "current_stock",
-          operator: "gt",
-          value: 0,
-        },
-      ];
-    }),
     order: ["name", "asc"],
   },
 });
@@ -253,6 +227,41 @@ const formInstance = useForm<CreateSale | UpdateSale>({
   initialValues: initialForm,
   validationSchema: formSchema,
 });
+
+const filtersWithSelectedProductIds = computed(() =>
+  props.sale?.i_sale_products
+    .filter((product) => Boolean(product?.product_id))
+    .map((product) => ({
+      column: "id",
+      operator: "eq",
+      value: product.product_id ?? 'Unknown',
+      filterType: "or",
+    })) ?? []
+);
+
+const productsQuery = useProductsQuery({
+  options: {
+    enabled: toRef(
+      () =>
+        organizationStore.hasOrganizations &&
+        saleSidebarMode.value === "products"
+    ),
+    organization_id: toRef(() => route.params?.orgId?.toString()),
+    search: productSearchDebounced,
+    filters: toRef(() => {
+      return [
+        ...filtersWithSelectedProductIds.value,
+        {
+          column: "current_stock",
+          operator: "gt",
+          value: 0,
+          filterType: "or",
+        },
+      ];
+    }),
+    order: ["name", "asc"],
+  },
+});
 const productsFormFieldArray = useFieldArray("products");
 
 const onSubmit = formInstance.handleSubmit(async (formValues) => {
@@ -304,7 +313,19 @@ function findIndexProductInFieldList(product: Product | null) {
 
 function getProductQuantityFromForm(product: Product | null) {
   const productFieldIdx = findIndexProductInFieldList(product);
-  return formInstance.values.products?.[productFieldIdx]?.qty ?? 0
+  return formInstance.values.products?.[productFieldIdx]?.qty ?? 0;
+}
+
+function getMaxIncrementValue(product: Product | null) {
+  const matchingProduct = props.sale?.i_sale_products.find(
+    (saleProduct) => saleProduct.product_id === product?.id
+  );
+  const initialFormQty = matchingProduct?.qty ?? 0;
+  const currentStock = product?.current_stock ?? 0;
+
+  if (initialFormQty > 0) return currentStock + initialFormQty;
+
+  return currentStock;
 }
 
 function updateProductFormQuantity(product: Product | null, quantity: number) {
@@ -454,11 +475,6 @@ watch(openModel, (nextOpenValue) => {
                     <TableHead class="w-[100px]"> Producto </TableHead>
                     <TableHead class="text-center">Cantidad</TableHead>
                     <TableHead class="text-center">Precio</TableHead>
-                    <TableHead
-                      v-if="formInstance.values.status === 'in_progress'"
-                      class="text-center"
-                      >-</TableHead
-                    >
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -469,25 +485,10 @@ watch(openModel, (nextOpenValue) => {
                     <TableCell class="font-medium min-w-[80px]">
                       {{ productField?.name }}
                     </TableCell>
-                    <TableCell class="text-center flex justify-center">
-                      <FormField
-                        v-slot="{ componentField }"
-                        :name="`products.${idx}.qty`"
-                      >
-                        <FormItem v-auto-animate>
-                          <FormControl>
-                            <Input
-                              inputmode="numeric"
-                              placeholder="Cantidad"
-                              v-bind="componentField"
-                              class="w-16"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      </FormField>
-                    </TableCell>
                     <TableCell class="text-center">
+                      {{ productField?.qty }}
+                    </TableCell>
+                    <TableCell class="flex justify-center">
                       <FormField
                         v-slot="{ componentField }"
                         :name="`products.${idx}.price`"
@@ -504,19 +505,6 @@ watch(openModel, (nextOpenValue) => {
                           <FormMessage />
                         </FormItem>
                       </FormField>
-                    </TableCell>
-                    <TableCell
-                      v-if="formInstance.values.status === 'in_progress'"
-                      class="text-center"
-                    >
-                      <Button
-                        @click="productsFormFieldArray.remove(idx)"
-                        size="icon"
-                        variant="ghost"
-                        type="button"
-                      >
-                        <XMarkIcon class="w-4 h-4" />
-                      </Button>
                     </TableCell>
                   </TableRow>
                   <TableRow>
@@ -588,15 +576,6 @@ watch(openModel, (nextOpenValue) => {
           type="search"
           placeholder="Busca productos..."
         />
-        <div class="flex items-center space-x-2 mt-4">
-          <Switch
-            id="allow-out-of-stock"
-            v-model:checked="allowOutOfStockProducts"
-          />
-          <Label for="allow-out-of-stock"
-            >Mostrar productos fuera de stock</Label
-          >
-        </div>
         <div class="grid grid-cols-2 gap-3 mt-4 mb-10">
           <Card
             v-for="product in productsQuery.data.value?.pages.flatMap(
@@ -624,7 +603,12 @@ watch(openModel, (nextOpenValue) => {
               </div>
             </CardContent>
             <CardFooter class="px-2 pb-2 mt-auto">
-              <NumberField :default-value="getProductQuantityFromForm(product)" :min="0" @update:model-value="updateProductFormQuantity(product, $event)">
+              <NumberField
+                :default-value="getProductQuantityFromForm(product)"
+                :min="0"
+                :max="getMaxIncrementValue(product)"
+                @update:model-value="updateProductFormQuantity(product, $event)"
+              >
                 <NumberFieldContent>
                   <NumberFieldDecrement />
                   <NumberFieldInput />
