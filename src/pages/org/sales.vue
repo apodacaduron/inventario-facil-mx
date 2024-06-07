@@ -356,14 +356,14 @@ watchEffect(() => {
               >
                 <Avatar>
                   <AvatarFallback>{{
-                    `${sale.i_customers?.name
+                    sale.i_customers?.name
                       ?.substring(0, 1)
-                      .toLocaleUpperCase()}`
+                      .toLocaleUpperCase() ?? '?'
                   }}</AvatarFallback>
                 </Avatar>
                 <div class="ps-3">
                   <div class="text-base font-semibold">
-                    {{ sale.i_customers?.name }}
+                    {{ sale.i_customers?.name ?? '-' }}
                   </div>
                   <div
                     v-if="sale.i_customers?.phone"
