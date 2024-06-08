@@ -38,6 +38,8 @@ import {
   NumberFieldDecrement,
   NumberFieldInput,
   NumberFieldIncrement,
+  Switch,
+  Label,
 } from "@/components/ui";
 import { computed, ref, toRef, watch } from "vue";
 import { z } from "zod";
@@ -120,7 +122,6 @@ const initialForm: CreateSale = {
   status: "in_progress",
   sale_date: new Date().toISOString(),
   products: [],
-  customer_id: "",
   shipping_cost: 0,
   notes: "",
   cancellation_notes: "",
@@ -174,7 +175,7 @@ const formSchema = toTypedSchema(
     sale_id: z.string().uuid().optional(),
     status: z.enum(SALE_STATUS),
     sale_date: z.string().datetime(),
-    customer_id: z.string().uuid("Por favor seleccione a un cliente"),
+    customer_id: z.string().uuid().optional(),
     shipping_cost: z.coerce
       .number({ invalid_type_error: "Ingresa un número válido" })
       .nonnegative({ message: "Ingrese un número mayor o igual a cero" })
@@ -366,7 +367,7 @@ watch(openModel, (nextOpenValue) => {
             unit_price: saleProduct?.unit_price ?? 0,
             qty: saleProduct.qty,
           })) ?? [],
-        customer_id: props.sale?.customer_id ?? "",
+        customer_id: props.sale?.customer_id ?? undefined,
         sale_date: props.sale?.sale_date
           ? new Date(props.sale.sale_date).toISOString()
           : new Date().toISOString(),
