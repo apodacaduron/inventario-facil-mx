@@ -150,6 +150,7 @@ function handleSaleSidebar(options: {
 async function createSaleMutationFn(formValues: CreateSale) {
   await saleServices.createSale(formValues);
   await queryClient.invalidateQueries({ queryKey: ['sales'] });
+  await queryClient.invalidateQueries({ queryKey: ['products'] });
   analytics.event('create-sale', formValues);
 }
 async function updateSaleMutationFn(formValues: UpdateSale) {
@@ -157,6 +158,7 @@ async function updateSaleMutationFn(formValues: UpdateSale) {
   if (!saleId) throw new Error('Sale id required to perform update');
   await saleServices.updateSale(formValues);
   await queryClient.invalidateQueries({ queryKey: ['sales'] });
+  await queryClient.invalidateQueries({ queryKey: ['products'] });
   analytics.event('update-sale', formValues);
 }
 async function deleteSaleMutationFn() {
@@ -165,6 +167,7 @@ async function deleteSaleMutationFn() {
   await saleServices.deleteSale(saleId);
   isDeleteSaleDialogOpen.value = false;
   await queryClient.invalidateQueries({ queryKey: ['sales'] });
+  await queryClient.invalidateQueries({ queryKey: ['products'] });
   analytics.event('delete-sale', activeSale.value ?? {});
 }
 
