@@ -44,7 +44,7 @@ import { z } from "zod";
 import { CreateSale, SALE_STATUS, Sale, UpdateSale } from "../composables";
 import { refDebounced, useInfiniteScroll } from "@vueuse/core";
 import { Customer, useCustomersQuery } from "@/features/customers";
-import { PlusCircleIcon, XMarkIcon } from "@heroicons/vue/24/outline";
+import { PlusCircleIcon } from "@heroicons/vue/24/outline";
 import {
   Product,
   useCurrencyFormatter,
