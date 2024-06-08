@@ -38,8 +38,6 @@ import {
   NumberFieldDecrement,
   NumberFieldInput,
   NumberFieldIncrement,
-  Switch,
-  Label,
 } from "@/components/ui";
 import { computed, ref, toRef, watch } from "vue";
 import { z } from "zod";
