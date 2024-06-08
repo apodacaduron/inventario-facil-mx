@@ -33,24 +33,27 @@ import {
   SelectContent,
   SelectGroup,
   Badge,
-  Switch,
-  Label,
-} from '@/components/ui';
-import { ref, toRef, watch } from 'vue';
-import { z } from 'zod';
-import { CreateSale, SALE_STATUS, Sale, UpdateSale } from '../composables';
-import { refDebounced, useInfiniteScroll } from '@vueuse/core';
-import { Customer, useCustomersQuery } from '@/features/customers';
-import { PlusCircleIcon, XMarkIcon } from '@heroicons/vue/24/outline';
+  NumberField,
+  NumberFieldContent,
+  NumberFieldDecrement,
+  NumberFieldInput,
+  NumberFieldIncrement,
+} from "@/components/ui";
+import { computed, ref, toRef, watch } from "vue";
+import { z } from "zod";
+import { CreateSale, SALE_STATUS, Sale, UpdateSale } from "../composables";
+import { refDebounced, useInfiniteScroll } from "@vueuse/core";
+import { Customer, useCustomersQuery } from "@/features/customers";
+import { PlusCircleIcon } from "@heroicons/vue/24/outline";
 import {
   Product,
   useCurrencyFormatter,
   useProductsQuery,
-} from '@/features/products';
-import { toTypedSchema } from '@vee-validate/zod';
-import { useFieldArray, useForm } from 'vee-validate';
-import { useOrganizationStore } from '@/stores';
-import { useRoute } from 'vue-router';
+} from "@/features/products";
+import { toTypedSchema } from "@vee-validate/zod";
+import { useFieldArray, useForm } from "vee-validate";
+import { useOrganizationStore } from "@/stores";
+import { useRoute } from "vue-router";
 
 type CreateOrEditSidebarProps = {
   viewOnly?: boolean;
@@ -58,81 +61,79 @@ type CreateOrEditSidebarProps = {
   sale?: Sale | null;
 };
 
-const openModel = defineModel<boolean>('open');
+const openModel = defineModel<boolean>("open");
 const props = withDefaults(defineProps<CreateOrEditSidebarProps>(), {
   viewOnly: false,
   isLoading: false,
   sale: null,
 });
 const emit = defineEmits<{
-  (e: 'save', formValues: CreateSale): void;
+  (e: "save", formValues: CreateSale): void;
 }>();
 
 const WHATSAPP_URL = import.meta.env.VITE_WHATSAPP_URL;
 const LOCALE = {
   CREATE: {
-    TITLE: 'Crear venta',
-    SUBTITLE: 'Crea rápidamente una nueva venta para tu inventario.',
+    TITLE: "Crear venta",
+    SUBTITLE: "Crea rápidamente una nueva venta para tu inventario.",
   },
   UPDATE: {
-    TITLE: 'Actualizar venta',
-    SUBTITLE: 'Actualiza rápidamente una venta de tu inventario.',
+    TITLE: "Actualizar venta",
+    SUBTITLE: "Actualiza rápidamente una venta de tu inventario.",
   },
   VIEW: {
-    TITLE: 'Detalle de venta',
-    SUBTITLE: 'Ve más a detalle tu venta',
+    TITLE: "Detalle de venta",
+    SUBTITLE: "Ve más a detalle tu venta",
   },
   SELECT_PRODUCTS: {
-    TITLE: 'Selecciona productos',
-    SUBTITLE: 'Selecciona facilmente productos para agregar a tu venta',
+    TITLE: "Selecciona productos",
+    SUBTITLE: "Selecciona facilmente productos para agregar a tu venta",
   },
   SELECT_CUSTOMERS: {
-    TITLE: 'Selecciona cliente',
-    SUBTITLE: 'Selecciona facilmente un cliente para tu venta',
+    TITLE: "Selecciona cliente",
+    SUBTITLE: "Selecciona facilmente un cliente para tu venta",
   },
 };
 const statusOptions = [
   {
-    value: 'in_progress',
-    text: 'En progreso',
+    value: "in_progress",
+    text: "En progreso",
     description:
-      'La venta se está procesando activamente, se están seleccionando o empaquetando los artículos.',
-    status: 'blue',
+      "La venta se está procesando activamente, se están seleccionando o empaquetando los artículos.",
+    status: "blue",
   },
   {
-    value: 'completed',
-    text: 'Completada',
-    description: 'La venta se ha procesado y completado con éxito.',
-    status: 'green',
+    value: "completed",
+    text: "Completada",
+    description: "La venta se ha procesado y completado con éxito.",
+    status: "green",
   },
   {
-    value: 'cancelled',
-    text: 'Cancelada',
+    value: "cancelled",
+    text: "Cancelada",
     description:
-      'La venta fue anulada antes de completarse, posiblemente a solicitud del cliente u otras razones.',
-    status: 'red',
+      "La venta fue anulada antes de completarse, posiblemente a solicitud del cliente u otras razones.",
+    status: "red",
   },
 ];
 const initialForm: CreateSale = {
-  status: 'in_progress',
+  status: "in_progress",
   sale_date: new Date().toISOString(),
   products: [],
-  customer_id: '',
   shipping_cost: 0,
-  notes: '',
-  cancellation_notes: '',
+  notes: "",
+  cancellation_notes: "",
 };
 
-const allowOutOfStockProducts = ref(false);
-const saleSidebarMode = ref<'sales' | 'products' | 'customers'>('sales');
+const saleSidebarMode = ref<"sales" | "products" | "customers">("sales");
 const activeCustomer = ref<Customer | null>(null);
 const productsRef = ref<HTMLElement | null>(null);
 const customersRef = ref<HTMLElement | null>(null);
-const customerSearch = ref('');
-const productSearch = ref('');
+const customerSearch = ref("");
+const productSearch = ref("");
 const customerSearchDebounced = refDebounced(customerSearch, 400);
 const productSearchDebounced = refDebounced(productSearch, 400);
-const route = useRoute()
+const route = useRoute();
 
 const organizationStore = useOrganizationStore();
 const currencyFormatter = useCurrencyFormatter();
@@ -141,34 +142,11 @@ const customersQuery = useCustomersQuery({
     enabled: toRef(
       () =>
         organizationStore.hasOrganizations &&
-        saleSidebarMode.value === 'customers'
+        saleSidebarMode.value === "customers"
     ),
     search: customerSearchDebounced,
-    filters: [{ column: 'trust_status', operator: 'eq', value: 'trusted' }],
-    order: ['name', 'asc'],
-  },
-});
-const productsQuery = useProductsQuery({
-  options: {
-    enabled: toRef(
-      () =>
-        organizationStore.hasOrganizations &&
-        saleSidebarMode.value === 'products'
-    ),
-    organization_id: toRef(() => route.params?.orgId?.toString()),
-    search: productSearchDebounced,
-    filters: toRef(() => {
-      if (allowOutOfStockProducts.value) return [];
-
-      return [
-        {
-          column: 'current_stock',
-          operator: 'gt',
-          value: 0,
-        },
-      ];
-    }),
-    order: ['name', 'asc'],
+    filters: [{ column: "trust_status", operator: "eq", value: "trusted" }],
+    order: ["name", "asc"],
   },
 });
 useInfiniteScroll(
@@ -188,17 +166,17 @@ useInfiniteScroll(
   { distance: 10, canLoadMore: () => productsQuery.hasNextPage.value }
 );
 
-const sidebarMode = toRef(() => (props.sale ? 'UPDATE' : 'CREATE'));
+const sidebarMode = toRef(() => (props.sale ? "UPDATE" : "CREATE"));
 
 const formSchema = toTypedSchema(
   z.object({
     sale_id: z.string().uuid().optional(),
     status: z.enum(SALE_STATUS),
     sale_date: z.string().datetime(),
-    customer_id: z.string().uuid('Por favor seleccione a un cliente'),
+    customer_id: z.string().uuid().optional(),
     shipping_cost: z.coerce
-      .number({ invalid_type_error: 'Ingresa un número válido' })
-      .nonnegative({ message: 'Ingrese un número mayor o igual a cero' })
+      .number({ invalid_type_error: "Ingresa un número válido" })
+      .nonnegative({ message: "Ingrese un número mayor o igual a cero" })
       .finite()
       .safe(),
     notes: z.string().optional(),
@@ -210,28 +188,37 @@ const formSchema = toTypedSchema(
             sale_detail_id: z.string().uuid().optional(),
             product_id: z.string().uuid(),
             price: z.coerce
-              .number({ message: 'Ingrese un número válido' })
-              .positive({ message: 'Ingrese un número positivo' })
+              .number({ message: "Ingrese un número válido" })
+              .positive({ message: "Ingrese un número positivo" })
               .finite()
               .safe(),
-            unit_price: z.coerce.number({ message: 'Ingrese un número válido' }).positive({ message: 'Ingrese un número positivo' }).finite().safe(),
+            unit_price: z.coerce
+              .number({ message: "Ingrese un número válido" })
+              .positive({ message: "Ingrese un número positivo" })
+              .finite()
+              .safe(),
             qty: z.coerce
-              .number({ message: 'Ingrese un número válido' })
-              .int('Cantidad debe ser número entero')
-              .positive({ message: 'Ingrese un número positivo' })
+              .number({ message: "Ingrese un número válido" })
+              .int("Cantidad debe ser número entero")
+              .positive({ message: "Ingrese un número positivo" })
               .finite()
               .safe(),
             name: z.string(),
             image_url: z.string().nullish().optional(),
           })
-          .refine((data) => {
-            return data.unit_price < (currencyFormatter.toCents(data.price) ?? 0)
-          }, {
-            message: 'Precio de venta debe de ser mayor al precio unitario',
-            path: ['price'],
-          })
+          .refine(
+            (data) => {
+              return (
+                data.unit_price < (currencyFormatter.toCents(data.price) ?? 0)
+              );
+            },
+            {
+              message: "Precio de venta debe de ser mayor al precio unitario",
+              path: ["price"],
+            }
+          )
       )
-      .min(1, 'Por favor seleccione al menos un producto'),
+      .min(1, "Por favor seleccione al menos un producto"),
   })
 );
 
@@ -239,7 +226,42 @@ const formInstance = useForm<CreateSale | UpdateSale>({
   initialValues: initialForm,
   validationSchema: formSchema,
 });
-const productsFormFieldArray = useFieldArray('products');
+
+const filtersWithSelectedProductIds = computed(() =>
+  props.sale?.i_sale_products
+    .filter((product) => Boolean(product?.product_id))
+    .map((product) => ({
+      column: "id",
+      operator: "eq",
+      value: product.product_id ?? 'Unknown',
+      filterType: "or",
+    })) ?? []
+);
+
+const productsQuery = useProductsQuery({
+  options: {
+    enabled: toRef(
+      () =>
+        organizationStore.hasOrganizations &&
+        saleSidebarMode.value === "products"
+    ),
+    organization_id: toRef(() => route.params?.orgId?.toString()),
+    search: productSearchDebounced,
+    filters: toRef(() => {
+      return [
+        ...filtersWithSelectedProductIds.value,
+        {
+          column: "current_stock",
+          operator: "gt",
+          value: 0,
+          filterType: "or",
+        },
+      ];
+    }),
+    order: ["name", "asc"],
+  },
+});
+const productsFormFieldArray = useFieldArray("products");
 
 const onSubmit = formInstance.handleSubmit(async (formValues) => {
   const modifiedProducts = formValues.products.map((formProduct) => ({
@@ -253,13 +275,14 @@ const onSubmit = formInstance.handleSubmit(async (formValues) => {
     shipping_cost: nextShippingCost ?? 0,
     products: modifiedProducts,
   };
-  emit('save', modifiedFormValues);
+  emit("save", modifiedFormValues);
 });
 
 function formatProductToSaleDetail(
-  product: Product | null
-): CreateSale['products'][number] {
-  if (!product) throw new Error('Cannot add product to sale missing data');
+  product: Product | null,
+  quantity = 0
+): CreateSale["products"][number] {
+  if (!product) throw new Error("Cannot add product to sale missing data");
 
   return {
     product_id: product.id,
@@ -267,14 +290,14 @@ function formatProductToSaleDetail(
     image_url: product.image_url,
     price: currencyFormatter.parseRaw(product.retail_price),
     unit_price: product.unit_price,
-    qty: 1,
+    qty: quantity,
   };
 }
 
 function hasProductInFieldList(product: Product | null) {
   return productsFormFieldArray.fields.value.some(
     (productField) =>
-      (productField.value as CreateSale['products'][number])?.product_id ===
+      (productField.value as CreateSale["products"][number])?.product_id ===
       product?.id
   );
 }
@@ -282,23 +305,46 @@ function hasProductInFieldList(product: Product | null) {
 function findIndexProductInFieldList(product: Product | null) {
   return productsFormFieldArray.fields.value.findIndex(
     (productField) =>
-      (productField.value as CreateSale['products'][number])?.product_id ===
+      (productField.value as CreateSale["products"][number])?.product_id ===
       product?.id
   );
 }
 
-function handleAddToProductsForm(product: Product | null) {
-  if (hasProductInFieldList(product)) {
+function getProductQuantityFromForm(product: Product | null) {
+  const productFieldIdx = findIndexProductInFieldList(product);
+  return formInstance.values.products?.[productFieldIdx]?.qty ?? 0;
+}
+
+function getMaxIncrementValue(product: Product | null) {
+  const matchingProduct = props.sale?.i_sale_products.find(
+    (saleProduct) => saleProduct.product_id === product?.id
+  );
+  const initialFormQty = matchingProduct?.qty ?? 0;
+  const currentStock = product?.current_stock ?? 0;
+
+  if (initialFormQty > 0) return currentStock + initialFormQty;
+
+  return currentStock;
+}
+
+function updateProductFormQuantity(product: Product | null, quantity: number) {
+  if (hasProductInFieldList(product) && quantity === 0) {
     const productFieldIdx = findIndexProductInFieldList(product);
     productsFormFieldArray.remove(productFieldIdx);
+  } else if (hasProductInFieldList(product) && quantity > 0) {
+    const productFieldIdx = findIndexProductInFieldList(product);
+    productsFormFieldArray.update(productFieldIdx, {
+      ...formInstance.values.products[productFieldIdx],
+      qty: quantity,
+    });
   } else {
-    productsFormFieldArray.push(formatProductToSaleDetail(product));
+    productsFormFieldArray.push(formatProductToSaleDetail(product, quantity));
   }
 }
 
 function handleCloseSidebar() {
-  if (saleSidebarMode.value !== 'sales') {
-    return (saleSidebarMode.value = 'sales');
+  if (saleSidebarMode.value !== "sales") {
+    return (saleSidebarMode.value = "sales");
   }
   openModel.value = false;
 }
@@ -308,24 +354,24 @@ watch(openModel, (nextOpenValue) => {
     formInstance.resetForm({
       values: {
         sale_id: props.sale?.id,
-        notes: props.sale?.notes ?? '',
+        notes: props.sale?.notes ?? "",
         products:
           props.sale?.i_sale_products.map((saleProduct) => ({
             sale_detail_id: saleProduct.id,
-            image_url: saleProduct.image_url ?? '',
-            product_id: saleProduct.product_id ?? '',
-            name: saleProduct.name ?? '',
+            image_url: saleProduct.image_url ?? "",
+            product_id: saleProduct.product_id ?? "",
+            name: saleProduct.name ?? "",
             price: currencyFormatter.parseRaw(saleProduct?.price ?? 0),
             unit_price: saleProduct?.unit_price ?? 0,
             qty: saleProduct.qty,
           })) ?? [],
-        customer_id: props.sale?.customer_id ?? '',
+        customer_id: props.sale?.customer_id ?? undefined,
         sale_date: props.sale?.sale_date
           ? new Date(props.sale.sale_date).toISOString()
           : new Date().toISOString(),
         shipping_cost:
           currencyFormatter.parseRaw(props.sale?.shipping_cost) ?? 0,
-        status: props.sale?.status ?? 'in_progress',
+        status: props.sale?.status ?? "in_progress",
       },
     });
   } else {
@@ -428,11 +474,6 @@ watch(openModel, (nextOpenValue) => {
                     <TableHead class="w-[100px]"> Producto </TableHead>
                     <TableHead class="text-center">Cantidad</TableHead>
                     <TableHead class="text-center">Precio</TableHead>
-                    <TableHead
-                      v-if="formInstance.values.status === 'in_progress'"
-                      class="text-center"
-                      >-</TableHead
-                    >
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -443,25 +484,10 @@ watch(openModel, (nextOpenValue) => {
                     <TableCell class="font-medium min-w-[80px]">
                       {{ productField?.name }}
                     </TableCell>
-                    <TableCell class="text-center flex justify-center">
-                      <FormField
-                        v-slot="{ componentField }"
-                        :name="`products.${idx}.qty`"
-                      >
-                        <FormItem v-auto-animate>
-                          <FormControl>
-                            <Input
-                              inputmode="numeric"
-                              placeholder="Cantidad"
-                              v-bind="componentField"
-                              class="w-16"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      </FormField>
-                    </TableCell>
                     <TableCell class="text-center">
+                      {{ productField?.qty }}
+                    </TableCell>
+                    <TableCell class="flex justify-center">
                       <FormField
                         v-slot="{ componentField }"
                         :name="`products.${idx}.price`"
@@ -479,26 +505,14 @@ watch(openModel, (nextOpenValue) => {
                         </FormItem>
                       </FormField>
                     </TableCell>
-                    <TableCell
-                      v-if="formInstance.values.status === 'in_progress'"
-                      class="text-center"
-                    >
-                      <Button
-                        @click="productsFormFieldArray.remove(idx)"
-                        size="icon"
-                        variant="ghost"
-                        type="button"
-                      >
-                        <XMarkIcon class="w-4 h-4" />
-                      </Button>
-                    </TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell class="font-medium min-w-[80px]"> </TableCell>
                     <TableCell class="text-center flex justify-center">
                       {{
                         formInstance.values.products.reduce(
-                          (acc, formProduct) => acc + (Number(formProduct.qty ?? 0)),
+                          (acc, formProduct) =>
+                            acc + Number(formProduct.qty ?? 0),
                           0
                         )
                       }}
@@ -561,22 +575,15 @@ watch(openModel, (nextOpenValue) => {
           type="search"
           placeholder="Busca productos..."
         />
-        <div class="flex items-center space-x-2 mt-4">
-          <Switch
-            id="allow-out-of-stock"
-            v-model:checked="allowOutOfStockProducts"
-          />
-          <Label for="allow-out-of-stock"
-            >Mostrar productos fuera de stock</Label
-          >
-        </div>
         <div class="grid grid-cols-2 gap-3 mt-4 mb-10">
           <Card
             v-for="product in productsQuery.data.value?.pages.flatMap(
               (page) => page.data
             )"
             :key="product?.id"
-            class="flex flex-col"
+            :class="`flex flex-col ${
+              hasProductInFieldList(product) && 'border-black'
+            }`"
           >
             <CardContent class="p-4 text-center">
               <div class="relative">
@@ -586,7 +593,7 @@ watch(openModel, (nextOpenValue) => {
                     `${product?.name?.substring(0, 1).toLocaleUpperCase()}`
                   }}</AvatarFallback>
                 </Avatar>
-                <Badge class="absolute -top-1 -right-1 text-xs">
+                <Badge class="absolute -top-1 -left-1 text-xs">
                   {{ product?.current_stock }}
                 </Badge>
               </div>
@@ -594,20 +601,19 @@ watch(openModel, (nextOpenValue) => {
                 {{ product?.name }}
               </div>
             </CardContent>
-            <CardFooter class="p-2 mt-auto">
-              <Button
-                @click="handleAddToProductsForm(product)"
-                class="w-full"
-                type="button"
-                :variant="
-                  hasProductInFieldList(product) ? 'default' : 'outline'
-                "
-                >{{
-                  hasProductInFieldList(product)
-                    ? 'Seleccionado'
-                    : 'Seleccionar'
-                }}</Button
+            <CardFooter class="px-2 pb-2 mt-auto">
+              <NumberField
+                :default-value="getProductQuantityFromForm(product)"
+                :min="0"
+                :max="getMaxIncrementValue(product)"
+                @update:model-value="updateProductFormQuantity(product, $event)"
               >
+                <NumberFieldContent>
+                  <NumberFieldDecrement />
+                  <NumberFieldInput />
+                  <NumberFieldIncrement />
+                </NumberFieldContent>
+              </NumberField>
             </CardFooter>
           </Card>
         </div>
@@ -648,11 +654,16 @@ watch(openModel, (nextOpenValue) => {
                   `${customer?.name?.substring(0, 1).toLocaleUpperCase()}`
                 }}</AvatarFallback>
               </Avatar>
-              <div class="text-sm font-semibold line-clamp-2">
-                {{ customer?.name }}
+              <div>
+                <div class="text-sm font-semibold line-clamp-2">
+                  {{ customer?.name ?? "-" }}
+                </div>
+                <div class="text-sm font-normal text-slate-500">
+                  {{ customer?.phone ?? "-" }}
+                </div>
               </div>
             </CardContent>
-            <CardFooter class="p-2 mt-auto">
+            <CardFooter class="px-2 pb-2 mt-auto">
               <Button
                 @click="
                   formInstance.setFieldValue('customer_id', customer?.id ?? '');
@@ -668,8 +679,8 @@ watch(openModel, (nextOpenValue) => {
                 "
                 >{{
                   formInstance.values.customer_id === customer?.id
-                    ? 'Seleccionado'
-                    : 'Seleccionar'
+                    ? "Seleccionado"
+                    : "Seleccionar"
                 }}</Button
               >
             </CardFooter>
@@ -796,10 +807,10 @@ watch(openModel, (nextOpenValue) => {
           >
             Creado el
             {{
-              new Date(sale.created_at).toLocaleDateString('es-MX', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
+              new Date(sale.created_at).toLocaleDateString("es-MX", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
               })
             }}
           </div>

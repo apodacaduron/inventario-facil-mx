@@ -3,7 +3,7 @@ import { LoadListOptions, useServiceHelpers } from "@/features/global";
 import { Tables } from "../../../../types_db";
 
 export type CreateProduct = {
-  product_id?: Product['id'];
+  product_id?: Product["id"];
   name: Product["name"];
   description: Product["description"];
   image_url: Product["image_url"];
@@ -16,7 +16,7 @@ export type UpdateProduct = {
 } & Partial<CreateProduct>;
 export type DeleteProduct = Product["id"];
 
-export type Product = Tables<'i_products'>
+export type Product = Tables<"i_products">;
 
 export const productServicesTypeguards = {
   isCreateProduct(
@@ -63,13 +63,24 @@ export function useProductServices() {
     }
 
     if (options?.filters) {
-      options?.filters.forEach((filter) => {
-        productQuery = productQuery.filter(
-          filter.column,
-          filter.operator,
-          filter.value
-        );
-      });
+      const orFilters = options.filters.filter(filter => filter.filterType === 'or').map(filter => ([filter.column, filter.operator, filter.value].join('.')))
+      const andFilters = options.filters.filter(filter => typeof filter.filterType === 'undefined' || filter.filterType === 'and')
+
+      if (orFilters.length) {
+        productQuery = productQuery.or(
+          orFilters.join(",")
+        )
+      }
+
+      if (orFilters.length) {
+        andFilters.forEach((filter) => {
+            productQuery = productQuery.filter(
+              filter.column,
+              filter.operator,
+              filter.value
+            );
+        });
+      }
     }
 
     return await productQuery;

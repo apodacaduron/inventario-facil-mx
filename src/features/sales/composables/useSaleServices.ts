@@ -6,9 +6,9 @@ export type CreateSale = {
   sale_id?: NonNullable<Tables<'i_sales'>['id']>;
   sale_date: NonNullable<Tables<'i_sales'>['sale_date']>;
   status: NonNullable<Sale['status']>;
-  customer_id: NonNullable<Sale['customer_id']>;
+  customer_id?: NonNullable<Sale['customer_id']>;
   notes: NonNullable<Sale['notes']>;
-  cancellation_notes: NonNullable<Sale['cancellation_notes']>;
+  cancellation_notes?: NonNullable<Sale['cancellation_notes']>;
   shipping_cost: NonNullable<Sale['shipping_cost']>;
   products: {
     product_id: SaleProduct['product_id'];
@@ -57,7 +57,7 @@ export function useSaleServices() {
 
     let saleQuery = supabase
       .from('i_sales')
-      .select('*, i_sale_products(*), i_customers!inner(*)')
+      .select('*, i_sale_products(*), i_customers(*)')
       .eq('org_id', organization.org_id)
       .range(from, to)
       .order('created_at', { ascending: false });

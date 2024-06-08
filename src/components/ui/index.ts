@@ -20,3 +20,4 @@ export * from "./drawer";
 export * from "./tabs";
 export * from "./tooltip";
 export * from "./toast";
+export * from "./number-field";

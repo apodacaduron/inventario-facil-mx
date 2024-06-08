@@ -444,6 +444,8 @@ export type Database = {
           description: string | null
           id: string
           max_customers: number | null
+          max_members: number | null
+          max_organizations: number | null
           max_products: number | null
           name: string | null
           price: number | null
@@ -456,6 +458,8 @@ export type Database = {
           description?: string | null
           id?: string
           max_customers?: number | null
+          max_members?: number | null
+          max_organizations?: number | null
           max_products?: number | null
           name?: string | null
           price?: number | null
@@ -468,6 +472,8 @@ export type Database = {
           description?: string | null
           id?: string
           max_customers?: number | null
+          max_members?: number | null
+          max_organizations?: number | null
           max_products?: number | null
           name?: string | null
           price?: number | null
@@ -570,6 +576,7 @@ export type Database = {
         Row: {
           avatar_url: string | null
           created_at: string | null
+          current_organizations: number | null
           email: string | null
           full_name: string | null
           id: string
@@ -578,6 +585,7 @@ export type Database = {
         Insert: {
           avatar_url?: string | null
           created_at?: string | null
+          current_organizations?: number | null
           email?: string | null
           full_name?: string | null
           id: string
@@ -586,6 +594,7 @@ export type Database = {
         Update: {
           avatar_url?: string | null
           created_at?: string | null
+          current_organizations?: number | null
           email?: string | null
           full_name?: string | null
           id?: string
@@ -606,19 +615,46 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      create_sale: {
-        Args: {
-          organization_id: string
-          sale_date: string
-          status: string
-          customer_id: string
-          notes: string
-          cancellation_notes: string
-          shipping_cost: number
-          products: Json[]
-        }
-        Returns: string
-      }
+      create_sale:
+        | {
+            Args: {
+              organization_id: string
+              sale_date: string
+              status: string
+              customer_id: string
+              notes: string
+              cancellation_notes: string
+              shipping_cost: number
+              products: Json[]
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              organization_id: string
+              sale_date: string
+              status: string
+              notes: string
+              cancellation_notes: string
+              shipping_cost: number
+              products: Json[]
+              customer_id?: string
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              organization_id: string
+              sale_date: string
+              status: string
+              notes: string
+              shipping_cost: number
+              products: Json[]
+              customer_id?: string
+              cancellation_notes?: string
+            }
+            Returns: string
+          }
       get_authed_user_data: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -634,6 +670,8 @@ export type Database = {
           currency: string
           max_products: number
           max_customers: number
+          max_organizations: number
+          max_members: number
           stripe_price_id: string
           stripe_product_id: string
         }[]
@@ -743,11 +781,11 @@ export type Database = {
           sale_id_input: string
           sale_date_input: string
           status_input: string
-          customer_id_input: string
           notes_input: string
-          cancellation_notes_input: string
           shipping_cost_input: number
           products_input: Json[]
+          customer_id_input?: string
+          cancellation_notes_input?: string
         }
         Returns: string
       }
