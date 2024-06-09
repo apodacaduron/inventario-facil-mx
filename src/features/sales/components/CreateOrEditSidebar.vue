@@ -582,7 +582,7 @@ watch(openModel, (nextOpenValue) => {
             )"
             :key="product?.id"
             :class="`flex flex-col ${
-              hasProductInFieldList(product) && 'border-black'
+              hasProductInFieldList(product) && 'border-black dark:border-white'
             }`"
           >
             <CardContent class="p-4 text-center">
