@@ -42,7 +42,7 @@ import {
 import { computed, ref, toRef, watch } from "vue";
 import { z } from "zod";
 import { CreateSale, SALE_STATUS, Sale, UpdateSale } from "../composables";
-import { refDebounced, useInfiniteScroll } from "@vueuse/core";
+import { refDebounced, useInfiniteScroll, useMediaQuery } from "@vueuse/core";
 import { Customer, useCustomersQuery } from "@/features/customers";
 import { PlusCircleIcon } from "@heroicons/vue/24/outline";
 import {
@@ -135,6 +135,7 @@ const customerSearchDebounced = refDebounced(customerSearch, 400);
 const productSearchDebounced = refDebounced(productSearch, 400);
 const route = useRoute();
 
+const isDesktop = useMediaQuery("(min-width: 768px)");
 const organizationStore = useOrganizationStore();
 const currencyFormatter = useCurrencyFormatter();
 const customersQuery = useCustomersQuery({
@@ -382,7 +383,7 @@ watch(openModel, (nextOpenValue) => {
 
 <template>
   <Sheet :open="openModel" @update:open="handleCloseSidebar">
-    <SheetContent v-if="!viewOnly" side="right" class="overflow-y-auto">
+    <SheetContent v-if="!viewOnly" side="right" class="overflow-y-auto w-100">
       <div v-show="saleSidebarMode === 'sales'">
         <SheetHeader>
           <SheetTitle>
@@ -688,7 +689,7 @@ watch(openModel, (nextOpenValue) => {
         </div>
       </div>
     </SheetContent>
-    <SheetContent v-else slide="right" class="overflow-y-auto">
+    <SheetContent v-else slide="right" class="overflow-y-auto w-100">
       <SheetHeader>
         <SheetTitle>
           {{ LOCALE.VIEW.TITLE }}
