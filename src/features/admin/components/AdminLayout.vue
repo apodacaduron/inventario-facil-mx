@@ -153,15 +153,15 @@ const menuList = {
         <li v-for="(menuItem, index) in menuList" :key="index">
           <router-link
             :to="menuItem.path"
-            class="flex items-center p-2 rounded-lg text-slate-500 dark:text-slate-300"
+            class="w-full inline-flex items-center whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground rounded-md h-10 px-3 text-md justify-start"
             active-class="active-link"
           >
             <component
               :is="menuItem.icon"
               v-if="menuItem.icon"
-              class="w-6 h-6 stroke-[2px]"
+              class="size-5"
             />
-            <span class="ms-3">{{ menuItem.text }}</span>
+            <span class="ms-2">{{ menuItem.text }}</span>
           </router-link>
         </li>
       </ul>
@@ -175,6 +175,6 @@ const menuList = {
 
 <style scoped lang="scss">
 .active-link {
-  @apply font-semibold text-foreground;
+  @apply bg-primary text-primary-foreground shadow hover:bg-primary/90 dark:bg-muted dark:text-white dark:hover:bg-muted dark:hover:text-white;
 }
 </style>
