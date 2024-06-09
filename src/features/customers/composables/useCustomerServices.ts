@@ -62,22 +62,7 @@ export function useCustomerServices() {
       );
     }
 
-    if (options?.order) {
-      const [column = "created_at", order = "desc"] = options?.order;
-      customerQuery = customerQuery.order(column, {
-        ascending: order === "asc",
-      });
-    }
-
-    if (options?.filters) {
-      options?.filters.forEach((filter) => {
-        customerQuery = customerQuery.filter(
-          filter.column,
-          filter.operator,
-          filter.value
-        );
-      });
-    }
+    serviceHelpers.appendFiltersToQuery(customerQuery, options);
 
     return await customerQuery;
   }

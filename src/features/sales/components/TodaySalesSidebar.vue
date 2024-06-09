@@ -37,14 +37,28 @@ const salesQuery = useSalesQuery({
     filters: toRef(() => {
       return [
         {
-          column: 'created_at',
+          column: 'and(completed_at',
           operator: 'gte',
           value: dashboardDates.dateRangeFromPeriod.value?.from.toISOString(),
+          filterType: 'or'
+        },
+        {
+          column: 'completed_at',
+          operator: 'lte',
+          value: `${dashboardDates.dateRangeFromPeriod.value?.to.toISOString()})`,
+          filterType: 'or'
+        },
+        {
+          column: 'and(created_at',
+          operator: 'gte',
+          value: dashboardDates.dateRangeFromPeriod.value?.from.toISOString(),
+          filterType: 'or',
         },
         {
           column: 'created_at',
           operator: 'lte',
-          value: dashboardDates.dateRangeFromPeriod.value?.to.toISOString(),
+          value: `${dashboardDates.dateRangeFromPeriod.value?.to.toISOString()})`,
+          filterType: 'or'
         },
       ];
     }),
