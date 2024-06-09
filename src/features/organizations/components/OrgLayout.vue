@@ -22,19 +22,21 @@ import { useDark, useToggle } from "@vueuse/core";
 import { useRoute } from "vue-router";
 import {
   ArrowLeftOnRectangleIcon,
-  BanknotesIcon,
   BuildingOffice2Icon,
   Cog6ToothIcon,
   EnvelopeIcon,
-  HomeIcon,
   MoonIcon,
   RocketLaunchIcon,
-  ShoppingBagIcon,
   SunIcon,
-  UserGroupIcon,
 } from "@heroicons/vue/24/outline";
 import GoPremiumDialog from "./GoPremiumDialog.vue";
 import { ref } from "vue";
+import {
+  BadgeDollarSign,
+  BarChart2,
+  ShoppingBag,
+  Users,
+} from "lucide-vue-next";
 
 const isGoPremiumDialogOpen = ref(false);
 
@@ -48,22 +50,22 @@ const menuList = {
   dashboard: {
     path: `/org/${route.params.orgId}/dashboard`,
     text: "Inicio",
-    icon: HomeIcon,
+    icon: BarChart2,
   },
   products: {
     path: `/org/${route.params.orgId}/products`,
     text: "Productos",
-    icon: ShoppingBagIcon,
+    icon: ShoppingBag,
   },
   customers: {
     path: `/org/${route.params.orgId}/customers`,
     text: "Clientes",
-    icon: UserGroupIcon,
+    icon: Users,
   },
   sales: {
     path: `/org/${route.params.orgId}/sales`,
     text: "Ventas",
-    icon: BanknotesIcon,
+    icon: BadgeDollarSign,
   },
 };
 </script>
@@ -114,31 +116,32 @@ const menuList = {
                       <SheetClose class="w-full">
                         <router-link
                           :to="menuItem.path"
-                          class="flex items-center p-2 rounded-lg"
+                          class="w-full inline-flex items-center whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground rounded-md h-10 px-3 text-md justify-start"
                           active-class="active-link"
                         >
                           <component
                             :is="menuItem.icon"
                             v-if="menuItem.icon"
-                            class="w-6 h-6 stroke-[2px] duration-75"
+                            class="size-5"
                           />
-                          <span class="ms-3">{{ menuItem.text }}</span>
+                          <span class="ms-2">{{ menuItem.text }}</span>
                         </router-link>
                       </SheetClose>
                     </li>
                   </ul>
                 </div>
               </div>
-              <SheetFooter
-                ><a
+              <SheetFooter>
+                <a
                   href="mailto:inventariofacilmx@gmail.com"
-                  class="flex items-center p-2 rounded-lg"
+                  class="w-full inline-flex items-center whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground rounded-md h-10 px-3 text-md justify-start"
                   active-class="active-link"
                 >
-                  <EnvelopeIcon class="w-6 h-6 stroke-[2px] duration-75" />
-                  <span class="ms-3">Soporte</span>
-                </a></SheetFooter
-              >
+                  <EnvelopeIcon class="size-5" />
+                  <span class="ms-2">Soporte</span>
+                </a>
+                <div class="shrink-0 bg-border h-px w-full mb-4" />
+              </SheetFooter>
             </SheetContent>
           </Sheet>
 
@@ -223,26 +226,26 @@ const menuList = {
         <li v-for="(menuItem, index) in menuList" :key="index">
           <router-link
             :to="menuItem.path"
-            class="flex items-center p-2 rounded-lg text-slate-500 dark:text-slate-300"
+            class="w-full inline-flex items-center whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground rounded-md h-10 px-3 text-md justify-start"
             active-class="active-link"
           >
             <component
               :is="menuItem.icon"
               v-if="menuItem.icon"
-              class="w-6 h-6 stroke-[2px]"
+              class="size-5"
             />
-            <span class="ms-3">{{ menuItem.text }}</span>
+            <span class="ms-2">{{ menuItem.text }}</span>
           </router-link>
         </li>
       </ul>
 
       <a
         href="mailto:inventariofacilmx@gmail.com"
-        class="flex items-center p-2 rounded-lg"
+        class="w-full inline-flex items-center whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground rounded-md h-10 px-3 text-md justify-start"
         active-class="active-link"
       >
-        <EnvelopeIcon class="w-6 h-6 stroke-[2px] duration-75" />
-        <span class="ms-3">Soporte</span>
+        <EnvelopeIcon class="size-5" />
+        <span class="ms-2">Soporte</span>
       </a>
     </div>
   </aside>
@@ -254,6 +257,6 @@ const menuList = {
 
 <style scoped lang="scss">
 .active-link {
-  @apply font-semibold text-foreground;
+  @apply bg-primary text-primary-foreground shadow hover:bg-primary/90 dark:bg-muted dark:text-white dark:hover:bg-muted dark:hover:text-white;
 }
 </style>

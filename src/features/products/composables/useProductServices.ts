@@ -55,33 +55,7 @@ export function useProductServices() {
       productQuery = productQuery.ilike("name", `%${options.search}%`);
     }
 
-    if (options?.order) {
-      const [column = "created_at", order = "desc"] = options?.order;
-      productQuery = productQuery.order(column, {
-        ascending: order === "asc",
-      });
-    }
-
-    if (options?.filters) {
-      const orFilters = options.filters.filter(filter => filter.filterType === 'or').map(filter => ([filter.column, filter.operator, filter.value].join('.')))
-      const andFilters = options.filters.filter(filter => typeof filter.filterType === 'undefined' || filter.filterType === 'and')
-
-      if (orFilters.length) {
-        productQuery = productQuery.or(
-          orFilters.join(",")
-        )
-      }
-
-      if (orFilters.length) {
-        andFilters.forEach((filter) => {
-            productQuery = productQuery.filter(
-              filter.column,
-              filter.operator,
-              filter.value
-            );
-        });
-      }
-    }
+    serviceHelpers.appendFiltersToQuery(productQuery, options);
 
     return await productQuery;
   }
@@ -102,22 +76,7 @@ export function useProductServices() {
       productQuery = productQuery.ilike("name", `%${options.search}%`);
     }
 
-    if (options?.order) {
-      const [column = "created_at", order = "desc"] = options?.order;
-      productQuery = productQuery.order(column, {
-        ascending: order === "asc",
-      });
-    }
-
-    if (options?.filters) {
-      options?.filters.forEach((filter) => {
-        productQuery = productQuery.filter(
-          filter.column,
-          filter.operator,
-          filter.value
-        );
-      });
-    }
+    serviceHelpers.appendFiltersToQuery(productQuery, options);
 
     return await productQuery;
   }

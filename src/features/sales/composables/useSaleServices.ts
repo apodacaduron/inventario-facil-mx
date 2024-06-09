@@ -66,22 +66,7 @@ export function useSaleServices() {
       saleQuery = saleQuery.ilike('i_customers.name', `%${options.search}%`);
     }
 
-    if (options?.order) {
-      const [column = 'created_at', order = 'desc'] = options?.order;
-      saleQuery = saleQuery.order(column, {
-        ascending: order === 'asc',
-      });
-    }
-
-    if (options?.filters) {
-      options?.filters.forEach((filter) => {
-        saleQuery = saleQuery.filter(
-          filter.column,
-          filter.operator,
-          filter.value
-        );
-      });
-    }
+    serviceHelpers.appendFiltersToQuery(saleQuery, options);
 
     return await saleQuery;
   }

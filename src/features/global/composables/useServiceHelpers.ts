@@ -1,5 +1,6 @@
 import { useOrganizationStore } from "@/stores";
 import { router } from "@/config/router";
+import type { PostgrestFilterBuilder } from "@supabase/postgrest-js";
 
 export type LoadListOptions = {
   offset?: number;
@@ -32,5 +33,37 @@ export function useServiceHelpers() {
     return [from, to];
   }
 
-  return { PAGINATION_LIMIT, getCurrentOrganization, getPaginationRange };
+  function appendFiltersToQuery<T extends PostgrestFilterBuilder<any, any, any>>(supabaseQuery: T, options?: LoadListOptions) {
+    if (options?.order) {
+      const [column = "created_at", order = "desc"] = options?.order;
+      supabaseQuery = supabaseQuery.order(column, {
+        ascending: order === "asc",
+      });
+    }
+
+    if (options?.filters) {
+      const orFilters = options.filters.filter(filter => filter.filterType === 'or').map(filter => ([filter.column, filter.operator, filter.value].join('.')))
+      const andFilters = options.filters.filter(filter => typeof filter.filterType === 'undefined' || filter.filterType === 'and')
+
+      if (orFilters.length) {
+        supabaseQuery = supabaseQuery.or(
+          orFilters.join(",")
+        )
+      }
+
+      if (orFilters.length) {
+        andFilters.forEach((filter) => {
+            supabaseQuery = supabaseQuery.filter(
+              filter.column,
+              filter.operator,
+              filter.value
+            );
+        });
+      }
+    }
+
+    return supabaseQuery
+  }
+
+  return { PAGINATION_LIMIT, getCurrentOrganization, getPaginationRange, appendFiltersToQuery };
 }

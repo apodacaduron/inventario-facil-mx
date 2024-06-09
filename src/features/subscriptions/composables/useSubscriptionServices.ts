@@ -19,22 +19,7 @@ export function useSubscriptionServices() {
       );
     }
 
-    if (options?.order) {
-      const [column = "created_at", order = "desc"] = options?.order;
-      subscriptionQuery = subscriptionQuery.order(column, {
-        ascending: order === "asc",
-      });
-    }
-
-    if (options?.filters) {
-      options?.filters.forEach((filter) => {
-        subscriptionQuery = subscriptionQuery.filter(
-          filter.column,
-          filter.operator,
-          filter.value
-        );
-      });
-    }
+    serviceHelpers.appendFiltersToQuery(subscriptionQuery, options);
 
     return await subscriptionQuery;
   }
