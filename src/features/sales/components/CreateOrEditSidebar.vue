@@ -382,7 +382,7 @@ watch(openModel, (nextOpenValue) => {
 
 <template>
   <Sheet :open="openModel" @update:open="handleCloseSidebar">
-    <SheetContent v-if="!viewOnly" side="right" class="overflow-y-auto">
+    <SheetContent v-if="!viewOnly" side="right" class="overflow-y-auto w-100">
       <div v-show="saleSidebarMode === 'sales'">
         <SheetHeader>
           <SheetTitle>
@@ -688,7 +688,7 @@ watch(openModel, (nextOpenValue) => {
         </div>
       </div>
     </SheetContent>
-    <SheetContent v-else slide="right" class="overflow-y-auto">
+    <SheetContent v-else slide="right" class="overflow-y-auto w-100">
       <SheetHeader>
         <SheetTitle>
           {{ LOCALE.VIEW.TITLE }}

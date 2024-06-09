@@ -130,7 +130,7 @@ watch(openModel, (nextOpenValue) => {
 
 <template>
   <Sheet v-model:open="openModel">
-    <SheetContent side="right" class="overflow-y-auto">
+    <SheetContent side="right" class="overflow-y-auto w-full">
       <SheetHeader>
         <SheetTitle>
           {{ locale[formMode].title }}
