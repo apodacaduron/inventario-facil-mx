@@ -51,7 +51,7 @@ export function useServiceHelpers() {
         )
       }
 
-      if (orFilters.length) {
+      if (andFilters.length) {
         andFilters.forEach((filter) => {
             supabaseQuery = supabaseQuery.filter(
               filter.column,
