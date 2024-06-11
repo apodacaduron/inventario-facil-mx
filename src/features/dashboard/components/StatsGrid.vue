@@ -58,7 +58,11 @@ const salesCountQuery = useSalesCountQuery(queryOptions);
 const customersCountQuery = useCustomersCountQuery(queryOptions);
 const salesTotalIncomeQuery = useSalesTotalIncomeQuery(queryOptions);
 const salesTotalProfitQuery = useSalesTotalProfitQuery(queryOptions);
-const productsInStockCountQuery = useProductsInStockCountQuery(queryOptions);
+const productsInStockCountQuery = useProductsInStockCountQuery({
+  options: {
+    orgId: queryOptions.options.orgId,
+  },
+});
 const mostSoldProductsQuery = useMostSoldProductsQuery(queryOptions);
 const bestCustomersQuery = useBestCustomersQuery(queryOptions);
 
