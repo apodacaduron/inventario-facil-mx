@@ -30,7 +30,7 @@ export const useOrganizationStore = defineStore("organization", () => {
       currentUserOrganization.value?.i_organizations?.current_products;
     if (!maxProducts || !currentProducts) return false;
 
-    return currentProducts <= maxProducts;
+    return currentProducts < maxProducts;
   });
   const canAddCustomers = toRef(() => {
     const maxCustomers =
@@ -39,7 +39,7 @@ export const useOrganizationStore = defineStore("organization", () => {
       currentUserOrganization.value?.i_organizations?.current_customers;
     if (!maxCustomers || !currentCustomers) return false;
 
-    return currentCustomers <= maxCustomers;
+    return currentCustomers < maxCustomers;
   });
   const canAddOrganizations = toRef(() => {
     const maxOrganizations =
@@ -47,7 +47,7 @@ export const useOrganizationStore = defineStore("organization", () => {
     const currentOrganizations = authStore.authedUser?.current_organizations
     if (!maxOrganizations || !currentOrganizations) return false;
 
-    return currentOrganizations <= maxOrganizations;
+    return currentOrganizations < maxOrganizations;
   });
 
   function setUserOrganizations(nextUserOrganizations: UserOrganizations) {

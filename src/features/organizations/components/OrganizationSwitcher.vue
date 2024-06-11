@@ -27,6 +27,7 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
+  useToast,
 } from "@/components/ui";
 import {
   CheckIcon,
@@ -43,6 +44,7 @@ const open = ref(false);
 const showNewTeamDialog = ref(false);
 const organizationName = ref("");
 
+const { toast } = useToast();
 const route = useRoute();
 const router = useRouter();
 const authStore = useAuthStore();
@@ -55,16 +57,26 @@ const createOrganizationMutation = useMutation({
       .from("i_organizations")
       .insert({
         name: organizationName,
-        plan_id: authStore.authedUser?.plan_id
+        plan_id: authStore.authedUser?.plan_id,
       })
       .select("*")
       .single();
     const newOrganizationId = createOrganizationResponse.data?.id;
 
-    if (createOrganizationResponse.error?.message)
+    if (createOrganizationResponse.error?.message) {
+      toast({
+        title: "Uh oh! Something went wrong.",
+        variant: "destructive",
+      });
       throw new Error(createOrganizationResponse.error?.message);
-    if (!newOrganizationId)
+    }
+    if (!newOrganizationId) {
+      toast({
+        title: "Uh oh! Something went wrong.",
+        variant: "destructive",
+      });
       throw new Error("Create organization response does not contain id");
+    }
 
     const roleResponse = await supabase
       .from("i_roles")
@@ -73,7 +85,13 @@ const createOrganizationMutation = useMutation({
       .single();
     const adminRoleId = roleResponse.data?.id;
 
-    if (!adminRoleId) throw new Error("Admin role id not found");
+    if (!adminRoleId) {
+      toast({
+        title: "Uh oh! Something went wrong.",
+        variant: "destructive",
+      });
+      throw new Error("Admin role id not found");
+    }
 
     await supabase.from("i_user_organization_roles").insert({
       org_id: newOrganizationId,
@@ -209,6 +227,7 @@ watchEffect(() => {
           Cancel
         </Button>
         <Button
+          :disabled="createOrganizationMutation.isPending.value"
           type="submit"
           @click="createOrganizationMutation.mutate(organizationName)"
         >
@@ -245,6 +264,7 @@ watchEffect(() => {
             Cancelar
           </Button>
           <Button
+            :disabled="createOrganizationMutation.isPending.value"
             type="submit"
             @click="createOrganizationMutation.mutate(organizationName)"
           >

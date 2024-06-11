@@ -130,7 +130,7 @@ export function useMostSoldProductsQuery(context: {
   const productServices = useProductServices();
 
   return useQuery({
-    queryKey: ['products', 'most-sold', context?.options?.range],
+    queryKey: ['products', 'most-sold', context.options.orgId, context?.options?.range],
     async queryFn() {
       const response = await productServices.getMostSoldProducts({
         orgId: toValue(context.options.orgId),

@@ -82,8 +82,7 @@ export function useProductServices() {
   }
 
   async function createProduct(orgId: string, formValues: CreateProduct) {
-    if (!orgId)
-      throw new Error("Organization is required to create a product");
+    if (!orgId) throw new Error("Organization is required to create a product");
 
     const { product_id, ...otherFormValues } = formValues;
     await supabase.from("i_products").insert([
@@ -111,36 +110,54 @@ export function useProductServices() {
     await supabase.from("i_products").delete().eq("id", productId);
   }
 
-  async function getProductCount(options: { orgId: string; range?: { from: string; to: string }}) {
+  async function getProductCount(options: {
+    orgId: string;
+    range?: { from: string; to: string };
+  }) {
     if (!options.orgId)
       throw new Error("Organization is required to get product count");
 
     return await supabase.rpc("get_products_count", {
       organization_id_input: options.orgId,
       ...(options.range
-        ? { start_date_input: options.range.from, end_date_input: options.range.to }
+        ? {
+            start_date_input: options.range.from,
+            end_date_input: options.range.to,
+          }
         : {}),
     });
   }
-  async function getProductsInStockCount(options: {orgId: string; range?: { from: string; to: string }}) {
+  async function getProductsInStockCount(options: {
+    orgId: string;
+    range?: { from: string; to: string };
+  }) {
     if (!options.orgId)
       throw new Error("Organization is required to get product count");
 
     return await supabase.rpc("get_products_in_stock_count", {
       organization_id_input: options.orgId,
       ...(options.range
-        ? { start_date_input: options.range.from, end_date_input: options.range.to }
+        ? {
+            start_date_input: options.range.from,
+            end_date_input: options.range.to,
+          }
         : {}),
     });
   }
-  async function getMostSoldProducts(options: {orgId: string; range?: { from: string; to: string }}) {
+  async function getMostSoldProducts(options: {
+    orgId: string;
+    range?: { from: string; to: string };
+  }) {
     if (!options.orgId)
       throw new Error("Organization is required to get product count");
 
     return await supabase.rpc("get_most_sold_products", {
       organization_id_input: options.orgId,
       ...(options.range
-        ? { start_date_input: options.range.from, end_date_input: options.range.to }
+        ? {
+            start_date_input: options.range.from,
+            end_date_input: options.range.to,
+          }
         : {}),
     });
   }
