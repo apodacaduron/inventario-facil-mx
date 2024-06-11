@@ -48,7 +48,7 @@ const menuList = {
       <div class="flex items-center justify-between">
         <div class="flex items-center justify-start rtl:justify-end">
           <span
-            class="self-center text-xl sm:text-2xl whitespace-nowrap dark:text-white"
+            class="ms-2 self-center text-xl sm:text-2xl whitespace-nowrap dark:text-white"
             >inventariofacil.mx
           </span>
         </div>
