@@ -54,6 +54,7 @@ import { FeedbackCard, useTableStates } from '@/features/global';
 import { Tables } from '../../../types_db';
 import { useDashboardDates } from '@/features/dashboard';
 import { analytics } from '@/config/analytics';
+import { useRoute } from 'vue-router';
 
 const WHATSAPP_URL = import.meta.env.VITE_WHATSAPP_URL;
 const tableFiltersRef = useStorage<{
@@ -71,6 +72,8 @@ const isCreateOrUpdateSidebarOpen = ref(false);
 const isSaleSidebarViewOnly = ref(false);
 const isDeleteSaleDialogOpen = ref(false);
 const activeSale = ref<Sale | null>(null);
+
+const route = useRoute();
 const queryClient = useQueryClient();
 const organizationStore = useOrganizationStore();
 const saleServices = useSaleServices();
@@ -80,7 +83,8 @@ const deleteSaleMutation = useMutation({ mutationFn: deleteSaleMutationFn });
 const currencyFormatter = useCurrencyFormatter();
 const salesQuery = useSalesQuery({
   options: {
-    enabled: toRef(() => organizationStore.hasOrganizations),
+    orgId: toRef(() => route.params.orgId.toString()),
+    enabled: toRef(() => organizationStore.hasUserOrganizations),
     search: saleSearchDebounced,
     filters: toRef(() => {
       const filters = [];
@@ -148,7 +152,7 @@ function handleSaleSidebar(options: {
 }
 
 async function createSaleMutationFn(formValues: CreateSale) {
-  await saleServices.createSale(formValues);
+  await saleServices.createSale(route.params.orgId.toString(), formValues);
   await queryClient.invalidateQueries({ queryKey: ['sales'] });
   await queryClient.invalidateQueries({ queryKey: ['products'] });
   analytics.event('create-sale', formValues);
@@ -156,7 +160,7 @@ async function createSaleMutationFn(formValues: CreateSale) {
 async function updateSaleMutationFn(formValues: UpdateSale) {
   const saleId = formValues.sale_id;
   if (!saleId) throw new Error('Sale id required to perform update');
-  await saleServices.updateSale(formValues);
+  await saleServices.updateSale(route.params.orgId.toString(), formValues);
   await queryClient.invalidateQueries({ queryKey: ['sales'] });
   await queryClient.invalidateQueries({ queryKey: ['products'] });
   analytics.event('update-sale', formValues);

@@ -1,22 +1,32 @@
 import type { useOrganizationServices } from "@/features/organizations";
 import { defineStore } from "pinia";
 import { ref, toRef } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
+import { useAuthStore } from "./useAuthStore";
 
-type UserOrganizations = Awaited<
-  ReturnType<ReturnType<typeof useOrganizationServices>["loadUserOrganizations"]>
->['data'];
+export type UserOrganization = NonNullable<Awaited<
+  ReturnType<
+    ReturnType<typeof useOrganizationServices>["loadUserOrganizations"]
+  >
+>["data"]>[number];
 
 export const useOrganizationStore = defineStore("organization", () => {
-  const route = useRoute();
-  const userOrganizations = ref<UserOrganizations | null>(null);
+  const isUserOrganizationsLoading = ref(true);
+  const userOrganizations = ref<UserOrganization[] | null>(null);
 
-  const hasOrganizations = toRef(() => Boolean(userOrganizations.value?.length));
+  const route = useRoute();
+  const router = useRouter();
+  const authStore = useAuthStore();
+
+  const hasUserOrganizations = toRef(() =>
+    Boolean(userOrganizations.value?.length)
+  );
   const currentUserOrganization = toRef(() =>
     findOrganizationById(route.params.orgId.toString())
   );
   const isPremium = toRef(
-    () => currentUserOrganization.value?.i_organizations?.plans?.name === "premium"
+    () =>
+      currentUserOrganization.value?.i_organizations?.plans?.name === "premium"
   );
   const canEnablePublicProductsPage = toRef(() => isPremium.value);
   const canAddProducts = toRef(() => {
@@ -26,7 +36,7 @@ export const useOrganizationStore = defineStore("organization", () => {
       currentUserOrganization.value?.i_organizations?.current_products;
     if (!maxProducts || !currentProducts) return false;
 
-    return currentProducts <= maxProducts;
+    return currentProducts < maxProducts;
   });
   const canAddCustomers = toRef(() => {
     const maxCustomers =
@@ -35,24 +45,44 @@ export const useOrganizationStore = defineStore("organization", () => {
       currentUserOrganization.value?.i_organizations?.current_customers;
     if (!maxCustomers || !currentCustomers) return false;
 
-    return currentCustomers <= maxCustomers;
+    return currentCustomers < maxCustomers;
+  });
+  const canAddOrganizations = toRef(() => {
+    const maxOrganizations = authStore.authedUser?.max_organizations;
+    const currentOrganizations = authStore.authedUser?.current_organizations;
+    if (!maxOrganizations || !currentOrganizations) return false;
+
+    return currentOrganizations < maxOrganizations;
   });
 
-  function setUserOrganizations(nexUsertOrganizations: UserOrganizations) {
-    userOrganizations.value = nexUsertOrganizations;
+  function setUserOrganizations(nextUserOrganizations: UserOrganization[] | null) {
+    userOrganizations.value = nextUserOrganizations;
+  }
+
+  function setIsUserOrganizationsLoading(isLoading: boolean) {
+    isUserOrganizationsLoading.value = isLoading;
   }
 
   function findOrganizationById(id: string) {
     return userOrganizations.value?.find((org) => org.org_id === id);
   }
 
+  function redirectToOrganization(orgId: string | null | undefined) {
+    if (!orgId)
+      throw new Error(
+        "Could not redirect since organization id was not provided"
+      );
+
+    router.push(`/org/${orgId}/dashboard`);
+  }
+
   function $reset() {
-    userOrganizations.value = null
+    userOrganizations.value = null;
   }
 
   return {
     userOrganizations,
-    hasOrganizations,
+    hasUserOrganizations,
     currentUserOrganization,
     setUserOrganizations,
     findOrganizationById,
@@ -60,6 +90,10 @@ export const useOrganizationStore = defineStore("organization", () => {
     canEnablePublicProductsPage,
     canAddProducts,
     canAddCustomers,
-    $reset
+    canAddOrganizations,
+    setIsUserOrganizationsLoading,
+    isUserOrganizationsLoading,
+    redirectToOrganization,
+    $reset,
   };
 });

@@ -18,7 +18,7 @@ import {
   AvatarFallback,
   SheetFooter,
 } from "@/components/ui";
-import { useDark, useToggle } from "@vueuse/core";
+import { useDark, useMediaQuery, useToggle } from "@vueuse/core";
 import { useRoute } from "vue-router";
 import {
   ArrowLeftOnRectangleIcon,
@@ -30,13 +30,14 @@ import {
   SunIcon,
 } from "@heroicons/vue/24/outline";
 import GoPremiumDialog from "./GoPremiumDialog.vue";
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import {
   BadgeDollarSign,
   BarChart2,
   ShoppingBag,
   Users,
 } from "lucide-vue-next";
+import OrganizationSwitcher from "./OrganizationSwitcher.vue";
 
 const isGoPremiumDialogOpen = ref(false);
 
@@ -45,8 +46,9 @@ const isDark = useDark();
 const toggleDark = useToggle(isDark);
 const authStore = useAuthStore();
 const organizationStore = useOrganizationStore();
+const isDesktop = useMediaQuery("(min-width: 768px)");
 
-const menuList = {
+const menuList = computed(() => ({
   dashboard: {
     path: `/org/${route.params.orgId}/dashboard`,
     text: "Inicio",
@@ -67,7 +69,7 @@ const menuList = {
     text: "Ventas",
     icon: BadgeDollarSign,
   },
-};
+}));
 </script>
 
 <template>
@@ -111,7 +113,9 @@ const menuList = {
                 <div
                   class="flex flex-col justify-between h-full pb-4 overflow-y-auto"
                 >
-                  <ul class="space-y-2">
+                  <OrganizationSwitcher />
+
+                  <ul class="space-y-2 mt-6">
                     <li v-for="(menuItem, index) in menuList" :key="index">
                       <SheetClose class="w-full">
                         <router-link
@@ -145,12 +149,14 @@ const menuList = {
             </SheetContent>
           </Sheet>
 
-          <router-link :to="menuList.dashboard.path" class="flex ms-2 md:me-24">
+          <router-link :to="menuList.dashboard.path" class="flex ms-2 md:me-6">
             <span
               class="self-center text-xl sm:text-2xl whitespace-nowrap dark:text-white"
               >inventariofacil.mx
             </span>
           </router-link>
+
+          <OrganizationSwitcher v-if="isDesktop" />
         </div>
         <div class="flex items-center">
           <div class="flex items-center ms-3 gap-4">

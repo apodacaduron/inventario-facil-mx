@@ -48,17 +48,16 @@ export const saleServicesTypeguards = {
 export function useSaleServices() {
   const serviceHelpers = useServiceHelpers();
 
-  async function loadList(options?: LoadListOptions) {
+  async function loadList(options: LoadListOptions & { orgId: string }) {
     const [from, to] = serviceHelpers.getPaginationRange(options?.offset);
 
-    const organization = serviceHelpers.getCurrentOrganization();
-    if (!organization?.org_id)
+    if (!options.orgId)
       throw new Error('Organization is required to get sale list');
 
     let saleQuery = supabase
       .from('i_sales')
       .select('*, i_sale_products(*), i_customers(*)')
-      .eq('org_id', organization.org_id)
+      .eq('org_id', options.orgId)
       .range(from, to)
       .order('created_at', { ascending: false });
 
@@ -71,20 +70,18 @@ export function useSaleServices() {
     return await saleQuery;
   }
 
-  async function createSale(formValues: CreateSale) {
-    const organization = serviceHelpers.getCurrentOrganization();
-    if (!organization?.org_id)
-      throw new Error('Organization is required to create a sale');
+  async function createSale(orgId: string, formValues: CreateSale) {
+    if (!orgId)
+      throw new Error('Organization is required to create a sale'); 
 
     await supabase.rpc('create_sale', {
       ...formValues,
-      organization_id: organization?.org_id,
+      organization_id: orgId,
     });
   }
 
-  async function updateSale(formValues: UpdateSale) {
-    const organization = serviceHelpers.getCurrentOrganization();
-    if (!organization?.org_id)
+  async function updateSale(orgId: string, formValues: UpdateSale) {
+    if (!orgId)
       throw new Error('Organization is required to update a sale');
 
     await supabase.rpc('update_sale', {
@@ -96,7 +93,7 @@ export function useSaleServices() {
       sale_id_input: formValues.sale_id,
       shipping_cost_input: formValues.shipping_cost,
       status_input: formValues.status,
-      organization_id_input: organization?.org_id,
+      organization_id_input: orgId,
     });
   }
 
@@ -106,41 +103,38 @@ export function useSaleServices() {
     await supabase.from('i_sales').delete().eq('id', saleId);
   }
 
-  async function getSalesCount(range?: { from: string; to: string }) {
-    const organization = serviceHelpers.getCurrentOrganization();
-    if (!organization?.org_id)
+  async function getSalesCount(options: { orgId: string; range?: { from: string; to: string }}) {
+    if (!options.orgId)
       throw new Error('Organization is required to get customer count');
 
     return await supabase.rpc('get_sales_count', {
-      organization_id_input: organization.org_id,
-      ...(range
-        ? { start_date_input: range.from, end_date_input: range.to }
+      organization_id_input: options.orgId,
+      ...(options.range
+        ? { start_date_input: options.range.from, end_date_input: options.range.to }
         : {}),
     });
   }
 
-  async function getSalesTotalIncome(range?: { from: string; to: string }) {
-    const organization = serviceHelpers.getCurrentOrganization();
-    if (!organization?.org_id)
+  async function getSalesTotalIncome(options: { orgId: string; range?: { from: string; to: string }}) {
+    if (!options.orgId)
       throw new Error('Organization is required to get customer count');
 
     return await supabase.rpc('get_sales_total_income', {
-      organization_id_input: organization.org_id,
-      ...(range
-        ? { start_date_input: range.from, end_date_input: range.to }
+      organization_id_input: options.orgId,
+      ...(options.range
+        ? { start_date_input: options.range.from, end_date_input: options.range.to }
         : {}),
     });
   }
 
-  async function getSalesTotalProfit(range?: { from: string; to: string }) {
-    const organization = serviceHelpers.getCurrentOrganization();
-    if (!organization?.org_id)
+  async function getSalesTotalProfit(options: {orgId: string; range?: { from: string; to: string }}) {
+    if (!options.orgId)
       throw new Error('Organization is required to get customer count');
 
     return await supabase.rpc('get_sales_total_profit', {
-      organization_id_input: organization.org_id,
-      ...(range
-        ? { start_date_input: range.from, end_date_input: range.to }
+      organization_id_input: options.orgId,
+      ...(options.range
+        ? { start_date_input: options.range.from, end_date_input: options.range.to }
         : {}),
     });
   }

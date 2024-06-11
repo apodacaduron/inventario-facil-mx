@@ -23,9 +23,11 @@ import { toRef } from 'vue';
 import { useCurrencyFormatter } from '@/features/products';
 import { FeedbackCard, useTableStates } from '@/features/global';
 import { FaceFrownIcon } from '@heroicons/vue/24/outline';
+import { useRoute } from 'vue-router';
 
 const openModel = defineModel<boolean>('open');
 
+const route = useRoute();
 const currencyFormatter = useCurrencyFormatter();
 const dashboardDates = useDashboardDates({
   period: 'daily',
@@ -34,6 +36,7 @@ const dashboardDates = useDashboardDates({
 const salesQuery = useSalesQuery({
   options: {
     enabled: toRef(() => Boolean(openModel.value)),
+    orgId: toRef(() => route.params.orgId.toString()),
     filters: toRef(() => {
       return [
         {
@@ -67,6 +70,7 @@ const salesQuery = useSalesQuery({
 const tableLoadingStates = useTableStates(salesQuery, '');
 const salesTotalIncomeQuery = useSalesTotalIncomeQuery({
   options: {
+    orgId: toRef(() => route.params.orgId.toString()),
     range: toRef(() => ({
       from: dashboardDates.dateRangeFromPeriod.value?.from.toISOString() ?? '',
       to: dashboardDates.dateRangeFromPeriod.value?.to.toISOString() ?? '',

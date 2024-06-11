@@ -86,6 +86,11 @@ export const routes: RouteWithMeta[] = [
         meta: { requiresAuth: true },
         component: () => import("@/pages/settings/billing.vue"),
       },
+      {
+        path: "organizations",
+        meta: { requiresAuth: true },
+        component: () => import("@/pages/settings/organizations.vue"),
+      },
     ],
   },
   {
@@ -145,19 +150,21 @@ async function isLoggedIn() {
 
   return authStore.isLoggedIn;
 }
-async function hasOrganizations() {
+async function hasUserOrganizations() {
   const organizationStore = useOrganizationStore();
-  const { hasOrganizations } = storeToRefs(organizationStore);
+  const { hasUserOrganizations, isUserOrganizationsLoading } = storeToRefs(organizationStore);
 
-  await until(hasOrganizations).toBe(true);
+  await until(isUserOrganizationsLoading).toBe(false);
+  await until(hasUserOrganizations).toBe(true);
 
-  return organizationStore.hasOrganizations;
+  return organizationStore.hasUserOrganizations;
 }
 async function isUserAllowedInOrganization(orgId: string | undefined) {
   const organizationStore = useOrganizationStore();
-  const { hasOrganizations } = storeToRefs(organizationStore);
+  const { hasUserOrganizations, isUserOrganizationsLoading } = storeToRefs(organizationStore);
 
-  await until(hasOrganizations).toBe(true);
+  await until(isUserOrganizationsLoading).toBe(false);
+  await until(hasUserOrganizations).toBe(true);
 
   return Boolean(
     organizationStore.userOrganizations?.some(
@@ -183,8 +190,8 @@ const navigationGuards = {
   },
   requiresOrganization: async (to: RouteLocationNormalized) => {
     if (to.matched.some((record) => record.meta.requiresOrganization)) {
-      const userHasOrganizations = await hasOrganizations();
-      if (!userHasOrganizations) {
+      const userhasUserOrganizations = await hasUserOrganizations();
+      if (!userhasUserOrganizations) {
         return "/no-organizations";
       }
     }

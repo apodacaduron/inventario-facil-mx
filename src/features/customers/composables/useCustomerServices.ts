@@ -43,9 +43,8 @@ export const customerServicesTypeguards = {
 export function useCustomerServices() {
   const serviceHelpers = useServiceHelpers();
 
-  async function loadList(options?: LoadListOptions) {
-    const organization = serviceHelpers.getCurrentOrganization();
-    if (!organization?.org_id)
+  async function loadList(options: LoadListOptions & {orgId: string}) {
+    if (!options.orgId)
       throw new Error("Organization is required to get customer list");
 
     const [from, to] = serviceHelpers.getPaginationRange(options?.offset);
@@ -53,7 +52,7 @@ export function useCustomerServices() {
     let customerQuery = supabase
       .from("i_customers")
       .select("*")
-      .eq("org_id", organization.org_id)
+      .eq("org_id", options.orgId)
       .range(from, to);
 
     if (options?.search) {
@@ -67,23 +66,21 @@ export function useCustomerServices() {
     return await customerQuery;
   }
 
-  async function createCustomer(formValues: CreateCustomer) {
-    const organization = serviceHelpers.getCurrentOrganization();
-    if (!organization?.org_id)
+  async function createCustomer(orgId: string, formValues: CreateCustomer) {
+    if (!orgId)
       throw new Error("Organization is required to create a customer");
 
     const { customer_id, ...otherFormValues } = formValues;
     return await supabase.from("i_customers").insert([
       {
         ...otherFormValues,
-        org_id: organization.org_id,
+        org_id: orgId,
       },
     ]);
   }
 
-  async function updateCustomer(formValues: UpdateCustomer) {
-    const organization = serviceHelpers.getCurrentOrganization();
-    if (!organization?.org_id)
+  async function updateCustomer(orgId: string, formValues: UpdateCustomer) {
+    if (!orgId)
       throw new Error("Organization is required to update a customer");
 
     const { customer_id, ...otherFormValues } = formValues;
@@ -91,7 +88,7 @@ export function useCustomerServices() {
       .from("i_customers")
       .update({
         ...otherFormValues,
-        org_id: organization.org_id,
+        org_id: orgId,
       })
       .eq("id", customer_id);
   }
@@ -103,25 +100,33 @@ export function useCustomerServices() {
     return await supabase.from("i_customers").delete().eq("id", customerId);
   }
 
-  async function getCustomerCount(range?: { from: string; to: string }) {
-    const organization = serviceHelpers.getCurrentOrganization();
-    if (!organization?.org_id)
-      throw new Error('Organization is required to get customer count');
+  async function getCustomerCount(options: {
+    orgId: string;
+    range?: { from: string; to: string };
+  }) {
+    if (!options.orgId)
+      throw new Error("Organization is required to get customer count");
 
-    return await supabase.rpc('get_customers_count', {
-      organization_id_input: organization.org_id,
-      ...(range ? { start_date_input: range.from, end_date_input: range.to } : {})
+    return await supabase.rpc("get_customers_count", {
+      organization_id_input: options.orgId,
+      ...(options.range
+        ? { start_date_input: options.range.from, end_date_input: options.range.to }
+        : {}),
     });
   }
 
-  async function getBestCustomers(range?: { from: string; to: string }) {
-    const organization = serviceHelpers.getCurrentOrganization();
-    if (!organization?.org_id)
-      throw new Error('Organization is required to get customer count');
+  async function getBestCustomers(options: {
+    orgId: string;
+    range?: { from: string; to: string };
+  }) {
+    if (!options.orgId)
+      throw new Error("Organization is required to get customer count");
 
-    return await supabase.rpc('get_best_customers', {
-      organization_id_input: organization.org_id,
-      ...(range ? { start_date_input: range.from, end_date_input: range.to } : {})
+    return await supabase.rpc("get_best_customers", {
+      organization_id_input: options.orgId,
+      ...(options.range
+        ? { start_date_input: options.range.from, end_date_input: options.range.to }
+        : {}),
     });
   }
 

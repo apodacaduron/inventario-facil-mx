@@ -43,6 +43,7 @@ import { useCustomersQuery } from "@/features/customers/composables/useCustomerQ
 import { useMutation, useQueryClient } from "@tanstack/vue-query";
 import { analytics } from "@/config/analytics";
 import { notifyIfHasError } from "@/features/global/utils";
+import { useRoute } from "vue-router";
 
 const WHATSAPP_URL = import.meta.env.VITE_WHATSAPP_URL;
 const tableRef = ref<HTMLElement | null>(null);
@@ -57,6 +58,7 @@ const customersTableOrder = useTableOrder({
     initialOrder: ["created_at", "desc"],
   },
 });
+const route = useRoute();
 const queryClient = useQueryClient();
 const organizationStore = useOrganizationStore();
 const customerServices = useCustomerServices();
@@ -71,7 +73,8 @@ const deleteCustomerMutation = useMutation({
 });
 const customersQuery = useCustomersQuery({
   options: {
-    enabled: toRef(() => organizationStore.hasOrganizations),
+    orgId: toRef(() => route.params.orgId.toString()),
+    enabled: toRef(() => organizationStore.hasUserOrganizations),
     search: customerSearchDebounced,
     order: toRef(() => customersTableOrder.tableOrder.value),
   },
@@ -106,7 +109,7 @@ function openUpdateCustomerSidebar(customer: Customer) {
 }
 
 async function createCustomerMutationFn(formValues: CreateCustomer) {
-  const { error } = await customerServices.createCustomer(formValues);
+  const { error } = await customerServices.createCustomer(route.params.orgId.toString(), formValues);
   notifyIfHasError(error);
   await queryClient.invalidateQueries({ queryKey: ["customers"] });
   analytics.event("create-customer", formValues);
@@ -114,7 +117,7 @@ async function createCustomerMutationFn(formValues: CreateCustomer) {
 async function updateCustomerMutationFn(formValues: UpdateCustomer) {
   const customerId = formValues.customer_id;
   if (!customerId) throw new Error("Customer id required to perform update");
-  const { error } = await customerServices.updateCustomer(formValues);
+  const { error } = await customerServices.updateCustomer(route.params.orgId.toString(), formValues);
   notifyIfHasError(error);
   await queryClient.invalidateQueries({ queryKey: ["customers"] });
   analytics.event("update-customer", formValues);

@@ -141,9 +141,10 @@ const customersQuery = useCustomersQuery({
   options: {
     enabled: toRef(
       () =>
-        organizationStore.hasOrganizations &&
+        organizationStore.hasUserOrganizations &&
         saleSidebarMode.value === "customers"
     ),
+    orgId: toRef(() => route.params.orgId.toString()),
     search: customerSearchDebounced,
     filters: [{ column: "trust_status", operator: "eq", value: "trusted" }],
     order: ["name", "asc"],
@@ -242,10 +243,10 @@ const productsQuery = useProductsQuery({
   options: {
     enabled: toRef(
       () =>
-        organizationStore.hasOrganizations &&
+        organizationStore.hasUserOrganizations &&
         saleSidebarMode.value === "products"
     ),
-    organization_id: toRef(() => route.params?.orgId?.toString()),
+    orgId: toRef(() => route.params?.orgId?.toString()),
     search: productSearchDebounced,
     filters: toRef(() => {
       return [

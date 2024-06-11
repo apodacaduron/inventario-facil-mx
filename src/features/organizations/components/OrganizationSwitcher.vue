@@ -1,0 +1,112 @@
+<script setup lang="ts">
+import { ref } from "vue";
+import {
+  Avatar,
+  AvatarFallback,
+  Button,
+  Command,
+  CommandGroup,
+  CommandItem,
+  CommandList,
+  CommandSeparator,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui";
+import {
+  CheckIcon,
+  PlusCircle,
+  SeparatorHorizontalIcon,
+} from "lucide-vue-next";
+import { useOrganizationStore } from "@/stores";
+import { useRoute } from "vue-router";
+import CreateOrganizationDialog from "./CreateOrganizationDialog.vue";
+
+const open = ref(false);
+const showNewTeamDialog = ref(false);
+const route = useRoute();
+const organizationStore = useOrganizationStore();
+</script>
+
+<template>
+  <Popover v-model:open="open">
+    <PopoverTrigger as-child>
+      <Button
+        variant="outline"
+        role="combobox"
+        aria-expanded="open"
+        aria-label="Select a team"
+        class="min-w-[200px] w-full justify-between"
+      >
+        <Avatar class="mr-2 h-5 w-5">
+          <AvatarFallback>{{
+            organizationStore.currentUserOrganization?.i_organizations?.name?.charAt(
+              0
+            )
+          }}</AvatarFallback>
+        </Avatar>
+        {{ organizationStore.currentUserOrganization?.i_organizations?.name }}
+        <SeparatorHorizontalIcon class="ml-auto size-4 shrink-0 opacity-50" />
+      </Button>
+    </PopoverTrigger>
+    <PopoverContent class="w-[200px] p-0">
+      <Command>
+        <CommandList>
+          <CommandGroup heading="Organizaciones">
+            <CommandItem
+              v-for="(
+                organization, index
+              ) in organizationStore.userOrganizations"
+              :key="organization.org_id ?? index"
+              :value="organization.org_id ?? 'Unknown'"
+              class="text-sm"
+              @select="
+                () => {
+                  organizationStore.redirectToOrganization(organization.org_id);
+                  open = false;
+                }
+              "
+            >
+              <Avatar class="mr-2 h-5 w-5">
+                <AvatarFallback>{{
+                  organization.i_organizations?.name?.charAt(0) ?? "?"
+                }}</AvatarFallback>
+              </Avatar>
+              {{ organization.i_organizations?.name }}
+              <CheckIcon
+                :class="`ml-auto h-4 w-4
+                             ${
+                               organization.org_id ===
+                               route.params.orgId.toString()
+                                 ? 'opacity-100'
+                                 : 'opacity-0'
+                             }`"
+              />
+            </CommandItem>
+          </CommandGroup>
+        </CommandList>
+        <template v-if="organizationStore.canAddOrganizations">
+          <CommandSeparator />
+          <CommandList>
+            <CommandGroup>
+              <CommandItem
+                value="create-team"
+                @select="
+                  () => {
+                    open = false;
+                    showNewTeamDialog = true;
+                  }
+                "
+              >
+                <PlusCircle class="mr-2 size-5" />
+                Create Team
+              </CommandItem>
+            </CommandGroup>
+          </CommandList>
+        </template>
+      </Command>
+    </PopoverContent>
+  </Popover>
+
+  <CreateOrganizationDialog v-model:open="showNewTeamDialog" />
+</template>

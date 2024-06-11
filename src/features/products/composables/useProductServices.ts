@@ -39,8 +39,8 @@ export const productServicesTypeguards = {
 export function useProductServices() {
   const serviceHelpers = useServiceHelpers();
 
-  async function loadList(options?: LoadListOptions) {
-    if (!options?.organization_id)
+  async function loadList(options: LoadListOptions & { orgId: string }) {
+    if (!options.orgId)
       throw new Error("Organization is required to get product list");
 
     const [from, to] = serviceHelpers.getPaginationRange(options?.offset);
@@ -48,7 +48,7 @@ export function useProductServices() {
     let productQuery = supabase
       .from("i_products")
       .select("*")
-      .eq("org_id", options?.organization_id)
+      .eq("org_id", options.orgId)
       .range(from, to);
 
     if (options?.search) {
@@ -60,8 +60,8 @@ export function useProductServices() {
     return await productQuery;
   }
 
-  async function loadPublicList(options?: LoadListOptions) {
-    if (!options?.organization_id)
+  async function loadPublicList(options: LoadListOptions & { orgId: string }) {
+    if (!options.orgId)
       throw new Error("Organization is required to get product list");
 
     const [from, to] = serviceHelpers.getPaginationRange(options?.offset);
@@ -69,7 +69,7 @@ export function useProductServices() {
     let productQuery = supabase
       .from("i_products")
       .select("id,name,current_stock,image_url")
-      .eq("org_id", options?.organization_id)
+      .eq("org_id", options.orgId)
       .range(from, to);
 
     if (options?.search) {
@@ -81,16 +81,14 @@ export function useProductServices() {
     return await productQuery;
   }
 
-  async function createProduct(formValues: CreateProduct) {
-    const organization = serviceHelpers.getCurrentOrganization();
-    if (!organization?.org_id)
-      throw new Error("Organization is required to create a product");
+  async function createProduct(orgId: string, formValues: CreateProduct) {
+    if (!orgId) throw new Error("Organization is required to create a product");
 
     const { product_id, ...otherFormValues } = formValues;
     await supabase.from("i_products").insert([
       {
         ...otherFormValues,
-        org_id: organization.org_id,
+        org_id: orgId,
       },
     ]);
   }
@@ -112,39 +110,54 @@ export function useProductServices() {
     await supabase.from("i_products").delete().eq("id", productId);
   }
 
-  async function getProductCount(range?: { from: string; to: string }) {
-    const organization = serviceHelpers.getCurrentOrganization();
-    if (!organization?.org_id)
+  async function getProductCount(options: {
+    orgId: string;
+    range?: { from: string; to: string };
+  }) {
+    if (!options.orgId)
       throw new Error("Organization is required to get product count");
 
     return await supabase.rpc("get_products_count", {
-      organization_id_input: organization.org_id,
-      ...(range
-        ? { start_date_input: range.from, end_date_input: range.to }
+      organization_id_input: options.orgId,
+      ...(options.range
+        ? {
+            start_date_input: options.range.from,
+            end_date_input: options.range.to,
+          }
         : {}),
     });
   }
-  async function getProductsInStockCount(range?: { from: string; to: string }) {
-    const organization = serviceHelpers.getCurrentOrganization();
-    if (!organization?.org_id)
+  async function getProductsInStockCount(options: {
+    orgId: string;
+    range?: { from: string; to: string };
+  }) {
+    if (!options.orgId)
       throw new Error("Organization is required to get product count");
 
     return await supabase.rpc("get_products_in_stock_count", {
-      organization_id_input: organization.org_id,
-      ...(range
-        ? { start_date_input: range.from, end_date_input: range.to }
+      organization_id_input: options.orgId,
+      ...(options.range
+        ? {
+            start_date_input: options.range.from,
+            end_date_input: options.range.to,
+          }
         : {}),
     });
   }
-  async function getMostSoldProducts(range?: { from: string; to: string }) {
-    const organization = serviceHelpers.getCurrentOrganization();
-    if (!organization?.org_id)
+  async function getMostSoldProducts(options: {
+    orgId: string;
+    range?: { from: string; to: string };
+  }) {
+    if (!options.orgId)
       throw new Error("Organization is required to get product count");
 
     return await supabase.rpc("get_most_sold_products", {
-      organization_id_input: organization.org_id,
-      ...(range
-        ? { start_date_input: range.from, end_date_input: range.to }
+      organization_id_input: options.orgId,
+      ...(options.range
+        ? {
+            start_date_input: options.range.from,
+            end_date_input: options.range.to,
+          }
         : {}),
     });
   }

@@ -21,3 +21,4 @@ export * from "./tabs";
 export * from "./tooltip";
 export * from "./toast";
 export * from "./number-field";
+export * from "./separator";

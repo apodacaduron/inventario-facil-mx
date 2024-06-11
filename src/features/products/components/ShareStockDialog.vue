@@ -54,7 +54,7 @@ const productsQuery = useProductsQuery({
   options: {
     enabled: toRef(() => Boolean(openModel.value)),
     search: "",
-    organization_id: toRef(() => route.params.orgId.toString()),
+    orgId: toRef(() => route.params.orgId.toString()),
     filters: toRef(() => {
       return [
         {

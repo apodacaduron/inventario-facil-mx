@@ -1,10 +1,7 @@
 <script setup lang="ts">
-import { Spinner } from "@/components";
-import { Button } from "@/components/ui";
+import { Button, Separator } from "@/components/ui";
 import { supabase } from "@/config/supabase";
-import { FeedbackCard } from "@/features/global";
 import { useAuthStore } from "@/stores";
-import { CreditCardIcon } from "@heroicons/vue/24/outline";
 import { useMutation } from "@tanstack/vue-query";
 
 const authStore = useAuthStore();
@@ -34,28 +31,18 @@ async function openStripeCustomerPortal() {
 </script>
 
 <template>
-  <div class="mt-16">
-    <FeedbackCard>
-      <template #icon>
-        <CreditCardIcon class="w-10 h-10 stroke-[1px]" />
-      </template>
-      <template #title>Pagos y Facturación</template>
-      <template #description
-        >Tu información de pago está segura con nosotros. <br />
-        Usa el botón de abajo para revisar y gestionar tus detalles de pago a
-        través de Stripe.
-      </template>
-      <template #action
-        ><Button
-          :disabled="stripeCustomerPortalMutation.isPending.value"
-          @click="stripeCustomerPortalMutation.mutate()"
-          ><Spinner
-            v-if="stripeCustomerPortalMutation.isPending.value"
-            class="mr-3"
-          />
-          Gestionar en Stripe
-        </Button>
-      </template>
-    </FeedbackCard>
+  <div>
+    <h3 class="text-lg font-medium">Pagos</h3>
+    <p class="text-sm text-muted-foreground">
+      Gestiona tus pagos a traves de la plataforma segura de Stripe.
+    </p>
+  </div>
+
+  <Separator />
+
+  <div class="flex justify-start mt-4">
+    <Button :disabled="stripeCustomerPortalMutation.isPending.value" @click="stripeCustomerPortalMutation.mutate">
+      Gestionar subscripcion
+    </Button>
   </div>
 </template>
