@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useAuthStore } from "@/stores";
+import { useAuthStore, useOrganizationStore } from "@/stores";
 import {
   Button,
   DropdownMenu,
@@ -9,9 +9,11 @@ import {
   Avatar,
   AvatarImage,
   AvatarFallback,
+  Separator,
 } from "@/components/ui";
 import { useDark, useToggle } from "@vueuse/core";
 import { useRouter } from "vue-router";
+import { ArrowLeft } from 'lucide-vue-next'
 import {
   ArrowLeftOnRectangleIcon,
   BuildingOffice2Icon,
@@ -24,11 +26,17 @@ const router = useRouter();
 const isDark = useDark();
 const toggleDark = useToggle(isDark);
 const authStore = useAuthStore();
+const organizationStore = useOrganizationStore();
 
 const menuList = {
   billing: {
     path: `/settings/billing`,
     text: "Pagos",
+    icon: HomeIcon,
+  },
+  organizations: {
+    path: `/settings/organizations`,
+    text: "Organizaciones",
     icon: HomeIcon,
   },
 };
@@ -96,22 +104,45 @@ const menuList = {
     </div>
   </nav>
 
-  <div class="mt-[86px] max-w-2xl mx-auto px-4">
-    <div class="mb-6">
-      <div class="text-2xl font-medium">{{ authStore.authedUser?.full_name }}</div>
-      <div>{{ authStore.authedUser?.email }}</div>
+  <div class="mt-[70px] space-y-6 p-6 md:p-10 pb-16">
+    <div class="flex gap-4">
+      <router-link :to="`/org/${organizationStore.userOrganizations?.find(Boolean)?.org_id}/dashboard`">
+
+        <Button variant="outline" size="icon"> <ArrowLeft class="size-4" /> </Button>
+      </router-link>
+      <div class="space-y-0.5">
+        <h2 class="text-2xl font-bold tracking-tight">Configuracion</h2>
+        <p class="text-muted-foreground">
+          Configuracion de tu cuenta.
+        </p>
+      </div>
     </div>
-    <div class="flex gap-4 overflow-x-auto">
-      <router-link
-        v-for="(menuItem, index) in menuList"
-        :key="index"
-        :to="menuItem.path"
-        >
-        <Button :variant="router.currentRoute.value.path === menuItem.path ? 'default' : 'ghost'">{{ menuItem.text }}</Button>
-        </router-link
-      >
+    <Separator class="my-6" />
+    <div class="flex flex-col space-y-8 lg:flex-row lg:space-x-12 lg:space-y-0">
+      <aside class="lg:w-1/5">
+        <nav class="flex mx-3 lg:flex-col lg:mx-2 lg:my-1 gap-2">
+          <router-link
+            v-for="(menuItem, index) in menuList"
+            :key="index"
+            :to="menuItem.path"
+          >
+            <Button
+              variant="ghost"
+              :class="`w-full text-left justify-start ${
+                router.currentRoute.value.path === menuItem.path &&
+                'bg-muted hover:bg-muted'
+              }`"
+              >{{ menuItem.text }}</Button
+            >
+          </router-link>
+        </nav>
+      </aside>
+      <div class="flex-1">
+        <div class="space-y-6">
+          <router-view />
+        </div>
+      </div>
     </div>
-    <router-view />
   </div>
 </template>
 

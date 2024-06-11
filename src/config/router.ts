@@ -86,6 +86,11 @@ export const routes: RouteWithMeta[] = [
         meta: { requiresAuth: true },
         component: () => import("@/pages/settings/billing.vue"),
       },
+      {
+        path: "organizations",
+        meta: { requiresAuth: true },
+        component: () => import("@/pages/settings/organizations.vue"),
+      },
     ],
   },
   {
