@@ -43,6 +43,11 @@ watchEffect(() => {
     userOrganizationsQuery.data.value?.data ?? null
   );
 });
+watchEffect(() => {
+  organizationStore.setIsUserOrganizationsLoading(
+    userOrganizationsQuery.isLoading.value
+  );
+});
 watchEffect(async () => {
   const stripeCustomerId = authStore.authedUser?.stripe_customer_id;
   if (!authStore.authedUser) return;

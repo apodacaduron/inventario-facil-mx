@@ -1,15 +1,12 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, watchEffect } from "vue";
 
 import {
   Avatar,
   AvatarFallback,
-  AvatarImage,
   Button,
   Command,
-  CommandEmpty,
   CommandGroup,
-  CommandInput,
   CommandItem,
   CommandList,
   CommandSeparator,
@@ -19,7 +16,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   Drawer,
   DrawerContent,
   DrawerDescription,
@@ -38,29 +34,74 @@ import {
   SeparatorHorizontalIcon,
 } from "lucide-vue-next";
 import { useMediaQuery } from "@vueuse/core";
-import { useOrganizationStore } from "@/stores";
-
-const groups = [
-  {
-    label: "Organizaciones",
-    teams: [
-      {
-        label: "Acme Inc.",
-        value: "acme-inc",
-      },
-      {
-        label: "Monsters Inc.",
-        value: "monsters",
-      },
-    ],
-  },
-];
+import { useAuthStore, useOrganizationStore } from "@/stores";
+import { useRoute, useRouter } from "vue-router";
+import { useMutation, useQueryClient } from "@tanstack/vue-query";
+import { supabase } from "@/config/supabase";
 
 const open = ref(false);
 const showNewTeamDialog = ref(false);
+const organizationName = ref("");
 
+const route = useRoute();
+const router = useRouter();
+const authStore = useAuthStore();
+const queryClient = useQueryClient();
 const organizationStore = useOrganizationStore();
 const isDesktop = useMediaQuery("(min-width: 768px)");
+const createOrganizationMutation = useMutation({
+  mutationFn: async (organizationName: string) => {
+    const createOrganizationResponse = await supabase
+      .from("i_organizations")
+      .insert({
+        name: organizationName,
+        plan_id: authStore.authedUser?.plan_id
+      })
+      .select("*")
+      .single();
+    const newOrganizationId = createOrganizationResponse.data?.id;
+
+    if (createOrganizationResponse.error?.message)
+      throw new Error(createOrganizationResponse.error?.message);
+    if (!newOrganizationId)
+      throw new Error("Create organization response does not contain id");
+
+    const roleResponse = await supabase
+      .from("i_roles")
+      .select("*")
+      .eq("role_name", "admin")
+      .single();
+    const adminRoleId = roleResponse.data?.id;
+
+    if (!adminRoleId) throw new Error("Admin role id not found");
+
+    await supabase.from("i_user_organization_roles").insert({
+      org_id: newOrganizationId,
+      role_id: adminRoleId,
+    });
+
+    await queryClient.invalidateQueries({ queryKey: ["organization"] });
+
+    showNewTeamDialog.value = false;
+    open.value = false;
+
+    redirectToOrganization(newOrganizationId);
+  },
+});
+
+function redirectToOrganization(orgId: string | null | undefined) {
+  if (!orgId)
+    throw new Error(
+      "Could not redirect since organization id was not provided"
+    );
+
+  router.push(`/org/${orgId}/dashboard`);
+}
+
+watchEffect(() => {
+  if (showNewTeamDialog.value) return;
+  organizationName.value = "";
+});
 </script>
 
 <template>
@@ -74,11 +115,11 @@ const isDesktop = useMediaQuery("(min-width: 768px)");
         class="min-w-[200px] w-full justify-between"
       >
         <Avatar class="mr-2 h-5 w-5">
-          <AvatarImage
-            :src="`https://avatar.vercel.sh/acme-inc.png`"
-            :alt="organizationStore.currentUserOrganization?.i_organizations?.name"
-          />
-          <AvatarFallback>{{organizationStore.currentUserOrganization?.i_organizations?.name?.charAt(0)}}</AvatarFallback>
+          <AvatarFallback>{{
+            organizationStore.currentUserOrganization?.i_organizations?.name?.charAt(
+              0
+            )
+          }}</AvatarFallback>
         </Avatar>
         {{ organizationStore.currentUserOrganization?.i_organizations?.name }}
         <SeparatorHorizontalIcon class="ml-auto size-4 shrink-0 opacity-50" />
@@ -87,34 +128,32 @@ const isDesktop = useMediaQuery("(min-width: 768px)");
     <PopoverContent class="w-[200px] p-0">
       <Command>
         <CommandList>
-          <CommandGroup
-            heading="Organizaciones"
-          >
+          <CommandGroup heading="Organizaciones">
             <CommandItem
-              v-for="organization in organizationStore.userOrganizations"
-              :key="organization.org_id"
-              :value="organization.org_id"
+              v-for="(
+                organization, index
+              ) in organizationStore.userOrganizations"
+              :key="organization.org_id ?? index"
+              :value="organization.org_id ?? 'Unknown'"
               class="text-sm"
               @select="
                 () => {
-                  selectedTeam = team;
+                  redirectToOrganization(organization.org_id);
                   open = false;
                 }
               "
             >
               <Avatar class="mr-2 h-5 w-5">
-                <AvatarImage
-                  :src="`https://avatar.vercel.sh/${team.value}.png`"
-                  :alt="team.label"
-                  class="grayscale"
-                />
-                <AvatarFallback>SC</AvatarFallback>
+                <AvatarFallback>{{
+                  organization.i_organizations?.name?.charAt(0) ?? "?"
+                }}</AvatarFallback>
               </Avatar>
-              {{ team.label }}
+              {{ organization.i_organizations?.name }}
               <CheckIcon
                 :class="`ml-auto h-4 w-4
                              ${
-                               selectedTeam.value === team.value
+                               organization.org_id ===
+                               route.params.orgId.toString()
                                  ? 'opacity-100'
                                  : 'opacity-0'
                              }`"
@@ -122,23 +161,25 @@ const isDesktop = useMediaQuery("(min-width: 768px)");
             </CommandItem>
           </CommandGroup>
         </CommandList>
-        <CommandSeparator />
-        <CommandList>
-          <CommandGroup>
-            <CommandItem
-              value="create-team"
-              @select="
-                () => {
-                  open = false;
-                  showNewTeamDialog = true;
-                }
-              "
-            >
-              <PlusCircle class="mr-2 size-5" />
-              Create Team
-            </CommandItem>
-          </CommandGroup>
-        </CommandList>
+        <template v-if="organizationStore.canAddOrganizations">
+          <CommandSeparator />
+          <CommandList>
+            <CommandGroup>
+              <CommandItem
+                value="create-team"
+                @select="
+                  () => {
+                    open = false;
+                    showNewTeamDialog = true;
+                  }
+                "
+              >
+                <PlusCircle class="mr-2 size-5" />
+                Create Team
+              </CommandItem>
+            </CommandGroup>
+          </CommandList>
+        </template>
       </Command>
     </PopoverContent>
   </Popover>
@@ -155,7 +196,11 @@ const isDesktop = useMediaQuery("(min-width: 768px)");
         <div class="space-y-4 py-2 pb-4">
           <div class="space-y-2">
             <Label for="name">Team name</Label>
-            <Input id="name" placeholder="Acme Inc." />
+            <Input
+              v-model="organizationName"
+              id="name"
+              placeholder="Acme Inc."
+            />
           </div>
         </div>
       </div>
@@ -163,7 +208,12 @@ const isDesktop = useMediaQuery("(min-width: 768px)");
         <Button variant="outline" @click="showNewTeamDialog = false">
           Cancel
         </Button>
-        <Button type="submit"> Continue </Button>
+        <Button
+          type="submit"
+          @click="createOrganizationMutation.mutate(organizationName)"
+        >
+          Continue
+        </Button>
       </DialogFooter>
     </DialogContent>
   </Dialog>
@@ -174,14 +224,19 @@ const isDesktop = useMediaQuery("(min-width: 768px)");
         <DrawerHeader>
           <DrawerTitle>Crea una organizacion</DrawerTitle>
           <DrawerDescription>
-            Agrega una nueva organizacion para agregar datos nuevos por separado de tu organizacion actual.
+            Agrega una nueva organizacion para agregar datos nuevos por separado
+            de tu organizacion actual.
           </DrawerDescription>
         </DrawerHeader>
         <div>
           <div class="space-y-4 py-2 pb-4 px-4">
             <div class="space-y-2">
               <Label for="name">Nombre de organizacion</Label>
-              <Input id="name" placeholder="Acme Inc." />
+              <Input
+                v-model="organizationName"
+                id="name"
+                placeholder="Acme Inc."
+              />
             </div>
           </div>
         </div>
@@ -189,7 +244,12 @@ const isDesktop = useMediaQuery("(min-width: 768px)");
           <Button variant="outline" @click="showNewTeamDialog = false">
             Cancelar
           </Button>
-          <Button type="submit"> Crear </Button>
+          <Button
+            type="submit"
+            @click="createOrganizationMutation.mutate(organizationName)"
+          >
+            Crear
+          </Button>
         </DrawerFooter>
       </div>
     </DrawerContent>

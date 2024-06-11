@@ -5,23 +5,26 @@ import { LoadListOptions } from "@/features/global";
 
 export function useSalesQuery(context: {
   options: {
+    orgId: MaybeRefOrGetter<string>,
     enabled: MaybeRefOrGetter<boolean | undefined>;
     search?: MaybeRefOrGetter<string | undefined>;
-    filters?: MaybeRefOrGetter<LoadListOptions['filters'] | undefined>;
-    order?: MaybeRefOrGetter<LoadListOptions['order'] | undefined>;
+    filters?: MaybeRefOrGetter<LoadListOptions["filters"] | undefined>;
+    order?: MaybeRefOrGetter<LoadListOptions["order"] | undefined>;
   };
 }) {
   const saleServices = useSaleServices();
 
   return useInfiniteQuery({
     queryKey: [
-      'sales',
+      "sales",
+      context.options.orgId,
       context.options.search,
       context.options.filters,
       context.options.order,
     ],
     queryFn({ pageParam }) {
       return saleServices.loadList({
+        orgId: toValue(context.options.orgId),
         offset: pageParam,
         search: toValue(context.options.search),
         filters: toValue(context.options.filters),
@@ -39,57 +42,68 @@ export function useSalesQuery(context: {
   });
 }
 
-export function useSalesCountQuery(context?: {
-  options?: {
+export function useSalesCountQuery(context: {
+  options: {
+    orgId: MaybeRefOrGetter<string>;
     range?: MaybeRefOrGetter<{ from: string; to: string } | undefined>;
   };
 }) {
   const saleServices = useSaleServices();
 
   return useQuery({
-    queryKey: ['sales', 'count', context?.options?.range],
+    queryKey: [
+      "sales",
+      "count",
+      context.options.orgId,
+      context?.options?.range,
+    ],
     async queryFn() {
-      const response = await saleServices.getSalesCount(
-        toValue(context?.options?.range)
-      );
+      const response = await saleServices.getSalesCount({
+        orgId: toValue(context.options.orgId),
+        range: toValue(context?.options?.range),
+      });
 
       return response.data ?? 0;
     },
   });
 }
 
-export function useSalesTotalIncomeQuery(context?: {
-  options?: {
+export function useSalesTotalIncomeQuery(context: {
+  options: {
+    orgId: MaybeRefOrGetter<string>;
     range?: MaybeRefOrGetter<{ from: string; to: string } | undefined>;
   };
 }) {
   const saleServices = useSaleServices();
 
   return useQuery({
-    queryKey: ['sales', 'total-income', context?.options?.range],
+    queryKey: ["sales", "total-income", context.options.orgId, context?.options?.range],
     async queryFn() {
-      const response = await saleServices.getSalesTotalIncome(
-        toValue(context?.options?.range)
-      );
+      const response = await saleServices.getSalesTotalIncome({
+        orgId: toValue(context.options.orgId),
+        range: toValue(context?.options?.range),
+      });
 
       return response.data ?? 0;
     },
   });
 }
 
-export function useSalesTotalProfitQuery(context?: {
-  options?: {
+export function useSalesTotalProfitQuery(context: {
+  options: {
+    orgId: MaybeRefOrGetter<string>;
     range?: MaybeRefOrGetter<{ from: string; to: string } | undefined>;
   };
 }) {
   const saleServices = useSaleServices();
 
   return useQuery({
-    queryKey: ['sales', 'total-profit', context?.options?.range],
+    queryKey: ["sales", "total-profit", context.options.orgId, context?.options?.range],
     async queryFn() {
-      const response = await saleServices.getSalesTotalProfit(
-        toValue(context?.options?.range)
-      );
+      const response = await saleServices.getSalesTotalProfit({
+        orgId: toValue(context.options.orgId),
+        range: toValue(context?.options?.range),
+      });
 
       return response.data ?? 0;
     },

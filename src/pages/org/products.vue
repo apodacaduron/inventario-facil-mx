@@ -55,11 +55,11 @@ import { useProductsQuery } from "@/features/products/composables/useProductQuer
 import { useMutation, useQueryClient } from "@tanstack/vue-query";
 import {
   FeedbackCard,
-  useServiceHelpers,
   useTableOrder,
   useTableStates,
 } from "@/features/global";
 import { analytics } from "@/config/analytics";
+import { useRoute } from "vue-router";
 
 const tableRef = ref<HTMLElement | null>(null);
 
@@ -79,8 +79,7 @@ const productsTableOrder = useTableOrder({
     initialOrder: ["created_at", "desc"],
   },
 });
-const serviceHelpers = useServiceHelpers();
-const organization = serviceHelpers.getCurrentOrganization();
+const route = useRoute();
 const queryClient = useQueryClient();
 const organizationStore = useOrganizationStore();
 const productServices = useProductServices();
@@ -97,9 +96,9 @@ const deleteProductMutation = useMutation({
 const currencyFormatter = useCurrencyFormatter();
 const productsQuery = useProductsQuery({
   options: {
-    enabled: toRef(() => organizationStore.hasOrganizations),
+    enabled: toRef(() => organizationStore.hasUserOrganizations),
     search: productSearchDebounced,
-    organization_id: toRef(() => organization?.org_id?.toString()),
+    orgId: toRef(() => route.params.orgId.toString()),
     order: toRef(() => productsTableOrder.tableOrder.value),
     filters: toRef(() => {
       if (tableFiltersRef.value.status === "all") return [];
@@ -160,7 +159,7 @@ function openAddStockDialog(product: Product) {
 }
 
 async function createProductMutationFn(formValues: CreateProduct) {
-  await productServices.createProduct(formValues);
+  await productServices.createProduct(route.params.orgId.toString(), formValues);
   await queryClient.invalidateQueries({ queryKey: ["products"] });
   analytics.event("create-product", formValues);
 }

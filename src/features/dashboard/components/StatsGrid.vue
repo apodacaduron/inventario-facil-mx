@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { useRoute } from 'vue-router';
-import { isDefined } from '@vueuse/core';
-import { toRef } from 'vue';
+import { useRoute } from "vue-router";
+import { isDefined } from "@vueuse/core";
+import { toRef } from "vue";
 import {
   useCurrencyFormatter,
   useMostSoldProductsQuery,
   useProductsInStockCountQuery,
-} from '@/features/products';
+} from "@/features/products";
 import {
   Avatar,
   AvatarFallback,
@@ -17,95 +17,64 @@ import {
   CardHeader,
   CardTitle,
   Skeleton,
-} from '@/components/ui';
+} from "@/components/ui";
 import {
   ArchiveBoxIcon,
   BanknotesIcon,
   CurrencyDollarIcon,
   InboxStackIcon,
   UserGroupIcon,
-} from '@heroicons/vue/24/outline';
+} from "@heroicons/vue/24/outline";
 import {
   useBestCustomersQuery,
   useCustomersCountQuery,
-} from '@/features/customers';
+} from "@/features/customers";
 import {
   useSalesCountQuery,
   useSalesTotalIncomeQuery,
   useSalesTotalProfitQuery,
-} from '@/features/sales';
+} from "@/features/sales";
 
 const props = defineProps<{
   from: string;
   to: string;
-  period: 'daily' | 'weekly' | 'monthly' | 'yearly';
+  period: "daily" | "weekly" | "monthly" | "yearly";
 }>();
 
 const route = useRoute();
 const currencyFormatter = useCurrencyFormatter();
-const salesCountQuery = useSalesCountQuery({
+
+const queryOptions = {
   options: {
+    orgId: toRef(() => route.params.orgId.toString()),
     range: toRef(() => ({
       from: props.from,
       to: props.to,
     })),
   },
-});
-const customersCountQuery = useCustomersCountQuery({
-  options: {
-    range: toRef(() => ({
-      from: props.from,
-      to: props.to,
-    })),
-  },
-});
-const salesTotalIncomeQuery = useSalesTotalIncomeQuery({
-  options: {
-    range: toRef(() => ({
-      from: props.from,
-      to: props.to,
-    })),
-  },
-});
-const salesTotalProfitQuery = useSalesTotalProfitQuery({
-  options: {
-    range: toRef(() => ({
-      from: props.from,
-      to: props.to,
-    })),
-  },
-});
-const productsInStockCountQuery = useProductsInStockCountQuery();
-const mostSoldProductsQuery = useMostSoldProductsQuery({
-  options: {
-    range: toRef(() => ({
-      from: props.from,
-      to: props.to,
-    })),
-  },
-});
-const bestCustomersQuery = useBestCustomersQuery({
-  options: {
-    range: toRef(() => ({
-      from: props.from,
-      to: props.to,
-    })),
-  },
-});
+};
+
+const salesCountQuery = useSalesCountQuery(queryOptions);
+const customersCountQuery = useCustomersCountQuery(queryOptions);
+const salesTotalIncomeQuery = useSalesTotalIncomeQuery(queryOptions);
+const salesTotalProfitQuery = useSalesTotalProfitQuery(queryOptions);
+const productsInStockCountQuery = useProductsInStockCountQuery(queryOptions);
+const mostSoldProductsQuery = useMostSoldProductsQuery(queryOptions);
+const bestCustomersQuery = useBestCustomersQuery(queryOptions);
 
 const periodString = toRef(() => {
   switch (props.period) {
-    case 'daily':
-      return 'día';
-    case 'monthly':
-      return 'mes';
-    case 'weekly':
-      return 'semana';
-    case 'yearly':
-      return 'año';
+    case "daily":
+      return "día";
+    case "monthly":
+      return "mes";
+    case "weekly":
+      return "semana";
+    case "yearly":
+      return "año";
 
     default:
-      return 'mes';
+      return "mes";
   }
 });
 </script>

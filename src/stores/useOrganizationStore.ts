@@ -2,16 +2,20 @@ import type { useOrganizationServices } from "@/features/organizations";
 import { defineStore } from "pinia";
 import { ref, toRef } from "vue";
 import { useRoute } from "vue-router";
+import { useAuthStore } from "./useAuthStore";
 
 type UserOrganizations = Awaited<
   ReturnType<ReturnType<typeof useOrganizationServices>["loadUserOrganizations"]>
 >['data'];
 
 export const useOrganizationStore = defineStore("organization", () => {
-  const route = useRoute();
+  const isUserOrganizationsLoading = ref(true);
   const userOrganizations = ref<UserOrganizations | null>(null);
+  
+  const route = useRoute();
+  const authStore = useAuthStore();
 
-  const hasOrganizations = toRef(() => Boolean(userOrganizations.value?.length));
+  const hasUserOrganizations = toRef(() => Boolean(userOrganizations.value?.length));
   const currentUserOrganization = toRef(() =>
     findOrganizationById(route.params.orgId.toString())
   );
@@ -37,9 +41,21 @@ export const useOrganizationStore = defineStore("organization", () => {
 
     return currentCustomers <= maxCustomers;
   });
+  const canAddOrganizations = toRef(() => {
+    const maxOrganizations =
+      authStore.authedUser?.max_organizations;
+    const currentOrganizations = authStore.authedUser?.current_organizations
+    if (!maxOrganizations || !currentOrganizations) return false;
 
-  function setUserOrganizations(nexUsertOrganizations: UserOrganizations) {
-    userOrganizations.value = nexUsertOrganizations;
+    return currentOrganizations <= maxOrganizations;
+  });
+
+  function setUserOrganizations(nextUserOrganizations: UserOrganizations) {
+    userOrganizations.value = nextUserOrganizations;
+  }
+
+  function setIsUserOrganizationsLoading(isLoading: boolean) {
+    isUserOrganizationsLoading.value = isLoading;
   }
 
   function findOrganizationById(id: string) {
@@ -52,7 +68,7 @@ export const useOrganizationStore = defineStore("organization", () => {
 
   return {
     userOrganizations,
-    hasOrganizations,
+    hasUserOrganizations,
     currentUserOrganization,
     setUserOrganizations,
     findOrganizationById,
@@ -60,6 +76,9 @@ export const useOrganizationStore = defineStore("organization", () => {
     canEnablePublicProductsPage,
     canAddProducts,
     canAddCustomers,
+    canAddOrganizations,
+    setIsUserOrganizationsLoading,
+    isUserOrganizationsLoading,
     $reset
   };
 });

@@ -5,11 +5,11 @@ import { LoadListOptions } from '@/features/global';
 
 export function useProductsQuery(context: {
   options: {
+    orgId: MaybeRefOrGetter<string>;
     enabled: MaybeRefOrGetter<boolean | undefined>;
     search: MaybeRefOrGetter<string | undefined>;
     filters?: MaybeRefOrGetter<LoadListOptions['filters'] | undefined>;
     order?: MaybeRefOrGetter<LoadListOptions['order'] | undefined>;
-    organization_id?: MaybeRefOrGetter<string | undefined>;
   };
 }) {
   const productServices = useProductServices();
@@ -20,7 +20,7 @@ export function useProductsQuery(context: {
       context.options.search,
       context.options.filters,
       context.options.order,
-      context.options.organization_id,
+      context.options.orgId,
     ],
     queryFn({ pageParam }) {
       return productServices.loadList({
@@ -28,7 +28,7 @@ export function useProductsQuery(context: {
         search: toValue(context.options.search),
         filters: toValue(context.options.filters),
         order: toValue(context.options.order),
-        organization_id: toValue(context.options.organization_id),
+        orgId: toValue(context.options.orgId),
       });
     },
     initialPageParam: 0,
@@ -44,11 +44,11 @@ export function useProductsQuery(context: {
 
 export function usePublicPageProductsQuery(context: {
   options: {
+    orgId: MaybeRefOrGetter<string>;
     enabled: MaybeRefOrGetter<boolean | undefined>;
     search: MaybeRefOrGetter<string | undefined>;
     filters?: MaybeRefOrGetter<LoadListOptions['filters'] | undefined>;
     order?: MaybeRefOrGetter<LoadListOptions['order'] | undefined>;
-    organization_id?: MaybeRefOrGetter<string | undefined>;
   };
 }) {
   const productServices = useProductServices();
@@ -59,7 +59,7 @@ export function usePublicPageProductsQuery(context: {
       context.options.search,
       context.options.filters,
       context.options.order,
-      context.options.organization_id,
+      context.options.orgId,
     ],
     queryFn({ pageParam }) {
       return productServices.loadPublicList({
@@ -67,7 +67,7 @@ export function usePublicPageProductsQuery(context: {
         search: toValue(context.options.search),
         filters: toValue(context.options.filters),
         order: toValue(context.options.order),
-        organization_id: toValue(context.options.organization_id),
+        orgId: toValue(context.options.orgId),
       });
     },
     initialPageParam: 0,
@@ -81,44 +81,49 @@ export function usePublicPageProductsQuery(context: {
   });
 }
 
-export function useProductsCountQuery(context?: {
-  options?: {
+export function useProductsCountQuery(context: {
+  options: {
+    orgId: MaybeRefOrGetter<string>;
     range?: MaybeRefOrGetter<{ from: string; to: string } | undefined>;
   };
 }) {
   const productServices = useProductServices();
 
   return useQuery({
-    queryKey: ['products', 'count', context?.options?.range],
+    queryKey: ['products', 'count', context.options.orgId, context?.options?.range],
     async queryFn() {
-      const response = await productServices.getProductCount(
-        toValue(context?.options?.range)
-      );
+      const response = await productServices.getProductCount({
+        orgId: toValue(context.options.orgId),
+        range: toValue(context?.options?.range)
+      });
 
       return response.data ?? 0;
     },
   });
 }
-export function useProductsInStockCountQuery(context?: {
-  options?: {
+export function useProductsInStockCountQuery(context: {
+  options: {
+    orgId: MaybeRefOrGetter<string>;
     range?: MaybeRefOrGetter<{ from: string; to: string } | undefined>;
   };
 }) {
   const productServices = useProductServices();
 
   return useQuery({
-    queryKey: ['products', 'count', 'in-stock', context?.options?.range],
+    queryKey: ['products', 'count', 'in-stock', context.options.orgId, context?.options?.range],
     async queryFn() {
-      const response = await productServices.getProductsInStockCount(
-        toValue(context?.options?.range)
-      );
+      const response = await productServices.getProductsInStockCount({
+        orgId: toValue(context.options.orgId),
+        range: toValue(context?.options?.range)
+      });
 
       return response.data ?? 0;
     },
   });
 }
-export function useMostSoldProductsQuery(context?: {
-  options?: {
+export function useMostSoldProductsQuery(context: {
+  options: {
+    orgId: MaybeRefOrGetter<string>;
     range?: MaybeRefOrGetter<{ from: string; to: string } | undefined>;
   };
 }) {
@@ -127,9 +132,10 @@ export function useMostSoldProductsQuery(context?: {
   return useQuery({
     queryKey: ['products', 'most-sold', context?.options?.range],
     async queryFn() {
-      const response = await productServices.getMostSoldProducts(
-        toValue(context?.options?.range)
-      );
+      const response = await productServices.getMostSoldProducts({
+        orgId: toValue(context.options.orgId),
+        range: toValue(context?.options?.range)
+      });
 
       return response.data;
     },

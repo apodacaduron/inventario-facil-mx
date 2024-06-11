@@ -30,7 +30,7 @@ import {
   SunIcon,
 } from "@heroicons/vue/24/outline";
 import GoPremiumDialog from "./GoPremiumDialog.vue";
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import {
   BadgeDollarSign,
   BarChart2,
@@ -48,7 +48,7 @@ const authStore = useAuthStore();
 const organizationStore = useOrganizationStore();
 const isDesktop = useMediaQuery("(min-width: 768px)");
 
-const menuList = {
+const menuList = computed(() => ({
   dashboard: {
     path: `/org/${route.params.orgId}/dashboard`,
     text: "Inicio",
@@ -69,7 +69,7 @@ const menuList = {
     text: "Ventas",
     icon: BadgeDollarSign,
   },
-};
+}));
 </script>
 
 <template>

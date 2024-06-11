@@ -78,6 +78,7 @@ export type Database = {
           org_id: string | null
           phone: string | null
           trust_status: Database["public"]["Enums"]["trust_status"] | null
+          user_id: string | null
         }
         Insert: {
           address?: string | null
@@ -90,6 +91,7 @@ export type Database = {
           org_id?: string | null
           phone?: string | null
           trust_status?: Database["public"]["Enums"]["trust_status"] | null
+          user_id?: string | null
         }
         Update: {
           address?: string | null
@@ -102,6 +104,7 @@ export type Database = {
           org_id?: string | null
           phone?: string | null
           trust_status?: Database["public"]["Enums"]["trust_status"] | null
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -109,6 +112,13 @@ export type Database = {
             columns: ["org_id"]
             isOneToOne: false
             referencedRelation: "i_organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "i_customers_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]
@@ -176,6 +186,7 @@ export type Database = {
           retail_price: number | null
           unit_price: number | null
           updated_at: string | null
+          user_id: string | null
         }
         Insert: {
           created_at?: string
@@ -188,6 +199,7 @@ export type Database = {
           retail_price?: number | null
           unit_price?: number | null
           updated_at?: string | null
+          user_id?: string | null
         }
         Update: {
           created_at?: string
@@ -200,6 +212,7 @@ export type Database = {
           retail_price?: number | null
           unit_price?: number | null
           updated_at?: string | null
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -207,6 +220,13 @@ export type Database = {
             columns: ["org_id"]
             isOneToOne: false
             referencedRelation: "i_organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "i_products_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]
@@ -334,6 +354,7 @@ export type Database = {
       i_sales: {
         Row: {
           cancellation_notes: string | null
+          cancelled_at: string | null
           completed_at: string | null
           created_at: string
           customer_id: string | null
@@ -345,9 +366,11 @@ export type Database = {
           shipping_cost: number | null
           status: Database["public"]["Enums"]["basic_sale_status"] | null
           updated_at: string | null
+          user_id: string | null
         }
         Insert: {
           cancellation_notes?: string | null
+          cancelled_at?: string | null
           completed_at?: string | null
           created_at?: string
           customer_id?: string | null
@@ -359,9 +382,11 @@ export type Database = {
           shipping_cost?: number | null
           status?: Database["public"]["Enums"]["basic_sale_status"] | null
           updated_at?: string | null
+          user_id?: string | null
         }
         Update: {
           cancellation_notes?: string | null
+          cancelled_at?: string | null
           completed_at?: string | null
           created_at?: string
           customer_id?: string | null
@@ -373,6 +398,7 @@ export type Database = {
           shipping_cost?: number | null
           status?: Database["public"]["Enums"]["basic_sale_status"] | null
           updated_at?: string | null
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -387,6 +413,13 @@ export type Database = {
             columns: ["org_id"]
             isOneToOne: false
             referencedRelation: "i_organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "i_sales_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]
@@ -615,46 +648,19 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      create_sale:
-        | {
-            Args: {
-              organization_id: string
-              sale_date: string
-              status: string
-              customer_id: string
-              notes: string
-              cancellation_notes: string
-              shipping_cost: number
-              products: Json[]
-            }
-            Returns: string
-          }
-        | {
-            Args: {
-              organization_id: string
-              sale_date: string
-              status: string
-              notes: string
-              cancellation_notes: string
-              shipping_cost: number
-              products: Json[]
-              customer_id?: string
-            }
-            Returns: string
-          }
-        | {
-            Args: {
-              organization_id: string
-              sale_date: string
-              status: string
-              notes: string
-              shipping_cost: number
-              products: Json[]
-              customer_id?: string
-              cancellation_notes?: string
-            }
-            Returns: string
-          }
+      create_sale: {
+        Args: {
+          organization_id: string
+          sale_date: string
+          status: string
+          notes: string
+          shipping_cost: number
+          products: Json[]
+          customer_id?: string
+          cancellation_notes?: string
+        }
+        Returns: string
+      }
       get_authed_user_data: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -665,6 +671,7 @@ export type Database = {
           role_name: Database["public"]["Enums"]["organization_roles"]
           start_date: string
           end_date: string
+          plan_id: string
           plan_name: string
           price: number
           currency: string
@@ -674,6 +681,7 @@ export type Database = {
           max_members: number
           stripe_price_id: string
           stripe_product_id: string
+          current_organizations: number
         }[]
       }
       get_best_customers: {

@@ -35,22 +35,22 @@ const toggleDark = useToggle(isDark);
           :class="[
             'hidden md:block',
             {
-              'pointer-events-none': !organizationStore.hasOrganizations,
-              'opacity-80': !organizationStore.hasOrganizations,
+              'pointer-events-none': !organizationStore.hasUserOrganizations,
+              'opacity-80': !organizationStore.hasUserOrganizations,
             },
           ]"
         >
           <Button
-            :loading="!organizationStore.hasOrganizations"
-            :disabled="!organizationStore.hasOrganizations"
+            :loading="!organizationStore.hasUserOrganizations"
+            :disabled="!organizationStore.hasUserOrganizations"
           >
             Dashboard
           </Button>
         </router-link>
         <Button
           variant="outline"
-          :loading="!organizationStore.hasOrganizations"
-          :disabled="!organizationStore.hasOrganizations"
+          :loading="!organizationStore.hasUserOrganizations"
+          :disabled="!organizationStore.hasUserOrganizations"
           @click="authStore.signOut"
         >
           <ArrowLeftOnRectangleIcon class="w-4 h-4 md:hidden" />

@@ -32,14 +32,14 @@ const isDark = useDark();
             organizationStore.userOrganizations?.find(Boolean)?.org_id
           }/dashboard`"
           :class="{
-            'pointer-events-none': !organizationStore.hasOrganizations,
-            'opacity-80': !organizationStore.hasOrganizations,
+            'pointer-events-none': !organizationStore.hasUserOrganizations,
+            'opacity-80': !organizationStore.hasUserOrganizations,
           }"
         >
           <Button
             class="px-8 py-3 text-base"
-            :loading="!organizationStore.hasOrganizations"
-            :disabled="!organizationStore.hasOrganizations"
+            :loading="!organizationStore.hasUserOrganizations"
+            :disabled="!organizationStore.hasUserOrganizations"
           >
             Dashboard
           </Button>
