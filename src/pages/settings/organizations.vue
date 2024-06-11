@@ -16,7 +16,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui";
 import { DeleteOrganizationDialog } from "@/features/organizations";
-import { UserOrganization, useOrganizationStore } from "@/stores";
+import { UserOrganization, useAuthStore, useOrganizationStore } from "@/stores";
 import { TrashIcon } from "lucide-vue-next";
 import { ref, watchEffect } from "vue";
 
@@ -24,6 +24,7 @@ const activeOrganization = ref<UserOrganization | null>(null);
 const isDeleteDialogOpen = ref(false);
 
 const organizationStore = useOrganizationStore();
+const authStore = useAuthStore();
 
 watchEffect(() => {
   if (isDeleteDialogOpen.value) return;
@@ -83,7 +84,7 @@ watchEffect(() => {
           <TableCell class="text-center">
             {{ userOrganization.i_organizations?.current_members }}
           </TableCell>
-          <TableCell class="text-center">
+          <TableCell v-if="userOrganization.i_organizations?.user_id === authStore.authedUser?.id" class="text-center">
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger as-child>
