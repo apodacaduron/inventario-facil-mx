@@ -33,9 +33,14 @@ export function useOrganizationServices() {
     await supabase.from('i_organizations').update(data.values).eq('id', data.organizationId)
   }
 
+  async function deleteOrganization(organizationId: string) {
+    return await supabase.from('i_organizations').delete().eq('id', organizationId)
+  }
+
   return {
     loadById,
     loadUserOrganizations,
-    updateOrganization
+    updateOrganization,
+    deleteOrganization
   };
 }

@@ -2,6 +2,7 @@
 import {
   Avatar,
   AvatarFallback,
+  Button,
   Separator,
   Table,
   TableBody,
@@ -9,10 +10,26 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
 } from "@/components/ui";
-import { useOrganizationStore } from "@/stores";
+import { DeleteOrganizationDialog } from "@/features/organizations";
+import { UserOrganization, useOrganizationStore } from "@/stores";
+import { TrashIcon } from "lucide-vue-next";
+import { ref, watchEffect } from "vue";
+
+const activeOrganization = ref<UserOrganization | null>(null);
+const isDeleteDialogOpen = ref(false);
 
 const organizationStore = useOrganizationStore();
+
+watchEffect(() => {
+  if (isDeleteDialogOpen.value) return;
+
+  activeOrganization.value = null;
+});
 </script>
 
 <template>
@@ -66,8 +83,32 @@ const organizationStore = useOrganizationStore();
           <TableCell class="text-center">
             {{ userOrganization.i_organizations?.current_members }}
           </TableCell>
+          <TableCell class="text-center">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger as-child>
+                  <Button
+                    size="icon"
+                    variant="outline"
+                    class="text-red-500 dark:text-red-500"
+                    @click="
+                      activeOrganization = userOrganization;
+                      isDeleteDialogOpen = true;
+                    "
+                  >
+                    <TrashIcon class="size-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Eliminar organizacion</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </TableCell>
         </TableRow>
       </TableBody>
     </Table>
   </div>
+
+  <DeleteOrganizationDialog v-model:open="isDeleteDialogOpen" :userOrganization="activeOrganization" />
 </template>

@@ -1,26 +1,32 @@
 import type { useOrganizationServices } from "@/features/organizations";
 import { defineStore } from "pinia";
 import { ref, toRef } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "./useAuthStore";
 
-type UserOrganizations = Awaited<
-  ReturnType<ReturnType<typeof useOrganizationServices>["loadUserOrganizations"]>
->['data'];
+export type UserOrganization = NonNullable<Awaited<
+  ReturnType<
+    ReturnType<typeof useOrganizationServices>["loadUserOrganizations"]
+  >
+>["data"]>[number];
 
 export const useOrganizationStore = defineStore("organization", () => {
   const isUserOrganizationsLoading = ref(true);
-  const userOrganizations = ref<UserOrganizations | null>(null);
-  
+  const userOrganizations = ref<UserOrganization[] | null>(null);
+
   const route = useRoute();
+  const router = useRouter();
   const authStore = useAuthStore();
 
-  const hasUserOrganizations = toRef(() => Boolean(userOrganizations.value?.length));
+  const hasUserOrganizations = toRef(() =>
+    Boolean(userOrganizations.value?.length)
+  );
   const currentUserOrganization = toRef(() =>
     findOrganizationById(route.params.orgId.toString())
   );
   const isPremium = toRef(
-    () => currentUserOrganization.value?.i_organizations?.plans?.name === "premium"
+    () =>
+      currentUserOrganization.value?.i_organizations?.plans?.name === "premium"
   );
   const canEnablePublicProductsPage = toRef(() => isPremium.value);
   const canAddProducts = toRef(() => {
@@ -42,15 +48,14 @@ export const useOrganizationStore = defineStore("organization", () => {
     return currentCustomers < maxCustomers;
   });
   const canAddOrganizations = toRef(() => {
-    const maxOrganizations =
-      authStore.authedUser?.max_organizations;
-    const currentOrganizations = authStore.authedUser?.current_organizations
+    const maxOrganizations = authStore.authedUser?.max_organizations;
+    const currentOrganizations = authStore.authedUser?.current_organizations;
     if (!maxOrganizations || !currentOrganizations) return false;
 
     return currentOrganizations < maxOrganizations;
   });
 
-  function setUserOrganizations(nextUserOrganizations: UserOrganizations) {
+  function setUserOrganizations(nextUserOrganizations: UserOrganization[]) {
     userOrganizations.value = nextUserOrganizations;
   }
 
@@ -62,8 +67,17 @@ export const useOrganizationStore = defineStore("organization", () => {
     return userOrganizations.value?.find((org) => org.org_id === id);
   }
 
+  function redirectToOrganization(orgId: string | null | undefined) {
+    if (!orgId)
+      throw new Error(
+        "Could not redirect since organization id was not provided"
+      );
+
+    router.push(`/org/${orgId}/dashboard`);
+  }
+
   function $reset() {
-    userOrganizations.value = null
+    userOrganizations.value = null;
   }
 
   return {
@@ -79,6 +93,7 @@ export const useOrganizationStore = defineStore("organization", () => {
     canAddOrganizations,
     setIsUserOrganizationsLoading,
     isUserOrganizationsLoading,
-    $reset
+    redirectToOrganization,
+    $reset,
   };
 });
