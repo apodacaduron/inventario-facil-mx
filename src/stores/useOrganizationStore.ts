@@ -55,7 +55,7 @@ export const useOrganizationStore = defineStore("organization", () => {
     return currentOrganizations < maxOrganizations;
   });
 
-  function setUserOrganizations(nextUserOrganizations: UserOrganization[]) {
+  function setUserOrganizations(nextUserOrganizations: UserOrganization[] | null) {
     userOrganizations.value = nextUserOrganizations;
   }
 

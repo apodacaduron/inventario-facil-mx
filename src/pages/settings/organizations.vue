@@ -15,19 +15,21 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui";
-import { DeleteOrganizationDialog } from "@/features/organizations";
+import { DeleteOrganizationDialog, UpdateOrganizationDialog } from "@/features/organizations";
 import { UserOrganization, useAuthStore, useOrganizationStore } from "@/stores";
-import { TrashIcon } from "lucide-vue-next";
+import { Pencil, TrashIcon } from "lucide-vue-next";
 import { ref, watchEffect } from "vue";
 
 const activeOrganization = ref<UserOrganization | null>(null);
 const isDeleteDialogOpen = ref(false);
+const isUpdateDialogOpen = ref(false);
 
 const organizationStore = useOrganizationStore();
 const authStore = useAuthStore();
 
 watchEffect(() => {
   if (isDeleteDialogOpen.value) return;
+  if (isUpdateDialogOpen.value) return;
 
   activeOrganization.value = null;
 });
@@ -91,6 +93,25 @@ watchEffect(() => {
                   <Button
                     size="icon"
                     variant="outline"
+                    @click="
+                      activeOrganization = userOrganization;
+                      isUpdateDialogOpen = true;
+                    "
+                  >
+                    <Pencil class="size-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Actualizar organizacion</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger as-child>
+                  <Button
+                    size="icon"
+                    variant="outline"
                     class="text-red-500 dark:text-red-500"
                     @click="
                       activeOrganization = userOrganization;
@@ -112,4 +133,5 @@ watchEffect(() => {
   </div>
 
   <DeleteOrganizationDialog v-model:open="isDeleteDialogOpen" :userOrganization="activeOrganization" />
+  <UpdateOrganizationDialog v-model:open="isUpdateDialogOpen" :userOrganization="activeOrganization" />
 </template>
