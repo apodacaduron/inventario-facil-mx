@@ -81,6 +81,7 @@ const createOrganizationMutation = useMutation({
     });
 
     await queryClient.invalidateQueries({ queryKey: ["organization"] });
+    await queryClient.invalidateQueries({ queryKey: ["user"] });
 
     openModel.value = false;
 
