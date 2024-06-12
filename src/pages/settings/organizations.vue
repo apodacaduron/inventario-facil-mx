@@ -107,7 +107,7 @@ watchEffect(() => {
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
-              <TooltipProvider>
+              <TooltipProvider v-if="(organizationStore.userOrganizations?.length ?? 1) > 1">
                 <Tooltip>
                   <TooltipTrigger as-child>
                     <Button
