@@ -99,7 +99,7 @@ const organizationStore = useOrganizationStore();
                 "
               >
                 <PlusCircle class="mr-2 size-5" />
-                Create Team
+                Crear organizacion
               </CommandItem>
             </CommandGroup>
           </CommandList>

@@ -87,45 +87,47 @@ watchEffect(() => {
             {{ userOrganization.i_organizations?.current_members }}
           </TableCell>
           <TableCell v-if="userOrganization.i_organizations?.user_id === authStore.authedUser?.id" class="text-center">
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger as-child>
-                  <Button
-                    size="icon"
-                    variant="outline"
-                    @click="
-                      activeOrganization = userOrganization;
-                      isUpdateDialogOpen = true;
-                    "
-                  >
-                    <Pencil class="size-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Actualizar organizacion</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger as-child>
-                  <Button
-                    size="icon"
-                    variant="outline"
-                    class="text-red-500 dark:text-red-500"
-                    @click="
-                      activeOrganization = userOrganization;
-                      isDeleteDialogOpen = true;
-                    "
-                  >
-                    <TrashIcon class="size-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Eliminar organizacion</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            <div class="flex gap-2">
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger as-child>
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      @click="
+                        activeOrganization = userOrganization;
+                        isUpdateDialogOpen = true;
+                      "
+                    >
+                      <Pencil class="size-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Actualizar organizacion</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger as-child>
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      class="text-red-500 dark:text-red-500"
+                      @click="
+                        activeOrganization = userOrganization;
+                        isDeleteDialogOpen = true;
+                      "
+                    >
+                      <TrashIcon class="size-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Eliminar organizacion</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
           </TableCell>
         </TableRow>
       </TableBody>

@@ -33,6 +33,7 @@ const deleteUserOrganizationMutation = useMutation({mutationFn: async () => {
     if (!props.userOrganization?.org_id) throw new Error('Cannot delete since organization id was not provided')
     await organizationServices.deleteOrganization(props.userOrganization?.org_id)
     await queryClient.invalidateQueries({queryKey: ['organization']})
+    await queryClient.invalidateQueries({queryKey: ['user']})
     openModel.value = false;
 }})
 </script>
