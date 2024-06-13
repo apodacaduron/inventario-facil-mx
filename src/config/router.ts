@@ -152,7 +152,8 @@ async function isLoggedIn() {
 }
 async function hasUserOrganizations() {
   const organizationStore = useOrganizationStore();
-  const { hasUserOrganizations, isUserOrganizationsLoading } = storeToRefs(organizationStore);
+  const { hasUserOrganizations, isUserOrganizationsLoading } =
+    storeToRefs(organizationStore);
 
   await until(isUserOrganizationsLoading).toBe(false);
   await until(hasUserOrganizations).toBe(true);
@@ -161,7 +162,8 @@ async function hasUserOrganizations() {
 }
 async function isUserAllowedInOrganization(orgId: string | undefined) {
   const organizationStore = useOrganizationStore();
-  const { hasUserOrganizations, isUserOrganizationsLoading } = storeToRefs(organizationStore);
+  const { hasUserOrganizations, isUserOrganizationsLoading } =
+    storeToRefs(organizationStore);
 
   await until(isUserOrganizationsLoading).toBe(false);
   await until(hasUserOrganizations).toBe(true);
@@ -251,4 +253,17 @@ router.beforeEach(async (to, _from) => {
 
 router.afterEach((to) => {
   analytics.pageView(to.fullPath);
+});
+
+router.onError((error, to) => {
+  if (
+    error.message.includes("Failed to fetch dynamically imported module") ||
+    error.message.includes("Importing a module script failed")
+  ) {
+    if (!to?.fullPath) {
+      window.location.reload();
+    } else {
+      window.location.href = to.fullPath;
+    }
+  }
 });
