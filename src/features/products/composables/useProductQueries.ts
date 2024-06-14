@@ -42,6 +42,45 @@ export function useProductsQuery(context: {
   });
 }
 
+export function useProductStockHistoryQuery(context: {
+  options: {
+    productId: MaybeRefOrGetter<string | undefined>;
+    enabled: MaybeRefOrGetter<boolean | undefined>;
+    search: MaybeRefOrGetter<string | undefined>;
+    filters?: MaybeRefOrGetter<LoadListOptions['filters'] | undefined>;
+    order?: MaybeRefOrGetter<LoadListOptions['order'] | undefined>;
+  };
+}) {
+  const productServices = useProductServices();
+
+  return useInfiniteQuery({
+    queryKey: [
+      'products',
+      context.options.search,
+      context.options.filters,
+      context.options.order,
+      context.options.productId,
+    ],
+    queryFn({ pageParam }) {
+      return productServices.loadProductStockHistory({
+        offset: pageParam,
+        search: toValue(context.options.search),
+        filters: toValue(context.options.filters),
+        order: toValue(context.options.order),
+        productId: toValue(context.options.productId),
+      });
+    },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, _allPages, lastPageParam) => {
+      if (lastPage.data?.length === 0) {
+        return undefined;
+      }
+      return lastPageParam + 1;
+    },
+    enabled: context.options.enabled,
+  });
+}
+
 export function usePublicPageProductsQuery(context: {
   options: {
     orgId: MaybeRefOrGetter<string>;

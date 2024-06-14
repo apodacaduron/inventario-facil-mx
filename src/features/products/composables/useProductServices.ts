@@ -81,6 +81,23 @@ export function useProductServices() {
     return await productQuery;
   }
 
+  async function loadProductStockHistory(options: LoadListOptions & { productId: string | undefined }) {
+    if (!options.productId)
+      throw new Error("Product is required to get product stock history");
+
+    const [from, to] = serviceHelpers.getPaginationRange(options?.offset);
+
+    let productStockHistoryQuery = supabase
+      .from("products_stock_history")
+      .select("*")
+      .eq("product_id", options.productId)
+      .range(from, to);
+
+    serviceHelpers.appendFiltersToQuery(productStockHistoryQuery, options);
+
+    return await productStockHistoryQuery;
+  }
+
   async function createProduct(orgId: string, formValues: CreateProduct) {
     if (!orgId) throw new Error("Organization is required to create a product");
 
@@ -171,5 +188,6 @@ export function useProductServices() {
     getProductCount,
     getProductsInStockCount,
     getMostSoldProducts,
+    loadProductStockHistory,
   };
 }

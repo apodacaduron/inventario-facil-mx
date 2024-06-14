@@ -6,6 +6,7 @@ import {
   DeleteProductDialog,
   Product,
   ProductImageDialog,
+  ProductStockHistorySidebar,
   ShareStockDialog,
   UpdateProduct,
   productServicesTypeguards,
@@ -53,13 +54,10 @@ import { refDebounced, useInfiniteScroll, useStorage } from "@vueuse/core";
 import { useOrganizationStore } from "@/stores";
 import { useProductsQuery } from "@/features/products/composables/useProductQueries";
 import { useMutation, useQueryClient } from "@tanstack/vue-query";
-import {
-  FeedbackCard,
-  useTableOrder,
-  useTableStates,
-} from "@/features/global";
+import { FeedbackCard, useTableOrder, useTableStates } from "@/features/global";
 import { analytics } from "@/config/analytics";
 import { useRoute } from "vue-router";
+import { HistoryIcon } from "lucide-vue-next";
 
 const tableRef = ref<HTMLElement | null>(null);
 
@@ -73,6 +71,7 @@ const isDeleteProductDialogOpen = ref(false);
 const isShareStockDialogOpen = ref(false);
 const isAddStockDialogOpen = ref(false);
 const isProductImageDialogOpen = ref(false);
+const isProductStockHistorySidebarOpen = ref(false);
 const activeProduct = ref<Product | null>(null);
 const productsTableOrder = useTableOrder({
   options: {
@@ -159,7 +158,10 @@ function openAddStockDialog(product: Product) {
 }
 
 async function createProductMutationFn(formValues: CreateProduct) {
-  await productServices.createProduct(route.params.orgId.toString(), formValues);
+  await productServices.createProduct(
+    route.params.orgId.toString(),
+    formValues
+  );
   await queryClient.invalidateQueries({ queryKey: ["products"] });
   analytics.event("create-product", formValues);
 }
@@ -187,6 +189,7 @@ watchEffect(() => {
   if (isAddStockDialogOpen.value) return;
   if (isCreateOrUpdateSidebarOpen.value) return;
   if (isProductImageDialogOpen.value) return;
+  if (isProductStockHistorySidebarOpen.value) return;
 
   activeProduct.value = null;
 });
@@ -394,9 +397,14 @@ watchEffect(() => {
                   </div>
                 </div>
               </TableCell>
-              <TableCell class="text-center">{{
-                product.current_stock
-              }}</TableCell>
+              <TableCell class="text-center">
+                <div class="flex items-center gap-4">
+                  {{ product.current_stock }}
+                  <Button @click="isProductStockHistorySidebarOpen = true; activeProduct = product" variant="outline" size="icon">
+                    <HistoryIcon class="size-4" />
+                  </Button>
+                </div>
+              </TableCell>
               <TableCell class="text-center">{{
                 currencyFormatter.parse(product.unit_price) ?? "-"
               }}</TableCell>
@@ -516,6 +524,10 @@ watchEffect(() => {
       @confirmDelete="deleteProductMutation.mutate"
     />
     <ShareStockDialog v-model:open="isShareStockDialogOpen" />
+    <ProductStockHistorySidebar
+      v-model:open="isProductStockHistorySidebarOpen"
+      :product="activeProduct"
+    />
     <CreateOrEditSidebar
       v-model:open="isCreateOrUpdateSidebarOpen"
       :product="activeProduct"

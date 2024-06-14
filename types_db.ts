@@ -515,6 +515,61 @@ export type Database = {
         }
         Relationships: []
       }
+      products_stock_history: {
+        Row: {
+          created_at: string
+          id: number
+          new_stock: number | null
+          old_stock: number | null
+          org_id: string | null
+          product_id: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          new_stock?: number | null
+          old_stock?: number | null
+          org_id?: string | null
+          product_id?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          new_stock?: number | null
+          old_stock?: number | null
+          org_id?: string | null
+          product_id?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "products_stock_history_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "i_organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "products_stock_history_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "i_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "products_stock_history_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subscriptions: {
         Row: {
           created_at: string
