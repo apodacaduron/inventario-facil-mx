@@ -33,11 +33,6 @@ import {
   SelectContent,
   SelectGroup,
   Badge,
-  NumberField,
-  NumberFieldContent,
-  NumberFieldDecrement,
-  NumberFieldInput,
-  NumberFieldIncrement,
 } from "@/components/ui";
 import { computed, ref, toRef, watch } from "vue";
 import { z } from "zod";
@@ -54,6 +49,7 @@ import { toTypedSchema } from "@vee-validate/zod";
 import { useFieldArray, useForm } from "vee-validate";
 import { useOrganizationStore } from "@/stores";
 import { useRoute } from "vue-router";
+import { MinusIcon, PlusIcon } from "lucide-vue-next";
 
 type CreateOrEditSidebarProps = {
   viewOnly?: boolean;
@@ -228,15 +224,16 @@ const formInstance = useForm<CreateSale | UpdateSale>({
   validationSchema: formSchema,
 });
 
-const filtersWithSelectedProductIds = computed(() =>
-  props.sale?.i_sale_products
-    .filter((product) => Boolean(product?.product_id))
-    .map((product) => ({
-      column: "id",
-      operator: "eq",
-      value: product.product_id ?? 'Unknown',
-      filterType: "or",
-    })) ?? []
+const filtersWithSelectedProductIds = computed(
+  () =>
+    props.sale?.i_sale_products
+      .filter((product) => Boolean(product?.product_id))
+      .map((product) => ({
+        column: "id",
+        operator: "eq",
+        value: product.product_id ?? "Unknown",
+        filterType: "or",
+      })) ?? []
 );
 
 const productsQuery = useProductsQuery({
@@ -329,18 +326,58 @@ function getMaxIncrementValue(product: Product | null) {
 }
 
 function updateProductFormQuantity(product: Product | null, quantity: number) {
+  const productFieldIdx = findIndexProductInFieldList(product);
+  const formProduct = formInstance.values.products[productFieldIdx]
+
+  if (quantity > getMaxIncrementValue(product)) return;
+  if (quantity < 0) return;
+
   if (hasProductInFieldList(product) && quantity === 0) {
-    const productFieldIdx = findIndexProductInFieldList(product);
     productsFormFieldArray.remove(productFieldIdx);
   } else if (hasProductInFieldList(product) && quantity > 0) {
-    const productFieldIdx = findIndexProductInFieldList(product);
     productsFormFieldArray.update(productFieldIdx, {
-      ...formInstance.values.products[productFieldIdx],
+      ...formProduct,
       qty: quantity,
     });
   } else {
     productsFormFieldArray.push(formatProductToSaleDetail(product, quantity));
   }
+}
+
+function decrementProductQuantity(product: Product | null) {
+  const productFieldIdx = findIndexProductInFieldList(product);
+  const currentFormQty =
+    formInstance.values.products[productFieldIdx]?.qty ?? 0;
+
+  return updateProductFormQuantity(product, currentFormQty - 1);
+}
+
+function incrementProductQuantity(product: Product | null) {
+  const productFieldIdx = findIndexProductInFieldList(product);
+  const currentFormQty =
+    formInstance.values.products[productFieldIdx]?.qty ?? 0;
+
+  return updateProductFormQuantity(product, currentFormQty + 1);
+}
+
+function isDecrementDisabled(product: Product | null) {
+  const productFieldIdx = findIndexProductInFieldList(product);
+  const maxDecrementValue = 0;
+
+  const currentFormQty =
+    formInstance.values.products[productFieldIdx]?.qty ?? 0;
+
+  return currentFormQty <= maxDecrementValue
+}
+
+function isIncrementDisabled(product: Product | null) {
+  const productFieldIdx = findIndexProductInFieldList(product);
+  const maxIncrementValue = getMaxIncrementValue(product);
+
+  const currentFormQty =
+    formInstance.values.products[productFieldIdx]?.qty ?? 0;
+
+  return currentFormQty >= maxIncrementValue
 }
 
 function handleCloseSidebar() {
@@ -603,18 +640,35 @@ watch(openModel, (nextOpenValue) => {
               </div>
             </CardContent>
             <CardFooter class="px-2 pb-2 mt-auto">
-              <NumberField
-                :default-value="getProductQuantityFromForm(product)"
-                :min="0"
-                :max="getMaxIncrementValue(product)"
-                @update:model-value="updateProductFormQuantity(product, $event)"
-              >
-                <NumberFieldContent>
-                  <NumberFieldDecrement />
-                  <NumberFieldInput />
-                  <NumberFieldIncrement />
-                </NumberFieldContent>
-              </NumberField>
+              <div class="flex gap-1">
+                <Button
+                  :disabled="isDecrementDisabled(product)"
+                  @click="decrementProductQuantity(product)"
+                  class="shrink-0"
+                  variant="outline"
+                  size="icon"
+                >
+                  <MinusIcon class="size-4" />
+                </Button>
+                <Input
+                  class="numeric-input"
+                  :default-value="getProductQuantityFromForm(product)"
+                  :value="getProductQuantityFromForm(product)"
+                  type="number"
+                  @update:model-value="
+                    updateProductFormQuantity(product, Number($event))
+                  "
+                />
+                <Button
+                  :disabled="isIncrementDisabled(product)"
+                  @click="incrementProductQuantity(product)"
+                  class="shrink-0"
+                  variant="outline"
+                  size="icon"
+                >
+                  <PlusIcon class="size-4" />
+                </Button>
+              </div>
             </CardFooter>
           </Card>
         </div>
@@ -820,3 +874,17 @@ watch(openModel, (nextOpenValue) => {
     </SheetContent>
   </Sheet>
 </template>
+
+<style scoped>
+.numeric-input {
+  text-align: center;
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  &[type="number"] {
+    -moz-appearance: textfield;
+  }
+}
+</style>
