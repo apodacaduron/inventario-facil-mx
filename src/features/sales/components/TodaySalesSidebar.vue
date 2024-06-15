@@ -16,8 +16,9 @@ import {
   Avatar,
   AvatarFallback,
   AvatarImage,
+  Badge,
 } from '@/components/ui';
-import { useSalesQuery, useSalesTotalIncomeQuery } from '../composables';
+import { Sale, useSalesQuery, useSalesTotalIncomeQuery } from '../composables';
 import { useDashboardDates } from '@/features/dashboard';
 import { toRef } from 'vue';
 import { useCurrencyFormatter } from '@/features/products';
@@ -77,6 +78,19 @@ const salesTotalIncomeQuery = useSalesTotalIncomeQuery({
     })),
   },
 });
+
+function getBadgeColorFromStatus(status: Sale['status']) {
+  switch (status) {
+    case 'cancelled':
+      return 'destructive';
+    case 'in_progress':
+      return 'outline';
+    case 'completed':
+      return 'default';
+    default:
+      return 'outline';
+  }
+}
 </script>
 
 <template>
@@ -224,7 +238,9 @@ const salesTotalIncomeQuery = useSalesTotalIncomeQuery({
                 {{ currencyFormatter.parse(sale.shipping_cost) }}
               </TableCell>
               <TableCell class="text-center">
-                {{ sale.status?.toLocaleUpperCase() }}
+                <Badge :variant="getBadgeColorFromStatus(sale.status)"
+                  >{{ sale.status?.toLocaleUpperCase() }}
+                </Badge>
               </TableCell>
             </TableRow>
           </template>
@@ -237,6 +253,7 @@ const salesTotalIncomeQuery = useSalesTotalIncomeQuery({
           <div class="text-4xl font-medium">
             {{ currencyFormatter.parse(salesTotalIncomeQuery.data.value) }}
           </div>
+          <span class="text-xs text-muted-foreground">Solo se suman las ventas completadas hoy</span>
         </div>
       </SheetFooter>
     </SheetContent>

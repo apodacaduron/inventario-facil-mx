@@ -400,7 +400,14 @@ watchEffect(() => {
               <TableCell class="text-center">
                 <div class="flex items-center gap-4">
                   {{ product.current_stock }}
-                  <Button @click="isProductStockHistorySidebarOpen = true; activeProduct = product" variant="outline" size="icon">
+                  <Button
+                    @click="
+                      isProductStockHistorySidebarOpen = true;
+                      activeProduct = product;
+                    "
+                    variant="outline"
+                    size="icon"
+                  >
                     <HistoryIcon class="size-4" />
                   </Button>
                 </div>
@@ -470,7 +477,7 @@ watchEffect(() => {
         v-if="productsQuery.isFetchingNextPage.value"
         class="w-full flex justify-center"
       >
-        LOADING...
+        CARGANDO MAS...
       </div>
 
       <FeedbackCard
@@ -486,7 +493,10 @@ watchEffect(() => {
           Comienza creando la primera producto.
         </template>
         <template #action
-          ><Button @click="isCreateOrUpdateSidebarOpen = true">
+          ><Button
+            :disabled="!organizationStore.canAddProducts"
+            @click="isCreateOrUpdateSidebarOpen = true"
+          >
             <PlusIcon class="w-5 h-5 stroke-[2px] mr-2" /> Crear producto
           </Button>
         </template>

@@ -123,7 +123,7 @@ useInfiniteScroll(
           </template>
         </TableBody>
       </Table>
-      <div v-if="usersQuery.isFetchingNextPage.value" class="w-full flex justify-center">LOADING...</div>
+      <div v-if="usersQuery.isFetchingNextPage.value" class="w-full flex justify-center">CARGANDO MAS...</div>
     </div>
   </div>
 </template>

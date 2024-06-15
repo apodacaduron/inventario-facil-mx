@@ -109,7 +109,10 @@ function openUpdateCustomerSidebar(customer: Customer) {
 }
 
 async function createCustomerMutationFn(formValues: CreateCustomer) {
-  const { error } = await customerServices.createCustomer(route.params.orgId.toString(), formValues);
+  const { error } = await customerServices.createCustomer(
+    route.params.orgId.toString(),
+    formValues
+  );
   notifyIfHasError(error);
   await queryClient.invalidateQueries({ queryKey: ["customers"] });
   analytics.event("create-customer", formValues);
@@ -117,7 +120,10 @@ async function createCustomerMutationFn(formValues: CreateCustomer) {
 async function updateCustomerMutationFn(formValues: UpdateCustomer) {
   const customerId = formValues.customer_id;
   if (!customerId) throw new Error("Customer id required to perform update");
-  const { error } = await customerServices.updateCustomer(route.params.orgId.toString(), formValues);
+  const { error } = await customerServices.updateCustomer(
+    route.params.orgId.toString(),
+    formValues
+  );
   notifyIfHasError(error);
   await queryClient.invalidateQueries({ queryKey: ["customers"] });
   analytics.event("update-customer", formValues);
@@ -169,9 +175,7 @@ watchEffect(() => {
       </div>
       <div class="hidden lg:flex gap-2">
         <Button
-          :disabled="
-            !organizationStore.canAddCustomers
-          "
+          :disabled="!organizationStore.canAddCustomers"
           @click="isCreateOrUpdateSidebarOpen = true"
           label=""
         >
@@ -190,9 +194,7 @@ watchEffect(() => {
 
       <div class="flex lg:hidden gap-2">
         <Button
-          :disabled="
-            !organizationStore.canAddCustomers
-          "
+          :disabled="!organizationStore.canAddCustomers"
           @click="isCreateOrUpdateSidebarOpen = true"
           label=""
           size="icon"
@@ -373,7 +375,7 @@ watchEffect(() => {
         v-if="customersQuery.isFetchingNextPage.value"
         class="w-full flex justify-center"
       >
-        LOADING...
+        CARGANDO MAS...
       </div>
 
       <FeedbackCard
@@ -412,7 +414,10 @@ watchEffect(() => {
             <Button @click="customerSearch = ''" variant="outline">
               Clear search
             </Button>
-            <Button @click="isCreateOrUpdateSidebarOpen = true">
+            <Button
+              :disabled="!organizationStore.canAddCustomers"
+              @click="isCreateOrUpdateSidebarOpen = true"
+            >
               <PlusIcon class="w-5 h-5 stroke-[2px] mr-2" /> Crear cliente
             </Button>
           </div>

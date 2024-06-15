@@ -204,7 +204,7 @@ const tableLoadingStates = useTableStates(subscriptionsQuery, userSearch);
           </template>
         </TableBody>
       </Table>
-      <div v-if="subscriptionsQuery.isFetchingNextPage.value" class="w-full flex justify-center">LOADING...</div>
+      <div v-if="subscriptionsQuery.isFetchingNextPage.value" class="w-full flex justify-center">CARGANDO MAS...</div>
 
       <FeedbackCard
         v-if="tableLoadingStates.showEmptyState.value"

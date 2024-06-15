@@ -34,7 +34,7 @@ export const useOrganizationStore = defineStore("organization", () => {
       currentUserOrganization.value?.i_organizations?.plans?.max_products;
     const currentProducts =
       currentUserOrganization.value?.i_organizations?.current_products;
-    if (!maxProducts || !currentProducts) return false;
+    if (typeof maxProducts !== 'number' || typeof currentProducts !== 'number') return false;
 
     return currentProducts < maxProducts;
   });
@@ -43,7 +43,7 @@ export const useOrganizationStore = defineStore("organization", () => {
       currentUserOrganization.value?.i_organizations?.plans?.max_customers;
     const currentCustomers =
       currentUserOrganization.value?.i_organizations?.current_customers;
-    if (!maxCustomers || !currentCustomers) return false;
+    if (typeof maxCustomers !== 'number' || typeof currentCustomers !== 'number') return false;
 
     return currentCustomers < maxCustomers;
   });

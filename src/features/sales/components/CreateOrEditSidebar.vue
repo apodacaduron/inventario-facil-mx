@@ -49,7 +49,13 @@ import { toTypedSchema } from "@vee-validate/zod";
 import { useFieldArray, useForm } from "vee-validate";
 import { useOrganizationStore } from "@/stores";
 import { useRoute } from "vue-router";
-import { MinusIcon, PlusIcon } from "lucide-vue-next";
+import {
+  MinusIcon,
+  PlusIcon,
+  ShoppingBagIcon,
+  UsersIcon,
+} from "lucide-vue-next";
+import { FeedbackCard, useTableStates } from "@/features/global";
 
 type CreateOrEditSidebarProps = {
   viewOnly?: boolean;
@@ -146,6 +152,7 @@ const customersQuery = useCustomersQuery({
     order: ["name", "asc"],
   },
 });
+const customersLoadingStates = useTableStates(customersQuery, customerSearch);
 useInfiniteScroll(
   customersRef,
   () => {
@@ -260,6 +267,7 @@ const productsQuery = useProductsQuery({
   },
 });
 const productsFormFieldArray = useFieldArray("products");
+const productsLoadingStates = useTableStates(productsQuery, productSearch);
 
 const onSubmit = formInstance.handleSubmit(async (formValues) => {
   const modifiedProducts = formValues.products.map((formProduct) => ({
@@ -327,7 +335,7 @@ function getMaxIncrementValue(product: Product | null) {
 
 function updateProductFormQuantity(product: Product | null, quantity: number) {
   const productFieldIdx = findIndexProductInFieldList(product);
-  const formProduct = formInstance.values.products[productFieldIdx]
+  const formProduct = formInstance.values.products[productFieldIdx];
 
   if (quantity > getMaxIncrementValue(product)) return;
   if (quantity < 0) return;
@@ -367,7 +375,7 @@ function isDecrementDisabled(product: Product | null) {
   const currentFormQty =
     formInstance.values.products[productFieldIdx]?.qty ?? 0;
 
-  return currentFormQty <= maxDecrementValue
+  return currentFormQty <= maxDecrementValue;
 }
 
 function isIncrementDisabled(product: Product | null) {
@@ -377,7 +385,7 @@ function isIncrementDisabled(product: Product | null) {
   const currentFormQty =
     formInstance.values.products[productFieldIdx]?.qty ?? 0;
 
-  return currentFormQty >= maxIncrementValue
+  return currentFormQty >= maxIncrementValue;
 }
 
 function handleCloseSidebar() {
@@ -613,7 +621,21 @@ watch(openModel, (nextOpenValue) => {
           type="search"
           placeholder="Busca productos..."
         />
-        <div class="grid grid-cols-2 gap-3 mt-4 mb-10">
+
+        <FeedbackCard
+          v-if="productsLoadingStates.showEmptyState.value"
+          class="my-24"
+        >
+          <template #icon>
+            <ShoppingBagIcon class="size-10" />
+          </template>
+          <template #title>No tienes productos en stock</template>
+          <template #description
+            >Cuando tengas productos en stock se mostraran aqui.
+          </template>
+        </FeedbackCard>
+
+        <div v-else class="grid grid-cols-2 gap-3 mt-4 mb-10">
           <Card
             v-for="product in productsQuery.data.value?.pages.flatMap(
               (page) => page.data
@@ -695,7 +717,21 @@ watch(openModel, (nextOpenValue) => {
           type="search"
           placeholder="Busca clientes..."
         />
-        <div class="grid grid-cols-2 gap-3 mt-4 mb-10">
+
+        <FeedbackCard
+          v-if="customersLoadingStates.showEmptyState.value"
+          class="my-24"
+        >
+          <template #icon>
+            <UsersIcon class="size-10" />
+          </template>
+          <template #title>No tienes clientes aun</template>
+          <template #description
+            >Cuando tengas clientes agregados se mostraran aqui.
+          </template>
+        </FeedbackCard>
+
+        <div v-else class="grid grid-cols-2 gap-3 mt-4 mb-10">
           <Card
             v-for="customer in customersQuery.data.value?.pages.flatMap(
               (page) => page.data

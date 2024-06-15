@@ -231,44 +231,6 @@ export type Database = {
           },
         ]
       }
-      i_purchases: {
-        Row: {
-          created_at: string
-          id: string
-          org_id: string | null
-          product_id: string | null
-          purchase_date: string | null
-          purchase_price: number | null
-          qty_purchased: number | null
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          org_id?: string | null
-          product_id?: string | null
-          purchase_date?: string | null
-          purchase_price?: number | null
-          qty_purchased?: number | null
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          org_id?: string | null
-          product_id?: string | null
-          purchase_date?: string | null
-          purchase_price?: number | null
-          qty_purchased?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "i_purchases_org_id_fkey"
-            columns: ["org_id"]
-            isOneToOne: false
-            referencedRelation: "i_organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       i_roles: {
         Row: {
           created_at: string
@@ -300,6 +262,7 @@ export type Database = {
           sale_id: string | null
           unit_price: number | null
           updated_at: string | null
+          user_id: string | null
         }
         Insert: {
           created_at?: string
@@ -313,6 +276,7 @@ export type Database = {
           sale_id?: string | null
           unit_price?: number | null
           updated_at?: string | null
+          user_id?: string | null
         }
         Update: {
           created_at?: string
@@ -326,6 +290,7 @@ export type Database = {
           sale_id?: string | null
           unit_price?: number | null
           updated_at?: string | null
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -349,6 +314,13 @@ export type Database = {
             referencedRelation: "i_sales"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "i_sale_products_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
         ]
       }
       i_sales: {
@@ -358,6 +330,8 @@ export type Database = {
           completed_at: string | null
           created_at: string
           customer_id: string | null
+          customer_name: string | null
+          customer_phone: string | null
           delivery_date: string | null
           id: string
           notes: string | null
@@ -374,6 +348,8 @@ export type Database = {
           completed_at?: string | null
           created_at?: string
           customer_id?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
           delivery_date?: string | null
           id?: string
           notes?: string | null
@@ -390,6 +366,8 @@ export type Database = {
           completed_at?: string | null
           created_at?: string
           customer_id?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
           delivery_date?: string | null
           id?: string
           notes?: string | null
