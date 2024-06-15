@@ -363,26 +363,26 @@ watchEffect(() => {
               >
                 <Avatar>
                   <AvatarFallback>{{
-                    sale.i_customers?.name
+                    (sale.i_customers?.name ?? sale.customer_name)
                       ?.substring(0, 1)
                       .toLocaleUpperCase() ?? '?'
                   }}</AvatarFallback>
                 </Avatar>
                 <div class="ps-3">
                   <div class="text-base font-semibold">
-                    {{ sale.i_customers?.name ?? '-' }}
+                    {{ sale.i_customers?.name ?? sale.customer_name ?? '-' }}
                   </div>
                   <div
-                    v-if="sale.i_customers?.phone"
+                    v-if="sale.i_customers?.phone || sale.customer_phone"
                     class="font-normal text-slate-500"
                   >
                     <a
-                      :href="`${WHATSAPP_URL}/${sale.i_customers.phone}`"
+                      :href="`${WHATSAPP_URL}/${sale.i_customers?.phone ?? sale.customer_phone}`"
                       target="_blank"
                       rel="noopener noreferrer"
                       class="block"
                     >
-                      {{ sale.i_customers.phone }}
+                      {{ sale.i_customers?.phone ?? sale.customer_phone }}
                     </a>
                   </div>
                 </div>
@@ -492,7 +492,7 @@ watchEffect(() => {
           </template>
         </TableBody>
       </Table>
-      <div v-if="salesQuery.isFetchingNextPage.value" class="w-full flex justify-center">LOADING...</div>
+      <div v-if="salesQuery.isFetchingNextPage.value" class="w-full flex justify-center">CARGANDO MAS...</div>
 
       <FeedbackCard
         v-if="tableLoadingStates.showEmptyState.value"

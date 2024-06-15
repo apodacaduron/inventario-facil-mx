@@ -477,7 +477,7 @@ watchEffect(() => {
         v-if="productsQuery.isFetchingNextPage.value"
         class="w-full flex justify-center"
       >
-        LOADING...
+        CARGANDO MAS...
       </div>
 
       <FeedbackCard
