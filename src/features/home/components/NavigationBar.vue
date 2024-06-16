@@ -9,13 +9,15 @@ const organizationStore = useOrganizationStore();
 
 const isDark = useDark();
 const toggleDark = useToggle(isDark);
+
+const HOME_URL = window.location.origin
 </script>
 
 <template>
   <nav
     class="mx-auto max-w-7xl px-4 h-[64px] flex items-center justify-between"
   >
-    <a href="https://flowbite.com">
+    <a :href="HOME_URL">
       <span
         class="self-center text-xl sm:text-2xl whitespace-nowrap dark:text-white"
       >
@@ -28,25 +30,6 @@ const toggleDark = useToggle(isDark);
         <SunIcon class="w-4 h-4 stroke-[2px]" v-else />
       </Button>
       <div v-if="authStore.isLoggedIn" class="flex gap-4">
-        <router-link
-          :to="`/org/${
-            organizationStore.userOrganizations?.find(Boolean)?.org_id
-          }/dashboard`"
-          :class="[
-            'hidden md:block',
-            {
-              'pointer-events-none': !organizationStore.hasUserOrganizations,
-              'opacity-80': !organizationStore.hasUserOrganizations,
-            },
-          ]"
-        >
-          <Button
-            :loading="!organizationStore.hasUserOrganizations"
-            :disabled="!organizationStore.hasUserOrganizations"
-          >
-            Dashboard
-          </Button>
-        </router-link>
         <Button
           variant="outline"
           :loading="!organizationStore.hasUserOrganizations"
@@ -62,9 +45,6 @@ const toggleDark = useToggle(isDark);
       <div v-else class="hidden gap-4 md:flex">
         <router-link to="/auth/sign-in">
           <Button variant="outline">Iniciar sesión</Button>
-        </router-link>
-        <router-link to="/auth/sign-up">
-          <Button>Regístrate</Button>
         </router-link>
       </div>
     </div>
