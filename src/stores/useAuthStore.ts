@@ -15,6 +15,9 @@ export const useAuthStore = defineStore("auth", () => {
   const session = ref<Session | null>(null);
   const authedUser = ref<AuthedUserData | null>(null);
 
+  const isPremiumAccount = toRef(() =>
+    Boolean(authedUser.value?.plan_name === "premium")
+  );
   const isLoggedIn = toRef(() => Boolean(session.value));
   const avatar = toRef(() => session.value?.user.user_metadata.avatar_url);
   const userRole = toRef(() => authedUser.value?.role_name);
@@ -35,13 +38,13 @@ export const useAuthStore = defineStore("auth", () => {
     await supabase.auth.signOut({ scope: "local" });
     queryClient.removeQueries();
     resetAllPiniaStores();
-    router.push('/')
+    router.push("/");
   }
 
   function $reset() {
     isLoadingSession.value = false;
-    session.value = null
-    authedUser.value = null
+    session.value = null;
+    authedUser.value = null;
   }
 
   return {
@@ -51,9 +54,10 @@ export const useAuthStore = defineStore("auth", () => {
     isLoggedIn,
     avatar,
     isLoadingSession,
+    isPremiumAccount,
     setSession,
     signOut,
     setAuthedUserData,
-    $reset
+    $reset,
   };
 });

@@ -84,7 +84,7 @@ const periodString = toRef(() => {
 </script>
 
 <template>
-  <div class="grid grid-cols-1 gap-5 lg:grid-cols-2">
+  <div class="grid grid-cols-1 gap-5 xl:grid-cols-2 2xl:grid-cols-4">
     <router-link :to="`/org/${route.params.orgId}/sales`">
       <Card>
         <CardHeader
@@ -167,27 +167,6 @@ const periodString = toRef(() => {
       </Card>
     </router-link>
 
-    <router-link :to="`/org/${route.params.orgId}/products`">
-      <Card>
-        <CardHeader
-          class="flex flex-row items-center justify-between space-y-0 pb-2"
-        >
-          <CardTitle class="text-sm font-medium"
-            >Total de productos en stock</CardTitle
-          >
-          <ArchiveBoxIcon class="w-5 h-5" />
-        </CardHeader>
-        <CardContent>
-          <div class="text-2xl font-bold">
-            <template v-if="isDefined(productsInStockCountQuery.data.value)"
-              >{{ productsInStockCountQuery.data.value }}
-            </template>
-            <Skeleton class="h-[32px] w-[64px]" v-else :count="1" />
-          </div>
-        </CardContent>
-      </Card>
-    </router-link>
-
     <router-link :to="`/org/${route.params.orgId}/sales`">
       <Card>
         <CardHeader
@@ -246,6 +225,27 @@ const periodString = toRef(() => {
                 </Badge>
               </div>
               / {{ periodString }}
+            </template>
+            <Skeleton class="h-[32px] w-[64px]" v-else :count="1" />
+          </div>
+        </CardContent>
+      </Card>
+    </router-link>
+
+    <router-link :to="`/org/${route.params.orgId}/products`">
+      <Card>
+        <CardHeader
+          class="flex flex-row items-center justify-between space-y-0 pb-2"
+        >
+          <CardTitle class="text-sm font-medium"
+            >Total de productos en stock</CardTitle
+          >
+          <ArchiveBoxIcon class="w-5 h-5" />
+        </CardHeader>
+        <CardContent>
+          <div class="text-2xl font-bold">
+            <template v-if="isDefined(productsInStockCountQuery.data.value)"
+              >{{ productsInStockCountQuery.data.value }}
             </template>
             <Skeleton class="h-[32px] w-[64px]" v-else :count="1" />
           </div>
