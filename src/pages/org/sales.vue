@@ -79,7 +79,6 @@ const organizationStore = useOrganizationStore();
 const saleServices = useSaleServices();
 const createSaleMutation = useMutation({ mutationFn: createSaleMutationFn });
 const updateSaleMutation = useMutation({ mutationFn: updateSaleMutationFn });
-const deleteSaleMutation = useMutation({ mutationFn: deleteSaleMutationFn });
 const currencyFormatter = useCurrencyFormatter();
 const salesQuery = useSalesQuery({
   options: {
@@ -164,15 +163,6 @@ async function updateSaleMutationFn(formValues: UpdateSale) {
   await queryClient.invalidateQueries({ queryKey: ['sales'] });
   await queryClient.invalidateQueries({ queryKey: ['products'] });
   analytics.event('update-sale', formValues);
-}
-async function deleteSaleMutationFn() {
-  const saleId = activeSale.value?.id;
-  if (!saleId) throw new Error('Sale id required to perform delete');
-  await saleServices.deleteSale(saleId);
-  isDeleteSaleDialogOpen.value = false;
-  await queryClient.invalidateQueries({ queryKey: ['sales'] });
-  await queryClient.invalidateQueries({ queryKey: ['products'] });
-  analytics.event('delete-sale', activeSale.value ?? {});
 }
 
 function getBadgeColorFromStatus(status: Sale['status']) {
@@ -541,8 +531,6 @@ watchEffect(() => {
     <DeleteSaleDialog
       v-model:open="isDeleteSaleDialogOpen"
       :sale="activeSale"
-      :isLoading="deleteSaleMutation.isPending.value"
-      @confirmDelete="deleteSaleMutation.mutate"
     />
 
     <CreateOrEditSidebar

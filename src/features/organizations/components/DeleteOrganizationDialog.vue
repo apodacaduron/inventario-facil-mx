@@ -21,6 +21,7 @@ import { useMutation, useQueryClient } from "@tanstack/vue-query";
 import { useMediaQuery } from "@vueuse/core";
 import { useOrganizationServices } from "../composables";
 import { ref } from "vue";
+import { notifyIfHasError } from "@/features/global";
 
 type DeleteUserOrganizationDialogProps = {
   userOrganization: UserOrganization | null;
@@ -38,9 +39,10 @@ const deleteUserOrganizationMutation = useMutation({
   mutationFn: async () => {
     if (!props.userOrganization?.org_id)
       throw new Error("Cannot delete since organization id was not provided");
-    await organizationServices.deleteOrganization(
+    const { error } = await organizationServices.deleteOrganization(
       props.userOrganization?.org_id
     );
+    notifyIfHasError(error);
     await queryClient.invalidateQueries({ queryKey: ["organization"] });
     await queryClient.invalidateQueries({ queryKey: ["user"] });
     openModel.value = false;
@@ -66,12 +68,17 @@ const deleteUserOrganizationMutation = useMutation({
         >Escribe el nombre de tu organizacion para poder eliminar:
         <b>{{ userOrganization?.i_organizations?.name }}</b></Label
       >
-      <Input v-model="organizationName" placeholder="Los nombres deben coincidir" />
+      <Input
+        v-model="organizationName"
+        placeholder="Los nombres deben coincidir"
+      />
 
       <DialogFooter>
         <Button
-          :disabled="deleteUserOrganizationMutation.isPending.value ||
-              organizationName !== userOrganization?.i_organizations?.name"
+          :disabled="
+            deleteUserOrganizationMutation.isPending.value ||
+            organizationName !== userOrganization?.i_organizations?.name
+          "
           type="button"
           variant="destructive"
           @click="deleteUserOrganizationMutation.mutate"
@@ -108,7 +115,10 @@ const deleteUserOrganizationMutation = useMutation({
           >Escribe el nombre de tu organizacion para poder eliminar:
           <b>{{ userOrganization?.i_organizations?.name }}</b></Label
         >
-        <Input v-model="organizationName" placeholder="Los nombres deben coincidir" />
+        <Input
+          v-model="organizationName"
+          placeholder="Los nombres deben coincidir"
+        />
 
         <DrawerFooter>
           <Button

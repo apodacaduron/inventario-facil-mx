@@ -124,7 +124,7 @@ export function useProductServices() {
     if (!productId)
       throw new Error("Product id is required to delete a product");
 
-    await supabase.from("i_products").delete().eq("id", productId);
+    return await supabase.from("i_products").delete().eq("id", productId);
   }
 
   async function getProductCount(options: {

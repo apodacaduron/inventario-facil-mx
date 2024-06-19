@@ -68,9 +68,7 @@ const createCustomerMutation = useMutation({
 const updateCustomerMutation = useMutation({
   mutationFn: updateCustomerMutationFn,
 });
-const deleteCustomerMutation = useMutation({
-  mutationFn: deleteCustomerMutationFn,
-});
+
 const customersQuery = useCustomersQuery({
   options: {
     orgId: toRef(() => route.params.orgId.toString()),
@@ -127,15 +125,6 @@ async function updateCustomerMutationFn(formValues: UpdateCustomer) {
   notifyIfHasError(error);
   await queryClient.invalidateQueries({ queryKey: ["customers"] });
   analytics.event("update-customer", formValues);
-}
-async function deleteCustomerMutationFn() {
-  const customerId = activeCustomer.value?.id;
-  if (!customerId) throw new Error("Customer id required to perform delete");
-  const { error } = await customerServices.deleteCustomer(customerId);
-  notifyIfHasError(error);
-  isDeleteCustomerDialogOpen.value = false;
-  await queryClient.invalidateQueries({ queryKey: ["customers"] });
-  analytics.event("delete-customer", activeCustomer.value ?? {});
 }
 
 function getBadgeColorFromStatus(status: Customer["trust_status"]) {
@@ -428,8 +417,6 @@ watchEffect(() => {
     <DeleteCustomerDialog
       v-model:open="isDeleteCustomerDialogOpen"
       :customer="activeCustomer"
-      :isLoading="deleteCustomerMutation.isPending.value"
-      @confirmDelete="deleteCustomerMutation.mutate"
     />
 
     <CreateOrEditSidebar

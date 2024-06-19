@@ -14,21 +14,33 @@ import {
   DrawerTitle,
   DrawerDescription,
 } from "@/components/ui";
-import { Customer } from "../composables";
+import { Customer, useCustomerServices } from "../composables";
 import { useMediaQuery } from "@vueuse/core";
+import { useMutation, useQueryClient } from "@tanstack/vue-query";
+import { analytics } from "@/config/analytics";
+import { notifyIfHasError } from "@/features/global";
 
 type DeleteCustomerDialogProps = {
-  isLoading?: boolean;
   customer: Customer | null;
 };
 
 const openModel = defineModel<boolean>("open");
-defineProps<DeleteCustomerDialogProps>();
-const emit = defineEmits<{
-  (e: "confirmDelete", formValues: Customer | null): void;
-}>();
+const props = defineProps<DeleteCustomerDialogProps>();
 
 const isDesktop = useMediaQuery("(min-width: 768px)");
+const queryClient = useQueryClient();
+const customerServices = useCustomerServices();
+const deleteCustomerMutation = useMutation({
+  mutationFn: async () => {
+  const customerId = props.customer?.id;
+  if (!customerId) throw new Error("Customer id required to perform delete");
+  const { error } = await customerServices.deleteCustomer(customerId);
+  notifyIfHasError(error);
+  openModel.value = false;
+  await queryClient.invalidateQueries({ queryKey: ["customers"] });
+  analytics.event("delete-customer", props.customer);
+  },
+});
 </script>
 
 <template>
@@ -43,15 +55,15 @@ const isDesktop = useMediaQuery("(min-width: 768px)");
       </DialogHeader>
       <DialogFooter>
         <Button
-          :disabled="isLoading"
+          :disabled="deleteCustomerMutation.isPending.value"
           type="button"
           variant="destructive"
-          @click="$emit('confirmDelete', customer)"
+          @click="deleteCustomerMutation.mutate"
         >
           Si, eliminar
         </Button>
         <Button
-          :disabled="isLoading"
+          :disabled="deleteCustomerMutation.isPending.value"
           type="button"
           variant="secondary"
           @click="openModel = false"
@@ -74,15 +86,15 @@ const isDesktop = useMediaQuery("(min-width: 768px)");
         </DrawerHeader>
         <DrawerFooter>
           <Button
-            :disabled="isLoading"
+            :disabled="deleteCustomerMutation.isPending.value"
             type="button"
             variant="destructive"
-            @click="$emit('confirmDelete', customer)"
+            @click="deleteCustomerMutation.mutate"
           >
             Si, eliminar
           </Button>
           <Button
-            :disabled="isLoading"
+            :disabled="deleteCustomerMutation.isPending.value"
             type="button"
             variant="secondary"
             @click="openModel = false"

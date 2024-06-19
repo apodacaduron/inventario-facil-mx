@@ -88,9 +88,7 @@ const createProductMutation = useMutation({
 const updateProductMutation = useMutation({
   mutationFn: updateProductMutationFn,
 });
-const deleteProductMutation = useMutation({
-  mutationFn: deleteProductMutationFn,
-});
+
 
 const currencyFormatter = useCurrencyFormatter();
 const productsQuery = useProductsQuery({
@@ -174,14 +172,6 @@ async function updateProductMutationFn(formValues: UpdateProduct) {
   });
   await queryClient.invalidateQueries({ queryKey: ["products"] });
   analytics.event("update-product", formValues);
-}
-async function deleteProductMutationFn(product: Product | null) {
-  const productId = product?.id;
-  if (!productId) throw new Error("Product id required to perform delete");
-  await productServices.deleteProduct(productId);
-  isDeleteProductDialogOpen.value = false;
-  await queryClient.invalidateQueries({ queryKey: ["products"] });
-  analytics.event("delete-product", product);
 }
 
 watchEffect(() => {
@@ -530,8 +520,6 @@ watchEffect(() => {
     <DeleteProductDialog
       v-model:open="isDeleteProductDialogOpen"
       :product="activeProduct"
-      :isLoading="deleteProductMutation.isPending.value"
-      @confirmDelete="deleteProductMutation.mutate"
     />
     <ShareStockDialog v-model:open="isShareStockDialogOpen" />
     <ProductStockHistorySidebar
