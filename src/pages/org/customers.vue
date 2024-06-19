@@ -1,12 +1,10 @@
 <script setup lang="ts">
 import {
-  CreateOrEditSidebar,
-  CreateCustomer,
   Customer,
-  UpdateCustomer,
-  customerServicesTypeguards,
-  useCustomerServices,
   DeleteCustomerDialog,
+  CreateCustomerSidebar,
+  useCustomersQuery,
+  UpdateCustomerSidebar,
 } from "@/features/customers";
 import { ref, toRef, watchEffect } from "vue";
 import { FeedbackCard, useTableOrder, useTableStates } from "@/features/global";
@@ -39,17 +37,14 @@ import {
 } from "@heroicons/vue/24/outline";
 import { refDebounced, useInfiniteScroll } from "@vueuse/core";
 import { useOrganizationStore } from "@/stores";
-import { useCustomersQuery } from "@/features/customers/composables/useCustomerQueries";
-import { useMutation, useQueryClient } from "@tanstack/vue-query";
-import { analytics } from "@/config/analytics";
-import { notifyIfHasError } from "@/features/global/utils";
 import { useRoute } from "vue-router";
 
 const WHATSAPP_URL = import.meta.env.VITE_WHATSAPP_URL;
 const tableRef = ref<HTMLElement | null>(null);
 const customerSearch = ref("");
 const customerSearchDebounced = refDebounced(customerSearch, 400);
-const isCreateOrUpdateSidebarOpen = ref(false);
+const isCreateSidebarOpen = ref(false);
+const isUpdateSidebarOpen = ref(false);
 const isDeleteCustomerDialogOpen = ref(false);
 const activeCustomer = ref<Customer | null>(null);
 
@@ -59,15 +54,7 @@ const customersTableOrder = useTableOrder({
   },
 });
 const route = useRoute();
-const queryClient = useQueryClient();
 const organizationStore = useOrganizationStore();
-const customerServices = useCustomerServices();
-const createCustomerMutation = useMutation({
-  mutationFn: createCustomerMutationFn,
-});
-const updateCustomerMutation = useMutation({
-  mutationFn: updateCustomerMutationFn,
-});
 
 const customersQuery = useCustomersQuery({
   options: {
@@ -92,39 +79,9 @@ function openDeleteCustomerDialog(customer: Customer) {
   isDeleteCustomerDialogOpen.value = true;
 }
 
-function handleSaveSidebar(formValues: CreateCustomer | UpdateCustomer) {
-  if (customerServicesTypeguards.isCreateCustomer(formValues)) {
-    createCustomerMutation.mutate(formValues);
-  } else {
-    updateCustomerMutation.mutate(formValues);
-  }
-  isCreateOrUpdateSidebarOpen.value = false;
-}
-
 function openUpdateCustomerSidebar(customer: Customer) {
   activeCustomer.value = customer;
-  isCreateOrUpdateSidebarOpen.value = true;
-}
-
-async function createCustomerMutationFn(formValues: CreateCustomer) {
-  const { error } = await customerServices.createCustomer(
-    route.params.orgId.toString(),
-    formValues
-  );
-  notifyIfHasError(error);
-  await queryClient.invalidateQueries({ queryKey: ["customers"] });
-  analytics.event("create-customer", formValues);
-}
-async function updateCustomerMutationFn(formValues: UpdateCustomer) {
-  const customerId = formValues.customer_id;
-  if (!customerId) throw new Error("Customer id required to perform update");
-  const { error } = await customerServices.updateCustomer(
-    route.params.orgId.toString(),
-    formValues
-  );
-  notifyIfHasError(error);
-  await queryClient.invalidateQueries({ queryKey: ["customers"] });
-  analytics.event("update-customer", formValues);
+  isUpdateSidebarOpen.value = true;
 }
 
 function getBadgeColorFromStatus(status: Customer["trust_status"]) {
@@ -139,8 +96,9 @@ function getBadgeColorFromStatus(status: Customer["trust_status"]) {
 }
 
 watchEffect(() => {
+  if (isCreateSidebarOpen.value) return;
+  if (isUpdateSidebarOpen.value) return;
   if (isDeleteCustomerDialogOpen.value) return;
-  if (isCreateOrUpdateSidebarOpen.value) return;
 
   activeCustomer.value = null;
 });
@@ -165,7 +123,7 @@ watchEffect(() => {
       <div class="hidden lg:flex gap-2">
         <Button
           :disabled="!organizationStore.canAddCustomers"
-          @click="isCreateOrUpdateSidebarOpen = true"
+          @click="isCreateSidebarOpen = true"
           label=""
         >
           <PlusIcon class="w-5 h-5 stroke-[2px] mr-2" /> Crear cliente
@@ -184,7 +142,7 @@ watchEffect(() => {
       <div class="flex lg:hidden gap-2">
         <Button
           :disabled="!organizationStore.canAddCustomers"
-          @click="isCreateOrUpdateSidebarOpen = true"
+          @click="isCreateSidebarOpen = true"
           label=""
           size="icon"
         >
@@ -380,7 +338,10 @@ watchEffect(() => {
           Comienza creando la primera cliente.
         </template>
         <template #action
-          ><Button @click="isCreateOrUpdateSidebarOpen = true">
+          ><Button
+            :disabled="!organizationStore.canAddCustomers"
+            @click="isCreateSidebarOpen = true"
+          >
             <PlusIcon class="w-5 h-5 stroke-[2px] mr-2" /> Crear cliente
           </Button>
         </template>
@@ -405,7 +366,7 @@ watchEffect(() => {
             </Button>
             <Button
               :disabled="!organizationStore.canAddCustomers"
-              @click="isCreateOrUpdateSidebarOpen = true"
+              @click="isCreateSidebarOpen = true"
             >
               <PlusIcon class="w-5 h-5 stroke-[2px] mr-2" /> Crear cliente
             </Button>
@@ -414,19 +375,14 @@ watchEffect(() => {
       </FeedbackCard>
     </div>
 
+    <CreateCustomerSidebar v-model:open="isCreateSidebarOpen" />
+    <UpdateCustomerSidebar
+      v-model:open="isUpdateSidebarOpen"
+      :customer="activeCustomer"
+    />
     <DeleteCustomerDialog
       v-model:open="isDeleteCustomerDialogOpen"
       :customer="activeCustomer"
-    />
-
-    <CreateOrEditSidebar
-      v-model:open="isCreateOrUpdateSidebarOpen"
-      :customer="activeCustomer"
-      :isLoading="
-        updateCustomerMutation.isPending.value ||
-        createCustomerMutation.isPending.value
-      "
-      @save="handleSaveSidebar"
     />
   </div>
 </template>

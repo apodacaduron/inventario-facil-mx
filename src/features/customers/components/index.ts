@@ -1,2 +1,3 @@
-export { default as CreateOrEditSidebar } from "./CreateOrEditSidebar.vue";
+export { default as CreateCustomerSidebar } from "./CreateCustomerSidebar.vue";
+export { default as UpdateCustomerSidebar } from "./UpdateCustomerSidebar.vue";
 export { default as DeleteCustomerDialog } from "./DeleteCustomerDialog.vue";
