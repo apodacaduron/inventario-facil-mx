@@ -1,4 +1,5 @@
-export { default as CreateOrEditSidebar } from "./CreateOrEditSidebar.vue";
+export { default as CreateProductSidebar } from "./CreateProductSidebar.vue";
+export { default as UpdateProductSidebar } from "./UpdateProductSidebar.vue";
 export { default as AddStockDialog } from "./AddStockDialog.vue";
 export { default as DeleteProductDialog } from "./DeleteProductDialog.vue";
 export { default as ShareStockDialog } from "./ShareStockDialog.vue";

@@ -19,25 +19,40 @@ import {
   MinusIcon,
   PlusIcon,
 } from "@heroicons/vue/24/outline";
-import { Product, UpdateProduct } from "../composables";
+import { Product, UpdateProduct, useProductServices } from "../composables";
 import { ref, toRef, watch } from "vue";
 import { createReusableTemplate, useMediaQuery } from "@vueuse/core";
+import { useMutation, useQueryClient } from "@tanstack/vue-query";
+import { analytics } from "@/config/analytics";
+import { notifyIfHasError } from "@/features/global";
 
 type AddStockDialogProps = {
-  isLoading?: boolean;
   product: Product | null;
 };
 
 const openModel = defineModel<boolean>("open");
 const props = defineProps<AddStockDialogProps>();
-const emit = defineEmits<{
-  (e: "save", formValues: UpdateProduct): void;
-}>();
-
-const [ModalBodyTemplate, ModalBody] = createReusableTemplate();
-const isDesktop = useMediaQuery("(min-width: 768px)");
 
 const stockAmount = ref(0);
+
+const queryClient = useQueryClient();
+const productServices = useProductServices();
+const [ModalBodyTemplate, ModalBody] = createReusableTemplate();
+const isDesktop = useMediaQuery("(min-width: 768px)");
+const updateProductMutation = useMutation({
+  mutationFn: async (formValues: UpdateProduct) => {
+    const productId = formValues.product_id;
+    if (!productId) throw new Error("Product id required to perform update");
+    const { error } = await productServices.updateProduct({
+      ...formValues,
+      product_id: productId,
+    });
+    notifyIfHasError(error);
+    await queryClient.invalidateQueries({ queryKey: ["products"] });
+    openModel.value = false;
+    analytics.event("update-product-stock", formValues);
+  },
+});
 
 const originalStockAmount = toRef(() => props.product?.current_stock ?? 0);
 const stockDifference = toRef(
@@ -53,7 +68,7 @@ function updateStock(nextStockAmount: number) {
 function saveStock() {
   if (!props.product?.id)
     throw new Error("Product id is required to add to stock");
-  emit("save", {
+  updateProductMutation.mutate({
     current_stock: stockAmount.value,
     product_id: props.product.id,
   });
@@ -122,7 +137,7 @@ watch(
       <ModalBody />
       <DialogFooter>
         <Button
-          :disabled="isLoading"
+          :disabled="updateProductMutation.isPending.value"
           @click="saveStock"
           type="button"
           class="w-full"
@@ -130,7 +145,7 @@ watch(
           Guardar
         </Button>
         <Button
-          :disabled="isLoading"
+          :disabled="updateProductMutation.isPending.value"
           @click="openModel = false"
           type="button"
           variant="outline"
@@ -163,7 +178,7 @@ watch(
         <ModalBody />
         <DrawerFooter>
           <Button
-            :disabled="isLoading"
+            :disabled="updateProductMutation.isPending.value"
             @click="saveStock"
             type="button"
             class="w-full"
@@ -171,7 +186,7 @@ watch(
             Guardar
           </Button>
           <Button
-            :disabled="isLoading"
+            :disabled="updateProductMutation.isPending.value"
             @click="openModel = false"
             type="button"
             variant="outline"
