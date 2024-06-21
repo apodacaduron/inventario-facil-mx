@@ -6,10 +6,11 @@ import {
   Sale,
   TodaySalesSidebar,
   UpdateSale,
+  ViewSaleSidebar,
   saleServicesTypeguards,
   useSaleServices,
-} from '@/features/sales';
-import { ref, toRef, watchEffect } from 'vue';
+} from "@/features/sales";
+import { ref, toRef, watchEffect } from "vue";
 import {
   Button,
   Input,
@@ -35,7 +36,7 @@ import {
   TooltipTrigger,
   TooltipContent,
   Badge,
-} from '@/components/ui';
+} from "@/components/ui";
 import {
   BanknotesIcon,
   EyeIcon,
@@ -44,32 +45,32 @@ import {
   TrashIcon,
   FunnelIcon,
   ShoppingBagIcon,
-} from '@heroicons/vue/24/outline';
-import { refDebounced, useInfiniteScroll, useStorage } from '@vueuse/core';
-import { useOrganizationStore } from '@/stores';
-import { useSalesQuery } from '@/features/sales/composables/useSaleQueries';
-import { useMutation, useQueryClient } from '@tanstack/vue-query';
-import { useCurrencyFormatter } from '@/features/products';
-import { FeedbackCard, useTableStates } from '@/features/global';
-import { Tables } from '../../../types_db';
-import { useDashboardDates } from '@/features/dashboard';
-import { analytics } from '@/config/analytics';
-import { useRoute } from 'vue-router';
+} from "@heroicons/vue/24/outline";
+import { refDebounced, useInfiniteScroll, useStorage } from "@vueuse/core";
+import { useOrganizationStore } from "@/stores";
+import { useSalesQuery } from "@/features/sales/composables/useSaleQueries";
+import { useMutation, useQueryClient } from "@tanstack/vue-query";
+import { useCurrencyFormatter } from "@/features/products";
+import { FeedbackCard, useTableStates } from "@/features/global";
+import { Tables } from "../../../types_db";
+import { useDashboardDates } from "@/features/dashboard";
+import { analytics } from "@/config/analytics";
+import { useRoute } from "vue-router";
 
 const WHATSAPP_URL = import.meta.env.VITE_WHATSAPP_URL;
 const tableFiltersRef = useStorage<{
-  status: NonNullable<Tables<'i_sales'>['status']> | 'all';
-  period?: 'daily' | 'weekly' | 'monthly';
-}>('sales-table-filters', { status: 'all' });
+  status: NonNullable<Tables<"i_sales">["status"]> | "all";
+  period?: "daily" | "weekly" | "monthly";
+}>("sales-table-filters", { status: "all" });
 const dashboardDates = useDashboardDates({
   period: toRef(() => tableFiltersRef.value.period),
 });
 const tableRef = ref<HTMLElement | null>(null);
-const saleSearch = ref('');
+const saleSearch = ref("");
 const saleSearchDebounced = refDebounced(saleSearch, 400);
+const isViewSaleSidebarOpen = ref(false);
 const isTodaySalesSidebarOpen = ref(false);
 const isCreateOrUpdateSidebarOpen = ref(false);
-const isSaleSidebarViewOnly = ref(false);
 const isDeleteSaleDialogOpen = ref(false);
 const activeSale = ref<Sale | null>(null);
 
@@ -88,25 +89,25 @@ const salesQuery = useSalesQuery({
     filters: toRef(() => {
       const filters = [];
 
-      if ('status' in tableFiltersRef.value) {
-        if (tableFiltersRef.value.status !== 'all') {
+      if ("status" in tableFiltersRef.value) {
+        if (tableFiltersRef.value.status !== "all") {
           filters.push({
-            column: 'status',
-            operator: 'eq',
+            column: "status",
+            operator: "eq",
             value: tableFiltersRef.value.status,
           });
         }
       }
-      if ('period' in tableFiltersRef.value) {
+      if ("period" in tableFiltersRef.value) {
         if (tableFiltersRef.value.period) {
           filters.push({
-            column: 'created_at',
-            operator: 'gte',
+            column: "created_at",
+            operator: "gte",
             value: dashboardDates.dateRangeFromPeriod.value?.from.toISOString(),
           });
           filters.push({
-            column: 'created_at',
-            operator: 'lte',
+            column: "created_at",
+            operator: "lte",
             value: dashboardDates.dateRangeFromPeriod.value?.to.toISOString(),
           });
         }
@@ -131,6 +132,11 @@ function openDeleteSaleDialog(sale: Sale) {
   isDeleteSaleDialogOpen.value = true;
 }
 
+function openViewSaleSidebar(sale: Sale) {
+  activeSale.value = sale;
+  isViewSaleSidebarOpen.value = true;
+}
+
 function handleSaveSidebar(formValues: CreateSale | UpdateSale) {
   if (saleServicesTypeguards.isCreateSale(formValues)) {
     delete formValues.sale_id;
@@ -141,53 +147,49 @@ function handleSaveSidebar(formValues: CreateSale | UpdateSale) {
   isCreateOrUpdateSidebarOpen.value = false;
 }
 
-function handleSaleSidebar(options: {
-  sale?: Sale | null;
-  viewOnly?: boolean;
-}) {
+function handleSaleSidebar(options: { sale?: Sale | null }) {
   activeSale.value = options.sale ?? null;
   isCreateOrUpdateSidebarOpen.value = true;
-  isSaleSidebarViewOnly.value = Boolean(options.viewOnly);
 }
 
 async function createSaleMutationFn(formValues: CreateSale) {
   await saleServices.createSale(route.params.orgId.toString(), formValues);
-  await queryClient.invalidateQueries({ queryKey: ['sales'] });
-  await queryClient.invalidateQueries({ queryKey: ['products'] });
-  analytics.event('create-sale', formValues);
+  await queryClient.invalidateQueries({ queryKey: ["sales"] });
+  await queryClient.invalidateQueries({ queryKey: ["products"] });
+  analytics.event("create-sale", formValues);
 }
 async function updateSaleMutationFn(formValues: UpdateSale) {
   const saleId = formValues.sale_id;
-  if (!saleId) throw new Error('Sale id required to perform update');
+  if (!saleId) throw new Error("Sale id required to perform update");
   await saleServices.updateSale(route.params.orgId.toString(), formValues);
-  await queryClient.invalidateQueries({ queryKey: ['sales'] });
-  await queryClient.invalidateQueries({ queryKey: ['products'] });
-  analytics.event('update-sale', formValues);
+  await queryClient.invalidateQueries({ queryKey: ["sales"] });
+  await queryClient.invalidateQueries({ queryKey: ["products"] });
+  analytics.event("update-sale", formValues);
 }
 
-function getBadgeColorFromStatus(status: Sale['status']) {
+function getBadgeColorFromStatus(status: Sale["status"]) {
   switch (status) {
-    case 'cancelled':
-      return 'destructive';
-    case 'in_progress':
-      return 'outline';
-    case 'completed':
-      return 'default';
+    case "cancelled":
+      return "destructive";
+    case "in_progress":
+      return "outline";
+    case "completed":
+      return "default";
     default:
-      return 'outline';
+      return "outline";
   }
 }
 
 function resetFilters() {
-  tableFiltersRef.value = { status: 'all' };
+  tableFiltersRef.value = { status: "all" };
 }
 
 watchEffect(() => {
   if (isDeleteSaleDialogOpen.value) return;
   if (isCreateOrUpdateSidebarOpen.value) return;
+  if (isViewSaleSidebarOpen.value) return;
 
   activeSale.value = null;
-  isSaleSidebarViewOnly.value = false;
 });
 </script>
 
@@ -355,19 +357,21 @@ watchEffect(() => {
                   <AvatarFallback>{{
                     (sale.i_customers?.name ?? sale.customer_name)
                       ?.substring(0, 1)
-                      .toLocaleUpperCase() ?? '?'
+                      .toLocaleUpperCase() ?? "?"
                   }}</AvatarFallback>
                 </Avatar>
                 <div class="ps-3">
                   <div class="text-base font-semibold">
-                    {{ sale.i_customers?.name ?? sale.customer_name ?? '-' }}
+                    {{ sale.i_customers?.name ?? sale.customer_name ?? "-" }}
                   </div>
                   <div
                     v-if="sale.i_customers?.phone || sale.customer_phone"
                     class="font-normal text-slate-500"
                   >
                     <a
-                      :href="`${WHATSAPP_URL}/${sale.i_customers?.phone ?? sale.customer_phone}`"
+                      :href="`${WHATSAPP_URL}/${
+                        sale.i_customers?.phone ?? sale.customer_phone
+                      }`"
                       target="_blank"
                       rel="noopener noreferrer"
                       class="block"
@@ -380,7 +384,7 @@ watchEffect(() => {
               <TableCell class="text-center"
                 ><div
                   class="flex -space-x-4 rtl:space-x-reverse w-fit mx-auto cursor-pointer"
-                  @click="handleSaleSidebar({ sale, viewOnly: true })"
+                  @click="openViewSaleSidebar(sale)"
                 >
                   <Avatar
                     v-for="saleProduct in sale.i_sale_products.slice(0, 3)"
@@ -432,7 +436,7 @@ watchEffect(() => {
                       <Button
                         size="icon"
                         variant="outline"
-                        @click="handleSaleSidebar({ sale, viewOnly: true })"
+                        @click="openViewSaleSidebar(sale)"
                       >
                         <EyeIcon class="w-4 h-4" />
                       </Button>
@@ -482,7 +486,12 @@ watchEffect(() => {
           </template>
         </TableBody>
       </Table>
-      <div v-if="salesQuery.isFetchingNextPage.value" class="w-full flex justify-center">CARGANDO MAS...</div>
+      <div
+        v-if="salesQuery.isFetchingNextPage.value"
+        class="w-full flex justify-center"
+      >
+        CARGANDO MAS...
+      </div>
 
       <FeedbackCard
         v-if="tableLoadingStates.showEmptyState.value"
@@ -535,13 +544,13 @@ watchEffect(() => {
 
     <CreateOrEditSidebar
       v-model:open="isCreateOrUpdateSidebarOpen"
-      :viewOnly="isSaleSidebarViewOnly"
       :isLoading="
         createSaleMutation.isPending.value || updateSaleMutation.isPending.value
       "
       :sale="activeSale"
       @save="handleSaveSidebar"
     />
+    <ViewSaleSidebar v-model:open="isViewSaleSidebarOpen" :sale="activeSale" />
 
     <TodaySalesSidebar v-model:open="isTodaySalesSidebarOpen" />
   </div>
