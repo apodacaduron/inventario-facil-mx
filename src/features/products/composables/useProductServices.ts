@@ -3,13 +3,12 @@ import { LoadListOptions, useServiceHelpers } from "@/features/global";
 import { Tables } from "../../../../types_db";
 
 export type CreateProduct = {
-  product_id?: Product["id"];
   name: Product["name"];
   description: Product["description"];
-  image_url: Product["image_url"];
   current_stock: Product["current_stock"];
   retail_price: Product["retail_price"];
   unit_price: Product["unit_price"];
+  image_url: Product["image_url"];
 };
 export type UpdateProduct = {
   product_id: Product["id"];
@@ -101,10 +100,9 @@ export function useProductServices() {
   async function createProduct(orgId: string, formValues: CreateProduct) {
     if (!orgId) throw new Error("Organization is required to create a product");
 
-    const { product_id, ...otherFormValues } = formValues;
-    await supabase.from("i_products").insert([
+    return await supabase.from("i_products").insert([
       {
-        ...otherFormValues,
+        ...formValues,
         org_id: orgId,
       },
     ]);
@@ -112,7 +110,7 @@ export function useProductServices() {
 
   async function updateProduct(formValues: UpdateProduct) {
     const { product_id, ...otherFormValues } = formValues;
-    await supabase
+    return await supabase
       .from("i_products")
       .update({
         ...otherFormValues,
@@ -124,7 +122,7 @@ export function useProductServices() {
     if (!productId)
       throw new Error("Product id is required to delete a product");
 
-    await supabase.from("i_products").delete().eq("id", productId);
+    return await supabase.from("i_products").delete().eq("id", productId);
   }
 
   async function getProductCount(options: {

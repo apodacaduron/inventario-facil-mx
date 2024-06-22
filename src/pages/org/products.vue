@@ -1,17 +1,14 @@
 <script setup lang="ts">
 import {
   AddStockDialog,
-  CreateOrEditSidebar,
-  CreateProduct,
+  CreateProductSidebar,
   DeleteProductDialog,
   Product,
   ProductImageDialog,
   ProductStockHistorySidebar,
   ShareStockDialog,
-  UpdateProduct,
-  productServicesTypeguards,
+  UpdateProductSidebar,
   useCurrencyFormatter,
-  useProductServices,
 } from "@/features/products";
 import { ref, toRef, watchEffect } from "vue";
 import {
@@ -53,9 +50,7 @@ import {
 import { refDebounced, useInfiniteScroll, useStorage } from "@vueuse/core";
 import { useOrganizationStore } from "@/stores";
 import { useProductsQuery } from "@/features/products/composables/useProductQueries";
-import { useMutation, useQueryClient } from "@tanstack/vue-query";
 import { FeedbackCard, useTableOrder, useTableStates } from "@/features/global";
-import { analytics } from "@/config/analytics";
 import { useRoute } from "vue-router";
 import { HistoryIcon } from "lucide-vue-next";
 
@@ -66,7 +61,8 @@ const productSearchDebounced = refDebounced(productSearch, 400);
 const tableFiltersRef = useStorage<{
   status: "in_stock" | "out_of_stock" | "all";
 }>("products-table-filters", { status: "all" });
-const isCreateOrUpdateSidebarOpen = ref(false);
+const isCreateProductSidebarOpen = ref(false);
+const isUpdateProductSidebarOpen = ref(false);
 const isDeleteProductDialogOpen = ref(false);
 const isShareStockDialogOpen = ref(false);
 const isAddStockDialogOpen = ref(false);
@@ -79,18 +75,7 @@ const productsTableOrder = useTableOrder({
   },
 });
 const route = useRoute();
-const queryClient = useQueryClient();
 const organizationStore = useOrganizationStore();
-const productServices = useProductServices();
-const createProductMutation = useMutation({
-  mutationFn: createProductMutationFn,
-});
-const updateProductMutation = useMutation({
-  mutationFn: updateProductMutationFn,
-});
-const deleteProductMutation = useMutation({
-  mutationFn: deleteProductMutationFn,
-});
 
 const currencyFormatter = useCurrencyFormatter();
 const productsQuery = useProductsQuery({
@@ -137,19 +122,9 @@ function openDeleteProductDialog(product: Product) {
   isDeleteProductDialogOpen.value = true;
 }
 
-function handleSaveModal(formValues: CreateProduct | UpdateProduct) {
-  if (productServicesTypeguards.isCreateProduct(formValues)) {
-    createProductMutation.mutate(formValues);
-  } else {
-    updateProductMutation.mutate(formValues);
-  }
-  isCreateOrUpdateSidebarOpen.value = false;
-  isAddStockDialogOpen.value = false;
-}
-
 function openUpdateProductSidebar(product: Product) {
   activeProduct.value = product;
-  isCreateOrUpdateSidebarOpen.value = true;
+  isUpdateProductSidebarOpen.value = true;
 }
 
 function openAddStockDialog(product: Product) {
@@ -157,37 +132,11 @@ function openAddStockDialog(product: Product) {
   isAddStockDialogOpen.value = true;
 }
 
-async function createProductMutationFn(formValues: CreateProduct) {
-  await productServices.createProduct(
-    route.params.orgId.toString(),
-    formValues
-  );
-  await queryClient.invalidateQueries({ queryKey: ["products"] });
-  analytics.event("create-product", formValues);
-}
-async function updateProductMutationFn(formValues: UpdateProduct) {
-  const productId = formValues.product_id;
-  if (!productId) throw new Error("Product id required to perform update");
-  await productServices.updateProduct({
-    ...formValues,
-    product_id: productId,
-  });
-  await queryClient.invalidateQueries({ queryKey: ["products"] });
-  analytics.event("update-product", formValues);
-}
-async function deleteProductMutationFn(product: Product | null) {
-  const productId = product?.id;
-  if (!productId) throw new Error("Product id required to perform delete");
-  await productServices.deleteProduct(productId);
-  isDeleteProductDialogOpen.value = false;
-  await queryClient.invalidateQueries({ queryKey: ["products"] });
-  analytics.event("delete-product", product);
-}
-
 watchEffect(() => {
   if (isDeleteProductDialogOpen.value) return;
   if (isAddStockDialogOpen.value) return;
-  if (isCreateOrUpdateSidebarOpen.value) return;
+  if (isCreateProductSidebarOpen.value) return;
+  if (isUpdateProductSidebarOpen.value) return;
   if (isProductImageDialogOpen.value) return;
   if (isProductStockHistorySidebarOpen.value) return;
 
@@ -214,7 +163,7 @@ watchEffect(() => {
       <div class="hidden lg:flex gap-2">
         <Button
           :disabled="!organizationStore.canAddProducts"
-          @click="isCreateOrUpdateSidebarOpen = true"
+          @click="isCreateProductSidebarOpen = true"
         >
           <PlusIcon class="w-5 h-5 stroke-[2px] mr-2" /> Crear producto
         </Button>
@@ -267,7 +216,7 @@ watchEffect(() => {
       <div class="flex lg:hidden gap-2">
         <Button
           :disabled="!organizationStore.canAddProducts"
-          @click="isCreateOrUpdateSidebarOpen = true"
+          @click="isCreateProductSidebarOpen = true"
           size="icon"
         >
           <PlusIcon class="w-5 h-5 stroke-[2px]" />
@@ -495,7 +444,7 @@ watchEffect(() => {
         <template #action
           ><Button
             :disabled="!organizationStore.canAddProducts"
-            @click="isCreateOrUpdateSidebarOpen = true"
+            @click="isCreateProductSidebarOpen = true"
           >
             <PlusIcon class="w-5 h-5 stroke-[2px] mr-2" /> Crear producto
           </Button>
@@ -519,7 +468,10 @@ watchEffect(() => {
             <Button @click="productSearch = ''" variant="outline">
               Clear search
             </Button>
-            <Button @click="isCreateOrUpdateSidebarOpen = true">
+            <Button
+              :disabled="!organizationStore.canAddProducts"
+              @click="isCreateProductSidebarOpen = true"
+            >
               <PlusIcon class="w-5 h-5 stroke-[2px] mr-2" /> Crear producto
             </Button>
           </div>
@@ -530,28 +482,20 @@ watchEffect(() => {
     <DeleteProductDialog
       v-model:open="isDeleteProductDialogOpen"
       :product="activeProduct"
-      :isLoading="deleteProductMutation.isPending.value"
-      @confirmDelete="deleteProductMutation.mutate"
     />
     <ShareStockDialog v-model:open="isShareStockDialogOpen" />
     <ProductStockHistorySidebar
       v-model:open="isProductStockHistorySidebarOpen"
       :product="activeProduct"
     />
-    <CreateOrEditSidebar
-      v-model:open="isCreateOrUpdateSidebarOpen"
+    <CreateProductSidebar v-model:open="isCreateProductSidebarOpen" />
+    <UpdateProductSidebar
+      v-model:open="isUpdateProductSidebarOpen"
       :product="activeProduct"
-      :isLoading="
-        updateProductMutation.isPending.value ||
-        createProductMutation.isPending.value
-      "
-      @save="handleSaveModal"
     />
     <AddStockDialog
       v-model:open="isAddStockDialogOpen"
       :product="activeProduct"
-      :isLoading="updateProductMutation.isPending.value"
-      @save="handleSaveModal"
     />
     <ProductImageDialog
       v-model:open="isProductImageDialogOpen"

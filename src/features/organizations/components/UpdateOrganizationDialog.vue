@@ -66,7 +66,7 @@ watchEffect(() => {
       <DialogHeader>
         <DialogTitle>Actualiza el nombre de tu organizacion</DialogTitle>
         <DialogDescription>
-          Escribe el nuevo nombre. MALANDRO {{ userOrganization?.i_organizations?.name }}
+          Escribe el nuevo nombre.
         </DialogDescription>
       </DialogHeader>
       <div>

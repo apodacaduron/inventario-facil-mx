@@ -1,15 +1,13 @@
 <script setup lang="ts">
 import {
-  CreateOrEditSidebar,
-  CreateSale,
+  CreateSaleSidebar,
   DeleteSaleDialog,
   Sale,
   TodaySalesSidebar,
-  UpdateSale,
-  saleServicesTypeguards,
-  useSaleServices,
-} from '@/features/sales';
-import { ref, toRef, watchEffect } from 'vue';
+  UpdateSaleSidebar,
+  ViewSaleSidebar,
+} from "@/features/sales";
+import { ref, toRef, watchEffect } from "vue";
 import {
   Button,
   Input,
@@ -35,7 +33,7 @@ import {
   TooltipTrigger,
   TooltipContent,
   Badge,
-} from '@/components/ui';
+} from "@/components/ui";
 import {
   BanknotesIcon,
   EyeIcon,
@@ -44,42 +42,55 @@ import {
   TrashIcon,
   FunnelIcon,
   ShoppingBagIcon,
-} from '@heroicons/vue/24/outline';
-import { refDebounced, useInfiniteScroll, useStorage } from '@vueuse/core';
-import { useOrganizationStore } from '@/stores';
-import { useSalesQuery } from '@/features/sales/composables/useSaleQueries';
-import { useMutation, useQueryClient } from '@tanstack/vue-query';
-import { useCurrencyFormatter } from '@/features/products';
-import { FeedbackCard, useTableStates } from '@/features/global';
-import { Tables } from '../../../types_db';
-import { useDashboardDates } from '@/features/dashboard';
-import { analytics } from '@/config/analytics';
-import { useRoute } from 'vue-router';
+} from "@heroicons/vue/24/outline";
+import { refDebounced, useInfiniteScroll, useStorage } from "@vueuse/core";
+import { useOrganizationStore } from "@/stores";
+import { useSalesQuery } from "@/features/sales/composables/useSaleQueries";
+import { useCurrencyFormatter } from "@/features/products";
+import {
+  FeedbackCard,
+  useSidebarManager,
+  useTableStates,
+} from "@/features/global";
+import { Tables } from "../../../types_db";
+import { useDashboardDates } from "@/features/dashboard";
+import { useRoute } from "vue-router";
+import CustomerPickerSidebar from "@/features/sales/components/CustomerPickerSidebar.vue";
+import { Customer } from "@/features/customers";
+import ProductPickerSidebar from "@/features/sales/components/ProductPickerSidebar.vue";
 
 const WHATSAPP_URL = import.meta.env.VITE_WHATSAPP_URL;
 const tableFiltersRef = useStorage<{
-  status: NonNullable<Tables<'i_sales'>['status']> | 'all';
-  period?: 'daily' | 'weekly' | 'monthly';
-}>('sales-table-filters', { status: 'all' });
+  status: NonNullable<Tables<"i_sales">["status"]> | "all";
+  period?: "daily" | "weekly" | "monthly";
+}>("sales-table-filters", { status: "all" });
 const dashboardDates = useDashboardDates({
   period: toRef(() => tableFiltersRef.value.period),
 });
 const tableRef = ref<HTMLElement | null>(null);
-const saleSearch = ref('');
+const saleSearch = ref("");
 const saleSearchDebounced = refDebounced(saleSearch, 400);
+const isViewSaleSidebarOpen = ref(false);
 const isTodaySalesSidebarOpen = ref(false);
-const isCreateOrUpdateSidebarOpen = ref(false);
-const isSaleSidebarViewOnly = ref(false);
+const isCreateSaleSidebarOpen = ref(false);
+const isUpdateSaleSidebarOpen = ref(false);
 const isDeleteSaleDialogOpen = ref(false);
 const activeSale = ref<Sale | null>(null);
+const activeCustomer = ref<Customer | null>(null);
+const activeProducts = ref<
+  Map<
+    string,
+    Pick<
+      Sale["i_sale_products"][number],
+      "product_id" | "price" | "unit_price" | "qty" | "name" | "image_url"
+    >
+  >
+>(new Map());
 
+const sidebarManager = useSidebarManager();
 const route = useRoute();
-const queryClient = useQueryClient();
 const organizationStore = useOrganizationStore();
-const saleServices = useSaleServices();
-const createSaleMutation = useMutation({ mutationFn: createSaleMutationFn });
-const updateSaleMutation = useMutation({ mutationFn: updateSaleMutationFn });
-const deleteSaleMutation = useMutation({ mutationFn: deleteSaleMutationFn });
+
 const currencyFormatter = useCurrencyFormatter();
 const salesQuery = useSalesQuery({
   options: {
@@ -89,25 +100,25 @@ const salesQuery = useSalesQuery({
     filters: toRef(() => {
       const filters = [];
 
-      if ('status' in tableFiltersRef.value) {
-        if (tableFiltersRef.value.status !== 'all') {
+      if ("status" in tableFiltersRef.value) {
+        if (tableFiltersRef.value.status !== "all") {
           filters.push({
-            column: 'status',
-            operator: 'eq',
+            column: "status",
+            operator: "eq",
             value: tableFiltersRef.value.status,
           });
         }
       }
-      if ('period' in tableFiltersRef.value) {
+      if ("period" in tableFiltersRef.value) {
         if (tableFiltersRef.value.period) {
           filters.push({
-            column: 'created_at',
-            operator: 'gte',
+            column: "created_at",
+            operator: "gte",
             value: dashboardDates.dateRangeFromPeriod.value?.from.toISOString(),
           });
           filters.push({
-            column: 'created_at',
-            operator: 'lte',
+            column: "created_at",
+            operator: "lte",
             value: dashboardDates.dateRangeFromPeriod.value?.to.toISOString(),
           });
         }
@@ -132,72 +143,51 @@ function openDeleteSaleDialog(sale: Sale) {
   isDeleteSaleDialogOpen.value = true;
 }
 
-function handleSaveSidebar(formValues: CreateSale | UpdateSale) {
-  if (saleServicesTypeguards.isCreateSale(formValues)) {
-    delete formValues.sale_id;
-    createSaleMutation.mutate(formValues);
-  } else {
-    updateSaleMutation.mutate(formValues);
-  }
-  isCreateOrUpdateSidebarOpen.value = false;
+function openViewSaleSidebar(sale: Sale) {
+  activeSale.value = sale;
+  isViewSaleSidebarOpen.value = true;
 }
 
-function handleSaleSidebar(options: {
-  sale?: Sale | null;
-  viewOnly?: boolean;
-}) {
-  activeSale.value = options.sale ?? null;
-  isCreateOrUpdateSidebarOpen.value = true;
-  isSaleSidebarViewOnly.value = Boolean(options.viewOnly);
+// function handleSaveSidebar(formValues: CreateSale | UpdateSale) {
+//   if (saleServicesTypeguards.isCreateSale(formValues)) {
+//   } else {
+//     updateSaleMutation.mutate(formValues);
+//   }
+//   isCreateOrUpdateSidebarOpen.value = false;
+// }
+
+function openUpdateSaleSidebar(sale?: Sale | null) {
+  activeSale.value = sale ?? null;
+  sidebarManager.openSidebar("update-sale");
 }
 
-async function createSaleMutationFn(formValues: CreateSale) {
-  await saleServices.createSale(route.params.orgId.toString(), formValues);
-  await queryClient.invalidateQueries({ queryKey: ['sales'] });
-  await queryClient.invalidateQueries({ queryKey: ['products'] });
-  analytics.event('create-sale', formValues);
-}
-async function updateSaleMutationFn(formValues: UpdateSale) {
-  const saleId = formValues.sale_id;
-  if (!saleId) throw new Error('Sale id required to perform update');
-  await saleServices.updateSale(route.params.orgId.toString(), formValues);
-  await queryClient.invalidateQueries({ queryKey: ['sales'] });
-  await queryClient.invalidateQueries({ queryKey: ['products'] });
-  analytics.event('update-sale', formValues);
-}
-async function deleteSaleMutationFn() {
-  const saleId = activeSale.value?.id;
-  if (!saleId) throw new Error('Sale id required to perform delete');
-  await saleServices.deleteSale(saleId);
-  isDeleteSaleDialogOpen.value = false;
-  await queryClient.invalidateQueries({ queryKey: ['sales'] });
-  await queryClient.invalidateQueries({ queryKey: ['products'] });
-  analytics.event('delete-sale', activeSale.value ?? {});
-}
-
-function getBadgeColorFromStatus(status: Sale['status']) {
+function getBadgeColorFromStatus(status: Sale["status"]) {
   switch (status) {
-    case 'cancelled':
-      return 'destructive';
-    case 'in_progress':
-      return 'outline';
-    case 'completed':
-      return 'default';
+    case "cancelled":
+      return "destructive";
+    case "in_progress":
+      return "outline";
+    case "completed":
+      return "default";
     default:
-      return 'outline';
+      return "outline";
   }
 }
 
 function resetFilters() {
-  tableFiltersRef.value = { status: 'all' };
+  tableFiltersRef.value = { status: "all" };
 }
 
 watchEffect(() => {
   if (isDeleteSaleDialogOpen.value) return;
-  if (isCreateOrUpdateSidebarOpen.value) return;
+  if (isCreateSaleSidebarOpen.value) return;
+  if (isUpdateSaleSidebarOpen.value) return;
+  if (isViewSaleSidebarOpen.value) return;
+  if (sidebarManager.hasAnySidebarOpen.value) return;
 
   activeSale.value = null;
-  isSaleSidebarViewOnly.value = false;
+  activeCustomer.value = null;
+  activeProducts.value.clear();
 });
 </script>
 
@@ -221,7 +211,7 @@ watchEffect(() => {
         <Button variant="outline" @click="isTodaySalesSidebarOpen = true">
           <ShoppingBagIcon class="w-5 h-5 stroke-[2px] mr-2" /> Ventas de hoy
         </Button>
-        <Button @click="isCreateOrUpdateSidebarOpen = true">
+        <Button @click="sidebarManager.openSidebar('create-sale')">
           <PlusIcon class="w-5 h-5 stroke-[2px] mr-2" /> Crear venta
         </Button>
       </div>
@@ -291,7 +281,7 @@ watchEffect(() => {
         >
           <ShoppingBagIcon class="w-5 h-5 stroke-[2px]" />
         </Button>
-        <Button @click="isCreateOrUpdateSidebarOpen = true" size="icon">
+        <Button @click="sidebarManager.openSidebar('create-sale')" size="icon">
           <PlusIcon class="w-5 h-5 stroke-[2px]" />
         </Button>
       </div>
@@ -365,19 +355,21 @@ watchEffect(() => {
                   <AvatarFallback>{{
                     (sale.i_customers?.name ?? sale.customer_name)
                       ?.substring(0, 1)
-                      .toLocaleUpperCase() ?? '?'
+                      .toLocaleUpperCase() ?? "?"
                   }}</AvatarFallback>
                 </Avatar>
                 <div class="ps-3">
                   <div class="text-base font-semibold">
-                    {{ sale.i_customers?.name ?? sale.customer_name ?? '-' }}
+                    {{ sale.i_customers?.name ?? sale.customer_name ?? "-" }}
                   </div>
                   <div
                     v-if="sale.i_customers?.phone || sale.customer_phone"
                     class="font-normal text-slate-500"
                   >
                     <a
-                      :href="`${WHATSAPP_URL}/${sale.i_customers?.phone ?? sale.customer_phone}`"
+                      :href="`${WHATSAPP_URL}/${
+                        sale.i_customers?.phone ?? sale.customer_phone
+                      }`"
                       target="_blank"
                       rel="noopener noreferrer"
                       class="block"
@@ -390,7 +382,7 @@ watchEffect(() => {
               <TableCell class="text-center"
                 ><div
                   class="flex -space-x-4 rtl:space-x-reverse w-fit mx-auto cursor-pointer"
-                  @click="handleSaleSidebar({ sale, viewOnly: true })"
+                  @click="openViewSaleSidebar(sale)"
                 >
                   <Avatar
                     v-for="saleProduct in sale.i_sale_products.slice(0, 3)"
@@ -442,7 +434,7 @@ watchEffect(() => {
                       <Button
                         size="icon"
                         variant="outline"
-                        @click="handleSaleSidebar({ sale, viewOnly: true })"
+                        @click="openViewSaleSidebar(sale)"
                       >
                         <EyeIcon class="w-4 h-4" />
                       </Button>
@@ -459,7 +451,7 @@ watchEffect(() => {
                         size="icon"
                         variant="outline"
                         v-if="sale.status === 'in_progress'"
-                        @click="handleSaleSidebar({ sale })"
+                        @click="openUpdateSaleSidebar(sale)"
                       >
                         <PencilIcon class="w-4 h-4" />
                       </Button>
@@ -492,7 +484,12 @@ watchEffect(() => {
           </template>
         </TableBody>
       </Table>
-      <div v-if="salesQuery.isFetchingNextPage.value" class="w-full flex justify-center">CARGANDO MAS...</div>
+      <div
+        v-if="salesQuery.isFetchingNextPage.value"
+        class="w-full flex justify-center"
+      >
+        CARGANDO MAS...
+      </div>
 
       <FeedbackCard
         v-if="tableLoadingStates.showEmptyState.value"
@@ -507,7 +504,7 @@ watchEffect(() => {
           Comienza creando tu primera venta.
         </template>
         <template #action
-          ><Button @click="isCreateOrUpdateSidebarOpen = true">
+          ><Button @click="sidebarManager.openSidebar('create-sale')">
             <PlusIcon class="w-5 h-5 stroke-[2px] mr-2" /> Crear venta
           </Button>
         </template>
@@ -530,7 +527,7 @@ watchEffect(() => {
             <Button @click="saleSearch = ''" variant="outline">
               Clear search
             </Button>
-            <Button @click="isCreateOrUpdateSidebarOpen = true">
+            <Button @click="sidebarManager.openSidebar('create-sale')">
               <PlusIcon class="w-5 h-5 stroke-[2px] mr-2" /> Crear venta
             </Button>
           </div>
@@ -541,19 +538,34 @@ watchEffect(() => {
     <DeleteSaleDialog
       v-model:open="isDeleteSaleDialogOpen"
       :sale="activeSale"
-      :isLoading="deleteSaleMutation.isPending.value"
-      @confirmDelete="deleteSaleMutation.mutate"
     />
-
-    <CreateOrEditSidebar
-      v-model:open="isCreateOrUpdateSidebarOpen"
-      :viewOnly="isSaleSidebarViewOnly"
-      :isLoading="
-        createSaleMutation.isPending.value || updateSaleMutation.isPending.value
-      "
+    <CreateSaleSidebar
+      :activeCustomer="activeCustomer"
+      :activeProducts="activeProducts"
+      :sidebarManager="sidebarManager"
+      :open="sidebarManager.currentSidebar.value?.id === 'create-sale'"
+      @update:open="(open) => open === false && sidebarManager.closeSidebar()"
+    />
+    <UpdateSaleSidebar
       :sale="activeSale"
-      @save="handleSaveSidebar"
+      :activeProducts="activeProducts"
+      :sidebarManager="sidebarManager"
+      :open="sidebarManager.currentSidebar.value?.id === 'update-sale'"
+      @update:open="(open) => open === false && sidebarManager.closeSidebar()"
     />
+    <CustomerPickerSidebar
+      :activeCustomer="activeCustomer"
+      :open="sidebarManager.currentSidebar.value?.id === 'customer-picker'"
+      @update:open="(open) => open === false && sidebarManager.closeSidebar()"
+      @select="activeCustomer = $event"
+    />
+    <ProductPickerSidebar
+      :activeProducts="activeProducts"
+      :sale="activeSale"
+      :open="sidebarManager.currentSidebar.value?.id === 'product-picker'"
+      @update:open="(open) => open === false && sidebarManager.closeSidebar()"
+    />
+    <ViewSaleSidebar v-model:open="isViewSaleSidebarOpen" :sale="activeSale" />
 
     <TodaySalesSidebar v-model:open="isTodaySalesSidebarOpen" />
   </div>

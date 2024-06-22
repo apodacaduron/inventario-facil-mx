@@ -14,21 +14,30 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui";
-import { Sale } from "../composables";
+import { Sale, useSaleServices } from "../composables";
 import { useMediaQuery } from "@vueuse/core";
+import { useMutation, useQueryClient } from "@tanstack/vue-query";
+import { analytics } from "@/config/analytics";
 
 type DeleteSaleDialogProps = {
-  isLoading?: boolean;
   sale: Sale | null;
 };
 
 const openModel = defineModel<boolean>("open");
-defineProps<DeleteSaleDialogProps>();
-const emit = defineEmits<{
-  (e: "confirmDelete", formValues: Sale | null): void;
-}>();
+const props = defineProps<DeleteSaleDialogProps>();
 
+const queryClient = useQueryClient();
+const saleServices = useSaleServices();
 const isDesktop = useMediaQuery("(min-width: 768px)");
+const deleteSaleMutation = useMutation({ mutationFn: async () => {
+  const saleId = props.sale?.id;
+  if (!saleId) throw new Error('Sale id required to perform delete');
+  await saleServices.deleteSale(saleId);
+  openModel.value = false;
+  await queryClient.invalidateQueries({ queryKey: ['sales'] });
+  await queryClient.invalidateQueries({ queryKey: ['products'] });
+  analytics.event('delete-sale', props.sale);
+} });
 </script>
 
 <template>
@@ -43,15 +52,15 @@ const isDesktop = useMediaQuery("(min-width: 768px)");
       </DialogHeader>
       <DialogFooter>
         <Button
-          :disabled="isLoading"
+          :disabled="deleteSaleMutation.isPending.value"
           type="button"
           variant="destructive"
-          @click="$emit('confirmDelete', sale)"
+          @click="deleteSaleMutation.mutate"
         >
           Si, eliminar
         </Button>
         <Button
-          :disabled="isLoading"
+          :disabled="deleteSaleMutation.isPending.value"
           type="button"
           variant="secondary"
           @click="openModel = false"
@@ -74,15 +83,15 @@ const isDesktop = useMediaQuery("(min-width: 768px)");
         </DrawerHeader>
         <DrawerFooter>
           <Button
-            :disabled="isLoading"
+            :disabled="deleteSaleMutation.isPending.value"
             type="button"
             variant="destructive"
-            @click="$emit('confirmDelete', sale)"
+            @click="deleteSaleMutation.mutate"
           >
             Si, eliminar
           </Button>
           <Button
-            :disabled="isLoading"
+            :disabled="deleteSaleMutation.isPending.value"
             type="button"
             variant="secondary"
             @click="openModel = false"
