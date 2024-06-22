@@ -241,7 +241,6 @@ watch(openModel, (nextOpenValue) => {
         </SheetDescription>
       </SheetHeader>
       <form @submit="onSubmit" class="flex flex-col gap-6 mt-6 mb-6">
-        {{ formInstance.values }}
         <FormField v-slot="{ componentField }" name="status">
           <FormItem v-auto-animate>
             <FormLabel>Status de venta</FormLabel>
