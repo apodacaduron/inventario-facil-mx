@@ -8,6 +8,7 @@ export type CreateProduct = {
   current_stock: Product["current_stock"];
   retail_price: Product["retail_price"];
   unit_price: Product["unit_price"];
+  image_url: Product["image_url"];
 };
 export type UpdateProduct = {
   product_id: Product["id"];

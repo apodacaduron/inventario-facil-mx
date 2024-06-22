@@ -2,19 +2,6 @@
 import {
   Sheet,
   Button,
-  Input,
-  Select,
-  FormMessage,
-  FormControl,
-  FormLabel,
-  FormItem,
-  FormField,
-  Textarea,
-  SelectTrigger,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectValue,
   SheetFooter,
   SheetContent,
   SheetHeader,
@@ -37,12 +24,12 @@ import { useMutation, useQueryClient } from "@tanstack/vue-query";
 import { useRoute } from "vue-router";
 import SharedCustomerFormValues from "./SharedCustomerFormValues.vue";
 
-type CreateOrEditSidebarProps = {
+type Props = {
   customer?: Customer | null;
 };
 
 const openModel = defineModel<boolean>("open");
-const props = withDefaults(defineProps<CreateOrEditSidebarProps>(), {
+const props = withDefaults(defineProps<Props>(), {
   customer: null,
 });
 

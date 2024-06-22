@@ -31,6 +31,7 @@ const initialForm: CreateProduct = {
   current_stock: null,
   unit_price: null,
   retail_price: null,
+  image_url: null,
 };
 
 const formSchema = toTypedSchema(

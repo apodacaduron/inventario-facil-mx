@@ -74,7 +74,7 @@ export function useSaleServices() {
     if (!orgId)
       throw new Error('Organization is required to create a sale'); 
 
-    await supabase.rpc('create_sale', {
+    return await supabase.rpc('create_sale', {
       ...formValues,
       organization_id: orgId,
     });
@@ -84,7 +84,7 @@ export function useSaleServices() {
     if (!orgId)
       throw new Error('Organization is required to update a sale');
 
-    await supabase.rpc('update_sale', {
+    return await supabase.rpc('update_sale', {
       cancellation_notes_input: formValues.cancellation_notes,
       notes_input: formValues.notes,
       customer_id_input: formValues.customer_id,

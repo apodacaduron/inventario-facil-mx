@@ -1,14 +1,11 @@
 <script setup lang="ts">
 import {
-  CreateOrEditSidebar,
-  CreateSale,
+  CreateSaleSidebar,
   DeleteSaleDialog,
   Sale,
   TodaySalesSidebar,
-  UpdateSale,
+  UpdateSaleSidebar,
   ViewSaleSidebar,
-  saleServicesTypeguards,
-  useSaleServices,
 } from "@/features/sales";
 import { ref, toRef, watchEffect } from "vue";
 import {
@@ -49,13 +46,18 @@ import {
 import { refDebounced, useInfiniteScroll, useStorage } from "@vueuse/core";
 import { useOrganizationStore } from "@/stores";
 import { useSalesQuery } from "@/features/sales/composables/useSaleQueries";
-import { useMutation, useQueryClient } from "@tanstack/vue-query";
 import { useCurrencyFormatter } from "@/features/products";
-import { FeedbackCard, useTableStates } from "@/features/global";
+import {
+  FeedbackCard,
+  useSidebarManager,
+  useTableStates,
+} from "@/features/global";
 import { Tables } from "../../../types_db";
 import { useDashboardDates } from "@/features/dashboard";
-import { analytics } from "@/config/analytics";
 import { useRoute } from "vue-router";
+import CustomerPickerSidebar from "@/features/sales/components/CustomerPickerSidebar.vue";
+import { Customer } from "@/features/customers";
+import ProductPickerSidebar from "@/features/sales/components/ProductPickerSidebar.vue";
 
 const WHATSAPP_URL = import.meta.env.VITE_WHATSAPP_URL;
 const tableFiltersRef = useStorage<{
@@ -70,16 +72,25 @@ const saleSearch = ref("");
 const saleSearchDebounced = refDebounced(saleSearch, 400);
 const isViewSaleSidebarOpen = ref(false);
 const isTodaySalesSidebarOpen = ref(false);
-const isCreateOrUpdateSidebarOpen = ref(false);
+const isCreateSaleSidebarOpen = ref(false);
+const isUpdateSaleSidebarOpen = ref(false);
 const isDeleteSaleDialogOpen = ref(false);
 const activeSale = ref<Sale | null>(null);
+const activeCustomer = ref<Customer | null>(null);
+const activeProducts = ref<
+  Map<
+    string,
+    Pick<
+      Sale["i_sale_products"][number],
+      "product_id" | "price" | "unit_price" | "qty" | "name" | "image_url"
+    >
+  >
+>(new Map());
 
+const sidebarManager = useSidebarManager();
 const route = useRoute();
-const queryClient = useQueryClient();
 const organizationStore = useOrganizationStore();
-const saleServices = useSaleServices();
-const createSaleMutation = useMutation({ mutationFn: createSaleMutationFn });
-const updateSaleMutation = useMutation({ mutationFn: updateSaleMutationFn });
+
 const currencyFormatter = useCurrencyFormatter();
 const salesQuery = useSalesQuery({
   options: {
@@ -137,34 +148,17 @@ function openViewSaleSidebar(sale: Sale) {
   isViewSaleSidebarOpen.value = true;
 }
 
-function handleSaveSidebar(formValues: CreateSale | UpdateSale) {
-  if (saleServicesTypeguards.isCreateSale(formValues)) {
-    delete formValues.sale_id;
-    createSaleMutation.mutate(formValues);
-  } else {
-    updateSaleMutation.mutate(formValues);
-  }
-  isCreateOrUpdateSidebarOpen.value = false;
-}
+// function handleSaveSidebar(formValues: CreateSale | UpdateSale) {
+//   if (saleServicesTypeguards.isCreateSale(formValues)) {
+//   } else {
+//     updateSaleMutation.mutate(formValues);
+//   }
+//   isCreateOrUpdateSidebarOpen.value = false;
+// }
 
-function handleSaleSidebar(options: { sale?: Sale | null }) {
-  activeSale.value = options.sale ?? null;
-  isCreateOrUpdateSidebarOpen.value = true;
-}
-
-async function createSaleMutationFn(formValues: CreateSale) {
-  await saleServices.createSale(route.params.orgId.toString(), formValues);
-  await queryClient.invalidateQueries({ queryKey: ["sales"] });
-  await queryClient.invalidateQueries({ queryKey: ["products"] });
-  analytics.event("create-sale", formValues);
-}
-async function updateSaleMutationFn(formValues: UpdateSale) {
-  const saleId = formValues.sale_id;
-  if (!saleId) throw new Error("Sale id required to perform update");
-  await saleServices.updateSale(route.params.orgId.toString(), formValues);
-  await queryClient.invalidateQueries({ queryKey: ["sales"] });
-  await queryClient.invalidateQueries({ queryKey: ["products"] });
-  analytics.event("update-sale", formValues);
+function openUpdateSaleSidebar(sale?: Sale | null) {
+  activeSale.value = sale ?? null;
+  sidebarManager.openSidebar("update-sale");
 }
 
 function getBadgeColorFromStatus(status: Sale["status"]) {
@@ -186,10 +180,14 @@ function resetFilters() {
 
 watchEffect(() => {
   if (isDeleteSaleDialogOpen.value) return;
-  if (isCreateOrUpdateSidebarOpen.value) return;
+  if (isCreateSaleSidebarOpen.value) return;
+  if (isUpdateSaleSidebarOpen.value) return;
   if (isViewSaleSidebarOpen.value) return;
+  if (sidebarManager.hasAnySidebarOpen.value) return;
 
   activeSale.value = null;
+  activeCustomer.value = null;
+  activeProducts.value.clear();
 });
 </script>
 
@@ -213,7 +211,7 @@ watchEffect(() => {
         <Button variant="outline" @click="isTodaySalesSidebarOpen = true">
           <ShoppingBagIcon class="w-5 h-5 stroke-[2px] mr-2" /> Ventas de hoy
         </Button>
-        <Button @click="isCreateOrUpdateSidebarOpen = true">
+        <Button @click="sidebarManager.openSidebar('create-sale')">
           <PlusIcon class="w-5 h-5 stroke-[2px] mr-2" /> Crear venta
         </Button>
       </div>
@@ -283,7 +281,7 @@ watchEffect(() => {
         >
           <ShoppingBagIcon class="w-5 h-5 stroke-[2px]" />
         </Button>
-        <Button @click="isCreateOrUpdateSidebarOpen = true" size="icon">
+        <Button @click="sidebarManager.openSidebar('create-sale')" size="icon">
           <PlusIcon class="w-5 h-5 stroke-[2px]" />
         </Button>
       </div>
@@ -453,7 +451,7 @@ watchEffect(() => {
                         size="icon"
                         variant="outline"
                         v-if="sale.status === 'in_progress'"
-                        @click="handleSaleSidebar({ sale })"
+                        @click="openUpdateSaleSidebar(sale)"
                       >
                         <PencilIcon class="w-4 h-4" />
                       </Button>
@@ -506,7 +504,7 @@ watchEffect(() => {
           Comienza creando tu primera venta.
         </template>
         <template #action
-          ><Button @click="isCreateOrUpdateSidebarOpen = true">
+          ><Button @click="sidebarManager.openSidebar('create-sale')">
             <PlusIcon class="w-5 h-5 stroke-[2px] mr-2" /> Crear venta
           </Button>
         </template>
@@ -529,7 +527,7 @@ watchEffect(() => {
             <Button @click="saleSearch = ''" variant="outline">
               Clear search
             </Button>
-            <Button @click="isCreateOrUpdateSidebarOpen = true">
+            <Button @click="sidebarManager.openSidebar('create-sale')">
               <PlusIcon class="w-5 h-5 stroke-[2px] mr-2" /> Crear venta
             </Button>
           </div>
@@ -541,14 +539,31 @@ watchEffect(() => {
       v-model:open="isDeleteSaleDialogOpen"
       :sale="activeSale"
     />
-
-    <CreateOrEditSidebar
-      v-model:open="isCreateOrUpdateSidebarOpen"
-      :isLoading="
-        createSaleMutation.isPending.value || updateSaleMutation.isPending.value
-      "
+    <CreateSaleSidebar
+      :activeCustomer="activeCustomer"
+      :activeProducts="activeProducts"
+      :sidebarManager="sidebarManager"
+      :open="sidebarManager.currentSidebar.value?.id === 'create-sale'"
+      @update:open="(open) => open === false && sidebarManager.closeSidebar()"
+    />
+    <UpdateSaleSidebar
       :sale="activeSale"
-      @save="handleSaveSidebar"
+      :activeProducts="activeProducts"
+      :sidebarManager="sidebarManager"
+      :open="sidebarManager.currentSidebar.value?.id === 'update-sale'"
+      @update:open="(open) => open === false && sidebarManager.closeSidebar()"
+    />
+    <CustomerPickerSidebar
+      :activeCustomer="activeCustomer"
+      :open="sidebarManager.currentSidebar.value?.id === 'customer-picker'"
+      @update:open="(open) => open === false && sidebarManager.closeSidebar()"
+      @select="activeCustomer = $event"
+    />
+    <ProductPickerSidebar
+      :activeProducts="activeProducts"
+      :sale="activeSale"
+      :open="sidebarManager.currentSidebar.value?.id === 'product-picker'"
+      @update:open="(open) => open === false && sidebarManager.closeSidebar()"
     />
     <ViewSaleSidebar v-model:open="isViewSaleSidebarOpen" :sale="activeSale" />
 

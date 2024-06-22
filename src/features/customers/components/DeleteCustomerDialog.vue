@@ -20,25 +20,25 @@ import { useMutation, useQueryClient } from "@tanstack/vue-query";
 import { analytics } from "@/config/analytics";
 import { notifyIfHasError } from "@/features/global";
 
-type DeleteCustomerDialogProps = {
+type Props = {
   customer: Customer | null;
 };
 
 const openModel = defineModel<boolean>("open");
-const props = defineProps<DeleteCustomerDialogProps>();
+const props = defineProps<Props>();
 
 const isDesktop = useMediaQuery("(min-width: 768px)");
 const queryClient = useQueryClient();
 const customerServices = useCustomerServices();
 const deleteCustomerMutation = useMutation({
   mutationFn: async () => {
-  const customerId = props.customer?.id;
-  if (!customerId) throw new Error("Customer id required to perform delete");
-  const { error } = await customerServices.deleteCustomer(customerId);
-  notifyIfHasError(error);
-  openModel.value = false;
-  await queryClient.invalidateQueries({ queryKey: ["customers"] });
-  analytics.event("delete-customer", props.customer);
+    const customerId = props.customer?.id;
+    if (!customerId) throw new Error("Customer id required to perform delete");
+    const { error } = await customerServices.deleteCustomer(customerId);
+    notifyIfHasError(error);
+    openModel.value = false;
+    await queryClient.invalidateQueries({ queryKey: ["customers"] });
+    analytics.event("delete-customer", props.customer);
   },
 });
 </script>
