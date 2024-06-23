@@ -38,8 +38,10 @@ function getCardDataFromPlan(plan: Tables<"plans">) {
       return {
         title: "Plan Premium",
         subtitle: "Para negocios en expansión y éxito garantizado",
-        price: currencyFormatter.parse(plan.price, { maximumFractionDigits: 0 }),
-        period: '/mes',
+        price: currencyFormatter.parse(plan.price, {
+          maximumFractionDigits: 0,
+        }),
+        period: "/mes",
         description: `
           <ul>
             <li>Hasta 5000 clientes y 5000 productos</li>  
@@ -60,22 +62,24 @@ function getCardDataFromPlan(plan: Tables<"plans">) {
           isDisabled: authStore.isPremiumAccount,
           callback() {
             if (!authStore.isLoggedIn) {
-              router.push('/auth/sign-up')
+              router.push("/auth/sign-up");
               return;
             }
             if (!authStore.isPremiumAccount) {
               isGoPremiumDialogOpen.value = true;
               return;
             }
-          }
+          },
         },
       };
     case "freemium":
       return {
         title: "Plan Gratuito",
         subtitle: "Para emprendedores que están comenzando",
-        price: currencyFormatter.parse(plan.price, { maximumFractionDigits: 0 }),
-        period: '/mes',
+        price: currencyFormatter.parse(plan.price, {
+          maximumFractionDigits: 0,
+        }),
+        period: "/mes",
         description: `
           <ul>
             <li>Hasta 50 clientes y 50 productos</li>  
@@ -94,9 +98,9 @@ function getCardDataFromPlan(plan: Tables<"plans">) {
           isDisabled: false,
           callback() {
             if (!authStore.isLoggedIn) {
-              router.push('/auth/sign-up')
+              router.push("/auth/sign-up");
             }
-          }
+          },
         },
       };
 
@@ -166,7 +170,9 @@ function getCardDataFromPlan(plan: Tables<"plans">) {
 
       <div class="flex flex-col justify-center text-center">
         <h2 class="text-4xl lg:text-5xl mb-3">Planes y Precios</h2>
-        <p class="text-muted-foreground">Elige el plan perfecto para tu negocio</p>
+        <p class="text-muted-foreground">
+          Elige el plan perfecto para tu negocio
+        </p>
       </div>
 
       <div class="my-14">
@@ -181,16 +187,25 @@ function getCardDataFromPlan(plan: Tables<"plans">) {
                 getCardDataFromPlan(plan)?.subtitle
               }}</CardDescription>
             </CardHeader>
-            <CardContent> 
+            <CardContent>
               <Separator />
               <div class="flex items-center gap-2 my-6">
-                <div class="text-4xl">{{ getCardDataFromPlan(plan)?.price }}</div>
+                <div class="text-4xl">
+                  {{ getCardDataFromPlan(plan)?.price }}
+                </div>
                 <div>{{ getCardDataFromPlan(plan)?.period }}</div>
               </div>
-              <p class="text-muted-foreground" v-html="getCardDataFromPlan(plan)?.description" />
+              <p
+                class="text-muted-foreground"
+                v-html="getCardDataFromPlan(plan)?.description"
+              />
             </CardContent>
             <CardFooter v-if="getCardDataFromPlan(plan)?.action.isVisible">
-              <Button :disabled="getCardDataFromPlan(plan)?.action.isDisabled" @click="getCardDataFromPlan(plan)?.action.callback()" class="w-full">
+              <Button
+                :disabled="getCardDataFromPlan(plan)?.action.isDisabled"
+                @click="getCardDataFromPlan(plan)?.action.callback()"
+                class="w-full"
+              >
                 {{ getCardDataFromPlan(plan)?.action.label }}
               </Button>
             </CardFooter>
@@ -205,21 +220,45 @@ function getCardDataFromPlan(plan: Tables<"plans">) {
       </div>
 
       <div class="mt-10 mb-14 flex justify-center">
-        <a  href="mailto:inventariofacilmx@gmail.com">
+        <a href="mailto:inventariofacilmx@gmail.com">
           <Button variant="outline" size="lg">Contactar</Button>
         </a>
       </div>
     </section>
     <footer class="mx-auto max-w-7xl">
+      <div class="px-6 flex my-8 flex-col md:flex-row justify-between">
+        <div class="mb-4">
+          <a href="/">
+            <span class="self-center text-xl sm:text-2xl whitespace-nowrap">
+              inventariofacil.mx
+            </span>
+          </a>
+        </div>
+        <div>
+          <ul class="text-muted-foreground">
+            <li>
+              <a href="/cookie-policy">Politica de cookies</a>
+            </li>
+            <li>
+              <a href="/legal-notice">Aviso legal</a>
+            </li>
+            <li>
+              <a href="/privacy-policy">Politica de privacidad</a>
+            </li>
+            <li>
+              <a href="/refund-policy">Politica de reembolsos</a>
+            </li>
+            <li>
+              <a href="/terms-and-conditions">Terminos y condiciones</a>
+            </li>
+          </ul>
+        </div>
+      </div>
       <Separator />
-      <div class="flex flex-col justify-between my-6 px-6 text-muted-foreground lg:flex-row">
+      <div class="my-6 px-6 text-muted-foreground lg:flex-row text-center">
         <div>
           ©{{ new Date().getFullYear() }} inventariofacil.mx. All rights
           reserved.
-        </div>
-        <div class="flex gap-2">
-          <div>-</div>
-          <div>-</div>
         </div>
       </div>
     </footer>

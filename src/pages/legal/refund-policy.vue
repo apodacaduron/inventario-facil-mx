@@ -13,7 +13,7 @@
       Nuestras suscripciones premium están disponibles en planes mensuales. Si
       no está satisfecho con su suscripción, puede solicitar un reembolso dentro
       de los primeros 7 días a partir de la fecha de compra. No se otorgarán
-      reembolsos después de este período.
+      reembolsos después de este período. Solo se reembolsará el mes en curso.
     </p>
 
     <h2 class="text-xl">2. Procedimiento para Solicitar un Reembolso</h2>
@@ -48,7 +48,8 @@
       Tenga en cuenta que los reembolsos no pueden ser solicitados directamente
       a través del portal del cliente de Stripe. Todas las solicitudes de
       reembolso deben ser gestionadas a través de nuestro sistema de soporte
-      siguiendo el procedimiento descrito anteriormente.
+      siguiendo el procedimiento descrito anteriormente. Tenga en cuenta que los
+      reembolsos se limitan al mes en curso en el que se solicita.
     </p>
 
     <h2 class="text-xl">4. Contacto</h2>
