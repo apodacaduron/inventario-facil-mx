@@ -43,6 +43,26 @@ export const routes: RouteWithMeta[] = [
     component: () => import("@/pages/unauthorized.vue"),
   },
   {
+    path: "/refund-policy",
+    component: () => import("@/pages/legal/refund-policy.vue"),
+  },
+  {
+    path: "/legal-notice",
+    component: () => import("@/pages/legal/legal-notice.vue"),
+  },
+  {
+    path: "/cookie-policy",
+    component: () => import("@/pages/legal/cookie-policy.vue"),
+  },
+  {
+    path: "/terms-and-conditions",
+    component: () => import("@/pages/legal/terms-and-conditions.vue"),
+  },
+  {
+    path: "/privacy-policy",
+    component: () => import("@/pages/legal/privacy-policy.vue"),
+  },
+  {
     path: "/p/org/:orgId/products",
     meta: { requiresPublicProductsPageEnabled: true },
     component: () => import("@/pages/public/products.vue"),
