@@ -53,10 +53,10 @@ const onSubmit = handleSubmit(async (formValues) => {
 <template>
   <AuthLayout>
     <div class="w-full max-w-md mx-auto px-6 py-3.5">
-      <h1 class="mt-8 mb-2 text-2xl lg:text-3xl">Bienvenido</h1>
+      <h1 class="mt-4 mb-2 text-2xl lg:text-3xl">Bienvenido</h1>
       <span class="text-sm"> Inicia sesión con tu cuenta </span>
     </div>
-    <div class="divide-y w-full max-w-md mx-auto px-6">
+    <div class="divide-y w-full max-w-md mx-auto px-6 mb-12">
       <div class="pb-4 my-4">
         <Button
           @click="
