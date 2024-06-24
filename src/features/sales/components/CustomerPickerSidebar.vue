@@ -63,7 +63,7 @@ useInfiniteScroll(
         <SheetHeader class="mb-6">
           <SheetTitle>Selecciona cliente</SheetTitle>
           <SheetDescription>
-            Selecciona facilmente un cliente para tu venta
+            Selecciona fácilmente un cliente para tu venta
           </SheetDescription>
         </SheetHeader>
         <Input
@@ -81,7 +81,7 @@ useInfiniteScroll(
           </template>
           <template #title>No tienes clientes aun</template>
           <template #description
-            >Cuando tengas clientes agregados se mostraran aqui.
+            >Cuando tengas clientes agregados se mostraran aquí.
           </template>
         </FeedbackCard>
 

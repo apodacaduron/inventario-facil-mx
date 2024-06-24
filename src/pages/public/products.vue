@@ -19,7 +19,7 @@ const productsQuery = usePublicPageProductsQuery({
     enabled: toRef(() => uuidv4.test(route.params.orgId.toString())),
     search: "",
     orgId: toRef(() => route.params.orgId.toString()),
-    order: ['name', 'asc'],
+    order: ["name", "asc"],
     filters: toRef(() => {
       return [
         {

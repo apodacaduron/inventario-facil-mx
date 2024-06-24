@@ -19,38 +19,38 @@ import {
   Input,
   Label,
   useToast,
-} from '@/components/ui';
-import { ArrowUpTrayIcon, TrashIcon } from '@heroicons/vue/24/outline';
-import { Product, UpdateProduct, useProductServices } from '../composables';
-import { ref, toRef, watchEffect } from 'vue';
-import imageCompression from 'browser-image-compression';
+} from "@/components/ui";
+import { ArrowUpTrayIcon, TrashIcon } from "@heroicons/vue/24/outline";
+import { Product, UpdateProduct, useProductServices } from "../composables";
+import { ref, toRef, watchEffect } from "vue";
+import imageCompression from "browser-image-compression";
 import {
   createReusableTemplate,
   useElementHover,
   useMediaQuery,
-} from '@vueuse/core';
+} from "@vueuse/core";
 import {
   useAssetByUrlQuery,
   useAssetServices,
-} from '@/features/assets/composables';
-import { useMutation, useQueryClient } from '@tanstack/vue-query';
-import { useAuthStore } from '@/stores';
-import { useRoute } from 'vue-router';
+} from "@/features/assets/composables";
+import { useMutation, useQueryClient } from "@tanstack/vue-query";
+import { useAuthStore } from "@/stores";
+import { useRoute } from "vue-router";
 
 type ProductImageDialogProps = {
   product: Product | null;
 };
 
-const openModel = defineModel<boolean>('open');
+const openModel = defineModel<boolean>("open");
 const props = defineProps<ProductImageDialogProps>();
 const emit = defineEmits<{
-  (e: 'save', formValues: UpdateProduct): void;
+  (e: "save", formValues: UpdateProduct): void;
 }>();
 
 const inputFileRef = ref<HTMLInputElement | null>();
 const hasSelectedFile = ref(false);
 const selectedFile = ref<File | null>(null);
-const productImageUrl = ref('');
+const productImageUrl = ref("");
 const productHoverRef = ref();
 
 const route = useRoute();
@@ -64,7 +64,7 @@ const uploadFileMutation = useMutation({
   mutationFn: uploadFile,
 });
 const [ModalBodyTemplate, ModalBody] = createReusableTemplate();
-const isDesktop = useMediaQuery('(min-width: 768px)');
+const isDesktop = useMediaQuery("(min-width: 768px)");
 const assetByFilename = useAssetByUrlQuery({
   options: {
     url: toRef(() => props.product?.image_url),
@@ -88,7 +88,7 @@ function setPreview(event: Event): void {
   const inputElement = event.target as HTMLInputElement;
   const reader = new FileReader();
   reader.onload = function () {
-    productImageUrl.value = reader.result?.toString() ?? '';
+    productImageUrl.value = reader.result?.toString() ?? "";
   };
   const firstFileFound = inputElement.files?.[0];
   if (!firstFileFound) return;
@@ -97,9 +97,9 @@ function setPreview(event: Event): void {
 }
 
 function resetImage() {
-  productImageUrl.value = '';
+  productImageUrl.value = "";
   if (!inputFileRef.value?.value) return;
-  inputFileRef.value.value = '';
+  inputFileRef.value.value = "";
   hasSelectedFile.value = false;
   selectedFile.value = null;
 }
@@ -118,13 +118,18 @@ async function uploadFile() {
     );
     if (assetForThisProductExists && assetByRelatedIdResponse?.data?.id) {
       await assetServices.deleteAsset(assetByRelatedIdResponse?.data?.id);
-      await assetServices.deleteFile({ bucket: 'product-images', path: `${route.params.orgId.toString()}/${props.product?.id}/${assetByRelatedIdResponse?.data.filename}` })
+      await assetServices.deleteFile({
+        bucket: "product-images",
+        path: `${route.params.orgId.toString()}/${props.product?.id}/${
+          assetByRelatedIdResponse?.data.filename
+        }`,
+      });
     }
     await productServices.updateProduct({
       product_id: props.product.id,
-      image_url: '',
+      image_url: "",
     });
-    await queryClient.invalidateQueries({ queryKey: ['products'] });
+    await queryClient.invalidateQueries({ queryKey: ["products"] });
     openModel.value = false;
     return;
   }
@@ -132,19 +137,21 @@ async function uploadFile() {
   if (hasSelectedFile.value && selectedFile.value) {
     const compressedFile = await compressFile(selectedFile.value);
     if (!compressedFile) return;
-    const extension = selectedFile.value?.name.split('.').pop();
+    const extension = selectedFile.value?.name.split(".").pop();
 
     const response = await assetServices.uploadFile({
-      bucket: 'product-images',
+      bucket: "product-images",
       file: compressedFile,
-      path: `${route.params.orgId.toString()}/${props.product?.id}/main.${extension}`,
+      path: `${route.params.orgId.toString()}/${
+        props.product?.id
+      }/main.${extension}`,
     });
     if (response.error) {
       toast({
-        title: 'Uh oh! Something went wrong.',
+        title: "Uh oh! Algo salió mal.",
         description:
-          response?.error?.message ?? 'There was a problem with your request.',
-        variant: 'destructive',
+          response?.error?.message ?? "Hubo un problema con tu solicitud.",
+        variant: "destructive",
       });
       return;
     }
@@ -153,7 +160,7 @@ async function uploadFile() {
     if (!selectedFile.value?.name) return;
 
     const responsePublicUrl = await assetServices.getPublicUrlFromFile({
-      bucket: 'product-images',
+      bucket: "product-images",
       path: imagePath,
     });
 
@@ -171,7 +178,7 @@ async function uploadFile() {
     );
     if (assetForThisProductExists && assetByRelatedIdResponse?.data?.id) {
       await assetServices.updateAsset(assetByRelatedIdResponse?.data?.id, {
-        file_type: selectedFile.value?.type ?? 'image',
+        file_type: selectedFile.value?.type ?? "image",
         filename: `main.${extension}`,
         is_external: false,
         org_id: route.params.orgId.toString(),
@@ -182,7 +189,7 @@ async function uploadFile() {
       });
     } else {
       await assetServices.createAsset({
-        file_type: selectedFile.value?.type ?? 'image',
+        file_type: selectedFile.value?.type ?? "image",
         filename: `main.${extension}`,
         is_external: false,
         org_id: route.params.orgId.toString(),
@@ -197,19 +204,18 @@ async function uploadFile() {
       product_id: props.product.id,
       image_url: responsePublicUrl.data.publicUrl,
     });
-    await queryClient.invalidateQueries({ queryKey: ['products'] });
+    await queryClient.invalidateQueries({ queryKey: ["products"] });
   } else if (productImageUrl.value) {
     if (!isValidHttpUrl(productImageUrl.value)) {
       toast({
-        title: 'Uh oh! Something went wrong.',
-        description:
-          'The link provided is not a valid URL',
-        variant: 'destructive',
+        title: "Uh oh! Algo salió mal.",
+        description: "The link provided is not a valid URL",
+        variant: "destructive",
       });
       return;
-    };
+    }
 
-    const filename = productImageUrl.value.split('/').pop();
+    const filename = productImageUrl.value.split("/").pop();
     if (!filename) return;
 
     const assetByUrlResponse = await assetServices.getAssetByUrl(
@@ -225,21 +231,26 @@ async function uploadFile() {
       assetByRelatedIdResponse?.data?.id
     );
     if (assetForThisProductExists && assetByRelatedIdResponse?.data?.id) {
-      await assetServices.deleteFile({ bucket: 'product-images', path: `${route.params.orgId.toString()}/${props.product?.id}/${assetByRelatedIdResponse?.data.filename}` })
+      await assetServices.deleteFile({
+        bucket: "product-images",
+        path: `${route.params.orgId.toString()}/${props.product?.id}/${
+          assetByRelatedIdResponse?.data.filename
+        }`,
+      });
       await assetServices.updateAsset(assetByRelatedIdResponse?.data?.id, {
         url: productImageUrl.value,
-        file_type: 'image',
-        filename: '',
+        file_type: "image",
+        filename: "",
         is_external: true,
-        path: '',
+        path: "",
       });
     } else {
       await assetServices.createAsset({
-        file_type: 'image',
-        filename: '',
+        file_type: "image",
+        filename: "",
         is_external: true,
         org_id: route.params.orgId.toString(),
-        path: '',
+        path: "",
         url: productImageUrl.value,
         related_id: props.product?.id,
         user_id: authStore.session?.user.id,
@@ -250,18 +261,18 @@ async function uploadFile() {
       product_id: props.product.id,
       image_url: productImageUrl.value,
     });
-    await queryClient.invalidateQueries({ queryKey: ['products'] });
+    await queryClient.invalidateQueries({ queryKey: ["products"] });
   }
   openModel.value = false;
 }
 
 function isValidHttpUrl(maybeUrl: string) {
   let url;
-  
+
   try {
     url = new URL(maybeUrl);
   } catch (_) {
-    return false;  
+    return false;
   }
 
   return url.protocol === "http:" || url.protocol === "https:";
@@ -278,9 +289,9 @@ async function compressFile(imageFile: File) {
     return compressedFile;
   } catch (error) {
     toast({
-      title: 'Uh oh! Something went wrong.',
-      description: 'There was a problem compressing your image',
-      variant: 'destructive',
+      title: "Uh oh! Algo salió mal.",
+      description: "There was a problem compressing your image",
+      variant: "destructive",
     });
   }
 }
@@ -292,7 +303,7 @@ watchEffect(() => {
 watchEffect(() => {
   if (!openModel.value && isExternalAsset && !assetByFilename.isLoading.value)
     return;
-  productImageUrl.value = props.product?.image_url ?? '';
+  productImageUrl.value = props.product?.image_url ?? "";
 });
 </script>
 

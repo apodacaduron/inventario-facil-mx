@@ -17,21 +17,21 @@ import {
   AvatarFallback,
   AvatarImage,
   Badge,
-} from '@/components/ui';
-import { Sale, useSalesQuery, useSalesTotalIncomeQuery } from '../composables';
-import { useDashboardDates } from '@/features/dashboard';
-import { toRef } from 'vue';
-import { useCurrencyFormatter } from '@/features/products';
-import { FeedbackCard, useTableStates } from '@/features/global';
-import { FaceFrownIcon } from '@heroicons/vue/24/outline';
-import { useRoute } from 'vue-router';
+} from "@/components/ui";
+import { Sale, useSalesQuery, useSalesTotalIncomeQuery } from "../composables";
+import { useDashboardDates } from "@/features/dashboard";
+import { toRef } from "vue";
+import { useCurrencyFormatter } from "@/features/products";
+import { FeedbackCard, useTableStates } from "@/features/global";
+import { FaceFrownIcon } from "@heroicons/vue/24/outline";
+import { useRoute } from "vue-router";
 
-const openModel = defineModel<boolean>('open');
+const openModel = defineModel<boolean>("open");
 
 const route = useRoute();
 const currencyFormatter = useCurrencyFormatter();
 const dashboardDates = useDashboardDates({
-  period: 'daily',
+  period: "daily",
 });
 
 const salesQuery = useSalesQuery({
@@ -41,54 +41,54 @@ const salesQuery = useSalesQuery({
     filters: toRef(() => {
       return [
         {
-          column: 'and(completed_at',
-          operator: 'gte',
+          column: "and(completed_at",
+          operator: "gte",
           value: dashboardDates.dateRangeFromPeriod.value?.from.toISOString(),
-          filterType: 'or'
+          filterType: "or",
         },
         {
-          column: 'completed_at',
-          operator: 'lte',
+          column: "completed_at",
+          operator: "lte",
           value: `${dashboardDates.dateRangeFromPeriod.value?.to.toISOString()})`,
-          filterType: 'or'
+          filterType: "or",
         },
         {
-          column: 'and(created_at',
-          operator: 'gte',
+          column: "and(created_at",
+          operator: "gte",
           value: dashboardDates.dateRangeFromPeriod.value?.from.toISOString(),
-          filterType: 'or',
+          filterType: "or",
         },
         {
-          column: 'created_at',
-          operator: 'lte',
+          column: "created_at",
+          operator: "lte",
           value: `${dashboardDates.dateRangeFromPeriod.value?.to.toISOString()})`,
-          filterType: 'or'
+          filterType: "or",
         },
       ];
     }),
   },
 });
-const tableLoadingStates = useTableStates(salesQuery, '');
+const tableLoadingStates = useTableStates(salesQuery, "");
 const salesTotalIncomeQuery = useSalesTotalIncomeQuery({
   options: {
     orgId: toRef(() => route.params.orgId.toString()),
     range: toRef(() => ({
-      from: dashboardDates.dateRangeFromPeriod.value?.from.toISOString() ?? '',
-      to: dashboardDates.dateRangeFromPeriod.value?.to.toISOString() ?? '',
+      from: dashboardDates.dateRangeFromPeriod.value?.from.toISOString() ?? "",
+      to: dashboardDates.dateRangeFromPeriod.value?.to.toISOString() ?? "",
     })),
   },
 });
 
-function getBadgeColorFromStatus(status: Sale['status']) {
+function getBadgeColorFromStatus(status: Sale["status"]) {
   switch (status) {
-    case 'cancelled':
-      return 'destructive';
-    case 'in_progress':
-      return 'outline';
-    case 'completed':
-      return 'default';
+    case "cancelled":
+      return "destructive";
+    case "in_progress":
+      return "outline";
+    case "completed":
+      return "default";
     default:
-      return 'outline';
+      return "outline";
   }
 }
 </script>
@@ -107,9 +107,7 @@ function getBadgeColorFromStatus(status: Sale['status']) {
         <template #icon>
           <FaceFrownIcon class="w-10 h-10 stroke-[1px]" />
         </template>
-        <template #title>
-          ¡Sin Ventas Hoy!
-        </template>
+        <template #title> ¡Sin Ventas Hoy! </template>
         <template #description>
           ¡Comienza un Nuevo Día de Oportunidades!
         </template>
@@ -122,7 +120,7 @@ function getBadgeColorFromStatus(status: Sale['status']) {
             <TableHead class="text-center">Productos</TableHead>
             <TableHead class="text-center">Cantidad</TableHead>
             <TableHead class="text-center"> Total </TableHead>
-            <TableHead class="text-center"> Costo de envio </TableHead>
+            <TableHead class="text-center"> Costo de envío </TableHead>
             <TableHead class="text-center"> Estatus</TableHead>
           </TableRow>
         </TableHeader>
@@ -253,7 +251,9 @@ function getBadgeColorFromStatus(status: Sale['status']) {
           <div class="text-4xl font-medium">
             {{ currencyFormatter.parse(salesTotalIncomeQuery.data.value) }}
           </div>
-          <span class="text-xs text-muted-foreground">Solo se suman las ventas completadas hoy</span>
+          <span class="text-xs text-muted-foreground"
+            >Solo se suman las ventas completadas hoy</span
+          >
         </div>
       </SheetFooter>
     </SheetContent>

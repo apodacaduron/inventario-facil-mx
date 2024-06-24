@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { supabase } from '@/config/supabase';
-import { AuthLayout } from '@/features/auth';
-import { Input, Button, useToast } from '@/components/ui';
-import { useMutation } from '@tanstack/vue-query';
-import { useRouter } from 'vue-router';
-import z from 'zod';
-import { toTypedSchema } from '@vee-validate/zod';
-import { useForm } from 'vee-validate';
+import { supabase } from "@/config/supabase";
+import { AuthLayout } from "@/features/auth";
+import { Input, Button } from "@/components/ui";
+import { useMutation } from "@tanstack/vue-query";
+import { useRouter } from "vue-router";
+import z from "zod";
+import { toTypedSchema } from "@vee-validate/zod";
+import { useForm } from "vee-validate";
 import {
   FormControl,
   FormDescription,
@@ -14,10 +14,10 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
-import { analytics } from '@/config/analytics';
+} from "@/components/ui/form";
+import { analytics } from "@/config/analytics";
+import { notifyIfHasError } from "@/features/global";
 
-const { toast } = useToast();
 const router = useRouter();
 const signInWithPasswordMutation = useMutation({
   mutationFn: signInWithPassword,
@@ -29,9 +29,9 @@ const formSchema = toTypedSchema(
   z.object({
     email: z
       .string()
-      .min(1, 'Correo es requerido')
-      .email('Ingresa un correo válido'),
-    password: z.string().min(1, 'Contraseña es requerida'),
+      .min(1, "Correo es requerido")
+      .email("Ingresa un correo válido"),
+    password: z.string().min(1, "Contraseña es requerida"),
   })
 );
 
@@ -40,19 +40,13 @@ const { handleSubmit } = useForm({
 });
 
 const onSubmit = handleSubmit(async (formValues) => {
-  const response = await signInWithPasswordMutation.mutateAsync(formValues);
-  const hasError = Boolean(response?.error);
-  if (hasError) {
-    toast({
-      title: 'Uh oh! Something went wrong.',
-      description: response?.error?.message ?? 'There was a problem with your request.',
-      variant: 'destructive',
-    });
-    return;
-  }
-
-  analytics.event('sign-in', { 'event_category': 'authentication', method: 'Credentials' });
-  router.push('/');
+  const { error } = await signInWithPasswordMutation.mutateAsync(formValues);
+  notifyIfHasError(error);
+  analytics.event("sign-in", {
+    event_category: "authentication",
+    method: "Credentials",
+  });
+  router.push("/");
 });
 </script>
 
@@ -66,9 +60,16 @@ const onSubmit = handleSubmit(async (formValues) => {
       <div class="pb-4 my-4">
         <Button
           @click="
-            supabase.auth.signInWithOAuth({
-              provider: 'google',
-            }).then(() => analytics.event('sign-in', { 'event_category': 'authentication', method: 'Google' }))
+            supabase.auth
+              .signInWithOAuth({
+                provider: 'google',
+              })
+              .then(() =>
+                analytics.event('sign-in', {
+                  event_category: 'authentication',
+                  method: 'Google',
+                })
+              )
           "
           class="w-full"
           variant="outline"
@@ -117,7 +118,7 @@ const onSubmit = handleSubmit(async (formValues) => {
           >Iniciar sesión</Button
         >
         <div class="text-center">
-          Aún no tienes una cuenta?
+          ¿Aún no tienes una cuenta?
           <router-link
             to="/auth/sign-up"
             class="font-medium text-primary hover:underline"

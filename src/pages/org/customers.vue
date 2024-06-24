@@ -334,7 +334,7 @@ watchEffect(() => {
         </template>
         <template #title>Comienza creando una cliente</template>
         <template #description
-          >Clientes creados se mostraran aqui. <br />
+          >Clientes creados se mostraran aquí. <br />
           Comienza creando la primera cliente.
         </template>
         <template #action
@@ -355,7 +355,7 @@ watchEffect(() => {
         </template>
         <template #title>No se encontraron suscripciones</template>
         <template #description
-          >Tu busqueda "{{ customerSearch }}" no coincidio con alguna cliente.
+          >Tu búsqueda "{{ customerSearch }}" no coincidió con alguna cliente.
           <br />
           Por favor intente de nuevo a agregue una nueva cliente.
         </template>

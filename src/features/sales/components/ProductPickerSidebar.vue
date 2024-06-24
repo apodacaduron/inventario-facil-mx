@@ -162,7 +162,7 @@ function getMaxIncrementValue(product: Product | null) {
         <SheetHeader class="mb-6">
           <SheetTitle>Selecciona productos</SheetTitle>
           <SheetDescription>
-            Selecciona facilmente productos para agregar a tu venta
+            Selecciona fácilmente productos para agregar a tu venta
           </SheetDescription>
         </SheetHeader>
         <Input
@@ -180,7 +180,7 @@ function getMaxIncrementValue(product: Product | null) {
           </template>
           <template #title>No tienes productos en stock</template>
           <template #description
-            >Cuando tengas productos en stock se mostraran aqui.
+            >Cuando tengas productos en stock se mostraran aquí.
           </template>
         </FeedbackCard>
 

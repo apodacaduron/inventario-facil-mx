@@ -10,7 +10,12 @@ import {
   Separator,
 } from "@/components/ui";
 import { Product, useProductStockHistoryQuery } from "../composables";
-import { ChevronDownIcon, ChevronUpIcon, HistoryIcon, MoveRightIcon } from "lucide-vue-next";
+import {
+  ChevronDownIcon,
+  ChevronUpIcon,
+  HistoryIcon,
+  MoveRightIcon,
+} from "lucide-vue-next";
 import { FeedbackCard, useTableStates } from "@/features/global";
 import { toRef } from "vue";
 
@@ -54,7 +59,7 @@ const tableLoadingStates = useTableStates(productStockHistoryQuery, "");
         <template #title>Este producto aun no tiene historial</template>
         <template #description
           >Una vez que el stock de alguno de tus productos tenga un cambio se
-          mostrara aqui
+          mostrara aquí
         </template>
       </FeedbackCard>
 
@@ -62,32 +67,35 @@ const tableLoadingStates = useTableStates(productStockHistoryQuery, "");
         v-for="page in productStockHistoryQuery.data.value?.pages"
         class="flex flex-col gap-2 my-6"
       >
-        <div
-          v-for="product in page.data"
-        >
-            <div class="flex items-center justify-between gap-2 mb-2">
-                <div class="flex items-center gap-4">
-                    <ChevronUpIcon v-if="(product.old_stock ?? 0) < (product.new_stock ?? 0)" class="size-6 text-green-500" />
-                    <ChevronDownIcon v-else class="size-6 text-red-500" />
-                    <div class="flex items-center gap-3">
-                      <span class="text-xl line-through text-muted-foreground">{{ product.old_stock }}</span>
-                      <MoveRightIcon class="size-4" />
-                      <span class="text-2xl">{{ product.new_stock }}</span>
-                    </div>
-                </div>
-                <div class="text-muted-foreground text-xs">
-                  {{
-                    new Date(product.created_at).toLocaleDateString("es-MX", {
-                      year: "numeric",
-                      month: "short",
-                      day: "numeric",
-                      hour: 'numeric',
-                      minute: 'numeric'
-                    })
-                  }}
-                </div>
+        <div v-for="product in page.data">
+          <div class="flex items-center justify-between gap-2 mb-2">
+            <div class="flex items-center gap-4">
+              <ChevronUpIcon
+                v-if="(product.old_stock ?? 0) < (product.new_stock ?? 0)"
+                class="size-6 text-green-500"
+              />
+              <ChevronDownIcon v-else class="size-6 text-red-500" />
+              <div class="flex items-center gap-3">
+                <span class="text-xl line-through text-muted-foreground">{{
+                  product.old_stock
+                }}</span>
+                <MoveRightIcon class="size-4" />
+                <span class="text-2xl">{{ product.new_stock }}</span>
+              </div>
             </div>
-            <Separator />
+            <div class="text-muted-foreground text-xs">
+              {{
+                new Date(product.created_at).toLocaleDateString("es-MX", {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                  hour: "numeric",
+                  minute: "numeric",
+                })
+              }}
+            </div>
+          </div>
+          <Separator />
         </div>
       </div>
 

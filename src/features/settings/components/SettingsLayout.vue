@@ -13,7 +13,7 @@ import {
 } from "@/components/ui";
 import { useDark, useToggle } from "@vueuse/core";
 import { useRouter } from "vue-router";
-import { ArrowLeft } from 'lucide-vue-next'
+import { ArrowLeft } from "lucide-vue-next";
 import {
   ArrowLeftOnRectangleIcon,
   BuildingOffice2Icon,
@@ -106,15 +106,18 @@ const menuList = {
 
   <div class="mt-[70px] space-y-6 p-6 md:p-10 pb-16">
     <div class="flex gap-4">
-      <router-link :to="`/org/${organizationStore.userOrganizations?.find(Boolean)?.org_id}/dashboard`">
-
-        <Button variant="outline" size="icon"> <ArrowLeft class="size-4" /> </Button>
+      <router-link
+        :to="`/org/${
+          organizationStore.userOrganizations?.find(Boolean)?.org_id
+        }/dashboard`"
+      >
+        <Button variant="outline" size="icon">
+          <ArrowLeft class="size-4" />
+        </Button>
       </router-link>
       <div class="space-y-0.5">
-        <h2 class="text-2xl font-bold tracking-tight">Configuracion</h2>
-        <p class="text-muted-foreground">
-          Configuracion de tu cuenta.
-        </p>
+        <h2 class="text-2xl font-bold tracking-tight">Configuración</h2>
+        <p class="text-muted-foreground">Configuración de tu cuenta.</p>
       </div>
     </div>
     <Separator class="my-6" />

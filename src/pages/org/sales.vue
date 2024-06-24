@@ -148,14 +148,6 @@ function openViewSaleSidebar(sale: Sale) {
   isViewSaleSidebarOpen.value = true;
 }
 
-// function handleSaveSidebar(formValues: CreateSale | UpdateSale) {
-//   if (saleServicesTypeguards.isCreateSale(formValues)) {
-//   } else {
-//     updateSaleMutation.mutate(formValues);
-//   }
-//   isCreateOrUpdateSidebarOpen.value = false;
-// }
-
 function openUpdateSaleSidebar(sale?: Sale | null) {
   activeSale.value = sale ?? null;
   sidebarManager.openSidebar("update-sale");
@@ -295,7 +287,7 @@ watchEffect(() => {
             <TableHead class="text-center">Productos</TableHead>
             <TableHead class="text-center">Cantidad</TableHead>
             <TableHead class="text-center"> Total </TableHead>
-            <TableHead class="text-center"> Costo de envio </TableHead>
+            <TableHead class="text-center"> Costo de envío </TableHead>
             <TableHead class="text-center"> Estatus</TableHead>
             <TableHead class="text-center"> - </TableHead>
           </TableRow>
@@ -500,7 +492,7 @@ watchEffect(() => {
         </template>
         <template #title>Comienza creando una venta</template>
         <template #description
-          >Ventas creadas se mostraran aqui. <br />
+          >Ventas creadas se mostraran aquí. <br />
           Comienza creando tu primera venta.
         </template>
         <template #action
@@ -518,7 +510,7 @@ watchEffect(() => {
         </template>
         <template #title>No se encontraron ventas</template>
         <template #description
-          >Tu búsqueda "{{ saleSearch }}" no coincidio con alguna venta.
+          >Tu búsqueda "{{ saleSearch }}" no coincidió con alguna venta.
           <br />
           Por favor intente de nuevo o agregue una nueva venta.
         </template>

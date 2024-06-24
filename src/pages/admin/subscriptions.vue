@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, toRef } from 'vue';
+import { ref, toRef } from "vue";
 import {
   Button,
   Table,
@@ -14,21 +14,19 @@ import {
   Input,
   Skeleton,
   Badge,
-} from '@/components/ui';
-import {
-  CalendarDaysIcon,
-} from '@heroicons/vue/24/outline';
-import { refDebounced, useInfiniteScroll } from '@vueuse/core';
-import { FeedbackCard, useTableStates, useTableOrder } from '@/features/global';
-import { useSubscriptionsQuery } from '@/features/subscriptions';
-import { useCurrencyFormatter } from '@/features/products';
+} from "@/components/ui";
+import { CalendarDaysIcon } from "@heroicons/vue/24/outline";
+import { refDebounced, useInfiniteScroll } from "@vueuse/core";
+import { FeedbackCard, useTableStates, useTableOrder } from "@/features/global";
+import { useSubscriptionsQuery } from "@/features/subscriptions";
+import { useCurrencyFormatter } from "@/features/products";
 
 const tableRef = ref<HTMLElement | null>(null);
-const userSearch = ref('');
+const userSearch = ref("");
 const userSearchDebounced = refDebounced(userSearch, 400);
 const subscriptionsTableOrder = useTableOrder({
   options: {
-    initialOrder: ['created_at', 'desc'],
+    initialOrder: ["created_at", "desc"],
   },
 });
 
@@ -168,35 +166,35 @@ const tableLoadingStates = useTableStates(subscriptionsQuery, userSearch);
               <TableCell class="text-center">{{
                 subscription.start_date
                   ? new Date(subscription.start_date).toLocaleDateString(
-                      'es-MX',
+                      "es-MX",
                       {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
                       }
                     )
-                  : '-'
+                  : "-"
               }}</TableCell>
               <TableCell class="text-center">
                 {{
                   subscription.end_date
                     ? new Date(subscription.end_date).toLocaleDateString(
-                        'es-MX',
+                        "es-MX",
                         {
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric',
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
                         }
                       )
-                    : '-'
+                    : "-"
                 }}
               </TableCell>
               <TableCell class="text-center">
                 <Badge>
                   {{
-                    new Date() <= new Date(subscription.end_date ?? '')
-                      ? 'ACTIVA'
-                      : 'EXPIRADA'
+                    new Date() <= new Date(subscription.end_date ?? "")
+                      ? "ACTIVA"
+                      : "EXPIRADA"
                   }}
                 </Badge>
               </TableCell>
@@ -204,7 +202,12 @@ const tableLoadingStates = useTableStates(subscriptionsQuery, userSearch);
           </template>
         </TableBody>
       </Table>
-      <div v-if="subscriptionsQuery.isFetchingNextPage.value" class="w-full flex justify-center">CARGANDO MAS...</div>
+      <div
+        v-if="subscriptionsQuery.isFetchingNextPage.value"
+        class="w-full flex justify-center"
+      >
+        CARGANDO MAS...
+      </div>
 
       <FeedbackCard
         v-if="tableLoadingStates.showEmptyState.value"
@@ -215,7 +218,7 @@ const tableLoadingStates = useTableStates(subscriptionsQuery, userSearch);
         </template>
         <template #title>Comienza creando una suscripción</template>
         <template #description
-          >Suscripciones creadas se mostraran aqui. <br />
+          >Suscripciones creadas se mostraran aquí. <br />
           Comienza creando la primera suscripción.
         </template>
       </FeedbackCard>
@@ -228,7 +231,7 @@ const tableLoadingStates = useTableStates(subscriptionsQuery, userSearch);
         </template>
         <template #title>No se encontraron suscripciones</template>
         <template #description
-          >Tu busqueda "{{ userSearch }}" no coincidio con alguna suscripción.
+          >Tu búsqueda "{{ userSearch }}" no coincidió con alguna suscripción.
           <br />
           Por favor intente de nuevo a agregue una nueva suscripción.
         </template>

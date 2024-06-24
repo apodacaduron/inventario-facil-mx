@@ -36,7 +36,7 @@ import {
       <FormControl>
         <Input
           type="number"
-          placeholder="Ingresa el telefono del cliente"
+          placeholder="Ingresa el teléfono del cliente"
           v-bind="componentField"
         />
       </FormControl>

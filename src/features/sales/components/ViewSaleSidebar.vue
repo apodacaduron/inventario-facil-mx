@@ -86,7 +86,7 @@ const currencyFormatter = useCurrencyFormatter();
         </div>
         <div v-if="sale?.shipping_cost">
           <div class="font-medium text-sm tracking-tight text-foreground">
-            Costo de envio
+            Costo de envío
           </div>
           <div class="flex items-center text-slate-900 dark:text-white">
             {{ currencyFormatter.parse(sale?.shipping_cost) }}

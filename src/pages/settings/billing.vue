@@ -41,8 +41,11 @@ async function openStripeCustomerPortal() {
   <Separator />
 
   <div class="flex justify-start mt-4">
-    <Button :disabled="stripeCustomerPortalMutation.isPending.value" @click="stripeCustomerPortalMutation.mutate">
-      Gestionar subscripcion
+    <Button
+      :disabled="stripeCustomerPortalMutation.isPending.value"
+      @click="stripeCustomerPortalMutation.mutate"
+    >
+      Gestionar suscripción
     </Button>
   </div>
 </template>

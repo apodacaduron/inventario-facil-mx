@@ -215,10 +215,10 @@ watch(openModel, (nextOpenValue) => {
 
         <FormField v-slot="{ componentField }" name="shipping_cost">
           <FormItem v-auto-animate>
-            <FormLabel>Costo de envio</FormLabel>
+            <FormLabel>Costo de envío</FormLabel>
             <FormControl>
               <Input
-                placeholder="Ingresa el costo de envio"
+                placeholder="Ingresa el costo de envío"
                 inputmode="numeric"
                 v-bind="componentField"
               />
