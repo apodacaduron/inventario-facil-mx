@@ -46,7 +46,10 @@ const initialForm: UpdateCustomer = {
 const formSchema = toTypedSchema(
   z.object({
     name: z.string().min(1, "Nombre de cliente es requerido"),
-    phone: z.coerce.string().length(10, "Teléfono debe tener 10 dígitos"),
+    phone: z.coerce
+      .string()
+      .length(10, "Teléfono debe tener 10 dígitos")
+      .or(z.literal("")),
     email: z.string().email("Debe ser un correo valido").or(z.literal("")),
     address: z.string().or(z.literal("")),
     map_url: z.string().url("Debe ser un url valido").or(z.literal("")),
