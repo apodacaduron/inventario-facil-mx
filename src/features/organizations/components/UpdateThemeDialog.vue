@@ -15,8 +15,6 @@ import {
   DrawerFooter,
   DrawerHeader,
   DrawerTitle,
-  Input,
-  Label,
 } from "@/components/ui";
 import { useMediaQuery } from "@vueuse/core";
 import { UserOrganization } from "@/stores";
