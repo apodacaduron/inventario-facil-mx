@@ -347,6 +347,7 @@ watchEffect(() => {
             <TableRow v-for="sale in page.data" :key="sale.id">
               <TableCell
                 class="flex items-center p-4 text-foreground whitespace-nowrap w-max"
+                @click="openViewSaleSidebar(sale)"
               >
                 <Avatar>
                   <AvatarFallback>{{
@@ -399,13 +400,17 @@ watchEffect(() => {
                   </div>
                 </div></TableCell
               >
-              <TableCell class="text-center">{{
-                sale.i_sale_products.reduce(
-                  (acc, saleProduct) => acc + (saleProduct.qty ?? 0),
-                  0
-                )
-              }}</TableCell>
-              <TableCell class="text-center">
+              <TableCell
+                @click="openViewSaleSidebar(sale)"
+                class="text-center"
+                >{{
+                  sale.i_sale_products.reduce(
+                    (acc, saleProduct) => acc + (saleProduct.qty ?? 0),
+                    0
+                  )
+                }}</TableCell
+              >
+              <TableCell @click="openViewSaleSidebar(sale)" class="text-center">
                 {{
                   currencyFormatter.parse(
                     sale.i_sale_products.reduce(
@@ -416,10 +421,10 @@ watchEffect(() => {
                   )
                 }}
               </TableCell>
-              <TableCell class="text-center">
+              <TableCell @click="openViewSaleSidebar(sale)" class="text-center">
                 {{ currencyFormatter.parse(sale.shipping_cost) }}
               </TableCell>
-              <TableCell class="text-center">
+              <TableCell @click="openViewSaleSidebar(sale)" class="text-center">
                 <Badge :variant="getBadgeColorFromStatus(sale.status)"
                   >{{
                     LOCALE[sale.status ?? "in_progress"]?.toLocaleUpperCase()
