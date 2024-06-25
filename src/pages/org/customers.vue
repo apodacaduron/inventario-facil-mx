@@ -39,6 +39,10 @@ import { refDebounced, useInfiniteScroll } from "@vueuse/core";
 import { useOrganizationStore } from "@/stores";
 import { useRoute } from "vue-router";
 
+const LOCALE = {
+  trusted: "Confiable",
+  not_trusted: "No confiable",
+};
 const WHATSAPP_URL = import.meta.env.VITE_WHATSAPP_URL;
 const tableRef = ref<HTMLElement | null>(null);
 const customerSearch = ref("");
@@ -275,7 +279,11 @@ watchEffect(() => {
                 <Badge
                   :variant="getBadgeColorFromStatus(customer.trust_status)"
                 >
-                  {{ customer.trust_status?.toLocaleUpperCase() }}
+                  {{
+                    LOCALE[
+                      customer.trust_status ?? "trusted"
+                    ]?.toLocaleUpperCase()
+                  }}
                 </Badge>
               </TableCell>
               <TableCell class="text-center flex justify-center gap-2">

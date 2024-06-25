@@ -27,6 +27,11 @@ withDefaults(defineProps<ViewSaleSidebarProps>(), {
   sale: null,
 });
 
+const LOCALE = {
+  in_progress: "En progreso",
+  cancelled: "Cancelada",
+  completed: "Completada",
+};
 const WHATSAPP_URL = import.meta.env.VITE_WHATSAPP_URL;
 
 const currencyFormatter = useCurrencyFormatter();
@@ -38,7 +43,9 @@ const currencyFormatter = useCurrencyFormatter();
       <SheetHeader>
         <SheetTitle>
           Detalle de venta
-          <Badge>{{ sale?.status?.toUpperCase() }}</Badge>
+          <Badge>{{
+            LOCALE[sale?.status ?? "in_progress"]?.toUpperCase()
+          }}</Badge>
         </SheetTitle>
         <SheetDescription> Ve más a detalle tu venta </SheetDescription>
       </SheetHeader>

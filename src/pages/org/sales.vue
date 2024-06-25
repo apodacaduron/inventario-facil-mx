@@ -59,6 +59,11 @@ import CustomerPickerSidebar from "@/features/sales/components/CustomerPickerSid
 import { Customer } from "@/features/customers";
 import ProductPickerSidebar from "@/features/sales/components/ProductPickerSidebar.vue";
 
+const LOCALE = {
+  in_progress: "En progreso",
+  cancelled: "Cancelada",
+  completed: "Completada",
+};
 const WHATSAPP_URL = import.meta.env.VITE_WHATSAPP_URL;
 const tableFiltersRef = useStorage<{
   status: NonNullable<Tables<"i_sales">["status"]> | "all";
@@ -416,7 +421,9 @@ watchEffect(() => {
               </TableCell>
               <TableCell class="text-center">
                 <Badge :variant="getBadgeColorFromStatus(sale.status)"
-                  >{{ sale.status?.toLocaleUpperCase() }}
+                  >{{
+                    LOCALE[sale.status ?? "in_progress"]?.toLocaleUpperCase()
+                  }}
                 </Badge>
               </TableCell>
               <TableCell class="text-center flex justify-center gap-2">
