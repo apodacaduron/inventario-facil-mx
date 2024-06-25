@@ -12,6 +12,7 @@ import { watch } from "vue";
 import { z } from "zod";
 import {
   CreateCustomer,
+  Customer,
   TRUST_STATUS,
   useCustomerServices,
 } from "../composables";
@@ -24,6 +25,9 @@ import { analytics } from "@/config/analytics";
 import SharedCustomerFormValues from "./SharedCustomerFormValues.vue";
 
 const openModel = defineModel<boolean>("open");
+const emits = defineEmits<{
+  (e: "createCustomer", customer: Customer | null): void;
+}>();
 
 const initialForm: CreateCustomer = {
   name: "",
@@ -37,7 +41,10 @@ const initialForm: CreateCustomer = {
 const formSchema = toTypedSchema(
   z.object({
     name: z.string().min(1, "Nombre de cliente es requerido"),
-    phone: z.coerce.string().length(10, "Teléfono debe tener 10 digitos"),
+    phone: z.coerce
+      .string()
+      .length(10, "Teléfono debe tener 10 dígitos")
+      .or(z.literal("")),
     email: z.string().email("Debe ser un correo valido").or(z.literal("")),
     address: z.string().or(z.literal("")),
     map_url: z.string().url("Debe ser un url valido").or(z.literal("")),
@@ -52,12 +59,13 @@ const queryClient = useQueryClient();
 const customerServices = useCustomerServices();
 const createCustomerMutation = useMutation({
   mutationFn: async (formValues: CreateCustomer) => {
-    const { error } = await customerServices.createCustomer(
+    const { data, error } = await customerServices.createCustomer(
       route.params.orgId.toString(),
       formValues
     );
     notifyIfHasError(error);
     await queryClient.invalidateQueries({ queryKey: ["customers"] });
+    emits("createCustomer", data);
     openModel.value = false;
     analytics.event("create-customer", formValues);
   },

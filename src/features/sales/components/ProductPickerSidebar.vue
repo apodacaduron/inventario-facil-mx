@@ -16,8 +16,17 @@ import {
   Badge,
   SheetFooter,
 } from "@/components/ui";
-import { FeedbackCard, useTableStates } from "@/features/global";
-import { MinusIcon, PlusIcon, ShoppingBagIcon } from "lucide-vue-next";
+import {
+  FeedbackCard,
+  useSidebarManager,
+  useTableStates,
+} from "@/features/global";
+import {
+  MinusIcon,
+  PackagePlusIcon,
+  PlusIcon,
+  ShoppingBagIcon,
+} from "lucide-vue-next";
 import { computed, ref, toRef } from "vue";
 import { refDebounced, useInfiniteScroll } from "@vueuse/core";
 import { useRoute } from "vue-router";
@@ -25,6 +34,7 @@ import { Sale } from "../composables";
 import { Product, useProductsQuery } from "@/features/products";
 
 type Props = {
+  sidebarManager: ReturnType<typeof useSidebarManager>;
   sale: Sale | null;
   activeProducts: Map<
     string,
@@ -162,14 +172,25 @@ function getMaxIncrementValue(product: Product | null) {
         <SheetHeader class="mb-6">
           <SheetTitle>Selecciona productos</SheetTitle>
           <SheetDescription>
-            Selecciona facilmente productos para agregar a tu venta
+            Selecciona fácilmente productos para agregar a tu venta
           </SheetDescription>
         </SheetHeader>
-        <Input
-          v-model="productSearch"
-          type="search"
-          placeholder="Busca productos..."
-        />
+        <div class="flex gap-3">
+          <Input
+            v-model="productSearch"
+            type="search"
+            placeholder="Busca productos..."
+          />
+          <Button
+            type="button"
+            class="shrink-0"
+            variant="ghost"
+            size="icon"
+            @click="sidebarManager.openSidebar('create-product')"
+          >
+            <PackagePlusIcon class="size-4" />
+          </Button>
+        </div>
 
         <FeedbackCard
           v-if="productsLoadingStates.showEmptyState.value"
@@ -180,7 +201,7 @@ function getMaxIncrementValue(product: Product | null) {
           </template>
           <template #title>No tienes productos en stock</template>
           <template #description
-            >Cuando tengas productos en stock se mostraran aqui.
+            >Cuando tengas productos en stock se mostraran aquí.
           </template>
         </FeedbackCard>
 

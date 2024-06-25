@@ -29,15 +29,17 @@ const props = defineProps<DeleteSaleDialogProps>();
 const queryClient = useQueryClient();
 const saleServices = useSaleServices();
 const isDesktop = useMediaQuery("(min-width: 768px)");
-const deleteSaleMutation = useMutation({ mutationFn: async () => {
-  const saleId = props.sale?.id;
-  if (!saleId) throw new Error('Sale id required to perform delete');
-  await saleServices.deleteSale(saleId);
-  openModel.value = false;
-  await queryClient.invalidateQueries({ queryKey: ['sales'] });
-  await queryClient.invalidateQueries({ queryKey: ['products'] });
-  analytics.event('delete-sale', props.sale);
-} });
+const deleteSaleMutation = useMutation({
+  mutationFn: async () => {
+    const saleId = props.sale?.id;
+    if (!saleId) throw new Error("Sale id required to perform delete");
+    await saleServices.deleteSale(saleId);
+    openModel.value = false;
+    await queryClient.invalidateQueries({ queryKey: ["sales"] });
+    await queryClient.invalidateQueries({ queryKey: ["products"] });
+    analytics.event("delete-sale", props.sale);
+  },
+});
 </script>
 
 <template>

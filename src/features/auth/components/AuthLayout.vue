@@ -6,12 +6,10 @@ const componentName = "auth-layout";
   <div :class="componentName">
     <main :class="`${componentName}__form`">
       <router-link to="/">
-        <a href="https://flowbite.com">
-          <span
-            class="self-center text-xl sm:text-2xl whitespace-nowrap dark:text-white"
-            >inventariofacil.mx</span
-          >
-        </a>
+        <span
+          class="self-center text-xl sm:text-2xl whitespace-nowrap mt-12 dark:text-white"
+          >inventariofacil.mx</span
+        >
       </router-link>
       <slot />
     </main>
@@ -23,7 +21,7 @@ const componentName = "auth-layout";
 
 <style scoped lang="scss">
 .auth-layout {
-  @apply flex flex-1 h-screen;
+  @apply flex flex-1 min-h-screen;
   &__logo {
     @apply max-w-md w-64 mb-6;
   }
@@ -33,6 +31,7 @@ const componentName = "auth-layout";
   }
   &__aside {
     @apply flex-1 flex-shrink-0 hidden basis-1/4 xl:flex;
+    @apply h-screen;
   }
   &__bg {
     @apply w-full h-full object-cover;

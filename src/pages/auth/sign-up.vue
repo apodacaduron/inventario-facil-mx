@@ -1,26 +1,25 @@
 <script setup lang="ts">
-import { supabase } from '@/config/supabase';
-import { AuthLayout } from '@/features/auth';
-import { Input, Button, useToast } from '@/components/ui';
-import { useMutation } from '@tanstack/vue-query';
-import { useRouter } from 'vue-router';
-import z from 'zod';
-import { toTypedSchema } from '@vee-validate/zod';
-import { useForm } from 'vee-validate';
+import { supabase } from "@/config/supabase";
+import { AuthLayout } from "@/features/auth";
+import { Input, Button } from "@/components/ui";
+import { useMutation } from "@tanstack/vue-query";
+import { useRouter } from "vue-router";
+import z from "zod";
+import { toTypedSchema } from "@vee-validate/zod";
+import { useForm } from "vee-validate";
 import {
   FormControl,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
-import { FeedbackCard } from '@/features/global';
-import { ref } from 'vue';
-import { analytics } from '@/config/analytics';
+} from "@/components/ui/form";
+import { FeedbackCard, notifyIfHasError } from "@/features/global";
+import { ref } from "vue";
+import { analytics } from "@/config/analytics";
 
 const isSignUpSuccessful = ref(false);
 
-const { toast } = useToast();
 const router = useRouter();
 const signUpMutation = useMutation({
   mutationFn: signUp,
@@ -48,17 +47,17 @@ const formSchema = toTypedSchema(
     .object({
       email: z
         .string()
-        .min(1, 'Correo es requerido')
-        .email('Ingresa un correo válido'),
-      full_name: z.string().min(1, 'Nombre es requerido'),
+        .min(1, "Correo es requerido")
+        .email("Ingresa un correo válido"),
+      full_name: z.string().min(1, "Nombre es requerido"),
       password: z
         .string()
-        .min(8, 'La contraseña debe tener al menos 8 caracteres'),
-      confirmPassword: z.string().min(1, 'Confirmar contraseña es requerido'),
+        .min(8, "La contraseña debe tener al menos 8 caracteres"),
+      confirmPassword: z.string().min(1, "Confirmar contraseña es requerido"),
     })
     .refine((data) => data.password === data.confirmPassword, {
-      message: 'Las contraseñas no coinciden',
-      path: ['confirmPassword'],
+      message: "Las contraseñas no coinciden",
+      path: ["confirmPassword"],
     })
 );
 
@@ -67,22 +66,15 @@ const { handleSubmit } = useForm({
 });
 
 const onSubmit = handleSubmit(async (formValues) => {
-  const response = await signUpMutation.mutateAsync(formValues);
-  const hasError = Boolean(response?.error);
-
-  if (hasError) {
-    toast({
-      title: 'Uh oh! Something went wrong.',
-      description: response?.error?.message ?? 'There was a problem with your request.',
-      variant: 'destructive',
-    });
-    return;
-  }
-
-  analytics.event('sign-up', { 'event_category': 'authentication', method: 'Credentials' });
+  const { error } = await signUpMutation.mutateAsync(formValues);
+  notifyIfHasError(error);
+  analytics.event("sign-up", {
+    event_category: "authentication",
+    method: "Credentials",
+  });
   isSignUpSuccessful.value = true;
   setTimeout(() => {
-    router.push('/auth/sign-in');
+    router.push("/auth/sign-in");
   }, 10_000);
 });
 </script>
@@ -99,16 +91,23 @@ const onSubmit = handleSubmit(async (formValues) => {
     </FeedbackCard>
     <template v-else>
       <div class="w-full max-w-md mx-auto px-6 py-3.5">
-        <h1 class="mt-8 mb-2 text-2xl lg:text-3xl">Crea una cuenta</h1>
+        <h1 class="mt-4 mb-2 text-2xl lg:text-3xl">Crea una cuenta</h1>
         <span class="text-sm"> Crea tu cuenta gratis </span>
       </div>
-      <div class="divide-y w-full max-w-md mx-auto px-6">
+      <div class="divide-y w-full max-w-md mx-auto px-6 mb-12">
         <div class="pb-4 my-4">
           <Button
             @click="
-              supabase.auth.signInWithOAuth({
-                provider: 'google',
-              }).then(() => analytics.event('sign-up', { 'event_category': 'authentication', method: 'Google' }))
+              supabase.auth
+                .signInWithOAuth({
+                  provider: 'google',
+                })
+                .then(() =>
+                  analytics.event('sign-up', {
+                    event_category: 'authentication',
+                    method: 'Google',
+                  })
+                )
             "
             class="w-full"
             variant="outline"
@@ -178,7 +177,7 @@ const onSubmit = handleSubmit(async (formValues) => {
             >Comenzar ahora</Button
           >
           <div class="text-center">
-            Ya tienes una cuenta?
+            ¿Ya tienes una cuenta?
             <router-link
               to="/auth/sign-in"
               class="font-medium text-primary hover:underline"

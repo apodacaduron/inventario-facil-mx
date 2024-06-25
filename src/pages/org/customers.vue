@@ -39,6 +39,10 @@ import { refDebounced, useInfiniteScroll } from "@vueuse/core";
 import { useOrganizationStore } from "@/stores";
 import { useRoute } from "vue-router";
 
+const LOCALE = {
+  trusted: "Confiable",
+  not_trusted: "No confiable",
+};
 const WHATSAPP_URL = import.meta.env.VITE_WHATSAPP_URL;
 const tableRef = ref<HTMLElement | null>(null);
 const customerSearch = ref("");
@@ -275,7 +279,11 @@ watchEffect(() => {
                 <Badge
                   :variant="getBadgeColorFromStatus(customer.trust_status)"
                 >
-                  {{ customer.trust_status?.toLocaleUpperCase() }}
+                  {{
+                    LOCALE[
+                      customer.trust_status ?? "trusted"
+                    ]?.toLocaleUpperCase()
+                  }}
                 </Badge>
               </TableCell>
               <TableCell class="text-center flex justify-center gap-2">
@@ -334,7 +342,7 @@ watchEffect(() => {
         </template>
         <template #title>Comienza creando una cliente</template>
         <template #description
-          >Clientes creados se mostraran aqui. <br />
+          >Clientes creados se mostraran aquí. <br />
           Comienza creando la primera cliente.
         </template>
         <template #action
@@ -355,7 +363,7 @@ watchEffect(() => {
         </template>
         <template #title>No se encontraron suscripciones</template>
         <template #description
-          >Tu busqueda "{{ customerSearch }}" no coincidio con alguna cliente.
+          >Tu búsqueda "{{ customerSearch }}" no coincidió con alguna cliente.
           <br />
           Por favor intente de nuevo a agregue una nueva cliente.
         </template>

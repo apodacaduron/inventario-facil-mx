@@ -438,7 +438,7 @@ watchEffect(() => {
         </template>
         <template #title>Comienza creando una producto</template>
         <template #description
-          >Productos creadas se mostraran aqui. <br />
+          >Productos creadas se mostraran aquí. <br />
           Comienza creando la primera producto.
         </template>
         <template #action
@@ -459,7 +459,7 @@ watchEffect(() => {
         </template>
         <template #title>No se encontraron suscripciones</template>
         <template #description
-          >Tu busqueda "{{ productSearch }}" no coincidio con alguna producto.
+          >Tu búsqueda "{{ productSearch }}" no coincidió con alguna producto.
           <br />
           Por favor intente de nuevo a agregue una nueva producto.
         </template>

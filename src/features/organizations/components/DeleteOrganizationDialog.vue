@@ -58,14 +58,14 @@ const deleteUserOrganizationMutation = useMutation({
           >Eliminar {{ userOrganization?.i_organizations?.name }}</DialogTitle
         >
         <DialogDescription>
-          Esta acción eliminará permanentemente a esta organizacion y toda la
-          informacion relacionada a ella. ¿Estás seguro de que deseas proceder
+          Esta acción eliminará permanentemente a esta organización y toda la
+          información relacionada a ella. ¿Estás seguro de que deseas proceder
           con la eliminación?
         </DialogDescription>
       </DialogHeader>
 
       <Label class="leading-normal mb-2 block"
-        >Escribe el nombre de tu organizacion para poder eliminar:
+        >Escribe el nombre de tu organización para poder eliminar:
         <b>{{ userOrganization?.i_organizations?.name }}</b></Label
       >
       <Input
@@ -105,14 +105,14 @@ const deleteUserOrganizationMutation = useMutation({
             >Eliminar {{ userOrganization?.i_organizations?.name }}</DrawerTitle
           >
           <DrawerDescription>
-            Esta acción eliminará permanentemente a esta organizacion y toda la
-            informacion relacionada a ella. ¿Estás seguro de que deseas proceder
+            Esta acción eliminará permanentemente a esta organización y toda la
+            información relacionada a ella. ¿Estás seguro de que deseas proceder
             con la eliminación?
           </DrawerDescription>
         </DrawerHeader>
 
         <Label class="leading-normal mb-2 block"
-          >Escribe el nombre de tu organizacion para poder eliminar:
+          >Escribe el nombre de tu organización para poder eliminar:
           <b>{{ userOrganization?.i_organizations?.name }}</b></Label
         >
         <Input

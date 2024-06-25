@@ -1,23 +1,23 @@
 <script setup lang="ts">
-import { supabase } from '@/config/supabase';
-import { AuthLayout } from '@/features/auth';
-import { Input, Button, useToast } from '@/components/ui';
-import { useMutation } from '@tanstack/vue-query';
-import { useRouter } from 'vue-router';
-import z from 'zod';
-import { toTypedSchema } from '@vee-validate/zod';
-import { useForm } from 'vee-validate';
+import { supabase } from "@/config/supabase";
+import { AuthLayout } from "@/features/auth";
+import { Input, Button, useToast } from "@/components/ui";
+import { useMutation } from "@tanstack/vue-query";
+import { useRouter } from "vue-router";
+import z from "zod";
+import { toTypedSchema } from "@vee-validate/zod";
+import { useForm } from "vee-validate";
 import {
   FormControl,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
-import { ref } from 'vue';
-import { FeedbackCard } from '@/features/global';
-import { LockClosedIcon } from '@heroicons/vue/24/outline';
-import { analytics } from '@/config/analytics';
+} from "@/components/ui/form";
+import { ref } from "vue";
+import { FeedbackCard } from "@/features/global";
+import { LockClosedIcon } from "@heroicons/vue/24/outline";
+import { analytics } from "@/config/analytics";
 
 const isResetPasswordSuccessful = ref(false);
 
@@ -35,8 +35,8 @@ const formSchema = toTypedSchema(
   z.object({
     email: z
       .string()
-      .min(1, 'Correo es requerido')
-      .email('Ingresa un correo válido'),
+      .min(1, "Correo es requerido")
+      .email("Ingresa un correo válido"),
   })
 );
 
@@ -49,17 +49,21 @@ const onSubmit = handleSubmit(async (formValues) => {
   const hasError = Boolean(response?.error);
   if (hasError) {
     toast({
-      title: 'Uh oh! Something went wrong.',
-      description: response?.error?.message ?? 'There was a problem with your request.',
-      variant: 'destructive',
+      title: "Uh oh! Algo salió mal.",
+      description:
+        response?.error?.message ?? "Hubo un problema con tu solicitud.",
+      variant: "destructive",
     });
     return;
   }
 
-  analytics.event('forgot-password', { 'event_category': 'authentication', email: formValues.email });
+  analytics.event("forgot-password", {
+    event_category: "authentication",
+    email: formValues.email,
+  });
   isResetPasswordSuccessful.value = true;
   setTimeout(() => {
-    router.push('/');
+    router.push("/");
   }, 10_000);
 });
 </script>
@@ -69,11 +73,11 @@ const onSubmit = handleSubmit(async (formValues) => {
     <FeedbackCard class="mt-8" v-if="isResetPasswordSuccessful">
       <template #icon><LockClosedIcon class="w-4 h-4" /> </template>
       <template #title>
-        Enviamos un correo para reestablecer tu contraseña
+        Enviamos un correo para restablecer tu contraseña
       </template>
       <template #description>
         Revisa el correo que nos proporcionaste y haz click en el link para
-        reestablecer tu contraseña
+        restablecer tu contraseña
       </template>
     </FeedbackCard>
     <template v-else>

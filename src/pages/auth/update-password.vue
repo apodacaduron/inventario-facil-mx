@@ -1,20 +1,20 @@
 <script setup lang="ts">
-import { supabase } from '@/config/supabase';
-import { AuthLayout } from '@/features/auth';
-import { Input, Button, useToast } from '@/components/ui';
-import { useMutation } from '@tanstack/vue-query';
-import { useRouter } from 'vue-router';
-import z from 'zod';
-import { toTypedSchema } from '@vee-validate/zod';
-import { useForm } from 'vee-validate';
+import { supabase } from "@/config/supabase";
+import { AuthLayout } from "@/features/auth";
+import { Input, Button, useToast } from "@/components/ui";
+import { useMutation } from "@tanstack/vue-query";
+import { useRouter } from "vue-router";
+import z from "zod";
+import { toTypedSchema } from "@vee-validate/zod";
+import { useForm } from "vee-validate";
 import {
   FormControl,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
-import { analytics } from '@/config/analytics';
+} from "@/components/ui/form";
+import { analytics } from "@/config/analytics";
 
 const { toast } = useToast();
 const router = useRouter();
@@ -29,12 +29,12 @@ const formSchema = toTypedSchema(
     .object({
       password: z
         .string()
-        .min(8, 'La contraseña debe tener al menos 8 caracteres'),
-      confirmPassword: z.string().min(1, 'Confirmar contraseña es requerido'),
+        .min(8, "La contraseña debe tener al menos 8 caracteres"),
+      confirmPassword: z.string().min(1, "Confirmar contraseña es requerido"),
     })
     .refine((data) => data.password === data.confirmPassword, {
-      message: 'Las contraseñas no coinciden',
-      path: ['confirmPassword'],
+      message: "Las contraseñas no coinciden",
+      path: ["confirmPassword"],
     })
 );
 
@@ -47,15 +47,16 @@ const onSubmit = handleSubmit(async (formValues) => {
   const hasError = Boolean(response?.error);
   if (hasError) {
     toast({
-      title: 'Uh oh! Something went wrong.',
-      description: response?.error?.message ?? 'There was a problem with your request.',
-      variant: 'destructive',
+      title: "Uh oh! Algo salió mal.",
+      description:
+        response?.error?.message ?? "Hubo un problema con tu solicitud.",
+      variant: "destructive",
     });
     return;
   }
 
-  analytics.event('update-password', { 'event_category': 'authentication' });
-  router.push('/');
+  analytics.event("update-password", { event_category: "authentication" });
+  router.push("/");
 });
 </script>
 

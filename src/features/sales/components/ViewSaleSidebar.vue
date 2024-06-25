@@ -27,6 +27,11 @@ withDefaults(defineProps<ViewSaleSidebarProps>(), {
   sale: null,
 });
 
+const LOCALE = {
+  in_progress: "En progreso",
+  cancelled: "Cancelada",
+  completed: "Completada",
+};
 const WHATSAPP_URL = import.meta.env.VITE_WHATSAPP_URL;
 
 const currencyFormatter = useCurrencyFormatter();
@@ -38,7 +43,9 @@ const currencyFormatter = useCurrencyFormatter();
       <SheetHeader>
         <SheetTitle>
           Detalle de venta
-          <Badge>{{ sale?.status?.toUpperCase() }}</Badge>
+          <Badge>{{
+            LOCALE[sale?.status ?? "in_progress"]?.toUpperCase()
+          }}</Badge>
         </SheetTitle>
         <SheetDescription> Ve más a detalle tu venta </SheetDescription>
       </SheetHeader>
@@ -86,7 +93,7 @@ const currencyFormatter = useCurrencyFormatter();
         </div>
         <div v-if="sale?.shipping_cost">
           <div class="font-medium text-sm tracking-tight text-foreground">
-            Costo de envio
+            Costo de envío
           </div>
           <div class="flex items-center text-slate-900 dark:text-white">
             {{ currencyFormatter.parse(sale?.shipping_cost) }}
@@ -109,15 +116,27 @@ const currencyFormatter = useCurrencyFormatter();
                 <TableCell class="font-medium min-w-[80px]">
                   {{ saleProduct?.name }}
                 </TableCell>
-                <TableCell class="text-center flex justify-center">
+                <TableCell class="text-center">
                   {{ saleProduct.qty }}
                 </TableCell>
                 <TableCell class="text-center">
-                  {{
-                    currencyFormatter.parse(
-                      (saleProduct.price ?? 0) * (saleProduct.qty ?? 0)
-                    )
-                  }}
+                  <div>
+                    <div>
+                      {{
+                        currencyFormatter.parse(
+                          (saleProduct.price ?? 0) * (saleProduct.qty ?? 0)
+                        )
+                      }}
+                    </div>
+                    <div class="text-xs text-muted-foreground">
+                      {{ saleProduct.qty }} x
+                      {{
+                        currencyFormatter.parse(saleProduct.price ?? 0, {
+                          signDisplay: "never",
+                        })
+                      }}
+                    </div>
+                  </div>
                 </TableCell>
               </TableRow>
               <TableRow>

@@ -13,8 +13,12 @@ import {
   Button,
   CardFooter,
 } from "@/components/ui";
-import { FeedbackCard, useTableStates } from "@/features/global";
-import { UsersIcon } from "lucide-vue-next";
+import {
+  FeedbackCard,
+  useSidebarManager,
+  useTableStates,
+} from "@/features/global";
+import { UserPlusIcon, UsersIcon } from "lucide-vue-next";
 import { Customer, useCustomersQuery } from "@/features/customers";
 import { ref, toRef } from "vue";
 import { refDebounced, useInfiniteScroll } from "@vueuse/core";
@@ -22,6 +26,7 @@ import { useRoute } from "vue-router";
 
 type Props = {
   activeCustomer: Customer | null;
+  sidebarManager: ReturnType<typeof useSidebarManager>;
 };
 type Emits = {
   (e: "select", customer: Customer | null): void;
@@ -63,14 +68,28 @@ useInfiniteScroll(
         <SheetHeader class="mb-6">
           <SheetTitle>Selecciona cliente</SheetTitle>
           <SheetDescription>
-            Selecciona facilmente un cliente para tu venta
+            Selecciona fácilmente un cliente para tu venta
           </SheetDescription>
         </SheetHeader>
-        <Input
-          v-model="customerSearch"
-          type="search"
-          placeholder="Busca clientes..."
-        />
+        <div class="flex gap-3">
+          <Input
+            v-model="customerSearch"
+            type="search"
+            placeholder="Busca clientes..."
+          />
+          <Button
+            type="button"
+            class="shrink-0"
+            variant="ghost"
+            size="icon"
+            @click="
+              sidebarManager.closeSidebar();
+              sidebarManager.openSidebar('create-customer');
+            "
+          >
+            <UserPlusIcon class="size-4" />
+          </Button>
+        </div>
 
         <FeedbackCard
           v-if="customersLoadingStates.showEmptyState.value"
@@ -81,7 +100,7 @@ useInfiniteScroll(
           </template>
           <template #title>No tienes clientes aun</template>
           <template #description
-            >Cuando tengas clientes agregados se mostraran aqui.
+            >Cuando tengas clientes agregados se mostraran aquí.
           </template>
         </FeedbackCard>
 

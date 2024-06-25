@@ -19,9 +19,9 @@ export function notifyIfHasError(error: unknown) {
 
   if (!error) return;
   toast({
-    title: "Uh oh! Something went wrong.",
+    title: "Uh oh! Algo salió mal.",
     description:
-      errorToString(error) ?? "There was a problem with your request.",
+      errorToString(error) ?? "Hubo un problema con tu solicitud.",
     variant: "destructive",
   });
 }

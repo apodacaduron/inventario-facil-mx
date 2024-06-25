@@ -15,7 +15,10 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui";
-import { DeleteOrganizationDialog, UpdateOrganizationDialog } from "@/features/organizations";
+import {
+  DeleteOrganizationDialog,
+  UpdateOrganizationDialog,
+} from "@/features/organizations";
 import { UserOrganization, useAuthStore, useOrganizationStore } from "@/stores";
 import { Pencil, TrashIcon } from "lucide-vue-next";
 import { ref, watchEffect } from "vue";
@@ -86,7 +89,13 @@ watchEffect(() => {
           <TableCell class="text-center">
             {{ userOrganization.i_organizations?.current_members }}
           </TableCell>
-          <TableCell v-if="userOrganization.i_organizations?.user_id === authStore.authedUser?.id" class="text-center">
+          <TableCell
+            v-if="
+              userOrganization.i_organizations?.user_id ===
+              authStore.authedUser?.id
+            "
+            class="text-center"
+          >
             <div class="flex gap-2">
               <TooltipProvider>
                 <Tooltip>
@@ -103,11 +112,13 @@ watchEffect(() => {
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>Actualizar organizacion</p>
+                    <p>Actualizar organización</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
-              <TooltipProvider v-if="(organizationStore.userOrganizations?.length ?? 1) > 1">
+              <TooltipProvider
+                v-if="(organizationStore.userOrganizations?.length ?? 1) > 1"
+              >
                 <Tooltip>
                   <TooltipTrigger as-child>
                     <Button
@@ -123,7 +134,7 @@ watchEffect(() => {
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>Eliminar organizacion</p>
+                    <p>Eliminar organización</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -134,6 +145,12 @@ watchEffect(() => {
     </Table>
   </div>
 
-  <DeleteOrganizationDialog v-model:open="isDeleteDialogOpen" :userOrganization="activeOrganization" />
-  <UpdateOrganizationDialog v-model:open="isUpdateDialogOpen" :userOrganization="activeOrganization" />
+  <DeleteOrganizationDialog
+    v-model:open="isDeleteDialogOpen"
+    :userOrganization="activeOrganization"
+  />
+  <UpdateOrganizationDialog
+    v-model:open="isUpdateDialogOpen"
+    :userOrganization="activeOrganization"
+  />
 </template>

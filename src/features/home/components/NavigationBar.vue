@@ -1,5 +1,9 @@
 <script setup lang="ts">
-import { ArrowLeftOnRectangleIcon, MoonIcon, SunIcon } from "@heroicons/vue/24/outline";
+import {
+  ArrowLeftOnRectangleIcon,
+  MoonIcon,
+  SunIcon,
+} from "@heroicons/vue/24/outline";
 import { useDark, useToggle } from "@vueuse/core";
 import { useAuthStore, useOrganizationStore } from "@/stores";
 import { Button } from "@/components/ui";
@@ -10,7 +14,7 @@ const organizationStore = useOrganizationStore();
 const isDark = useDark();
 const toggleDark = useToggle(isDark);
 
-const HOME_URL = window.location.origin
+const HOME_URL = window.location.origin;
 </script>
 
 <template>
@@ -37,9 +41,7 @@ const HOME_URL = window.location.origin
           @click="authStore.signOut"
         >
           <ArrowLeftOnRectangleIcon class="w-4 h-4 md:hidden" />
-          <span class="hidden md:block">
-            Cerrar sesion
-          </span>
+          <span class="hidden md:block"> Cerrar sesión </span>
         </Button>
       </div>
       <div v-else class="hidden gap-4 md:flex">

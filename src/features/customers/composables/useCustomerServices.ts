@@ -22,23 +22,6 @@ export type CustomerList = Awaited<
 export type Customer = NonNullable<CustomerList>[number];
 
 export const TRUST_STATUS = ["trusted", "not_trusted"] as const;
-export const customerServicesTypeguards = {
-  isCreateCustomer(
-    maybeCustomer: CreateCustomer | UpdateCustomer
-  ): maybeCustomer is CreateCustomer {
-    return (
-      !("customer_id" in maybeCustomer && maybeCustomer.customer_id) &&
-      "name" in maybeCustomer &&
-      "phone" in maybeCustomer &&
-      "email" in maybeCustomer
-    );
-  },
-  isUpdateCustomer(
-    maybeCustomer: CreateCustomer | UpdateCustomer
-  ): maybeCustomer is UpdateCustomer {
-    return !this.isCreateCustomer(maybeCustomer);
-  },
-};
 
 export function useCustomerServices() {
   const serviceHelpers = useServiceHelpers();
@@ -76,7 +59,7 @@ export function useCustomerServices() {
         ...otherFormValues,
         org_id: orgId,
       },
-    ]);
+    ]).select().single();
   }
 
   async function updateCustomer(orgId: string, formValues: UpdateCustomer) {

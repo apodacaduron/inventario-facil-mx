@@ -46,7 +46,10 @@ import {
 import { refDebounced, useInfiniteScroll, useStorage } from "@vueuse/core";
 import { useOrganizationStore } from "@/stores";
 import { useSalesQuery } from "@/features/sales/composables/useSaleQueries";
-import { useCurrencyFormatter } from "@/features/products";
+import {
+  CreateProductSidebar,
+  useCurrencyFormatter,
+} from "@/features/products";
 import {
   FeedbackCard,
   useSidebarManager,
@@ -56,9 +59,14 @@ import { Tables } from "../../../types_db";
 import { useDashboardDates } from "@/features/dashboard";
 import { useRoute } from "vue-router";
 import CustomerPickerSidebar from "@/features/sales/components/CustomerPickerSidebar.vue";
-import { Customer } from "@/features/customers";
+import { CreateCustomerSidebar, Customer } from "@/features/customers";
 import ProductPickerSidebar from "@/features/sales/components/ProductPickerSidebar.vue";
 
+const LOCALE = {
+  in_progress: "En progreso",
+  cancelled: "Cancelada",
+  completed: "Completada",
+};
 const WHATSAPP_URL = import.meta.env.VITE_WHATSAPP_URL;
 const tableFiltersRef = useStorage<{
   status: NonNullable<Tables<"i_sales">["status"]> | "all";
@@ -147,14 +155,6 @@ function openViewSaleSidebar(sale: Sale) {
   activeSale.value = sale;
   isViewSaleSidebarOpen.value = true;
 }
-
-// function handleSaveSidebar(formValues: CreateSale | UpdateSale) {
-//   if (saleServicesTypeguards.isCreateSale(formValues)) {
-//   } else {
-//     updateSaleMutation.mutate(formValues);
-//   }
-//   isCreateOrUpdateSidebarOpen.value = false;
-// }
 
 function openUpdateSaleSidebar(sale?: Sale | null) {
   activeSale.value = sale ?? null;
@@ -295,7 +295,7 @@ watchEffect(() => {
             <TableHead class="text-center">Productos</TableHead>
             <TableHead class="text-center">Cantidad</TableHead>
             <TableHead class="text-center"> Total </TableHead>
-            <TableHead class="text-center"> Costo de envio </TableHead>
+            <TableHead class="text-center"> Costo de envío </TableHead>
             <TableHead class="text-center"> Estatus</TableHead>
             <TableHead class="text-center"> - </TableHead>
           </TableRow>
@@ -350,6 +350,7 @@ watchEffect(() => {
             <TableRow v-for="sale in page.data" :key="sale.id">
               <TableCell
                 class="flex items-center p-4 text-foreground whitespace-nowrap w-max"
+                @click="openViewSaleSidebar(sale)"
               >
                 <Avatar>
                   <AvatarFallback>{{
@@ -402,13 +403,17 @@ watchEffect(() => {
                   </div>
                 </div></TableCell
               >
-              <TableCell class="text-center">{{
-                sale.i_sale_products.reduce(
-                  (acc, saleProduct) => acc + (saleProduct.qty ?? 0),
-                  0
-                )
-              }}</TableCell>
-              <TableCell class="text-center">
+              <TableCell
+                @click="openViewSaleSidebar(sale)"
+                class="text-center"
+                >{{
+                  sale.i_sale_products.reduce(
+                    (acc, saleProduct) => acc + (saleProduct.qty ?? 0),
+                    0
+                  )
+                }}</TableCell
+              >
+              <TableCell @click="openViewSaleSidebar(sale)" class="text-center">
                 {{
                   currencyFormatter.parse(
                     sale.i_sale_products.reduce(
@@ -419,12 +424,14 @@ watchEffect(() => {
                   )
                 }}
               </TableCell>
-              <TableCell class="text-center">
+              <TableCell @click="openViewSaleSidebar(sale)" class="text-center">
                 {{ currencyFormatter.parse(sale.shipping_cost) }}
               </TableCell>
-              <TableCell class="text-center">
+              <TableCell @click="openViewSaleSidebar(sale)" class="text-center">
                 <Badge :variant="getBadgeColorFromStatus(sale.status)"
-                  >{{ sale.status?.toLocaleUpperCase() }}
+                  >{{
+                    LOCALE[sale.status ?? "in_progress"]?.toLocaleUpperCase()
+                  }}
                 </Badge>
               </TableCell>
               <TableCell class="text-center flex justify-center gap-2">
@@ -500,7 +507,7 @@ watchEffect(() => {
         </template>
         <template #title>Comienza creando una venta</template>
         <template #description
-          >Ventas creadas se mostraran aqui. <br />
+          >Ventas creadas se mostraran aquí. <br />
           Comienza creando tu primera venta.
         </template>
         <template #action
@@ -518,7 +525,7 @@ watchEffect(() => {
         </template>
         <template #title>No se encontraron ventas</template>
         <template #description
-          >Tu búsqueda "{{ saleSearch }}" no coincidio con alguna venta.
+          >Tu búsqueda "{{ saleSearch }}" no coincidió con alguna venta.
           <br />
           Por favor intente de nuevo o agregue una nueva venta.
         </template>
@@ -546,6 +553,11 @@ watchEffect(() => {
       :open="sidebarManager.currentSidebar.value?.id === 'create-sale'"
       @update:open="(open) => open === false && sidebarManager.closeSidebar()"
     />
+    <CreateCustomerSidebar
+      @createCustomer="activeCustomer = $event"
+      :open="sidebarManager.currentSidebar.value?.id === 'create-customer'"
+      @update:open="(open) => open === false && sidebarManager.closeSidebar()"
+    />
     <UpdateSaleSidebar
       :sale="activeSale"
       :activeProducts="activeProducts"
@@ -555,6 +567,7 @@ watchEffect(() => {
     />
     <CustomerPickerSidebar
       :activeCustomer="activeCustomer"
+      :sidebarManager="sidebarManager"
       :open="sidebarManager.currentSidebar.value?.id === 'customer-picker'"
       @update:open="(open) => open === false && sidebarManager.closeSidebar()"
       @select="activeCustomer = $event"
@@ -562,7 +575,12 @@ watchEffect(() => {
     <ProductPickerSidebar
       :activeProducts="activeProducts"
       :sale="activeSale"
+      :sidebarManager="sidebarManager"
       :open="sidebarManager.currentSidebar.value?.id === 'product-picker'"
+      @update:open="(open) => open === false && sidebarManager.closeSidebar()"
+    />
+    <CreateProductSidebar
+      :open="sidebarManager.currentSidebar.value?.id === 'create-product'"
       @update:open="(open) => open === false && sidebarManager.closeSidebar()"
     />
     <ViewSaleSidebar v-model:open="isViewSaleSidebarOpen" :sale="activeSale" />

@@ -33,6 +33,7 @@ import { useRoute } from "vue-router";
 import { useMutation, useQueryClient } from "@tanstack/vue-query";
 import { analytics } from "@/config/analytics";
 import { notifyIfHasError, useSidebarManager } from "@/features/global";
+import { UserPlusIcon } from "lucide-vue-next";
 
 type Props = {
   sidebarManager: ReturnType<typeof useSidebarManager>;
@@ -181,25 +182,36 @@ watch(openModel, (nextOpenValue) => {
         <FormField name="customer_id">
           <FormItem class="flex flex-col">
             <FormLabel>Cliente</FormLabel>
-            <Button
-              class="h-12"
-              variant="outline"
-              type="button"
-              @click="
-                sidebarManager.openSidebar('customer-picker', { formInstance })
-              "
-            >
-              <span v-if="formInstance.values.customer_id">
-                {{ activeCustomer?.name }} <br />
-                <span class="text-xs">
-                  {{ activeCustomer?.phone }}
+            <div class="flex gap-3">
+              <Button
+                class="h-12 w-full"
+                variant="outline"
+                type="button"
+                @click="sidebarManager.openSidebar('customer-picker')"
+              >
+                <span v-if="formInstance.values.customer_id">
+                  {{ activeCustomer?.name }} <br />
+                  <span class="text-xs">
+                    {{ activeCustomer?.phone }}
+                  </span>
                 </span>
-              </span>
-              <span v-else>Seleccionar cliente</span>
-            </Button>
+                <span v-else>Seleccionar cliente</span>
+              </Button>
+              <Button
+                type="button"
+                class="shrink-0 size-12"
+                variant="ghost"
+                size="icon"
+                @click="sidebarManager.openSidebar('create-customer')"
+              >
+                <UserPlusIcon class="size-4" />
+              </Button>
+            </div>
+
             <FormMessage />
           </FormItem>
         </FormField>
+
         <FormField v-slot="{ componentField }" name="notes">
           <FormItem v-auto-animate>
             <FormLabel>Notas de venta</FormLabel>
@@ -215,10 +227,10 @@ watch(openModel, (nextOpenValue) => {
 
         <FormField v-slot="{ componentField }" name="shipping_cost">
           <FormItem v-auto-animate>
-            <FormLabel>Costo de envio</FormLabel>
+            <FormLabel>Costo de envío</FormLabel>
             <FormControl>
               <Input
-                placeholder="Ingresa el costo de envio"
+                placeholder="Ingresa el costo de envío"
                 inputmode="numeric"
                 v-bind="componentField"
               />

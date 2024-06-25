@@ -47,14 +47,14 @@ const createOrganizationMutation = useMutation({
 
     if (createOrganizationResponse.error?.message) {
       toast({
-        title: "Uh oh! Something went wrong.",
+        title: "Uh oh! Algo salió mal.",
         variant: "destructive",
       });
       throw new Error(createOrganizationResponse.error?.message);
     }
     if (!newOrganizationId) {
       toast({
-        title: "Uh oh! Something went wrong.",
+        title: "Uh oh! Algo salió mal.",
         variant: "destructive",
       });
       throw new Error("Create organization response does not contain id");
@@ -69,7 +69,7 @@ const createOrganizationMutation = useMutation({
 
     if (!adminRoleId) {
       toast({
-        title: "Uh oh! Something went wrong.",
+        title: "Uh oh! Algo salió mal.",
         variant: "destructive",
       });
       throw new Error("Admin role id not found");
@@ -99,16 +99,16 @@ watchEffect(() => {
   <Dialog v-if="isDesktop" v-model:open="openModel">
     <DialogContent>
       <DialogHeader>
-        <DialogTitle>Crea una organizacion</DialogTitle>
+        <DialogTitle>Crea una organización</DialogTitle>
         <DialogDescription>
-          Agrega una nueva organizacion para agregar datos nuevos por separado
-          de tu organizacion actual.
+          Agrega una nueva organización para agregar datos nuevos por separado
+          de tu organización actual.
         </DialogDescription>
       </DialogHeader>
       <div>
         <div class="space-y-4 py-2 pb-4">
           <div class="space-y-2">
-            <Label for="name">Nombre de organizacion</Label>
+            <Label for="name">Nombre de organización</Label>
             <Input
               v-model="organizationName"
               id="name"
@@ -118,9 +118,7 @@ watchEffect(() => {
         </div>
       </div>
       <DialogFooter>
-        <Button variant="outline" @click="openModel = false">
-          Cancelar
-        </Button>
+        <Button variant="outline" @click="openModel = false"> Cancelar </Button>
         <Button
           :disabled="createOrganizationMutation.isPending.value"
           type="submit"
@@ -136,16 +134,16 @@ watchEffect(() => {
     <DrawerContent>
       <div class="mx-auto w-full max-w-sm mt-8 mb-16">
         <DrawerHeader>
-          <DrawerTitle>Crea una organizacion</DrawerTitle>
+          <DrawerTitle>Crea una organización</DrawerTitle>
           <DrawerDescription>
-            Agrega una nueva organizacion para agregar datos nuevos por separado
-            de tu organizacion actual.
+            Agrega una nueva organización para agregar datos nuevos por separado
+            de tu organización actual.
           </DrawerDescription>
         </DrawerHeader>
         <div>
           <div class="space-y-4 py-2 pb-4 px-4">
             <div class="space-y-2">
-              <Label for="name">Nombre de organizacion</Label>
+              <Label for="name">Nombre de organización</Label>
               <Input
                 v-model="organizationName"
                 id="name"

@@ -161,7 +161,7 @@ function getCardDataFromPlan(plan: Tables<"plans">) {
         <img
           :src="`/screenshot-${isDark ? 'dark' : 'light'}.png`"
           class="border-2 border-foreground rounded-lg lg:border-4 lg:rounded-3xl"
-          alt="Inventario Facil screenshot"
+          alt="Inventario Fácil screenshot"
         />
       </div>
     </section>
@@ -215,7 +215,7 @@ function getCardDataFromPlan(plan: Tables<"plans">) {
     </section>
     <section class="mx-auto px-6 max-w-5xl pb-16">
       <div class="flex flex-col justify-center text-center">
-        <h2 class="text-4xl lg:text-5xl mb-3">Tienes preguntas?</h2>
+        <h2 class="text-4xl lg:text-5xl mb-3">¿Tienes preguntas?</h2>
         <p class="text-muted-foreground">Ponte en contacto con nosotros</p>
       </div>
 
@@ -237,19 +237,19 @@ function getCardDataFromPlan(plan: Tables<"plans">) {
         <div>
           <ul class="text-muted-foreground">
             <li>
-              <a href="/cookie-policy">Politica de cookies</a>
+              <a href="/cookie-policy">Política de cookies</a>
             </li>
             <li>
               <a href="/legal-notice">Aviso legal</a>
             </li>
             <li>
-              <a href="/privacy-policy">Politica de privacidad</a>
+              <a href="/privacy-policy">Política de privacidad</a>
             </li>
             <li>
-              <a href="/refund-policy">Politica de reembolsos</a>
+              <a href="/refund-policy">Política de reembolsos</a>
             </li>
             <li>
-              <a href="/terms-and-conditions">Terminos y condiciones</a>
+              <a href="/terms-and-conditions">Términos y condiciones</a>
             </li>
           </ul>
         </div>

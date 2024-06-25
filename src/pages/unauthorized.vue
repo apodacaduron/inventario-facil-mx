@@ -7,9 +7,9 @@ import { HomeIcon } from "@heroicons/vue/24/outline";
 <template>
   <FeedbackCard class="mt-24">
     <template #icon> 🫠 </template>
-    <template #title>Sin autorizacion</template>
+    <template #title>Sin autorización</template>
     <template #description
-      >Por el momento no podemos accesar la pagina solicitada
+      >Por el momento no podemos acceder la pagina solicitada
     </template>
     <template #action>
       <router-link to="/">

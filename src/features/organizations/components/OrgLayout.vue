@@ -206,7 +206,7 @@ const menuList = computed(() => ({
                   <router-link to="/settings/billing">
                     <DropdownMenuItem>
                       <Cog6ToothIcon class="w-4 h-4 mr-2" />
-                      <span>Configuracion</span>
+                      <span>Configuración</span>
                     </DropdownMenuItem>
                   </router-link>
                   <DropdownMenuItem @click="authStore.signOut">
