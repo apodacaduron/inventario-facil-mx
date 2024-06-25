@@ -18,14 +18,16 @@ import {
 import {
   DeleteOrganizationDialog,
   UpdateOrganizationDialog,
+  UpdateThemeDialog,
 } from "@/features/organizations";
 import { UserOrganization, useAuthStore, useOrganizationStore } from "@/stores";
-import { Pencil, TrashIcon } from "lucide-vue-next";
+import { PaletteIcon, Pencil, TrashIcon } from "lucide-vue-next";
 import { ref, watchEffect } from "vue";
 
 const activeOrganization = ref<UserOrganization | null>(null);
 const isDeleteDialogOpen = ref(false);
 const isUpdateDialogOpen = ref(false);
+const isUpdateThemeDialogOpen = ref(false);
 
 const organizationStore = useOrganizationStore();
 const authStore = useAuthStore();
@@ -33,6 +35,7 @@ const authStore = useAuthStore();
 watchEffect(() => {
   if (isDeleteDialogOpen.value) return;
   if (isUpdateDialogOpen.value) return;
+  if (isUpdateThemeDialogOpen.value) return;
 
   activeOrganization.value = null;
 });
@@ -116,6 +119,25 @@ watchEffect(() => {
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger as-child>
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      @click="
+                        activeOrganization = userOrganization;
+                        isUpdateThemeDialogOpen = true;
+                      "
+                    >
+                      <PaletteIcon class="size-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Color de organización</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
               <TooltipProvider
                 v-if="(organizationStore.userOrganizations?.length ?? 1) > 1"
               >
@@ -151,6 +173,10 @@ watchEffect(() => {
   />
   <UpdateOrganizationDialog
     v-model:open="isUpdateDialogOpen"
+    :userOrganization="activeOrganization"
+  />
+  <UpdateThemeDialog
+    v-model:open="isUpdateThemeDialogOpen"
     :userOrganization="activeOrganization"
   />
 </template>

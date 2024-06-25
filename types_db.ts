@@ -133,6 +133,7 @@ export type Database = {
           is_public_products_page_enabled: boolean
           name: string | null
           plan_id: string | null
+          theme_color: string | null
           user_id: string | null
         }
         Insert: {
@@ -144,6 +145,7 @@ export type Database = {
           is_public_products_page_enabled?: boolean
           name?: string | null
           plan_id?: string | null
+          theme_color?: string | null
           user_id?: string | null
         }
         Update: {
@@ -155,6 +157,7 @@ export type Database = {
           is_public_products_page_enabled?: boolean
           name?: string | null
           plan_id?: string | null
+          theme_color?: string | null
           user_id?: string | null
         }
         Relationships: [
