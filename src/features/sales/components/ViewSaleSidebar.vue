@@ -116,15 +116,27 @@ const currencyFormatter = useCurrencyFormatter();
                 <TableCell class="font-medium min-w-[80px]">
                   {{ saleProduct?.name }}
                 </TableCell>
-                <TableCell class="text-center flex justify-center">
+                <TableCell class="text-center">
                   {{ saleProduct.qty }}
                 </TableCell>
                 <TableCell class="text-center">
-                  {{
-                    currencyFormatter.parse(
-                      (saleProduct.price ?? 0) * (saleProduct.qty ?? 0)
-                    )
-                  }}
+                  <div>
+                    <div>
+                      {{
+                        currencyFormatter.parse(
+                          (saleProduct.price ?? 0) * (saleProduct.qty ?? 0)
+                        )
+                      }}
+                    </div>
+                    <div class="text-xs text-muted-foreground">
+                      {{ saleProduct.qty }} x
+                      {{
+                        currencyFormatter.parse(saleProduct.price ?? 0, {
+                          signDisplay: "never",
+                        })
+                      }}
+                    </div>
+                  </div>
                 </TableCell>
               </TableRow>
               <TableRow>
