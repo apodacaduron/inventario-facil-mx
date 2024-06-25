@@ -12,6 +12,7 @@ import { watch } from "vue";
 import { z } from "zod";
 import {
   CreateCustomer,
+  Customer,
   TRUST_STATUS,
   useCustomerServices,
 } from "../composables";
@@ -24,6 +25,9 @@ import { analytics } from "@/config/analytics";
 import SharedCustomerFormValues from "./SharedCustomerFormValues.vue";
 
 const openModel = defineModel<boolean>("open");
+const emits = defineEmits<{
+  (e: "createCustomer", customer: Customer | null): void;
+}>();
 
 const initialForm: CreateCustomer = {
   name: "",
@@ -55,12 +59,13 @@ const queryClient = useQueryClient();
 const customerServices = useCustomerServices();
 const createCustomerMutation = useMutation({
   mutationFn: async (formValues: CreateCustomer) => {
-    const { error } = await customerServices.createCustomer(
+    const { data, error } = await customerServices.createCustomer(
       route.params.orgId.toString(),
       formValues
     );
     notifyIfHasError(error);
     await queryClient.invalidateQueries({ queryKey: ["customers"] });
+    emits("createCustomer", data);
     openModel.value = false;
     analytics.event("create-customer", formValues);
   },

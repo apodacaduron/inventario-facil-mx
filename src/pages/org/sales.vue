@@ -46,7 +46,10 @@ import {
 import { refDebounced, useInfiniteScroll, useStorage } from "@vueuse/core";
 import { useOrganizationStore } from "@/stores";
 import { useSalesQuery } from "@/features/sales/composables/useSaleQueries";
-import { useCurrencyFormatter } from "@/features/products";
+import {
+  CreateProductSidebar,
+  useCurrencyFormatter,
+} from "@/features/products";
 import {
   FeedbackCard,
   useSidebarManager,
@@ -56,7 +59,7 @@ import { Tables } from "../../../types_db";
 import { useDashboardDates } from "@/features/dashboard";
 import { useRoute } from "vue-router";
 import CustomerPickerSidebar from "@/features/sales/components/CustomerPickerSidebar.vue";
-import { Customer } from "@/features/customers";
+import { CreateCustomerSidebar, Customer } from "@/features/customers";
 import ProductPickerSidebar from "@/features/sales/components/ProductPickerSidebar.vue";
 
 const LOCALE = {
@@ -550,6 +553,11 @@ watchEffect(() => {
       :open="sidebarManager.currentSidebar.value?.id === 'create-sale'"
       @update:open="(open) => open === false && sidebarManager.closeSidebar()"
     />
+    <CreateCustomerSidebar
+      @createCustomer="activeCustomer = $event"
+      :open="sidebarManager.currentSidebar.value?.id === 'create-customer'"
+      @update:open="(open) => open === false && sidebarManager.closeSidebar()"
+    />
     <UpdateSaleSidebar
       :sale="activeSale"
       :activeProducts="activeProducts"
@@ -559,6 +567,7 @@ watchEffect(() => {
     />
     <CustomerPickerSidebar
       :activeCustomer="activeCustomer"
+      :sidebarManager="sidebarManager"
       :open="sidebarManager.currentSidebar.value?.id === 'customer-picker'"
       @update:open="(open) => open === false && sidebarManager.closeSidebar()"
       @select="activeCustomer = $event"
@@ -566,7 +575,12 @@ watchEffect(() => {
     <ProductPickerSidebar
       :activeProducts="activeProducts"
       :sale="activeSale"
+      :sidebarManager="sidebarManager"
       :open="sidebarManager.currentSidebar.value?.id === 'product-picker'"
+      @update:open="(open) => open === false && sidebarManager.closeSidebar()"
+    />
+    <CreateProductSidebar
+      :open="sidebarManager.currentSidebar.value?.id === 'create-product'"
       @update:open="(open) => open === false && sidebarManager.closeSidebar()"
     />
     <ViewSaleSidebar v-model:open="isViewSaleSidebarOpen" :sale="activeSale" />

@@ -59,7 +59,7 @@ export function useCustomerServices() {
         ...otherFormValues,
         org_id: orgId,
       },
-    ]);
+    ]).select().single();
   }
 
   async function updateCustomer(orgId: string, formValues: UpdateCustomer) {
