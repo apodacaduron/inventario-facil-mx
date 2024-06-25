@@ -23,12 +23,12 @@ import { useOrganizationServices } from "../composables";
 import { ref } from "vue";
 import { notifyIfHasError } from "@/features/global";
 
-type DeleteUserOrganizationDialogProps = {
+type Props = {
   userOrganization: UserOrganization | null;
 };
 
 const openModel = defineModel<boolean>("open");
-const props = defineProps<DeleteUserOrganizationDialogProps>();
+const props = defineProps<Props>();
 
 const organizationName = ref("");
 

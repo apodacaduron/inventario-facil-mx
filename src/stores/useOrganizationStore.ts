@@ -1,14 +1,16 @@
 import type { useOrganizationServices } from "@/features/organizations";
 import { defineStore } from "pinia";
-import { ref, toRef } from "vue";
+import { ref, toRef, watchEffect } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "./useAuthStore";
 
-export type UserOrganization = NonNullable<Awaited<
-  ReturnType<
-    ReturnType<typeof useOrganizationServices>["loadUserOrganizations"]
-  >
->["data"]>[number];
+export type UserOrganization = NonNullable<
+  Awaited<
+    ReturnType<
+      ReturnType<typeof useOrganizationServices>["loadUserOrganizations"]
+    >
+  >["data"]
+>[number];
 
 export const useOrganizationStore = defineStore("organization", () => {
   const isUserOrganizationsLoading = ref(true);
@@ -22,7 +24,7 @@ export const useOrganizationStore = defineStore("organization", () => {
     Boolean(userOrganizations.value?.length)
   );
   const currentUserOrganization = toRef(() =>
-    findOrganizationById(route.params.orgId.toString())
+    findOrganizationById(route.params?.orgId?.toString())
   );
   const isPremium = toRef(
     () =>
@@ -34,7 +36,8 @@ export const useOrganizationStore = defineStore("organization", () => {
       currentUserOrganization.value?.i_organizations?.plans?.max_products;
     const currentProducts =
       currentUserOrganization.value?.i_organizations?.current_products;
-    if (typeof maxProducts !== 'number' || typeof currentProducts !== 'number') return false;
+    if (typeof maxProducts !== "number" || typeof currentProducts !== "number")
+      return false;
 
     return currentProducts < maxProducts;
   });
@@ -43,7 +46,11 @@ export const useOrganizationStore = defineStore("organization", () => {
       currentUserOrganization.value?.i_organizations?.plans?.max_customers;
     const currentCustomers =
       currentUserOrganization.value?.i_organizations?.current_customers;
-    if (typeof maxCustomers !== 'number' || typeof currentCustomers !== 'number') return false;
+    if (
+      typeof maxCustomers !== "number" ||
+      typeof currentCustomers !== "number"
+    )
+      return false;
 
     return currentCustomers < maxCustomers;
   });
@@ -55,7 +62,9 @@ export const useOrganizationStore = defineStore("organization", () => {
     return currentOrganizations < maxOrganizations;
   });
 
-  function setUserOrganizations(nextUserOrganizations: UserOrganization[] | null) {
+  function setUserOrganizations(
+    nextUserOrganizations: UserOrganization[] | null
+  ) {
     userOrganizations.value = nextUserOrganizations;
   }
 
@@ -79,6 +88,16 @@ export const useOrganizationStore = defineStore("organization", () => {
   function $reset() {
     userOrganizations.value = null;
   }
+
+  watchEffect(() => {
+    const themeColor =
+      currentUserOrganization.value?.i_organizations?.theme_color ?? null;
+    const root = document.querySelector(":root") as HTMLElement;
+    
+    if (themeColor) {
+      root?.style.setProperty("--primary", themeColor);
+    }
+  });
 
   return {
     userOrganizations,

@@ -263,6 +263,6 @@ const menuList = computed(() => ({
 
 <style scoped lang="scss">
 .active-link {
-  @apply bg-primary text-primary-foreground shadow hover:bg-primary/90 dark:bg-muted dark:text-white dark:hover:bg-muted dark:hover:text-white;
+  @apply bg-primary text-primary-foreground shadow hover:bg-primary/90;
 }
 </style>
