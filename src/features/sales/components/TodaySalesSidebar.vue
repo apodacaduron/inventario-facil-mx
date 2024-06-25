@@ -28,6 +28,12 @@ import { useRoute } from "vue-router";
 
 const openModel = defineModel<boolean>("open");
 
+const LOCALE = {
+  in_progress: "En progreso",
+  cancelled: "Cancelada",
+  completed: "Completada",
+};
+const WHATSAPP_URL = import.meta.env.VITE_WHATSAPP_URL;
 const route = useRoute();
 const currencyFormatter = useCurrencyFormatter();
 const dashboardDates = useDashboardDates({
@@ -174,21 +180,30 @@ function getBadgeColorFromStatus(status: Sale["status"]) {
               >
                 <Avatar>
                   <AvatarFallback>{{
-                    `${sale.i_customers?.name
-                      ?.substring(0, 1)
-                      .toLocaleUpperCase()}`
+                    `${
+                      sale.i_customers?.name
+                        ?.substring(0, 1)
+                        .toLocaleUpperCase() ?? "?"
+                    }`
                   }}</AvatarFallback>
                 </Avatar>
                 <div class="ps-3">
                   <div class="text-base font-semibold">
-                    {{ sale.i_customers?.name }}
+                    {{ sale.i_customers?.name ?? sale.customer_name ?? "-" }}
                   </div>
                   <div
-                    v-if="sale.i_customers?.phone"
+                    v-if="sale.i_customers?.phone ?? sale.customer_phone"
                     class="font-normal text-slate-500"
                   >
-                    <a target="_blank" rel="noopener noreferrer" class="block">
-                      {{ sale.i_customers.phone }}
+                    <a
+                      :href="`${WHATSAPP_URL}/${
+                        sale.i_customers?.phone ?? sale.customer_phone
+                      }`"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="block"
+                    >
+                      {{ sale.i_customers?.phone ?? sale.customer_phone }}
                     </a>
                   </div>
                 </div>
@@ -237,7 +252,9 @@ function getBadgeColorFromStatus(status: Sale["status"]) {
               </TableCell>
               <TableCell class="text-center">
                 <Badge :variant="getBadgeColorFromStatus(sale.status)"
-                  >{{ sale.status?.toLocaleUpperCase() }}
+                  >{{
+                    LOCALE[sale.status ?? "in_progress"]?.toLocaleUpperCase()
+                  }}
                 </Badge>
               </TableCell>
             </TableRow>
