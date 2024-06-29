@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useAuthStore, useOrganizationStore } from "@/stores";
+import { useAuthStore } from "@/stores";
 import {
   Button,
   DropdownMenu,
@@ -45,7 +45,6 @@ const route = useRoute();
 const isDark = useDark();
 const toggleDark = useToggle(isDark);
 const authStore = useAuthStore();
-const organizationStore = useOrganizationStore();
 const isDesktop = useMediaQuery("(min-width: 768px)");
 
 const menuList = computed(() => ({
