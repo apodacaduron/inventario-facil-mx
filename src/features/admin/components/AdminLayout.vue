@@ -99,10 +99,11 @@ const menuList = {
             <Button
               @click="toggleDark()"
               variant="outline"
+              size="icon"
               class="dark:text-white"
             >
-              <MoonIcon class="w-4 h-4 stroke-[2px]" v-if="isDark" />
-              <SunIcon class="w-4 h-4 stroke-[2px]" v-else />
+              <MoonIcon class="size-4 stroke-[2px]" v-if="isDark" />
+              <SunIcon class="size-4 stroke-[2px]" v-else />
             </Button>
             <div>
               <DropdownMenu>
