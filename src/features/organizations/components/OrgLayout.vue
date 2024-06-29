@@ -26,9 +26,9 @@ import {
   Cog6ToothIcon,
   EnvelopeIcon,
   MoonIcon,
-  RocketLaunchIcon,
   SunIcon,
 } from "@heroicons/vue/24/outline";
+import { CrownIcon } from "lucide-vue-next";
 import GoPremiumDialog from "./GoPremiumDialog.vue";
 import { computed, ref } from "vue";
 import {
@@ -135,7 +135,8 @@ const menuList = computed(() => ({
                   </ul>
                 </div>
               </div>
-              <SheetFooter>
+              <SheetFooter class="flex flex-col gap-4">
+                <div class="shrink-0 bg-border h-px w-full" />
                 <a
                   href="mailto:inventariofacilmx@gmail.com"
                   class="w-full inline-flex items-center whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground rounded-md h-10 px-3 text-md justify-start"
@@ -144,7 +145,12 @@ const menuList = computed(() => ({
                   <EnvelopeIcon class="size-5" />
                   <span class="ms-2">Soporte</span>
                 </a>
-                <div class="shrink-0 bg-border h-px w-full mb-4" />
+                <Button
+                  class="w-full"
+                  @click="isGoPremiumDialogOpen = !isGoPremiumDialogOpen"
+                >
+                  <CrownIcon class="w-4 h-4 mr-2" /> Premium
+                </Button>
               </SheetFooter>
             </SheetContent>
           </Sheet>
@@ -161,18 +167,13 @@ const menuList = computed(() => ({
         <div class="flex items-center">
           <div class="flex items-center ms-3 gap-4">
             <Button
-              v-if="!organizationStore.isPremium"
-              @click="isGoPremiumDialogOpen = !isGoPremiumDialogOpen"
-            >
-              <RocketLaunchIcon class="w-4 h-4 mr-2" /> Premium
-            </Button>
-            <Button
               @click="toggleDark()"
               variant="outline"
-              class="dark:text-white"
+              size="icon"
+              class="md:visible dark:text-white"
             >
-              <MoonIcon class="w-4 h-4 stroke-[2px]" v-if="isDark" />
-              <SunIcon class="w-4 h-4 stroke-[2px]" v-else />
+              <MoonIcon class="size-4 stroke-[2px]" v-if="isDark" />
+              <SunIcon class="size-4 stroke-[2px]" v-else />
             </Button>
             <div>
               <DropdownMenu>
@@ -245,14 +246,22 @@ const menuList = computed(() => ({
         </li>
       </ul>
 
-      <a
-        href="mailto:inventariofacilmx@gmail.com"
-        class="w-full inline-flex items-center whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground rounded-md h-10 px-3 text-md justify-start"
-        active-class="active-link"
-      >
-        <EnvelopeIcon class="size-5" />
-        <span class="ms-2">Soporte</span>
-      </a>
+      <div class="w-full flex flex-col gap-4">
+        <a
+          href="mailto:inventariofacilmx@gmail.com"
+          class="w-full inline-flex items-center whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground rounded-md h-10 px-3 text-md justify-start"
+          active-class="active-link"
+        >
+          <EnvelopeIcon class="size-5" />
+          <span class="ms-2">Soporte</span>
+        </a>
+        <Button
+          class="w-full"
+          @click="isGoPremiumDialogOpen = !isGoPremiumDialogOpen"
+        >
+          <CrownIcon class="w-4 h-4 mr-2" /> Premium
+        </Button>
+      </div>
     </div>
   </aside>
 

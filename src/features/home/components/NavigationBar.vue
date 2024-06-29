@@ -29,9 +29,14 @@ const HOME_URL = window.location.origin;
       </span>
     </a>
     <div class="gap-4 flex">
-      <Button aria-label="Toggle theme" @click="toggleDark()" variant="outline">
-        <MoonIcon class="w-4 h-4 stroke-[2px]" v-if="isDark" />
-        <SunIcon class="w-4 h-4 stroke-[2px]" v-else />
+      <Button
+        aria-label="Toggle theme"
+        @click="toggleDark()"
+        variant="outline"
+        size="icon"
+      >
+        <MoonIcon class="size-4 stroke-[2px]" v-if="isDark" />
+        <SunIcon class="size-4 stroke-[2px]" v-else />
       </Button>
       <div v-if="authStore.isLoggedIn" class="flex gap-4">
         <Button
