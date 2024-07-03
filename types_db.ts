@@ -339,6 +339,7 @@ export type Database = {
         Row: {
           cancellation_notes: string | null
           cancelled_at: string | null
+          cashback_redeemed: number | null
           completed_at: string | null
           created_at: string
           customer_id: string | null
@@ -357,6 +358,7 @@ export type Database = {
         Insert: {
           cancellation_notes?: string | null
           cancelled_at?: string | null
+          cashback_redeemed?: number | null
           completed_at?: string | null
           created_at?: string
           customer_id?: string | null
@@ -375,6 +377,7 @@ export type Database = {
         Update: {
           cancellation_notes?: string | null
           cancelled_at?: string | null
+          cashback_redeemed?: number | null
           completed_at?: string | null
           created_at?: string
           customer_id?: string | null
