@@ -69,6 +69,7 @@ export type Database = {
       i_customers: {
         Row: {
           address: string | null
+          cashback_balance: number | null
           created_at: string
           email: string | null
           id: string
@@ -82,6 +83,7 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          cashback_balance?: number | null
           created_at?: string
           email?: string | null
           id?: string
@@ -95,6 +97,7 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          cashback_balance?: number | null
           created_at?: string
           email?: string | null
           id?: string
@@ -125,11 +128,13 @@ export type Database = {
       }
       i_organizations: {
         Row: {
+          cashback_percent: number | null
           created_at: string
           current_customers: number
           current_members: number
           current_products: number
           id: string
+          is_cashback_enabled: boolean | null
           is_public_products_page_enabled: boolean
           name: string | null
           plan_id: string | null
@@ -137,11 +142,13 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          cashback_percent?: number | null
           created_at?: string
           current_customers?: number
           current_members?: number
           current_products?: number
           id?: string
+          is_cashback_enabled?: boolean | null
           is_public_products_page_enabled?: boolean
           name?: string | null
           plan_id?: string | null
@@ -149,11 +156,13 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          cashback_percent?: number | null
           created_at?: string
           current_customers?: number
           current_members?: number
           current_products?: number
           id?: string
+          is_cashback_enabled?: boolean | null
           is_public_products_page_enabled?: boolean
           name?: string | null
           plan_id?: string | null
