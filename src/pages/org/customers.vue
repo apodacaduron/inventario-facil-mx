@@ -38,6 +38,7 @@ import {
 import { refDebounced, useInfiniteScroll } from "@vueuse/core";
 import { useOrganizationStore } from "@/stores";
 import { useRoute } from "vue-router";
+import { useCurrencyFormatter } from "@/features/products";
 
 const LOCALE = {
   trusted: "Confiable",
@@ -52,6 +53,7 @@ const isUpdateSidebarOpen = ref(false);
 const isDeleteCustomerDialogOpen = ref(false);
 const activeCustomer = ref<Customer | null>(null);
 
+const currencyFormatter = useCurrencyFormatter();
 const customersTableOrder = useTableOrder({
   options: {
     initialOrder: ["created_at", "desc"],
@@ -184,6 +186,15 @@ watchEffect(() => {
             <TableHead class="text-center"> Dirección </TableHead>
             <TableHead class="text-center"> Mapa </TableHead>
             <TableHead class="text-center"> Estado de confianza </TableHead>
+            <TableHead
+              v-if="
+                organizationStore.currentUserOrganization?.i_organizations
+                  ?.is_cashback_enabled
+              "
+              class="text-center"
+            >
+              Monedero
+            </TableHead>
             <TableHead class="text-center"> - </TableHead>
           </TableRow>
         </TableHeader>
@@ -214,6 +225,9 @@ watchEffect(() => {
             <TableCell class="text-center"
               ><Skeleton class="h-4 w-[180px]"
             /></TableCell>
+            <TableCell class="text-center">
+              <Skeleton class="h-4 w-[180px]" />
+            </TableCell>
             <TableCell class="text-center">
               <Skeleton class="h-4 w-[180px]" />
             </TableCell>
@@ -285,6 +299,15 @@ watchEffect(() => {
                     ]?.toLocaleUpperCase()
                   }}
                 </Badge>
+              </TableCell>
+              <TableCell
+                v-if="
+                  organizationStore.currentUserOrganization?.i_organizations
+                    ?.is_cashback_enabled
+                "
+                class="text-center"
+              >
+                {{ currencyFormatter.parse(customer.cashback_balance) ?? "-" }}
               </TableCell>
               <TableCell class="text-center flex justify-center gap-2">
                 <TooltipProvider>
