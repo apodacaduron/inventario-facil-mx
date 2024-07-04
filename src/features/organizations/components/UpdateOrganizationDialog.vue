@@ -16,11 +16,14 @@ import {
   DrawerHeader,
   DrawerTitle,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
   Input,
+  Separator,
+  Switch,
 } from "@/components/ui";
 import { createReusableTemplate, useMediaQuery } from "@vueuse/core";
 import { UserOrganization } from "@/stores";
@@ -29,6 +32,7 @@ import { z } from "zod";
 import { toTypedSchema } from "@vee-validate/zod";
 import { UpdateOrganization, useOrganizationServices } from "../composables";
 import { useForm } from "vee-validate";
+import { PercentIcon } from "lucide-vue-next";
 
 type Props = {
   userOrganization: UserOrganization | undefined;
@@ -43,6 +47,14 @@ const initialForm: UpdateOrganization = {
 const formSchema = toTypedSchema(
   z.object({
     name: z.string().min(1, "Nombre de organización es requerido"),
+    cashback_percent: z.coerce
+      .number({ invalid_type_error: "Ingresa un número válido" })
+      .positive({ message: "Ingrese un número positivo" })
+      .finite()
+      .safe()
+      .min(0)
+      .max(5),
+    is_cashback_enabled: z.boolean(),
   })
 );
 
@@ -79,6 +91,11 @@ watchEffect(() => {
   if (!openModel.value) return;
   formInstance.setValues({
     name: props.userOrganization?.i_organizations?.name ?? "",
+    cashback_percent:
+      props.userOrganization?.i_organizations?.cashback_percent ?? 1,
+    is_cashback_enabled: Boolean(
+      props.userOrganization?.i_organizations?.is_cashback_enabled
+    ),
   });
 });
 </script>
@@ -86,22 +103,57 @@ watchEffect(() => {
 <template>
   <ModalBodyTemplate>
     <div>
-      <div class="space-y-4 py-2 pb-4">
-        <div class="space-y-2">
-          <FormField v-slot="{ componentField }" name="name">
-            <FormItem v-auto-animate>
-              <FormLabel>Nombre de organización</FormLabel>
-              <FormControl>
+      <div class="space-y-4 py-2 pb-8">
+        <FormField v-slot="{ componentField }" name="name">
+          <FormItem v-auto-animate>
+            <FormLabel>Nombre de organización</FormLabel>
+            <FormControl>
+              <Input
+                type="text"
+                placeholder="Acme Inc."
+                v-bind="componentField"
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        </FormField>
+        <Separator class="my-6" />
+        <FormField v-slot="{ value, handleChange }" name="is_cashback_enabled">
+          <FormItem class="flex flex-row items-center justify-between">
+            <div class="space-y-0.5">
+              <FormLabel class="text-base">
+                Habilitar monedero electrónico
+              </FormLabel>
+              <FormDescription>
+                Tus clientes acumulan un porcentaje por cada compra.
+              </FormDescription>
+            </div>
+            <FormControl>
+              <Switch :checked="value" @update:checked="handleChange" />
+            </FormControl>
+          </FormItem>
+        </FormField>
+        <FormField v-slot="{ componentField }" name="cashback_percent">
+          <FormItem v-auto-animate>
+            <FormLabel>Porcentaje por compra</FormLabel>
+            <FormControl>
+              <div class="relative w-full items-center">
                 <Input
                   type="text"
-                  placeholder="Acme Inc."
+                  placeholder="Ingresa un porcentaje"
+                  class="pr-10"
                   v-bind="componentField"
                 />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          </FormField>
-        </div>
+                <span
+                  class="absolute end-0 inset-y-0 flex items-center justify-center px-2"
+                >
+                  <PercentIcon class="size-4" />
+                </span>
+              </div>
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        </FormField>
       </div>
     </div>
   </ModalBodyTemplate>
@@ -109,8 +161,10 @@ watchEffect(() => {
   <Dialog v-if="isDesktop" v-model:open="openModel">
     <DialogContent>
       <DialogHeader>
-        <DialogTitle>Actualiza el nombre de tu organización</DialogTitle>
-        <DialogDescription> Escribe el nuevo nombre. </DialogDescription>
+        <DialogTitle>Actualiza tu organización</DialogTitle>
+        <DialogDescription>
+          Ajusta tu organización acorde a tus preferencias.
+        </DialogDescription>
       </DialogHeader>
 
       <form @submit="onSubmit">
@@ -135,8 +189,10 @@ watchEffect(() => {
     <DrawerContent>
       <div class="mx-auto w-full max-w-sm mt-8 mb-16">
         <DrawerHeader>
-          <DrawerTitle>Actualiza el nombre de tu organización</DrawerTitle>
-          <DrawerDescription> Escribe el nuevo nombre. </DrawerDescription>
+          <DrawerTitle>Actualiza tu organización</DrawerTitle>
+          <DrawerDescription>
+            Ajusta tu organización acorde a tus preferencias.
+          </DrawerDescription>
         </DrawerHeader>
 
         <form @submit="onSubmit">
