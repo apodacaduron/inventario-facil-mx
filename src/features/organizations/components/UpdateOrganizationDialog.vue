@@ -15,38 +15,50 @@ import {
   DrawerFooter,
   DrawerHeader,
   DrawerTitle,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
   Input,
-  Label,
 } from "@/components/ui";
-import { useMediaQuery } from "@vueuse/core";
+import { createReusableTemplate, useMediaQuery } from "@vueuse/core";
 import { UserOrganization } from "@/stores";
 import { useMutation, useQueryClient } from "@tanstack/vue-query";
-import { supabase } from "@/config/supabase";
+import { z } from "zod";
+import { toTypedSchema } from "@vee-validate/zod";
+import { UpdateOrganization, useOrganizationServices } from "../composables";
+import { useForm } from "vee-validate";
 
 type Props = {
-  userOrganization: UserOrganization | null;
+  userOrganization: UserOrganization | undefined;
 };
 
 const openModel = defineModel<boolean>("open");
 const props = defineProps<Props>();
 
-const organizationName = ref(
-  props.userOrganization?.i_organizations?.name ?? ""
+const initialForm: UpdateOrganization = {
+  name: "",
+};
+const formSchema = toTypedSchema(
+  z.object({
+    name: z.string().min(1, "Nombre de organización es requerido"),
+  })
 );
 
+const [ModalBodyTemplate, ModalBody] = createReusableTemplate();
 const queryClient = useQueryClient();
+const organizationServices = useOrganizationServices();
 const isDesktop = useMediaQuery("(min-width: 768px)");
 const updateOrganizationMutation = useMutation({
-  mutationFn: async () => {
+  mutationFn: async (formValues: UpdateOrganization) => {
     if (!props.userOrganization?.org_id)
       throw new Error("Cannot update since organization id was not provided");
 
-    await supabase
-      .from("i_organizations")
-      .update({
-        name: organizationName.value,
-      })
-      .eq("id", props.userOrganization?.org_id);
+    await organizationServices.updateOrganization({
+      organizationId: props.userOrganization?.org_id,
+      values: formValues,
+    });
 
     await queryClient.invalidateQueries({ queryKey: ["organization"] });
 
@@ -54,45 +66,68 @@ const updateOrganizationMutation = useMutation({
   },
 });
 
+const formInstance = useForm<UpdateOrganization>({
+  initialValues: initialForm,
+  validationSchema: formSchema,
+});
+
+const onSubmit = formInstance.handleSubmit(async (formValues) => {
+  updateOrganizationMutation.mutate(formValues);
+});
+
 watchEffect(() => {
-  if (openModel.value) {
-    organizationName.value =
-      props.userOrganization?.i_organizations?.name ?? "";
-  } else {
-    organizationName.value = "";
-  }
+  if (!openModel.value) return;
+  formInstance.setValues({
+    name: props.userOrganization?.i_organizations?.name ?? "",
+  });
 });
 </script>
 
 <template>
+  <ModalBodyTemplate>
+    <div>
+      <div class="space-y-4 py-2 pb-4">
+        <div class="space-y-2">
+          <FormField v-slot="{ componentField }" name="name">
+            <FormItem v-auto-animate>
+              <FormLabel>Nombre de organización</FormLabel>
+              <FormControl>
+                <Input
+                  type="text"
+                  placeholder="Acme Inc."
+                  v-bind="componentField"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          </FormField>
+        </div>
+      </div>
+    </div>
+  </ModalBodyTemplate>
+
   <Dialog v-if="isDesktop" v-model:open="openModel">
     <DialogContent>
       <DialogHeader>
         <DialogTitle>Actualiza el nombre de tu organización</DialogTitle>
         <DialogDescription> Escribe el nuevo nombre. </DialogDescription>
       </DialogHeader>
-      <div>
-        <div class="space-y-4 py-2 pb-4">
-          <div class="space-y-2">
-            <Label for="name">Nombre de organización</Label>
-            <Input
-              v-model="organizationName"
-              id="name"
-              placeholder="Acme Inc."
-            />
-          </div>
-        </div>
-      </div>
-      <DialogFooter>
-        <Button variant="outline" @click="openModel = false"> Cancelar </Button>
-        <Button
-          :disabled="updateOrganizationMutation.isPending.value"
-          type="submit"
-          @click="updateOrganizationMutation.mutate"
-        >
-          Actualizar
-        </Button>
-      </DialogFooter>
+
+      <form @submit="onSubmit">
+        <ModalBody />
+
+        <DialogFooter>
+          <Button variant="outline" @click="openModel = false">
+            Cancelar
+          </Button>
+          <Button
+            :disabled="updateOrganizationMutation.isPending.value"
+            type="submit"
+          >
+            Actualizar
+          </Button>
+        </DialogFooter>
+      </form>
     </DialogContent>
   </Dialog>
 
@@ -103,30 +138,22 @@ watchEffect(() => {
           <DrawerTitle>Actualiza el nombre de tu organización</DrawerTitle>
           <DrawerDescription> Escribe el nuevo nombre. </DrawerDescription>
         </DrawerHeader>
-        <div>
-          <div class="space-y-4 py-2 pb-4 px-4">
-            <div class="space-y-2">
-              <Label for="name">Nombre de organización</Label>
-              <Input
-                v-model="organizationName"
-                id="name"
-                placeholder="Acme Inc."
-              />
-            </div>
-          </div>
-        </div>
-        <DrawerFooter>
-          <Button variant="outline" @click="openModel = false">
-            Cancelar
-          </Button>
-          <Button
-            :disabled="updateOrganizationMutation.isPending.value"
-            type="submit"
-            @click="updateOrganizationMutation.mutate"
-          >
-            Actualizar
-          </Button>
-        </DrawerFooter>
+
+        <form @submit="onSubmit">
+          <ModalBody />
+
+          <DrawerFooter>
+            <Button variant="outline" @click="openModel = false">
+              Cancelar
+            </Button>
+            <Button
+              :disabled="updateOrganizationMutation.isPending.value"
+              type="submit"
+            >
+              Actualizar
+            </Button>
+          </DrawerFooter>
+        </form>
       </div>
     </DrawerContent>
   </Drawer>
