@@ -52,7 +52,7 @@ const formSchema = toTypedSchema(
       .positive({ message: "Ingrese un número positivo" })
       .finite()
       .safe()
-      .min(0)
+      .min(1)
       .max(5),
     is_cashback_enabled: z.boolean(),
   })

@@ -20,6 +20,8 @@ import {
   TableHead,
   TableBody,
   TableCell,
+  FormDescription,
+  Switch,
 } from "@/components/ui";
 import { watch } from "vue";
 import { z } from "zod";
@@ -34,6 +36,7 @@ import { useMutation, useQueryClient } from "@tanstack/vue-query";
 import { analytics } from "@/config/analytics";
 import { notifyIfHasError, useSidebarManager } from "@/features/global";
 import { UserPlusIcon } from "lucide-vue-next";
+import { useOrganizationStore } from "@/stores";
 
 type Props = {
   sidebarManager: ReturnType<typeof useSidebarManager>;
@@ -62,6 +65,7 @@ const initialForm: CreateSale = {
 const route = useRoute();
 const queryClient = useQueryClient();
 const saleServices = useSaleServices();
+const organizationStore = useOrganizationStore();
 const currencyFormatter = useCurrencyFormatter();
 const createSaleMutation = useMutation({
   mutationFn: async (formValues: CreateSale) => {
@@ -79,6 +83,7 @@ const createSaleMutation = useMutation({
 
 const formSchema = toTypedSchema(
   z.object({
+    redeem_cashback: z.boolean(),
     status: z.enum(SALE_STATUS),
     sale_date: z.string().datetime(),
     customer_id: z.string().uuid().optional(),
@@ -209,6 +214,38 @@ watch(openModel, (nextOpenValue) => {
             </div>
 
             <FormMessage />
+          </FormItem>
+        </FormField>
+
+        <FormField
+          v-if="
+            activeCustomer &&
+            organizationStore.currentUserOrganization?.i_organizations
+              ?.is_cashback_enabled &&
+            (activeCustomer.cashback_balance ?? 0) > 0
+          "
+          v-slot="{ value, handleChange }"
+          name="redeem_cashback"
+        >
+          <FormItem class="flex flex-row items-center justify-between">
+            <div class="space-y-0.5">
+              <FormLabel class="text-base">
+                {{ activeCustomer?.name }} tiene
+                {{ currencyFormatter.parse(activeCustomer.cashback_balance) }}
+                cashback disponible, ¿Deseas usarlo en esta compra?
+              </FormLabel>
+              <FormDescription>
+                Tus clientes acumulan el
+                {{
+                  organizationStore.currentUserOrganization?.i_organizations
+                    ?.cashback_percent
+                }}% por cada compra. El monto se vera disponible después de que
+                esta venta se marque como completada.
+              </FormDescription>
+            </div>
+            <FormControl>
+              <Switch :checked="value" @update:checked="handleChange" />
+            </FormControl>
           </FormItem>
         </FormField>
 
