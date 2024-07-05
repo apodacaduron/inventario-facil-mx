@@ -414,17 +414,28 @@ watchEffect(() => {
                 }}</TableCell
               >
               <TableCell @click="openViewSaleSidebar(sale)" class="text-center">
-                <span
-                  v-if="sale.cashback_redeemed"
-                  class="line-through text-muted-foreground mr-2"
-                >
+                <div v-if="sale.redeem_cashback">
+                  <span
+                    v-if="
+                      sale.cashback_redeemed ||
+                      sale.i_customers?.cashback_balance
+                    "
+                    class="line-through text-muted-foreground mr-2"
+                  >
+                    {{ currencyFormatter.parse(sale.total ?? 0) }}
+                  </span>
+                  <span>{{
+                    currencyFormatter.parse(
+                      (sale.total ?? 0) -
+                        ((sale.cashback_redeemed ||
+                          sale.i_customers?.cashback_balance) ??
+                          0)
+                    )
+                  }}</span>
+                </div>
+                <div v-else>
                   {{ currencyFormatter.parse(sale.total ?? 0) }}
-                </span>
-                <span>{{
-                  currencyFormatter.parse(
-                    (sale.total ?? 0) - (sale.cashback_redeemed ?? 0)
-                  )
-                }}</span>
+                </div>
               </TableCell>
               <TableCell @click="openViewSaleSidebar(sale)" class="text-center">
                 {{ currencyFormatter.parse(sale.shipping_cost) }}

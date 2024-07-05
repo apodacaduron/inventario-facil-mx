@@ -26,8 +26,9 @@ import {
   SelectItem,
   SelectContent,
   SelectGroup,
+  Separator,
 } from "@/components/ui";
-import { watch } from "vue";
+import { computed, watch } from "vue";
 import { z } from "zod";
 import { SALE_STATUS, Sale, UpdateSale, useSaleServices } from "../composables";
 import { PlusCircleIcon } from "@heroicons/vue/24/outline";
@@ -187,6 +188,17 @@ const onSubmit = formInstance.handleSubmit(async (formValues) => {
   };
   updateSaleMutation.mutate(modifiedFormValues);
 });
+
+const sumProductPrices = computed(
+  () =>
+    formInstance.values.products.reduce(
+      (acc, formProduct) =>
+        acc +
+        (formProduct.qty ?? 0) *
+          (currencyFormatter.toCents(formProduct.price) ?? 0),
+      0
+    ) ?? 0
+);
 
 watch(openModel, (nextOpenValue) => {
   if (nextOpenValue && props.sale) {
@@ -355,18 +367,47 @@ watch(openModel, (nextOpenValue) => {
                     }}
                   </TableCell>
                   <TableCell class="text-center">
-                    {{
-                      currencyFormatter.parse(
-                        formInstance.values.products.reduce(
-                          (acc, formProduct) =>
-                            acc +
-                            (formProduct.qty ?? 0) *
-                              (currencyFormatter.toCents(formProduct.price) ??
-                                0),
-                          0
-                        ) ?? 0
-                      )
-                    }}
+                    <div>
+                      <div>
+                        <div
+                          v-if="
+                            sale?.redeem_cashback &&
+                            sumProductPrices <
+                              (sale.i_customers?.cashback_balance ?? 0)
+                          "
+                        >
+                          GRATIS
+                        </div>
+                        <div v-else>
+                          {{ currencyFormatter.parse(sumProductPrices) }}
+                        </div>
+                      </div>
+                      <template v-if="sale?.redeem_cashback">
+                        <template
+                          v-if="
+                            sumProductPrices >
+                            (sale.i_customers?.cashback_balance ?? 0)
+                          "
+                        >
+                          <div>
+                            {{
+                              `-${currencyFormatter.parse(
+                                sale.i_customers?.cashback_balance
+                              )}`
+                            }}
+                          </div>
+                          <Separator />
+                          <div>
+                            {{
+                              currencyFormatter.parse(
+                                sumProductPrices -
+                                  (sale.i_customers?.cashback_balance ?? 0)
+                              )
+                            }}
+                          </div>
+                        </template>
+                      </template>
+                    </div>
                   </TableCell>
                 </TableRow>
               </TableBody>

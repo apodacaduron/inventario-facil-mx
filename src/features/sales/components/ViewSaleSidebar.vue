@@ -156,7 +156,10 @@ const currencyFormatter = useCurrencyFormatter();
                       <div
                         v-if="
                           sale?.redeem_cashback &&
-                          (sale?.total ?? 0) < (sale.cashback_redeemed ?? 0)
+                          (sale?.total ?? 0) <
+                            ((sale.cashback_redeemed ||
+                              sale.i_customers?.cashback_balance) ??
+                              0)
                         "
                       >
                         GRATIS
@@ -166,17 +169,25 @@ const currencyFormatter = useCurrencyFormatter();
                       </div>
                     </div>
                     <template
-                      v-if="sale?.redeem_cashback && sale.cashback_redeemed"
+                      v-if="
+                        sale?.redeem_cashback &&
+                        (sale.cashback_redeemed ||
+                          sale.i_customers?.cashback_balance)
+                      "
                     >
                       <template
                         v-if="
-                          (sale?.total ?? 0) > (sale.cashback_redeemed ?? 0)
+                          (sale?.total ?? 0) >
+                          ((sale.cashback_redeemed ||
+                            sale.i_customers?.cashback_balance) ??
+                            0)
                         "
                       >
                         <div>
                           {{
                             `-${currencyFormatter.parse(
-                              sale.cashback_redeemed
+                              sale.cashback_redeemed ||
+                                sale.i_customers?.cashback_balance
                             )}`
                           }}
                         </div>
@@ -184,7 +195,10 @@ const currencyFormatter = useCurrencyFormatter();
                         <div>
                           {{
                             currencyFormatter.parse(
-                              (sale?.total ?? 0) - (sale.cashback_redeemed ?? 0)
+                              (sale?.total ?? 0) -
+                                ((sale.cashback_redeemed ||
+                                  sale.i_customers?.cashback_balance) ??
+                                  0)
                             )
                           }}
                         </div>
