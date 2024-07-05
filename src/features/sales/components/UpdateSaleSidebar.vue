@@ -383,6 +383,15 @@ watch(openModel, (nextOpenValue) => {
             <FormMessage />
           </FormItem>
         </FormField>
+
+        <div
+          v-if="sale?.redeem_cashback && sale.status === 'in_progress'"
+          class="text-xs text-muted-foreground"
+        >
+          El total de esta venta sera ajustado con el monedero del cliente una
+          vez que la venta se marque como completada
+        </div>
+
         <SheetFooter class="gap-4 sm:gap-0">
           <Button
             :disabled="updateSaleMutation.isPending.value"

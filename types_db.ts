@@ -340,6 +340,7 @@ export type Database = {
           cancellation_notes: string | null
           cancelled_at: string | null
           cashback_redeemed: number | null
+          cashback_to_redeem: number | null
           completed_at: string | null
           created_at: string
           customer_id: string | null
@@ -349,9 +350,11 @@ export type Database = {
           id: string
           notes: string | null
           org_id: string | null
+          redeem_cashback: boolean | null
           sale_date: string | null
           shipping_cost: number | null
           status: Database["public"]["Enums"]["basic_sale_status"] | null
+          total: number | null
           updated_at: string | null
           user_id: string | null
         }
@@ -359,6 +362,7 @@ export type Database = {
           cancellation_notes?: string | null
           cancelled_at?: string | null
           cashback_redeemed?: number | null
+          cashback_to_redeem?: number | null
           completed_at?: string | null
           created_at?: string
           customer_id?: string | null
@@ -368,9 +372,11 @@ export type Database = {
           id?: string
           notes?: string | null
           org_id?: string | null
+          redeem_cashback?: boolean | null
           sale_date?: string | null
           shipping_cost?: number | null
           status?: Database["public"]["Enums"]["basic_sale_status"] | null
+          total?: number | null
           updated_at?: string | null
           user_id?: string | null
         }
@@ -378,6 +384,7 @@ export type Database = {
           cancellation_notes?: string | null
           cancelled_at?: string | null
           cashback_redeemed?: number | null
+          cashback_to_redeem?: number | null
           completed_at?: string | null
           created_at?: string
           customer_id?: string | null
@@ -387,9 +394,11 @@ export type Database = {
           id?: string
           notes?: string | null
           org_id?: string | null
+          redeem_cashback?: boolean | null
           sale_date?: string | null
           shipping_cost?: number | null
           status?: Database["public"]["Enums"]["basic_sale_status"] | null
+          total?: number | null
           updated_at?: string | null
           user_id?: string | null
         }
@@ -704,6 +713,7 @@ export type Database = {
           notes: string
           shipping_cost: number
           products: Json[]
+          redeem_cashback?: boolean
           customer_id?: string
           cancellation_notes?: string
         }
@@ -830,6 +840,12 @@ export type Database = {
           end_date_input?: string
         }
         Returns: number
+      }
+      handle_customer_cashback: {
+        Args: {
+          p_sale_id: string
+        }
+        Returns: undefined
       }
       update_sale: {
         Args: {

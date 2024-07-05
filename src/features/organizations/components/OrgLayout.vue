@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useAuthStore, useOrganizationStore, UserOrganization } from "@/stores";
+import { useAuthStore, useOrganizationStore } from "@/stores";
 import {
   Button,
   DropdownMenu,

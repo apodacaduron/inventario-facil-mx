@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watchEffect } from "vue";
+import { watchEffect } from "vue";
 
 import {
   Button,
@@ -26,7 +26,7 @@ import {
   Switch,
 } from "@/components/ui";
 import { createReusableTemplate, useMediaQuery } from "@vueuse/core";
-import { UserOrganization } from "@/stores";
+import { useOrganizationStore, UserOrganization } from "@/stores";
 import { useMutation, useQueryClient } from "@tanstack/vue-query";
 import { z } from "zod";
 import { toTypedSchema } from "@vee-validate/zod";
@@ -35,7 +35,7 @@ import { useForm } from "vee-validate";
 import { PercentIcon } from "lucide-vue-next";
 
 type Props = {
-  userOrganization: UserOrganization | undefined;
+  userOrganization: UserOrganization | null | undefined;
 };
 
 const openModel = defineModel<boolean>("open");
@@ -52,7 +52,7 @@ const formSchema = toTypedSchema(
       .positive({ message: "Ingrese un número positivo" })
       .finite()
       .safe()
-      .min(1)
+      .min(0.0000000001)
       .max(5),
     is_cashback_enabled: z.boolean(),
   })
@@ -61,6 +61,7 @@ const formSchema = toTypedSchema(
 const [ModalBodyTemplate, ModalBody] = createReusableTemplate();
 const queryClient = useQueryClient();
 const organizationServices = useOrganizationServices();
+const organizationStore = useOrganizationStore();
 const isDesktop = useMediaQuery("(min-width: 768px)");
 const updateOrganizationMutation = useMutation({
   mutationFn: async (formValues: UpdateOrganization) => {
@@ -117,43 +118,48 @@ watchEffect(() => {
             <FormMessage />
           </FormItem>
         </FormField>
-        <Separator class="my-6" />
-        <FormField v-slot="{ value, handleChange }" name="is_cashback_enabled">
-          <FormItem class="flex flex-row items-center justify-between">
-            <div class="space-y-0.5">
-              <FormLabel class="text-base">
-                Habilitar monedero electrónico
-              </FormLabel>
-              <FormDescription>
-                Tus clientes acumulan un porcentaje por cada compra.
-              </FormDescription>
-            </div>
-            <FormControl>
-              <Switch :checked="value" @update:checked="handleChange" />
-            </FormControl>
-          </FormItem>
-        </FormField>
-        <FormField v-slot="{ componentField }" name="cashback_percent">
-          <FormItem v-auto-animate>
-            <FormLabel>Porcentaje por compra</FormLabel>
-            <FormControl>
-              <div class="relative w-full items-center">
-                <Input
-                  type="text"
-                  placeholder="Ingresa un porcentaje"
-                  class="pr-10"
-                  v-bind="componentField"
-                />
-                <span
-                  class="absolute end-0 inset-y-0 flex items-center justify-center px-2"
-                >
-                  <PercentIcon class="size-4" />
-                </span>
+        <template v-if="organizationStore.canEnableCustomerCashback">
+          <Separator class="my-6" />
+          <FormField
+            v-slot="{ value, handleChange }"
+            name="is_cashback_enabled"
+          >
+            <FormItem class="flex flex-row items-center justify-between">
+              <div class="space-y-0.5">
+                <FormLabel class="text-base">
+                  Habilitar monedero electrónico
+                </FormLabel>
+                <FormDescription>
+                  Tus clientes acumulan un porcentaje por cada compra.
+                </FormDescription>
               </div>
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        </FormField>
+              <FormControl>
+                <Switch :checked="value" @update:checked="handleChange" />
+              </FormControl>
+            </FormItem>
+          </FormField>
+          <FormField v-slot="{ componentField }" name="cashback_percent">
+            <FormItem v-auto-animate>
+              <FormLabel>Porcentaje por compra</FormLabel>
+              <FormControl>
+                <div class="relative w-full items-center">
+                  <Input
+                    type="text"
+                    placeholder="Ingresa un porcentaje"
+                    class="pr-10"
+                    v-bind="componentField"
+                  />
+                  <span
+                    class="absolute end-0 inset-y-0 flex items-center justify-center px-2"
+                  >
+                    <PercentIcon class="size-4" />
+                  </span>
+                </div>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          </FormField>
+        </template>
       </div>
     </div>
   </ModalBodyTemplate>

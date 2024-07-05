@@ -414,15 +414,17 @@ watchEffect(() => {
                 }}</TableCell
               >
               <TableCell @click="openViewSaleSidebar(sale)" class="text-center">
-                {{
+                <span
+                  v-if="sale.cashback_redeemed"
+                  class="line-through text-muted-foreground mr-2"
+                >
+                  {{ currencyFormatter.parse(sale.total ?? 0) }}
+                </span>
+                <span>{{
                   currencyFormatter.parse(
-                    sale.i_sale_products.reduce(
-                      (acc, saleProduct) =>
-                        acc + (saleProduct.qty ?? 0) * (saleProduct.price ?? 0),
-                      0
-                    )
+                    (sale.total ?? 0) - (sale.cashback_redeemed ?? 0)
                   )
-                }}
+                }}</span>
               </TableCell>
               <TableCell @click="openViewSaleSidebar(sale)" class="text-center">
                 {{ currencyFormatter.parse(sale.shipping_cost) }}

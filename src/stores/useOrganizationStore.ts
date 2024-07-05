@@ -31,6 +31,7 @@ export const useOrganizationStore = defineStore("organization", () => {
       currentUserOrganization.value?.i_organizations?.plans?.name === "premium"
   );
   const canEnablePublicProductsPage = toRef(() => isPremium.value);
+  const canEnableCustomerCashback = toRef(() => isPremium.value);
   const canAddProducts = toRef(() => {
     const maxProducts =
       currentUserOrganization.value?.i_organizations?.plans?.max_products;
@@ -107,6 +108,7 @@ export const useOrganizationStore = defineStore("organization", () => {
     findOrganizationById,
     isPremium,
     canEnablePublicProductsPage,
+    canEnableCustomerCashback,
     canAddProducts,
     canAddCustomers,
     canAddOrganizations,
