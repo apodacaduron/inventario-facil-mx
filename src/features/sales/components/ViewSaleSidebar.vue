@@ -14,6 +14,7 @@ import {
   TableBody,
   TableCell,
   Badge,
+  Separator,
 } from "@/components/ui";
 import { Sale } from "../composables";
 import { useCurrencyFormatter } from "@/features/products";
@@ -150,20 +151,84 @@ const currencyFormatter = useCurrencyFormatter();
                   }}
                 </TableCell>
                 <TableCell class="text-center">
-                  {{
-                    currencyFormatter.parse(
-                      sale?.i_sale_products.reduce(
-                        (acc, saleProduct) =>
-                          acc +
-                          (saleProduct.qty ?? 0) * (saleProduct.price ?? 0),
-                        0
-                      ) ?? 0
-                    )
-                  }}
+                  <div>
+                    <div>
+                      <div
+                        v-if="
+                          sale?.redeem_cashback &&
+                          (sale?.total ?? 0) <
+                            ((sale.cashback_redeemed ||
+                              sale.i_customers?.cashback_balance) ??
+                              0)
+                        "
+                      >
+                        GRATIS
+                      </div>
+                      <div v-else>
+                        {{ currencyFormatter.parse(sale?.total ?? 0) }}
+                      </div>
+                    </div>
+                    <template
+                      v-if="
+                        sale?.redeem_cashback &&
+                        (sale.cashback_redeemed ||
+                          sale.i_customers?.cashback_balance)
+                      "
+                    >
+                      <template
+                        v-if="
+                          (sale?.total ?? 0) >
+                          ((sale.cashback_redeemed ||
+                            sale.i_customers?.cashback_balance) ??
+                            0)
+                        "
+                      >
+                        <div>
+                          {{
+                            `-${currencyFormatter.parse(
+                              sale.cashback_redeemed ||
+                                sale.i_customers?.cashback_balance
+                            )}`
+                          }}
+                        </div>
+                        <Separator />
+                        <div>
+                          {{
+                            currencyFormatter.parse(
+                              (sale?.total ?? 0) -
+                                ((sale.cashback_redeemed ||
+                                  sale.i_customers?.cashback_balance) ??
+                                  0)
+                            )
+                          }}
+                        </div>
+                      </template>
+                    </template>
+                  </div>
                 </TableCell>
               </TableRow>
             </TableBody>
           </Table>
+
+          <div
+            v-if="sale?.redeem_cashback && sale.status === 'in_progress'"
+            class="text-xs text-muted-foreground"
+          >
+            El total de esta venta sera ajustado con el monedero del cliente una
+            vez que la venta se marque como completada
+          </div>
+          <div
+            v-if="
+              sale?.redeem_cashback &&
+              sale.status === 'completed' &&
+              sale.cashback_redeemed === 0
+            "
+            class="text-xs text-muted-foreground"
+          >
+            El cliente ya no cuenta con dinero en su monedero, por lo que el
+            precio se mantiene.
+          </div>
+
           <div
             v-if="sale?.created_at"
             class="text-muted-foreground text-xs mt-4"

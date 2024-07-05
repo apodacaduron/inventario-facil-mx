@@ -3,7 +3,7 @@ import { LoadListOptions, useServiceHelpers } from '@/features/global';
 import { Tables } from '../../../../types_db';
 
 export type CreateSale = {
-  sale_id?: NonNullable<Tables<'i_sales'>['id']>;
+  redeem_cashback: NonNullable<Tables<'i_sales'>['redeem_cashback']>;
   sale_date: NonNullable<Tables<'i_sales'>['sale_date']>;
   status: NonNullable<Sale['status']>;
   customer_id?: NonNullable<Sale['customer_id']>;
@@ -21,7 +21,7 @@ export type CreateSale = {
 };
 export type UpdateSale = {
   sale_id: Sale['id'];
-} & CreateSale;
+} & Omit<CreateSale, 'redeem_cashback'>;
 export type DeleteSale = Sale['id'];
 
 export type SaleList = Awaited<

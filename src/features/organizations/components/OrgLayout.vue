@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useAuthStore } from "@/stores";
+import { useAuthStore, useOrganizationStore } from "@/stores";
 import {
   Button,
   DropdownMenu,
@@ -28,7 +28,7 @@ import {
   MoonIcon,
   SunIcon,
 } from "@heroicons/vue/24/outline";
-import { CrownIcon } from "lucide-vue-next";
+import { CrownIcon, SettingsIcon } from "lucide-vue-next";
 import GoPremiumDialog from "./GoPremiumDialog.vue";
 import { computed, ref } from "vue";
 import {
@@ -38,9 +38,12 @@ import {
   Users,
 } from "lucide-vue-next";
 import OrganizationSwitcher from "./OrganizationSwitcher.vue";
+import UpdateOrganizationDialog from "./UpdateOrganizationDialog.vue";
 
 const isGoPremiumDialogOpen = ref(false);
+const isUpdateDialogOpen = ref(false);
 
+const organizationStore = useOrganizationStore();
 const route = useRoute();
 const isDark = useDark();
 const toggleDark = useToggle(isDark);
@@ -73,6 +76,10 @@ const menuList = computed(() => ({
 
 <template>
   <GoPremiumDialog v-model:open="isGoPremiumDialogOpen" />
+  <UpdateOrganizationDialog
+    v-model:open="isUpdateDialogOpen"
+    :userOrganization="organizationStore.currentUserOrganization"
+  />
 
   <nav class="fixed top-0 z-20 w-full border-b border-border bg-background">
     <div class="px-3 py-3 lg:px-5 lg:pl-3">
@@ -112,7 +119,17 @@ const menuList = computed(() => ({
                 <div
                   class="flex flex-col justify-between h-full pb-4 overflow-y-auto"
                 >
-                  <OrganizationSwitcher />
+                  <div class="flex gap-2">
+                    <OrganizationSwitcher />
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      class="shrink-0"
+                      @click="isUpdateDialogOpen = true"
+                    >
+                      <SettingsIcon class="size-4" />
+                    </Button>
+                  </div>
 
                   <ul class="space-y-2 mt-6">
                     <li v-for="(menuItem, index) in menuList" :key="index">
@@ -161,7 +178,17 @@ const menuList = computed(() => ({
             </span>
           </router-link>
 
-          <OrganizationSwitcher v-if="isDesktop" />
+          <div v-if="isDesktop" class="flex gap-2">
+            <OrganizationSwitcher />
+            <Button
+              size="icon"
+              variant="ghost"
+              class="shrink-0"
+              @click="isUpdateDialogOpen = true"
+            >
+              <SettingsIcon class="size-4" />
+            </Button>
+          </div>
         </div>
         <div class="flex items-center">
           <div class="flex items-center ms-3 gap-4">

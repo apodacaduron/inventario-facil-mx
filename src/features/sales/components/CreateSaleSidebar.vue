@@ -20,8 +20,11 @@ import {
   TableHead,
   TableBody,
   TableCell,
+  FormDescription,
+  Switch,
+  Separator,
 } from "@/components/ui";
-import { watch } from "vue";
+import { computed, watch } from "vue";
 import { z } from "zod";
 import { CreateSale, SALE_STATUS, Sale, useSaleServices } from "../composables";
 import { Customer } from "@/features/customers";
@@ -34,6 +37,7 @@ import { useMutation, useQueryClient } from "@tanstack/vue-query";
 import { analytics } from "@/config/analytics";
 import { notifyIfHasError, useSidebarManager } from "@/features/global";
 import { UserPlusIcon } from "lucide-vue-next";
+import { useOrganizationStore } from "@/stores";
 
 type Props = {
   sidebarManager: ReturnType<typeof useSidebarManager>;
@@ -51,6 +55,7 @@ const openModel = defineModel<boolean>("open");
 const props = defineProps<Props>();
 
 const initialForm: CreateSale = {
+  redeem_cashback: false,
   status: "in_progress",
   sale_date: new Date().toISOString(),
   products: [],
@@ -62,6 +67,7 @@ const initialForm: CreateSale = {
 const route = useRoute();
 const queryClient = useQueryClient();
 const saleServices = useSaleServices();
+const organizationStore = useOrganizationStore();
 const currencyFormatter = useCurrencyFormatter();
 const createSaleMutation = useMutation({
   mutationFn: async (formValues: CreateSale) => {
@@ -79,6 +85,7 @@ const createSaleMutation = useMutation({
 
 const formSchema = toTypedSchema(
   z.object({
+    redeem_cashback: z.boolean(),
     status: z.enum(SALE_STATUS),
     sale_date: z.string().datetime(),
     customer_id: z.string().uuid().optional(),
@@ -134,6 +141,17 @@ const formInstance = useForm<CreateSale>({
   validationSchema: formSchema,
 });
 
+const sumProductPrices = computed(
+  () =>
+    formInstance.values.products.reduce(
+      (acc, formProduct) =>
+        acc +
+        (formProduct.qty ?? 0) *
+          (currencyFormatter.toCents(formProduct.price) ?? 0),
+      0
+    ) ?? 0
+);
+
 const onSubmit = formInstance.handleSubmit(async (formValues) => {
   const modifiedProducts = formValues.products.map((formProduct) => ({
     ...formProduct,
@@ -149,12 +167,22 @@ const onSubmit = formInstance.handleSubmit(async (formValues) => {
   createSaleMutation.mutate(modifiedFormValues);
 });
 
+function openSidebar(name: string) {
+  props.sidebarManager.setCurrentSidebarState({
+    formValues: { ...formInstance.values },
+  });
+  props.sidebarManager.openSidebar(name);
+}
+
 watch(openModel, (nextOpenValue) => {
   if (!nextOpenValue) return;
+
   formInstance.resetForm(
     {
       values: {
         ...initialForm,
+        ...(props.sidebarManager.currentSidebar.value.state
+          ?.formValues as Record<string, unknown>),
         customer_id: props.activeCustomer?.id,
         products: props.activeProducts
           ? Array.from(props.activeProducts.values()).map((product) => ({
@@ -187,7 +215,7 @@ watch(openModel, (nextOpenValue) => {
                 class="h-12 w-full"
                 variant="outline"
                 type="button"
-                @click="sidebarManager.openSidebar('customer-picker')"
+                @click="openSidebar('customer-picker')"
               >
                 <span v-if="formInstance.values.customer_id">
                   {{ activeCustomer?.name }} <br />
@@ -202,13 +230,41 @@ watch(openModel, (nextOpenValue) => {
                 class="shrink-0 size-12"
                 variant="ghost"
                 size="icon"
-                @click="sidebarManager.openSidebar('create-customer')"
+                @click="openSidebar('create-customer')"
               >
                 <UserPlusIcon class="size-4" />
               </Button>
             </div>
 
             <FormMessage />
+          </FormItem>
+        </FormField>
+
+        <FormField
+          v-if="
+            activeCustomer &&
+            organizationStore.currentUserOrganization?.i_organizations
+              ?.is_cashback_enabled &&
+            (activeCustomer.cashback_balance ?? 0) > 0
+          "
+          v-slot="{ value, handleChange }"
+          name="redeem_cashback"
+        >
+          <FormItem class="flex flex-row items-center justify-between">
+            <div class="space-y-0.5">
+              <FormLabel class="text-base">
+                {{ activeCustomer?.name }} tiene
+                {{ currencyFormatter.parse(activeCustomer.cashback_balance) }}
+                cashback disponible, ¿Deseas aplicarlo en esta compra?
+              </FormLabel>
+              <FormDescription>
+                El monto actualizado se vera disponible después de que esta
+                venta se marque como completada.
+              </FormDescription>
+            </div>
+            <FormControl>
+              <Switch :checked="value" @update:checked="handleChange" />
+            </FormControl>
           </FormItem>
         </FormField>
 
@@ -293,18 +349,47 @@ watch(openModel, (nextOpenValue) => {
                     }}
                   </TableCell>
                   <TableCell class="text-center">
-                    {{
-                      currencyFormatter.parse(
-                        formInstance.values.products.reduce(
-                          (acc, formProduct) =>
-                            acc +
-                            (formProduct.qty ?? 0) *
-                              (currencyFormatter.toCents(formProduct.price) ??
-                                0),
-                          0
-                        ) ?? 0
-                      )
-                    }}
+                    <div>
+                      <div>
+                        <div
+                          v-if="
+                            formInstance.values.redeem_cashback &&
+                            sumProductPrices <
+                              (activeCustomer?.cashback_balance ?? 0)
+                          "
+                        >
+                          GRATIS
+                        </div>
+                        <div v-else>
+                          {{ currencyFormatter.parse(sumProductPrices) }}
+                        </div>
+                      </div>
+                      <template v-if="formInstance.values.redeem_cashback">
+                        <template
+                          v-if="
+                            sumProductPrices >
+                            (activeCustomer?.cashback_balance ?? 0)
+                          "
+                        >
+                          <div>
+                            {{
+                              `-${currencyFormatter.parse(
+                                activeCustomer?.cashback_balance
+                              )}`
+                            }}
+                          </div>
+                          <Separator />
+                          <div>
+                            {{
+                              currencyFormatter.parse(
+                                sumProductPrices -
+                                  (activeCustomer?.cashback_balance ?? 0)
+                              )
+                            }}
+                          </div>
+                        </template>
+                      </template>
+                    </div>
                   </TableCell>
                 </TableRow>
               </TableBody>
@@ -313,9 +398,7 @@ watch(openModel, (nextOpenValue) => {
             <Button
               v-if="formInstance.values.status === 'in_progress'"
               type="button"
-              @click="
-                sidebarManager.openSidebar('product-picker', { formInstance })
-              "
+              @click="openSidebar('product-picker')"
               variant="outline"
             >
               <PlusCircleIcon class="w-5 h-5 mr-2" /> Agregar productos
@@ -323,6 +406,23 @@ watch(openModel, (nextOpenValue) => {
             <FormMessage />
           </FormItem>
         </FormField>
+
+        <div
+          v-if="
+            activeCustomer &&
+            organizationStore.currentUserOrganization?.i_organizations
+              ?.is_cashback_enabled &&
+            !formInstance.values.redeem_cashback
+          "
+          class="text-xs text-muted-foreground"
+        >
+          Tus clientes acumulan el
+          {{
+            organizationStore.currentUserOrganization?.i_organizations
+              ?.cashback_percent
+          }}% por cada compra.
+        </div>
+
         <SheetFooter class="gap-4 sm:gap-0">
           <Button
             :disabled="createSaleMutation.isPending.value"
