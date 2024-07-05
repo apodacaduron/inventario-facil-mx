@@ -424,14 +424,23 @@ watchEffect(() => {
                   >
                     {{ currencyFormatter.parse(sale.total ?? 0) }}
                   </span>
-                  <span>{{
-                    currencyFormatter.parse(
-                      (sale.total ?? 0) -
-                        ((sale.cashback_redeemed ||
-                          sale.i_customers?.cashback_balance) ??
-                          0)
-                    )
-                  }}</span>
+                  <span
+                    v-if="
+                      (sale.total ?? 0) >
+                      ((sale.cashback_redeemed ||
+                        sale.i_customers?.cashback_balance) ??
+                        0)
+                    "
+                    >{{
+                      currencyFormatter.parse(
+                        (sale.total ?? 0) -
+                          ((sale.cashback_redeemed ||
+                            sale.i_customers?.cashback_balance) ??
+                            0)
+                      )
+                    }}</span
+                  >
+                  <span v-else>GRATIS</span>
                 </div>
                 <div v-else>
                   {{ currencyFormatter.parse(sale.total ?? 0) }}
