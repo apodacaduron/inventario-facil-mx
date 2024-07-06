@@ -2,28 +2,20 @@
 import { Spinner } from "@/components";
 import {
   Button,
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  Drawer,
-  DrawerContent,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerDescription,
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
 } from "@/components/ui";
 import { supabase } from "@/config/supabase";
 import { useAuthStore } from "@/stores";
 import { useMutation } from "@tanstack/vue-query";
-import { useMediaQuery } from "@vueuse/core";
 import { toRef } from "vue";
 
 const openModel = defineModel<boolean>("open");
 
-const isDesktop = useMediaQuery("(min-width: 768px)");
 const authStore = useAuthStore();
 const createStripeCheckoutMutation = useMutation({
   mutationFn: createStripeCheckout,
@@ -65,18 +57,18 @@ async function createStripeCheckout() {
 </script>
 
 <template>
-  <Dialog v-if="isDesktop" v-model:open="openModel">
-    <DialogContent class="sm:max-w-[425px]">
-      <DialogHeader>
-        <DialogTitle>¡Hazte Premium Hoy!</DialogTitle>
-        <DialogDescription>
+  <Sheet v-model:open="openModel">
+    <SheetContent class="sm:max-w-[425px]">
+      <SheetHeader>
+        <SheetTitle>¡Hazte Premium Hoy!</SheetTitle>
+        <SheetDescription>
           Suscríbete ahora para disfrutar de todos los beneficios exclusivos de
           nuestra membresía premium. Accede a contenido exclusivo, soporte
           prioritario y mucho más. Haz clic en el botón de abajo para completar
           tu suscripción a través de Stripe y mejorar tu experiencia al máximo.
-        </DialogDescription>
-      </DialogHeader>
-      <DialogFooter>
+        </SheetDescription>
+      </SheetHeader>
+      <SheetFooter>
         <Button
           :disabled="isSubscribeButtonDisabled"
           @click="createStripeCheckoutMutation.mutate()"
@@ -91,40 +83,7 @@ async function createStripeCheckout() {
             Suscribirse
           </div>
         </Button>
-      </DialogFooter>
-    </DialogContent>
-  </Dialog>
-
-  <Drawer v-else v-model:open="openModel">
-    <DrawerContent>
-      <div class="mx-auto w-full max-w-sm mt-8 mb-16">
-        <DrawerHeader>
-          <DrawerTitle>¡Hazte Premium Hoy!</DrawerTitle>
-          <DrawerDescription>
-            Suscríbete ahora para disfrutar de todos los beneficios exclusivos
-            de nuestra membresía premium. Accede a contenido exclusivo, soporte
-            prioritario y mucho más. Haz clic en el botón de abajo para
-            completar tu suscripción a través de Stripe y mejorar tu experiencia
-            al máximo.
-          </DrawerDescription>
-        </DrawerHeader>
-        <DrawerFooter>
-          <Button
-            :disabled="isSubscribeButtonDisabled"
-            @click="createStripeCheckoutMutation.mutate()"
-            type="button"
-            class="w-full"
-          >
-            <div class="flex">
-              <Spinner
-                v-if="createStripeCheckoutMutation.isPending.value"
-                class="mr-3"
-              />
-              Suscribirse
-            </div>
-          </Button>
-        </DrawerFooter>
-      </div>
-    </DrawerContent>
-  </Drawer>
+      </SheetFooter>
+    </SheetContent>
+  </Sheet>
 </template>

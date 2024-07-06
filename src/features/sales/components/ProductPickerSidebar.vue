@@ -18,7 +18,7 @@ import {
 } from "@/components/ui";
 import {
   FeedbackCard,
-  useSidebarManager,
+  useLayerManager,
   useTableStates,
 } from "@/features/global";
 import {
@@ -34,7 +34,7 @@ import { Sale } from "../composables";
 import { Product, useProductsQuery } from "@/features/products";
 
 type Props = {
-  sidebarManager: ReturnType<typeof useSidebarManager>;
+  layerManager: ReturnType<typeof useLayerManager>;
   sale: Sale | null;
   activeProducts: Map<
     string,
@@ -186,7 +186,7 @@ function getMaxIncrementValue(product: Product | null) {
             class="shrink-0"
             variant="ghost"
             size="icon"
-            @click="sidebarManager.openSidebar('create-product')"
+            @click="layerManager.openLayer('create-product')"
           >
             <PackagePlusIcon class="size-4" />
           </Button>

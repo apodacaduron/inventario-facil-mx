@@ -36,12 +36,12 @@ import { useCurrencyFormatter } from "@/features/products";
 import { toTypedSchema } from "@vee-validate/zod";
 import { useForm } from "vee-validate";
 import { useMutation, useQueryClient } from "@tanstack/vue-query";
-import { notifyIfHasError, useSidebarManager } from "@/features/global";
+import { notifyIfHasError, useLayerManager } from "@/features/global";
 import { analytics } from "@/config/analytics";
 import { useRoute } from "vue-router";
 
 type Props = {
-  sidebarManager: ReturnType<typeof useSidebarManager>;
+  layerManager: ReturnType<typeof useLayerManager>;
   sale?: Sale | null;
   activeProducts: Map<
     string,
@@ -416,7 +416,7 @@ watch(openModel, (nextOpenValue) => {
             <Button
               v-if="formInstance.values.status === 'in_progress'"
               type="button"
-              @click="sidebarManager.openSidebar('product-picker')"
+              @click="layerManager.openLayer('product-picker')"
               variant="outline"
             >
               <PlusCircleIcon class="w-5 h-5 mr-2" /> Agregar productos

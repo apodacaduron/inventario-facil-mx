@@ -20,10 +20,15 @@ import {
 } from "lucide-vue-next";
 import { useOrganizationStore } from "@/stores";
 import { useRoute } from "vue-router";
-import CreateOrganizationDialog from "./CreateOrganizationDialog.vue";
+import type { useLayerManager } from "@/features/global";
+
+type Props = {
+  layerManager: ReturnType<typeof useLayerManager>;
+};
+defineProps<Props>();
 
 const open = ref(false);
-const showNewTeamDialog = ref(false);
+
 const route = useRoute();
 const organizationStore = useOrganizationStore();
 </script>
@@ -94,7 +99,7 @@ const organizationStore = useOrganizationStore();
                 @select="
                   () => {
                     open = false;
-                    showNewTeamDialog = true;
+                    layerManager.openLayer('create-organization');
                   }
                 "
               >
@@ -107,6 +112,4 @@ const organizationStore = useOrganizationStore();
       </Command>
     </PopoverContent>
   </Popover>
-
-  <CreateOrganizationDialog v-model:open="showNewTeamDialog" />
 </template>

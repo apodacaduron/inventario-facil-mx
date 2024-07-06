@@ -1,7 +1,7 @@
 export { default as OrgLayout } from "./OrgLayout.vue";
 export { default as OrganizationSwitcher } from "./OrganizationSwitcher.vue";
-export { default as GoPremiumDialog } from "./GoPremiumDialog.vue";
-export { default as CreateOrganizationDialog } from "./CreateOrganizationDialog.vue";
+export { default as GoPremiumSidebar } from "./GoPremiumSidebar.vue";
+export { default as CreateOrganizationSidebar } from "./CreateOrganizationSidebar.vue";
 export { default as DeleteOrganizationDialog } from "./DeleteOrganizationDialog.vue";
-export { default as UpdateOrganizationDialog } from "./UpdateOrganizationDialog.vue";
+export { default as UpdateOrganizationSidebar } from "./UpdateOrganizationSidebar.vue";
 export { default as UpdateThemeDialog } from "./UpdateThemeDialog.vue";

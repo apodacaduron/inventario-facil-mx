@@ -19,13 +19,6 @@ import {
   Skeleton,
 } from "@/components/ui";
 import {
-  ArchiveBoxIcon,
-  BanknotesIcon,
-  CurrencyDollarIcon,
-  InboxStackIcon,
-  UserGroupIcon,
-} from "@heroicons/vue/24/outline";
-import {
   useBestCustomersQuery,
   useCustomersCountQuery,
 } from "@/features/customers";
@@ -34,6 +27,15 @@ import {
   useSalesTotalIncomeQuery,
   useSalesTotalProfitQuery,
 } from "@/features/sales";
+import {
+  AwardIcon,
+  BoxIcon,
+  DollarSignIcon,
+  ShoppingCartIcon,
+  StarIcon,
+  TrendingUpIcon,
+  UsersIcon,
+} from "lucide-vue-next";
 
 const props = defineProps<{
   from: string;
@@ -87,13 +89,17 @@ const periodString = toRef(() => {
   <div class="grid grid-cols-1 gap-5 xl:grid-cols-2 2xl:grid-cols-4">
     <router-link :to="`/org/${route.params.orgId}/sales`">
       <Card>
-        <CardHeader
-          class="flex flex-row items-center justify-between space-y-0 pb-2"
-        >
+        <CardHeader class="flex relative pb-2">
           <CardTitle class="text-sm font-medium">
             Cantidad de ventas
           </CardTitle>
-          <InboxStackIcon class="w-5 h-5" />
+          <Avatar
+            class="absolute top-2 right-4 bg-primary text-primary-foreground"
+          >
+            <AvatarFallback>
+              <ShoppingCartIcon class="size-4" />
+            </AvatarFallback>
+          </Avatar>
         </CardHeader>
         <CardContent>
           <div class="text-2xl font-bold">
@@ -108,11 +114,13 @@ const periodString = toRef(() => {
 
     <router-link :to="`/org/${route.params.orgId}/sales`">
       <Card>
-        <CardHeader
-          class="flex flex-row items-center justify-between space-y-0 pb-2"
-        >
+        <CardHeader class="flex relative pb-2">
           <CardTitle class="text-sm font-medium"> Total de ventas </CardTitle>
-          <BanknotesIcon class="w-5 h-5" />
+          <Avatar
+            class="absolute top-2 right-4 bg-primary text-primary-foreground"
+          >
+            <AvatarFallback> <DollarSignIcon class="size-4" /> </AvatarFallback
+          ></Avatar>
         </CardHeader>
         <CardContent>
           <div class="text-2xl font-bold">
@@ -128,13 +136,15 @@ const periodString = toRef(() => {
 
     <router-link :to="`/org/${route.params.orgId}/sales`">
       <Card>
-        <CardHeader
-          class="flex flex-row items-center justify-between space-y-0 pb-2"
-        >
+        <CardHeader class="flex relative pb-2">
           <CardTitle class="text-sm font-medium">
             Ganancia de ventas
           </CardTitle>
-          <CurrencyDollarIcon class="w-5 h-5" />
+          <Avatar
+            class="absolute top-2 right-4 bg-primary text-primary-foreground"
+          >
+            <AvatarFallback> <TrendingUpIcon class="size-4" /> </AvatarFallback
+          ></Avatar>
         </CardHeader>
         <CardContent>
           <div class="text-2xl font-bold">
@@ -150,11 +160,15 @@ const periodString = toRef(() => {
 
     <router-link :to="`/org/${route.params.orgId}/customers`">
       <Card>
-        <CardHeader
-          class="flex flex-row items-center justify-between space-y-0 pb-2"
-        >
+        <CardHeader class="flex relative pb-2">
           <CardTitle class="text-sm font-medium"> Total de clientes</CardTitle>
-          <UserGroupIcon class="w-5 h-5" />
+          <Avatar
+            class="absolute top-2 right-4 bg-primary text-primary-foreground"
+          >
+            <AvatarFallback>
+              <UsersIcon class="size-4" />
+            </AvatarFallback>
+          </Avatar>
         </CardHeader>
         <CardContent>
           <div class="text-2xl font-bold">
@@ -169,13 +183,15 @@ const periodString = toRef(() => {
 
     <router-link :to="`/org/${route.params.orgId}/sales`">
       <Card>
-        <CardHeader
-          class="flex flex-row items-center justify-between space-y-0 pb-2"
-        >
+        <CardHeader class="flex relative pb-2">
           <CardTitle class="text-sm font-medium"
             >Los productos mas vendidos</CardTitle
           >
-          <ArchiveBoxIcon class="w-5 h-5" />
+          <Avatar
+            class="absolute top-2 right-4 bg-primary text-primary-foreground"
+          >
+            <AvatarFallback> <StarIcon class="size-4" /> </AvatarFallback
+          ></Avatar>
         </CardHeader>
         <CardContent>
           <div class="text-2xl font-bold h-[32px] flex flex-row">
@@ -204,13 +220,15 @@ const periodString = toRef(() => {
 
     <router-link :to="`/org/${route.params.orgId}/customers`">
       <Card>
-        <CardHeader
-          class="flex flex-row items-center justify-between space-y-0 pb-2"
-        >
+        <CardHeader class="flex relative pb-2">
           <CardTitle class="text-sm font-medium"
             >Los mejores clientes</CardTitle
           >
-          <ArchiveBoxIcon class="w-5 h-5" />
+          <Avatar
+            class="absolute top-2 right-4 bg-primary text-primary-foreground"
+          >
+            <AvatarFallback> <AwardIcon class="size-4" /> </AvatarFallback
+          ></Avatar>
         </CardHeader>
         <CardContent>
           <div class="text-2xl font-bold flex flex-row gap-2 lg:h-[32px]">
@@ -234,13 +252,15 @@ const periodString = toRef(() => {
 
     <router-link :to="`/org/${route.params.orgId}/products`">
       <Card>
-        <CardHeader
-          class="flex flex-row items-center justify-between space-y-0 pb-2"
-        >
+        <CardHeader class="flex relative pb-2">
           <CardTitle class="text-sm font-medium"
             >Total de productos en stock</CardTitle
           >
-          <ArchiveBoxIcon class="w-5 h-5" />
+          <Avatar
+            class="absolute top-2 right-4 bg-primary text-primary-foreground"
+          >
+            <AvatarFallback> <BoxIcon class="size-4" /> </AvatarFallback
+          ></Avatar>
         </CardHeader>
         <CardContent>
           <div class="text-2xl font-bold">

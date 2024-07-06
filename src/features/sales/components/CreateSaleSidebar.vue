@@ -35,12 +35,12 @@ import { useForm } from "vee-validate";
 import { useRoute } from "vue-router";
 import { useMutation, useQueryClient } from "@tanstack/vue-query";
 import { analytics } from "@/config/analytics";
-import { notifyIfHasError, useSidebarManager } from "@/features/global";
+import { notifyIfHasError, useLayerManager } from "@/features/global";
 import { UserPlusIcon } from "lucide-vue-next";
 import { useOrganizationStore } from "@/stores";
 
 type Props = {
-  sidebarManager: ReturnType<typeof useSidebarManager>;
+  layerManager: ReturnType<typeof useLayerManager>;
   activeCustomer: Customer | null;
   activeProducts: Map<
     string,
@@ -168,10 +168,10 @@ const onSubmit = formInstance.handleSubmit(async (formValues) => {
 });
 
 function openSidebar(name: string) {
-  props.sidebarManager.setCurrentSidebarState({
+  props.layerManager.setCurrentLayerState({
     formValues: { ...formInstance.values },
   });
-  props.sidebarManager.openSidebar(name);
+  props.layerManager.openLayer(name);
 }
 
 watch(openModel, (nextOpenValue) => {
@@ -181,8 +181,10 @@ watch(openModel, (nextOpenValue) => {
     {
       values: {
         ...initialForm,
-        ...(props.sidebarManager.currentSidebar.value.state
-          ?.formValues as Record<string, unknown>),
+        ...(props.layerManager.currentLayer.value.state?.formValues as Record<
+          string,
+          unknown
+        >),
         customer_id: props.activeCustomer?.id,
         products: props.activeProducts
           ? Array.from(props.activeProducts.values()).map((product) => ({
