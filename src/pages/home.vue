@@ -17,9 +17,9 @@ import { Tables } from "../../types_db";
 import { useCurrencyFormatter } from "@/features/products";
 import { useRouter } from "vue-router";
 import { ref } from "vue";
-import { GoPremiumDialog } from "@/features/organizations";
+import { GoPremiumSidebar } from "@/features/organizations";
 
-const isGoPremiumDialogOpen = ref(false);
+const isGoPremiumSidebarOpen = ref(false);
 const router = useRouter();
 const authStore = useAuthStore();
 const organizationStore = useOrganizationStore();
@@ -66,7 +66,7 @@ function getCardDataFromPlan(plan: Tables<"plans">) {
               return;
             }
             if (!authStore.isPremiumAccount) {
-              isGoPremiumDialogOpen.value = true;
+              isGoPremiumSidebarOpen.value = true;
               return;
             }
           },
@@ -166,7 +166,7 @@ function getCardDataFromPlan(plan: Tables<"plans">) {
       </div>
     </section>
     <section class="mx-auto px-6 max-w-5xl pb-16">
-      <GoPremiumDialog v-model:open="isGoPremiumDialogOpen" />
+      <GoPremiumSidebar v-model:open="isGoPremiumSidebarOpen" />
 
       <div class="flex flex-col justify-center text-center">
         <h2 class="text-4xl lg:text-5xl mb-3">Planes y Precios</h2>

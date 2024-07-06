@@ -3,12 +3,12 @@ import { ref, watchEffect } from "vue";
 
 import {
   Button,
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
   Drawer,
   DrawerContent,
   DrawerDescription,
@@ -96,15 +96,15 @@ watchEffect(() => {
 </script>
 
 <template>
-  <Dialog v-if="isDesktop" v-model:open="openModel">
-    <DialogContent>
-      <DialogHeader>
-        <DialogTitle>Crea una organización</DialogTitle>
-        <DialogDescription>
+  <Sheet v-model:open="openModel">
+    <SheetContent>
+      <SheetHeader>
+        <SheetTitle>Crea una organización</SheetTitle>
+        <SheetDescription>
           Agrega una nueva organización para agregar datos nuevos por separado
           de tu organización actual.
-        </DialogDescription>
-      </DialogHeader>
+        </SheetDescription>
+      </SheetHeader>
       <div>
         <div class="space-y-4 py-2 pb-4">
           <div class="space-y-2">
@@ -117,7 +117,7 @@ watchEffect(() => {
           </div>
         </div>
       </div>
-      <DialogFooter>
+      <SheetFooter class="gap-2">
         <Button variant="outline" @click="openModel = false"> Cancelar </Button>
         <Button
           :disabled="createOrganizationMutation.isPending.value"
@@ -126,45 +126,7 @@ watchEffect(() => {
         >
           Crear
         </Button>
-      </DialogFooter>
-    </DialogContent>
-  </Dialog>
-
-  <Drawer v-else v-model:open="openModel">
-    <DrawerContent>
-      <div class="mx-auto w-full max-w-sm mt-8 mb-16">
-        <DrawerHeader>
-          <DrawerTitle>Crea una organización</DrawerTitle>
-          <DrawerDescription>
-            Agrega una nueva organización para agregar datos nuevos por separado
-            de tu organización actual.
-          </DrawerDescription>
-        </DrawerHeader>
-        <div>
-          <div class="space-y-4 py-2 pb-4 px-4">
-            <div class="space-y-2">
-              <Label for="name">Nombre de organización</Label>
-              <Input
-                v-model="organizationName"
-                id="name"
-                placeholder="Acme Inc."
-              />
-            </div>
-          </div>
-        </div>
-        <DrawerFooter>
-          <Button variant="outline" @click="openModel = false">
-            Cancelar
-          </Button>
-          <Button
-            :disabled="createOrganizationMutation.isPending.value"
-            type="submit"
-            @click="createOrganizationMutation.mutate(organizationName)"
-          >
-            Crear
-          </Button>
-        </DrawerFooter>
-      </div>
-    </DrawerContent>
-  </Drawer>
+      </SheetFooter>
+    </SheetContent>
+  </Sheet>
 </template>

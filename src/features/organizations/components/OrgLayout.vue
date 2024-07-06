@@ -7,7 +7,6 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   Sheet,
-  SheetTrigger,
   SheetContent,
   SheetHeader,
   SheetTitle,
@@ -18,7 +17,7 @@ import {
   AvatarFallback,
   SheetFooter,
 } from "@/components/ui";
-import { useDark, useMediaQuery, useToggle } from "@vueuse/core";
+import { useDark, useToggle } from "@vueuse/core";
 import { useRoute } from "vue-router";
 import {
   ArrowLeftOnRectangleIcon,
@@ -28,9 +27,9 @@ import {
   MoonIcon,
   SunIcon,
 } from "@heroicons/vue/24/outline";
-import { CrownIcon, SettingsIcon } from "lucide-vue-next";
-import GoPremiumDialog from "./GoPremiumDialog.vue";
-import { computed, ref } from "vue";
+import { CrownIcon, MenuIcon, SettingsIcon } from "lucide-vue-next";
+import GoPremiumSidebar from "./GoPremiumSidebar.vue";
+import { computed } from "vue";
 import {
   BadgeDollarSign,
   BarChart2,
@@ -38,17 +37,16 @@ import {
   Users,
 } from "lucide-vue-next";
 import OrganizationSwitcher from "./OrganizationSwitcher.vue";
-import UpdateOrganizationDialog from "./UpdateOrganizationDialog.vue";
+import UpdateOrganizationSidebar from "./UpdateOrganizationSidebar.vue";
+import { useLayerManager } from "@/features/global";
+import CreateOrganizationSidebar from "./CreateOrganizationSidebar.vue";
 
-const isGoPremiumDialogOpen = ref(false);
-const isUpdateDialogOpen = ref(false);
-
+const layerManager = useLayerManager();
 const organizationStore = useOrganizationStore();
 const route = useRoute();
 const isDark = useDark();
 const toggleDark = useToggle(isDark);
 const authStore = useAuthStore();
-const isDesktop = useMediaQuery("(min-width: 768px)");
 
 const menuList = computed(() => ({
   dashboard: {
@@ -75,37 +73,37 @@ const menuList = computed(() => ({
 </script>
 
 <template>
-  <GoPremiumDialog v-model:open="isGoPremiumDialogOpen" />
-  <UpdateOrganizationDialog
-    v-model:open="isUpdateDialogOpen"
+  <GoPremiumSidebar
+    :open="layerManager.currentLayer.value?.id === 'go-premium'"
+    @update:open="(open) => open === false && layerManager.closeLayer()"
+  />
+  <UpdateOrganizationSidebar
+    :open="layerManager.currentLayer.value?.id === 'update-organization'"
+    @update:open="(open) => open === false && layerManager.closeLayer()"
     :userOrganization="organizationStore.currentUserOrganization"
+  />
+  <CreateOrganizationSidebar
+    :open="layerManager.currentLayer.value?.id === 'create-organization'"
+    @update:open="(open) => open === false && layerManager.closeLayer()"
   />
 
   <nav class="fixed top-0 z-20 w-full border-b border-border bg-background">
     <div class="px-3 py-3 lg:px-5 lg:pl-3">
       <div class="flex items-center justify-between">
         <div class="flex items-center justify-start rtl:justify-end">
-          <Sheet>
-            <SheetTrigger>
-              <button
-                class="inline-flex items-center p-2 text-sm text-slate-500 rounded-lg sm:hidden hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-200 dark:text-slate-400 dark:hover:bg-slate-700 dark:focus:ring-slate-600"
-              >
-                <span class="sr-only">Open sidebar</span>
-                <svg
-                  class="w-6 h-6"
-                  aria-hidden="true"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    clip-rule="evenodd"
-                    fill-rule="evenodd"
-                    d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z"
-                  ></path>
-                </svg>
-              </button>
-            </SheetTrigger>
+          <Button
+            @click="layerManager.openLayer('mobile-menu')"
+            size="icon"
+            variant="ghost"
+            class="sm:hidden"
+          >
+            <MenuIcon class="size-6" />
+          </Button>
+
+          <Sheet
+            :open="layerManager.currentLayer.value?.id === 'mobile-menu'"
+            @update:open="(open) => open === false && layerManager.closeLayer()"
+          >
             <SheetContent side="left" class="overflow-y-auto">
               <SheetHeader class="text-left">
                 <SheetTitle>Explora</SheetTitle>
@@ -120,12 +118,12 @@ const menuList = computed(() => ({
                   class="flex flex-col justify-between h-full pb-4 overflow-y-auto"
                 >
                   <div class="flex gap-2">
-                    <OrganizationSwitcher />
+                    <OrganizationSwitcher :layerManager />
                     <Button
                       size="icon"
                       variant="ghost"
                       class="shrink-0"
-                      @click="isUpdateDialogOpen = true"
+                      @click="layerManager.openLayer('update-organization')"
                     >
                       <SettingsIcon class="size-4" />
                     </Button>
@@ -164,28 +162,28 @@ const menuList = computed(() => ({
                 <Button
                   v-if="!organizationStore.isPremium"
                   class="w-full"
-                  @click="isGoPremiumDialogOpen = !isGoPremiumDialogOpen"
+                  @click="layerManager.openLayer('go-premium')"
                 >
-                  <CrownIcon class="w-4 h-4 mr-2" /> Premium
+                  <CrownIcon class="size-4 mr-2" /> Premium
                 </Button>
               </SheetFooter>
             </SheetContent>
           </Sheet>
 
-          <router-link :to="menuList.dashboard.path" class="flex ms-2 md:me-6">
+          <router-link :to="menuList.dashboard.path" class="flex ms-2 sm:me-6">
             <span
               class="self-center text-xl sm:text-2xl whitespace-nowrap dark:text-white"
               >inventariofacil.mx
             </span>
           </router-link>
 
-          <div v-if="isDesktop" class="flex gap-2">
-            <OrganizationSwitcher />
+          <div class="gap-2 hidden sm:flex">
+            <OrganizationSwitcher :layerManager />
             <Button
               size="icon"
               variant="ghost"
               class="shrink-0"
-              @click="isUpdateDialogOpen = true"
+              @click="layerManager.openLayer('update-organization')"
             >
               <SettingsIcon class="size-4" />
             </Button>
@@ -285,7 +283,7 @@ const menuList = computed(() => ({
         <Button
           v-if="!organizationStore.isPremium"
           class="w-full"
-          @click="isGoPremiumDialogOpen = !isGoPremiumDialogOpen"
+          @click="layerManager.openLayer('go-premium')"
         >
           <CrownIcon class="w-4 h-4 mr-2" /> Premium
         </Button>

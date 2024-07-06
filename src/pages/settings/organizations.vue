@@ -17,7 +17,7 @@ import {
 } from "@/components/ui";
 import {
   DeleteOrganizationDialog,
-  UpdateOrganizationDialog,
+  UpdateOrganizationSidebar,
   UpdateThemeDialog,
 } from "@/features/organizations";
 import { UserOrganization, useAuthStore, useOrganizationStore } from "@/stores";
@@ -171,7 +171,7 @@ watchEffect(() => {
     v-model:open="isDeleteDialogOpen"
     :userOrganization="activeOrganization"
   />
-  <UpdateOrganizationDialog
+  <UpdateOrganizationSidebar
     v-model:open="isUpdateDialogOpen"
     :userOrganization="activeOrganization"
   />

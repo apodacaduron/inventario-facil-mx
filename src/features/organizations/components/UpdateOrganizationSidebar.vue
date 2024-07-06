@@ -3,18 +3,6 @@ import { watchEffect } from "vue";
 
 import {
   Button,
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  Drawer,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
   FormControl,
   FormDescription,
   FormField,
@@ -23,10 +11,16 @@ import {
   FormMessage,
   Input,
   Separator,
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
   Switch,
 } from "@/components/ui";
-import { createReusableTemplate, useMediaQuery } from "@vueuse/core";
-import { useOrganizationStore, UserOrganization } from "@/stores";
+import { createReusableTemplate } from "@vueuse/core";
+import { UserOrganization } from "@/stores";
 import { useMutation, useQueryClient } from "@tanstack/vue-query";
 import { z } from "zod";
 import { toTypedSchema } from "@vee-validate/zod";
@@ -61,8 +55,6 @@ const formSchema = toTypedSchema(
 const [ModalBodyTemplate, ModalBody] = createReusableTemplate();
 const queryClient = useQueryClient();
 const organizationServices = useOrganizationServices();
-const organizationStore = useOrganizationStore();
-const isDesktop = useMediaQuery("(min-width: 768px)");
 const updateOrganizationMutation = useMutation({
   mutationFn: async (formValues: UpdateOrganization) => {
     if (!props.userOrganization?.org_id)
@@ -103,7 +95,7 @@ watchEffect(() => {
 
 <template>
   <ModalBodyTemplate>
-    <div class="p-4">
+    <div>
       <div class="space-y-4 pt-2 pb-8">
         <FormField v-slot="{ componentField }" name="name">
           <FormItem v-auto-animate>
@@ -118,7 +110,9 @@ watchEffect(() => {
             <FormMessage />
           </FormItem>
         </FormField>
-        <template v-if="organizationStore.canEnableCustomerCashback">
+        <template
+          v-if="userOrganization?.i_organizations?.plans?.name === 'premium'"
+        >
           <Separator class="my-6" />
           <FormField
             v-slot="{ value, handleChange }"
@@ -164,19 +158,19 @@ watchEffect(() => {
     </div>
   </ModalBodyTemplate>
 
-  <Dialog v-if="isDesktop" v-model:open="openModel">
-    <DialogContent>
-      <DialogHeader>
-        <DialogTitle>Actualiza tu organización</DialogTitle>
-        <DialogDescription>
+  <Sheet v-model:open="openModel">
+    <SheetContent>
+      <SheetHeader>
+        <SheetTitle>Actualiza tu organización</SheetTitle>
+        <SheetDescription>
           Ajusta tu organización acorde a tus preferencias.
-        </DialogDescription>
-      </DialogHeader>
+        </SheetDescription>
+      </SheetHeader>
 
       <form @submit="onSubmit">
         <ModalBody />
 
-        <DialogFooter>
+        <SheetFooter>
           <Button variant="outline" @click="openModel = false">
             Cancelar
           </Button>
@@ -186,37 +180,8 @@ watchEffect(() => {
           >
             Actualizar
           </Button>
-        </DialogFooter>
+        </SheetFooter>
       </form>
-    </DialogContent>
-  </Dialog>
-
-  <Drawer v-else v-model:open="openModel">
-    <DrawerContent>
-      <div class="mx-auto w-full max-w-sm mt-8 mb-16">
-        <DrawerHeader>
-          <DrawerTitle>Actualiza tu organización</DrawerTitle>
-          <DrawerDescription>
-            Ajusta tu organización acorde a tus preferencias.
-          </DrawerDescription>
-        </DrawerHeader>
-
-        <form @submit="onSubmit">
-          <ModalBody />
-
-          <DrawerFooter>
-            <Button variant="outline" @click="openModel = false">
-              Cancelar
-            </Button>
-            <Button
-              :disabled="updateOrganizationMutation.isPending.value"
-              type="submit"
-            >
-              Actualizar
-            </Button>
-          </DrawerFooter>
-        </form>
-      </div>
-    </DrawerContent>
-  </Drawer>
+    </SheetContent>
+  </Sheet>
 </template>
