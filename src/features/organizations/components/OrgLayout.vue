@@ -162,6 +162,7 @@ const menuList = computed(() => ({
                   <span class="ms-2">Soporte</span>
                 </a>
                 <Button
+                  v-if="!organizationStore.isPremium"
                   class="w-full"
                   @click="isGoPremiumDialogOpen = !isGoPremiumDialogOpen"
                 >
@@ -282,6 +283,7 @@ const menuList = computed(() => ({
           <span class="ms-2">Soporte</span>
         </a>
         <Button
+          v-if="!organizationStore.isPremium"
           class="w-full"
           @click="isGoPremiumDialogOpen = !isGoPremiumDialogOpen"
         >
