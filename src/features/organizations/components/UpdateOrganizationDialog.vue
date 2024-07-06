@@ -103,8 +103,8 @@ watchEffect(() => {
 
 <template>
   <ModalBodyTemplate>
-    <div>
-      <div class="space-y-4 py-2 pb-8">
+    <div class="p-4">
+      <div class="space-y-4 pt-2 pb-8">
         <FormField v-slot="{ componentField }" name="name">
           <FormItem v-auto-animate>
             <FormLabel>Nombre de organización</FormLabel>

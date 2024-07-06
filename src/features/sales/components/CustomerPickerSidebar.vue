@@ -15,7 +15,7 @@ import {
 } from "@/components/ui";
 import {
   FeedbackCard,
-  useSidebarManager,
+  useLayerManager,
   useTableStates,
 } from "@/features/global";
 import { UserPlusIcon, UsersIcon } from "lucide-vue-next";
@@ -26,7 +26,7 @@ import { useRoute } from "vue-router";
 
 type Props = {
   activeCustomer: Customer | null;
-  sidebarManager: ReturnType<typeof useSidebarManager>;
+  layerManager: ReturnType<typeof useLayerManager>;
 };
 type Emits = {
   (e: "select", customer: Customer | null): void;
@@ -83,8 +83,8 @@ useInfiniteScroll(
             variant="ghost"
             size="icon"
             @click="
-              sidebarManager.closeSidebar();
-              sidebarManager.openSidebar('create-customer');
+              layerManager.closeLayer();
+              layerManager.openLayer('create-customer');
             "
           >
             <UserPlusIcon class="size-4" />

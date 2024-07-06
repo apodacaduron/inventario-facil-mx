@@ -52,7 +52,7 @@ import {
 } from "@/features/products";
 import {
   FeedbackCard,
-  useSidebarManager,
+  useLayerManager,
   useTableStates,
 } from "@/features/global";
 import { Tables } from "../../../types_db";
@@ -95,7 +95,7 @@ const activeProducts = ref<
   >
 >(new Map());
 
-const sidebarManager = useSidebarManager();
+const layerManager = useLayerManager();
 const route = useRoute();
 const organizationStore = useOrganizationStore();
 
@@ -158,7 +158,7 @@ function openViewSaleSidebar(sale: Sale) {
 
 function openUpdateSaleSidebar(sale?: Sale | null) {
   activeSale.value = sale ?? null;
-  sidebarManager.openSidebar("update-sale");
+  layerManager.openLayer("update-sale");
 }
 
 function getBadgeColorFromStatus(status: Sale["status"]) {
@@ -183,7 +183,7 @@ watchEffect(() => {
   if (isCreateSaleSidebarOpen.value) return;
   if (isUpdateSaleSidebarOpen.value) return;
   if (isViewSaleSidebarOpen.value) return;
-  if (sidebarManager.hasAnySidebarOpen.value) return;
+  if (layerManager.hasAnyLayerOpen.value) return;
 
   activeSale.value = null;
   activeCustomer.value = null;
@@ -211,7 +211,7 @@ watchEffect(() => {
         <Button variant="outline" @click="isTodaySalesSidebarOpen = true">
           <ShoppingBagIcon class="w-5 h-5 stroke-[2px] mr-2" /> Ventas de hoy
         </Button>
-        <Button @click="sidebarManager.openSidebar('create-sale')">
+        <Button @click="layerManager.openLayer('create-sale')">
           <PlusIcon class="w-5 h-5 stroke-[2px] mr-2" /> Crear venta
         </Button>
       </div>
@@ -281,7 +281,7 @@ watchEffect(() => {
         >
           <ShoppingBagIcon class="w-5 h-5 stroke-[2px]" />
         </Button>
-        <Button @click="sidebarManager.openSidebar('create-sale')" size="icon">
+        <Button @click="layerManager.openLayer('create-sale')" size="icon">
           <PlusIcon class="w-5 h-5 stroke-[2px]" />
         </Button>
       </div>
@@ -533,7 +533,7 @@ watchEffect(() => {
           Comienza creando tu primera venta.
         </template>
         <template #action
-          ><Button @click="sidebarManager.openSidebar('create-sale')">
+          ><Button @click="layerManager.openLayer('create-sale')">
             <PlusIcon class="w-5 h-5 stroke-[2px] mr-2" /> Crear venta
           </Button>
         </template>
@@ -556,7 +556,7 @@ watchEffect(() => {
             <Button @click="saleSearch = ''" variant="outline">
               Clear search
             </Button>
-            <Button @click="sidebarManager.openSidebar('create-sale')">
+            <Button @click="layerManager.openLayer('create-sale')">
               <PlusIcon class="w-5 h-5 stroke-[2px] mr-2" /> Crear venta
             </Button>
           </div>
@@ -571,39 +571,39 @@ watchEffect(() => {
     <CreateSaleSidebar
       :activeCustomer="activeCustomer"
       :activeProducts="activeProducts"
-      :sidebarManager="sidebarManager"
-      :open="sidebarManager.currentSidebar.value?.id === 'create-sale'"
-      @update:open="(open) => open === false && sidebarManager.closeSidebar()"
+      :layerManager="layerManager"
+      :open="layerManager.currentLayer.value?.id === 'create-sale'"
+      @update:open="(open) => open === false && layerManager.closeLayer()"
     />
     <CreateCustomerSidebar
       @createCustomer="activeCustomer = $event"
-      :open="sidebarManager.currentSidebar.value?.id === 'create-customer'"
-      @update:open="(open) => open === false && sidebarManager.closeSidebar()"
+      :open="layerManager.currentLayer.value?.id === 'create-customer'"
+      @update:open="(open) => open === false && layerManager.closeLayer()"
     />
     <UpdateSaleSidebar
       :sale="activeSale"
       :activeProducts="activeProducts"
-      :sidebarManager="sidebarManager"
-      :open="sidebarManager.currentSidebar.value?.id === 'update-sale'"
-      @update:open="(open) => open === false && sidebarManager.closeSidebar()"
+      :layerManager="layerManager"
+      :open="layerManager.currentLayer.value?.id === 'update-sale'"
+      @update:open="(open) => open === false && layerManager.closeLayer()"
     />
     <CustomerPickerSidebar
       :activeCustomer="activeCustomer"
-      :sidebarManager="sidebarManager"
-      :open="sidebarManager.currentSidebar.value?.id === 'customer-picker'"
-      @update:open="(open) => open === false && sidebarManager.closeSidebar()"
+      :layerManager="layerManager"
+      :open="layerManager.currentLayer.value?.id === 'customer-picker'"
+      @update:open="(open) => open === false && layerManager.closeLayer()"
       @select="activeCustomer = $event"
     />
     <ProductPickerSidebar
       :activeProducts="activeProducts"
       :sale="activeSale"
-      :sidebarManager="sidebarManager"
-      :open="sidebarManager.currentSidebar.value?.id === 'product-picker'"
-      @update:open="(open) => open === false && sidebarManager.closeSidebar()"
+      :layerManager="layerManager"
+      :open="layerManager.currentLayer.value?.id === 'product-picker'"
+      @update:open="(open) => open === false && layerManager.closeLayer()"
     />
     <CreateProductSidebar
-      :open="sidebarManager.currentSidebar.value?.id === 'create-product'"
-      @update:open="(open) => open === false && sidebarManager.closeSidebar()"
+      :open="layerManager.currentLayer.value?.id === 'create-product'"
+      @update:open="(open) => open === false && layerManager.closeLayer()"
     />
     <ViewSaleSidebar v-model:open="isViewSaleSidebarOpen" :sale="activeSale" />
 
