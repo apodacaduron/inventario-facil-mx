@@ -104,7 +104,7 @@ const periodString = toRef(() => {
             class="absolute top-2 right-4 bg-primary text-primary-foreground"
           >
             <AvatarFallback>
-              <ShoppingCartIcon class="size-6" />
+              <ShoppingCartIcon class="size-4" />
             </AvatarFallback>
           </Avatar>
         </CardHeader>
@@ -126,7 +126,7 @@ const periodString = toRef(() => {
           <Avatar
             class="absolute top-2 right-4 bg-primary text-primary-foreground"
           >
-            <AvatarFallback> <DollarSignIcon class="size-6" /> </AvatarFallback
+            <AvatarFallback> <DollarSignIcon class="size-4" /> </AvatarFallback
           ></Avatar>
         </CardHeader>
         <CardContent>
@@ -150,7 +150,7 @@ const periodString = toRef(() => {
           <Avatar
             class="absolute top-2 right-4 bg-primary text-primary-foreground"
           >
-            <AvatarFallback> <TrendingUpIcon class="size-6" /> </AvatarFallback
+            <AvatarFallback> <TrendingUpIcon class="size-4" /> </AvatarFallback
           ></Avatar>
         </CardHeader>
         <CardContent>
@@ -173,7 +173,7 @@ const periodString = toRef(() => {
             class="absolute top-2 right-4 bg-primary text-primary-foreground"
           >
             <AvatarFallback>
-              <UsersIcon class="size-6" />
+              <UsersIcon class="size-4" />
             </AvatarFallback>
           </Avatar>
         </CardHeader>
@@ -197,7 +197,7 @@ const periodString = toRef(() => {
           <Avatar
             class="absolute top-2 right-4 bg-primary text-primary-foreground"
           >
-            <AvatarFallback> <StarIcon class="size-6" /> </AvatarFallback
+            <AvatarFallback> <StarIcon class="size-4" /> </AvatarFallback
           ></Avatar>
         </CardHeader>
         <CardContent>
@@ -234,7 +234,7 @@ const periodString = toRef(() => {
           <Avatar
             class="absolute top-2 right-4 bg-primary text-primary-foreground"
           >
-            <AvatarFallback> <AwardIcon class="size-6" /> </AvatarFallback
+            <AvatarFallback> <AwardIcon class="size-4" /> </AvatarFallback
           ></Avatar>
         </CardHeader>
         <CardContent>
@@ -266,7 +266,7 @@ const periodString = toRef(() => {
           <Avatar
             class="absolute top-2 right-4 bg-primary text-primary-foreground"
           >
-            <AvatarFallback> <BoxIcon class="size-6" /> </AvatarFallback
+            <AvatarFallback> <BoxIcon class="size-4" /> </AvatarFallback
           ></Avatar>
         </CardHeader>
         <CardContent>

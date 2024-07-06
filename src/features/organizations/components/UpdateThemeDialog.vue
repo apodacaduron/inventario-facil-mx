@@ -29,23 +29,30 @@ type Props = {
 const openModel = defineModel<boolean>("open");
 const props = defineProps<Props>();
 
-const colorList = [
-  "0 84% 60%", // Red
-  "24 93% 56%", // Amber
-  "48 89% 48%", // Lime
-  "78 61% 55%", // Green
-  "156 47% 47%", // Teal
-  "174 62% 40%", // Cyan
-  "192 69% 47%", // Sky
-  "204 85% 45%", // Blue
-  "226 70% 50%", // Indigo
-  "252 73% 56%", // Violet
-  "264 65% 59%", // Purple
-  "284 55% 53%", // Fuchsia
-  "336 80% 60%", // Pink
-  "348 83% 58%", // Rose
-  "0 0% 50%", // Neutral (Gray)
-  "220 16% 50%", // Blue Gray
+const primaryColors = [
+  // Cool Colors
+  "197 71% 73%", // Sky Blue
+  "180 62% 50%", // Teal
+  "174 62% 56%", // Turquoise
+  "235 89% 41%", // Indigo
+  "259 67% 85%", // Lavender
+  "282 64% 58%", // Violet
+
+  // Neutral Colors
+  "219 44% 27%", // Navy
+  "6 93% 71%", // Salmon
+
+  // Warm Colors
+  "16 68% 60%", // Coral
+  "328 76% 52%", // Deep Pink
+  "348 83% 47%", // Crimson
+  "350 80% 70%", // Rose
+
+  // Yellowish Colors
+  "74 70% 55%", // Lime Green
+  "45 89% 60%", // Gold
+  "79 61% 43%", // Olive
+  "42 100% 50%", // Amber
 ];
 
 const themeColor = ref(
@@ -98,7 +105,7 @@ watchEffect(() => {
           <div class="space-y-2">
             <Button
               :key="index"
-              v-for="(color, index) in colorList"
+              v-for="(color, index) in primaryColors"
               variant="ghost"
               @click="themeColor = color"
             >
@@ -139,7 +146,7 @@ watchEffect(() => {
             <div class="space-y-2">
               <Button
                 :key="index"
-                v-for="(color, index) in colorList"
+                v-for="(color, index) in primaryColors"
                 variant="ghost"
                 @click="themeColor = color"
               >
