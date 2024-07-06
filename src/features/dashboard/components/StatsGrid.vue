@@ -19,13 +19,6 @@ import {
   Skeleton,
 } from "@/components/ui";
 import {
-  ArchiveBoxIcon,
-  BanknotesIcon,
-  CurrencyDollarIcon,
-  InboxStackIcon,
-  UserGroupIcon,
-} from "@heroicons/vue/24/outline";
-import {
   useBestCustomersQuery,
   useCustomersCountQuery,
 } from "@/features/customers";

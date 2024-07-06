@@ -9,17 +9,10 @@ import {
   SheetFooter,
   SheetHeader,
   SheetTitle,
-  Drawer,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
   Input,
   Label,
   useToast,
 } from "@/components/ui";
-import { useMediaQuery } from "@vueuse/core";
 import { useAuthStore, useOrganizationStore } from "@/stores";
 import { useMutation, useQueryClient } from "@tanstack/vue-query";
 import { supabase } from "@/config/supabase";
@@ -32,7 +25,6 @@ const { toast } = useToast();
 const authStore = useAuthStore();
 const organizationStore = useOrganizationStore();
 const queryClient = useQueryClient();
-const isDesktop = useMediaQuery("(min-width: 768px)");
 const createOrganizationMutation = useMutation({
   mutationFn: async (organizationName: string) => {
     const createOrganizationResponse = await supabase
