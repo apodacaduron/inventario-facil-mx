@@ -841,6 +841,15 @@ export type Database = {
         }
         Returns: number
       }
+      get_year_monthly_sales: {
+        Args: {
+          organization_id_input: string
+        }
+        Returns: {
+          month_number: number
+          total_sales: number
+        }[]
+      }
       handle_customer_cashback: {
         Args: {
           p_sale_id: string

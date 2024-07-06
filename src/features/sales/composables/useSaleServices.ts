@@ -139,6 +139,15 @@ export function useSaleServices() {
     });
   }
 
+  async function getYearMonthlySales(options: {orgId: string;}) {
+    if (!options.orgId)
+      throw new Error('Organization is required to get customer count');
+
+    return await supabase.rpc('get_year_monthly_sales', {
+      organization_id_input: options.orgId,
+    });
+  }
+
   return {
     loadList,
     createSale,
@@ -147,5 +156,6 @@ export function useSaleServices() {
     getSalesCount,
     getSalesTotalIncome,
     getSalesTotalProfit,
+    getYearMonthlySales,
   };
 }
