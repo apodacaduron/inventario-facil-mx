@@ -22,3 +22,4 @@ export * from "./tooltip";
 export * from "./toast";
 export * from "./number-field";
 export * from "./separator";
+export * from "./chart-area";

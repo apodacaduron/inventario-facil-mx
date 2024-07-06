@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { StatsGrid, useDashboardDates } from '@/features/dashboard';
+import { StatsGrid, useDashboardDates } from "@/features/dashboard";
 import {
   CheckIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
-} from '@heroicons/vue/24/outline';
+} from "@heroicons/vue/24/outline";
 import {
   Badge,
   Button,
@@ -17,20 +17,30 @@ import {
   DropdownMenuLabel,
   DropdownMenuRadioItem,
   DropdownMenuRadioGroup,
-} from '@/components/ui';
-import { useStorage } from '@vueuse/core';
-import { toRef } from 'vue';
+  AreaChart,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Card,
+} from "@/components/ui";
+import { useStorage } from "@vueuse/core";
+import { computed, toRef } from "vue";
+import { useYearMonthlySalesQuery } from "@/features/sales";
+import { useRoute } from "vue-router";
+import { useCurrencyFormatter } from "@/features/products";
 
 const locale = {
-  DAILY: 'Diario',
-  WEEKLY: 'Semanal',
-  MONTHLY: 'Mensual',
-  YEARLY: 'Anual',
+  DAILY: "Diario",
+  WEEKLY: "Semanal",
+  MONTHLY: "Mensual",
+  YEARLY: "Anual",
 };
 
+const currencyFormatter = useCurrencyFormatter();
+const route = useRoute();
 const statsFiltersRef = useStorage<{
-  period: 'daily' | 'weekly' | 'monthly' | 'yearly';
-}>('dashboard-stats-filters', { period: 'monthly' });
+  period: "daily" | "weekly" | "monthly" | "yearly";
+}>("dashboard-stats-filters", { period: "monthly" });
 const dashboardDates = useDashboardDates({
   period: toRef(() => statsFiltersRef.value.period),
 });
@@ -38,6 +48,22 @@ const dashboardDates = useDashboardDates({
 function toUpperCase<T extends string>(text: T) {
   return text.toUpperCase() as Uppercase<T>;
 }
+
+const yearMonthlySalesQuery = useYearMonthlySalesQuery({
+  options: {
+    orgId: toRef(() => route.params.orgId.toString()),
+  },
+});
+
+const yearMonthlySalesData = computed(() => {
+  return yearMonthlySalesQuery.data.value?.map((monthData) => ({
+    name: dashboardDates.generateMonthName({
+      month: monthData.month_number - 1,
+      year: new Date().getFullYear(),
+    }),
+    total: currencyFormatter.parseRaw(monthData.total_sales),
+  }));
+});
 </script>
 
 <template>
@@ -129,6 +155,29 @@ function toUpperCase<T extends string>(text: T) {
           :from="dashboardDates.dateRangeFromPeriod.value!.from.toISOString()"
           :to="dashboardDates.dateRangeFromPeriod.value!.to.toISOString()"
         />
+
+        <Card>
+          <CardHeader>
+            <CardTitle class="font-medium">
+              Total de ventas del año en curso
+            </CardTitle>
+          </CardHeader>
+          <CardContent class="overflow-x-auto">
+            <div class="min-w-[1580px]">
+              <AreaChart
+                v-if="yearMonthlySalesData?.length"
+                :data="yearMonthlySalesData"
+                :yFormatter="
+                  (tick) =>
+                    currencyFormatter.parse(Number(tick) * 100) ??
+                    tick.toString()
+                "
+                index="name"
+                :categories="['total']"
+              />
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   </div>

@@ -109,3 +109,22 @@ export function useSalesTotalProfitQuery(context: {
     },
   });
 }
+
+export function useYearMonthlySalesQuery(context: {
+  options: {
+    orgId: MaybeRefOrGetter<string>;
+  };
+}) {
+  const saleServices = useSaleServices();
+
+  return useQuery({
+    queryKey: ["sales", "year-monthly-sales", context.options.orgId],
+    async queryFn() {
+      const response = await saleServices.getYearMonthlySales({
+        orgId: toValue(context.options.orgId),
+      });
+
+      return response.data;
+    },
+  });
+}
