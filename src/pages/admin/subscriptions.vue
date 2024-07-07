@@ -138,7 +138,10 @@ const tableLoadingStates = useTableStates(subscriptionsQuery, userSearch);
                 class="flex items-center p-4 text-foreground whitespace-nowrap w-max"
               >
                 <Avatar>
-                  <AvatarImage :src="subscription?.users?.avatar_url ?? ''" />
+                  <AvatarImage
+                    :src="subscription?.users?.avatar_url ?? ''"
+                    class="object-cover"
+                  />
                   <AvatarFallback>{{
                     `${subscription?.users?.full_name
                       ?.substring(0, 1)

@@ -202,7 +202,10 @@ const periodString = toRef(() => {
                 :key="product.product_id"
               >
                 <Avatar :class="`border-muted border-2`">
-                  <AvatarImage :src="product?.image_url ?? ''" />
+                  <AvatarImage
+                    :src="product?.image_url ?? ''"
+                    class="object-cover"
+                  />
                   <AvatarFallback>
                     {{
                       `${product?.name?.substring(0, 1).toLocaleUpperCase()}`

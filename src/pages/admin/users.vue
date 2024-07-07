@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, toRef } from 'vue';
-import { useTableOrder } from '@/features/global';
+import { ref, toRef } from "vue";
+import { useTableOrder } from "@/features/global";
 import {
   Input,
   Avatar,
@@ -11,18 +11,18 @@ import {
   TableHead,
   TableBody,
   TableCell,
-} from '@/components/ui';
-import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/vue/24/outline';
-import { refDebounced, useInfiniteScroll } from '@vueuse/core';
-import { useUsersQuery } from '@/features/admin';
-import AvatarImage from '@/components/ui/avatar/AvatarImage.vue';
+} from "@/components/ui";
+import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/vue/24/outline";
+import { refDebounced, useInfiniteScroll } from "@vueuse/core";
+import { useUsersQuery } from "@/features/admin";
+import AvatarImage from "@/components/ui/avatar/AvatarImage.vue";
 
 const tableRef = ref<HTMLElement | null>(null);
-const userSearch = ref('');
+const userSearch = ref("");
 const userSearchDebounced = refDebounced(userSearch, 400);
 const usersTableOrder = useTableOrder({
   options: {
-    initialOrder: ['created_at', 'desc'],
+    initialOrder: ["created_at", "desc"],
   },
 });
 const usersQuery = useUsersQuery({
@@ -105,7 +105,10 @@ useInfiniteScroll(
                 class="flex items-center p-4 text-foreground whitespace-nowrap w-max"
               >
                 <Avatar>
-                  <AvatarImage :src="user?.avatar_url ?? ''" />
+                  <AvatarImage
+                    :src="user?.avatar_url ?? ''"
+                    class="object-cover"
+                  />
                   <AvatarFallback>{{
                     `${(user?.full_name ?? user.id)
                       ?.substring(0, 1)
@@ -114,16 +117,21 @@ useInfiniteScroll(
                 </Avatar>
                 <div class="ps-3">
                   <div class="text-base font-semibold">
-                    {{ user.full_name ?? '-' }}
+                    {{ user.full_name ?? "-" }}
                   </div>
                 </div>
               </TableCell>
-              <TableCell class="text-center">{{ user.id || '-' }}</TableCell>
+              <TableCell class="text-center">{{ user.id || "-" }}</TableCell>
             </TableRow>
           </template>
         </TableBody>
       </Table>
-      <div v-if="usersQuery.isFetchingNextPage.value" class="w-full flex justify-center">CARGANDO MAS...</div>
+      <div
+        v-if="usersQuery.isFetchingNextPage.value"
+        class="w-full flex justify-center"
+      >
+        CARGANDO MAS...
+      </div>
     </div>
   </div>
 </template>

@@ -73,7 +73,10 @@ const menuList = {
                   >
                     <span class="sr-only">Open user menu</span>
                     <Avatar>
-                      <AvatarImage :src="authStore.avatar" />
+                      <AvatarImage
+                        :src="authStore.avatar"
+                        class="object-cover"
+                      />
                       <AvatarFallback>{{
                         `${authStore.session?.user.email
                           ?.substring(0, 1)

@@ -56,7 +56,7 @@ const productsQuery = usePublicPageProductsQuery({
       >
         <CardContent class="p-4 text-center">
           <Avatar class="w-32 h-32">
-            <AvatarImage :src="product?.image_url ?? ''" />
+            <AvatarImage :src="product?.image_url ?? ''" class="object-cover" />
             <AvatarFallback>{{
               `${product?.name?.substring(0, 1).toLocaleUpperCase()}`
             }}</AvatarFallback>

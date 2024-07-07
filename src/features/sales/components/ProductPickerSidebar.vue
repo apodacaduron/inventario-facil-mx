@@ -219,7 +219,10 @@ function getMaxIncrementValue(product: Product | null) {
             <CardContent class="p-4 text-center">
               <div class="relative">
                 <Avatar>
-                  <AvatarImage :src="product?.image_url ?? ''" />
+                  <AvatarImage
+                    :src="product?.image_url ?? ''"
+                    class="object-cover"
+                  />
                   <AvatarFallback>{{
                     `${product?.name?.substring(0, 1).toLocaleUpperCase()}`
                   }}</AvatarFallback>

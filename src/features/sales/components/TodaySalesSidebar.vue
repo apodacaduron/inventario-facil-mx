@@ -217,7 +217,10 @@ function getBadgeColorFromStatus(status: Sale["status"]) {
                     :key="saleProduct.id"
                     class="border-muted border-2"
                   >
-                    <AvatarImage :src="saleProduct.image_url ?? ''" />
+                    <AvatarImage
+                      :src="saleProduct.image_url ?? ''"
+                      class="object-cover"
+                    />
                     <AvatarFallback>{{
                       `${saleProduct.name?.substring(0, 1).toLocaleUpperCase()}`
                     }}</AvatarFallback>
