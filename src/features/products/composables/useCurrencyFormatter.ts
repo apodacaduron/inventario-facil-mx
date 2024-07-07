@@ -2,7 +2,7 @@ export function useCurrencyFormatter() {
   function parse(cents: number | null | undefined, options?: Intl.NumberFormatOptions) {
     if (typeof cents !== 'number') return cents ?? null;
 
-    return (cents / 100).toLocaleString("en-US", {
+    return (cents / 100).toLocaleString("es-MX", {
       style: "currency",
       currency: "MXN",
       ...options,
