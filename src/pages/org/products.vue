@@ -35,6 +35,7 @@ import {
   Tooltip,
   TooltipTrigger,
   TooltipContent,
+  Badge,
 } from "@/components/ui";
 import {
   ChevronDownIcon,
@@ -130,6 +131,12 @@ function openUpdateProductSidebar(product: Product) {
 function openAddStockDialog(product: Product) {
   activeProduct.value = product;
   isAddStockDialogOpen.value = true;
+}
+
+function getProductStockBadgeColor(stock: number | null) {
+  if (Number(stock) <= 0) return "destructive";
+
+  return "default";
 }
 
 watchEffect(() => {
@@ -351,8 +358,13 @@ watchEffect(() => {
               </TableCell>
               <TableCell class="text-center">
                 <div class="flex items-center gap-4">
-                  {{ product.current_stock }}
+                  <Badge
+                    :variant="getProductStockBadgeColor(product.current_stock)"
+                  >
+                    {{ product.current_stock }}
+                  </Badge>
                   <Button
+                    v-if="organizationStore.isPremium"
                     @click="
                       isProductStockHistorySidebarOpen = true;
                       activeProduct = product;
