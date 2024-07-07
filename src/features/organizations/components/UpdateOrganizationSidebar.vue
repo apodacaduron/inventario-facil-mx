@@ -49,6 +49,12 @@ const formSchema = toTypedSchema(
       .min(0.0000000001)
       .max(5),
     is_cashback_enabled: z.boolean(),
+    is_low_stock_alert_enabled: z.boolean(),
+    low_stock_threshold: z.coerce
+      .number({ invalid_type_error: "Ingresa un número válido" })
+      .nonnegative({ message: "Ingrese un número positivo" })
+      .finite()
+      .safe(),
   })
 );
 
@@ -88,6 +94,11 @@ watchEffect(() => {
       props.userOrganization?.i_organizations?.cashback_percent ?? 1,
     is_cashback_enabled: Boolean(
       props.userOrganization?.i_organizations?.is_cashback_enabled
+    ),
+    low_stock_threshold:
+      props.userOrganization?.i_organizations?.low_stock_threshold ?? 0,
+    is_low_stock_alert_enabled: Boolean(
+      props.userOrganization?.i_organizations?.is_low_stock_alert_enabled
     ),
   });
 });
@@ -133,7 +144,10 @@ watchEffect(() => {
             </FormItem>
           </FormField>
           <FormField v-slot="{ componentField }" name="cashback_percent">
-            <FormItem v-auto-animate>
+            <FormItem
+              v-if="formInstance.values.is_cashback_enabled"
+              v-auto-animate
+            >
               <FormLabel>Porcentaje por compra</FormLabel>
               <FormControl>
                 <div class="relative w-full items-center">
@@ -149,6 +163,49 @@ watchEffect(() => {
                     <PercentIcon class="size-4" />
                   </span>
                 </div>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          </FormField>
+          <Separator class="my-6" />
+          <FormField
+            v-slot="{ value, handleChange }"
+            name="is_low_stock_alert_enabled"
+          >
+            <FormItem class="flex flex-row items-center justify-between">
+              <div class="space-y-0.5">
+                <FormLabel class="text-base">
+                  Habilitar alertas de stock bajo
+                </FormLabel>
+                <FormDescription>
+                  Activa esta opción para recibir alertas cuando el stock de
+                  este producto esté por debajo del límite especificado.
+                </FormDescription>
+              </div>
+              <FormControl>
+                <Switch :checked="value" @update:checked="handleChange" />
+              </FormControl>
+            </FormItem>
+          </FormField>
+          <FormField v-slot="{ componentField }" name="low_stock_threshold">
+            <FormItem
+              v-if="formInstance.values.is_low_stock_alert_enabled"
+              v-auto-animate
+            >
+              <div class="space-y-0.5">
+                <FormLabel class="text-base"> Límite de stock bajo </FormLabel>
+                <FormDescription>
+                  Especifica la cantidad mínima de este producto antes de que se
+                  dispare una alerta de stock bajo.
+                </FormDescription>
+              </div>
+              <FormControl>
+                <Input
+                  type="text"
+                  placeholder="Ingresa un porcentaje"
+                  class="pr-10"
+                  v-bind="componentField"
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
