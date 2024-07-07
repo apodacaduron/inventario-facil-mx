@@ -23,7 +23,7 @@ import {
 import { ArrowUpTrayIcon, TrashIcon } from "@heroicons/vue/24/outline";
 import { Product, UpdateProduct, useProductServices } from "../composables";
 import { ref, toRef, watchEffect } from "vue";
-import imageCompression from "browser-image-compression";
+import imageCompression, { Options } from "browser-image-compression";
 import {
   createReusableTemplate,
   useElementHover,
@@ -279,9 +279,9 @@ function isValidHttpUrl(maybeUrl: string) {
 }
 
 async function compressFile(imageFile: File) {
-  const options = {
+  const options: Options = {
     maxSizeMB: 1,
-    maxWidthOrHeight: 120,
+    maxWidthOrHeight: 240,
     useWebWorker: true,
   };
   try {
@@ -339,7 +339,7 @@ watchEffect(() => {
           >
             <ArrowUpTrayIcon class="w-8 h-8" />
           </div>
-          <AvatarImage :src="productImageUrl" class="bg-cover" />
+          <AvatarImage :src="productImageUrl" class="object-cover" />
           <AvatarFallback>
             {{ `${product?.name?.substring(0, 1).toLocaleUpperCase()}` }}
           </AvatarFallback>
