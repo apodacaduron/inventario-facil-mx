@@ -135,7 +135,9 @@ export type Database = {
           current_products: number
           id: string
           is_cashback_enabled: boolean | null
+          is_low_stock_alert_enabled: boolean | null
           is_public_products_page_enabled: boolean
+          low_stock_threshold: number | null
           name: string | null
           plan_id: string | null
           theme_color: string | null
@@ -149,7 +151,9 @@ export type Database = {
           current_products?: number
           id?: string
           is_cashback_enabled?: boolean | null
+          is_low_stock_alert_enabled?: boolean | null
           is_public_products_page_enabled?: boolean
+          low_stock_threshold?: number | null
           name?: string | null
           plan_id?: string | null
           theme_color?: string | null
@@ -163,7 +167,9 @@ export type Database = {
           current_products?: number
           id?: string
           is_cashback_enabled?: boolean | null
+          is_low_stock_alert_enabled?: boolean | null
           is_public_products_page_enabled?: boolean
+          low_stock_threshold?: number | null
           name?: string | null
           plan_id?: string | null
           theme_color?: string | null
