@@ -133,10 +133,30 @@ function openAddStockDialog(product: Product) {
   isAddStockDialogOpen.value = true;
 }
 
-function getProductStockBadgeColor(stock: number | null) {
-  if (Number(stock) <= 0) return "destructive";
+function getProductStockBadgeProps(stock: number | null) {
+  if (Number(stock) <= 0) return { variant: "destructive" } as const;
 
-  return "default";
+  const lowStockThreshold =
+    organizationStore.currentUserOrganization?.i_organizations
+      ?.low_stock_threshold ?? 0;
+  const isLowStockAlertEnabled =
+    organizationStore.currentUserOrganization?.i_organizations
+      ?.is_low_stock_alert_enabled;
+
+  const isLowStockWarningEnabled =
+    organizationStore.isPremium &&
+    isLowStockAlertEnabled &&
+    lowStockThreshold > 0 &&
+    Number(stock) <= lowStockThreshold;
+
+  if (isLowStockWarningEnabled) {
+    return {
+      variant: "default",
+      class: "bg-yellow-500 hover:bg-yellow-400",
+    } as const;
+  }
+
+  return { variant: "default" } as const;
 }
 
 watchEffect(() => {
@@ -359,7 +379,7 @@ watchEffect(() => {
               <TableCell class="text-center">
                 <div class="flex items-center gap-4">
                   <Badge
-                    :variant="getProductStockBadgeColor(product.current_stock)"
+                    v-bind="getProductStockBadgeProps(product.current_stock)"
                   >
                     {{ product.current_stock }}
                   </Badge>
