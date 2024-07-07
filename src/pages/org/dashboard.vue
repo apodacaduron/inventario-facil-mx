@@ -28,6 +28,7 @@ import { computed, toRef } from "vue";
 import { useYearMonthlySalesQuery } from "@/features/sales";
 import { useRoute } from "vue-router";
 import { useCurrencyFormatter } from "@/features/products";
+import { useOrganizationStore } from "@/stores";
 
 const locale = {
   DAILY: "Diario",
@@ -36,6 +37,7 @@ const locale = {
   YEARLY: "Anual",
 };
 
+const organizationStore = useOrganizationStore();
 const currencyFormatter = useCurrencyFormatter();
 const route = useRoute();
 const statsFiltersRef = useStorage<{
@@ -72,7 +74,7 @@ const yearMonthlySalesData = computed(() => {
       <div class="flex flex-col gap-5">
         <div class="text-slate-500 dark:text-slate-400 font-semibold">
           Estadísticas
-          <DropdownMenu>
+          <DropdownMenu v-if="organizationStore.isPremium">
             <DropdownMenuTrigger as-child>
               <Button variant="ghost">
                 <Badge variant="secondary">
@@ -100,7 +102,12 @@ const yearMonthlySalesData = computed(() => {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <DropdownMenu v-if="statsFiltersRef.period === 'monthly'">
+          <DropdownMenu
+            v-if="
+              organizationStore.isPremium &&
+              statsFiltersRef.period === 'monthly'
+            "
+          >
             <DropdownMenuTrigger as-child>
               <Button variant="ghost">
                 <Badge>{{ dashboardDates.selectedMonthName.value }}</Badge>
