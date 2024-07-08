@@ -135,7 +135,16 @@ watch(
         </DialogDescription>
       </DialogHeader>
       <ModalBody />
-      <DialogFooter>
+      <DialogFooter class="flex flex-row gap-2">
+        <Button
+          :disabled="updateProductMutation.isPending.value"
+          @click="openModel = false"
+          type="button"
+          variant="outline"
+          class="w-full"
+        >
+          Cancelar
+        </Button>
         <Button
           :disabled="updateProductMutation.isPending.value"
           @click="saveStock"
@@ -143,14 +152,6 @@ watch(
           class="w-full"
         >
           Guardar
-        </Button>
-        <Button
-          :disabled="updateProductMutation.isPending.value"
-          @click="openModel = false"
-          type="button"
-          variant="outline"
-        >
-          Cancelar
         </Button>
       </DialogFooter>
     </DialogContent>
@@ -176,7 +177,16 @@ watch(
           </DrawerDescription>
         </DrawerHeader>
         <ModalBody />
-        <DrawerFooter>
+        <DrawerFooter class="flex flex-row gap-2">
+          <Button
+            :disabled="updateProductMutation.isPending.value"
+            @click="openModel = false"
+            type="button"
+            variant="outline"
+            class="w-full"
+          >
+            Cancelar
+          </Button>
           <Button
             :disabled="updateProductMutation.isPending.value"
             @click="saveStock"
@@ -184,14 +194,6 @@ watch(
             class="w-full"
           >
             Guardar
-          </Button>
-          <Button
-            :disabled="updateProductMutation.isPending.value"
-            @click="openModel = false"
-            type="button"
-            variant="outline"
-          >
-            Cancelar
           </Button>
         </DrawerFooter>
       </div>

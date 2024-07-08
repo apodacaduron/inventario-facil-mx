@@ -367,7 +367,16 @@ watchEffect(() => {
         </DialogDescription>
       </DialogHeader>
       <ModalBody />
-      <DialogFooter>
+      <DialogFooter class="flex flex-row gap-2">
+        <Button
+          :disabled="uploadFileMutation.isPending.value"
+          @click="openModel = false"
+          type="button"
+          variant="outline"
+          class="w-full"
+        >
+          Cancelar
+        </Button>
         <Button
           @click="uploadFileMutation.mutateAsync"
           :disabled="uploadFileMutation.isPending.value"
@@ -375,14 +384,6 @@ watchEffect(() => {
           class="w-full"
         >
           Guardar
-        </Button>
-        <Button
-          :disabled="uploadFileMutation.isPending.value"
-          @click="openModel = false"
-          type="button"
-          variant="outline"
-        >
-          Cancelar
         </Button>
       </DialogFooter>
     </DialogContent>
@@ -399,7 +400,16 @@ watchEffect(() => {
           </DrawerDescription>
         </DrawerHeader>
         <ModalBody />
-        <DrawerFooter>
+        <DrawerFooter class="flex flex-row gap-2">
+          <Button
+            :disabled="uploadFileMutation.isPending.value"
+            @click="openModel = false"
+            type="button"
+            variant="outline"
+            class="w-full"
+          >
+            Cancelar
+          </Button>
           <Button
             @click="uploadFileMutation.mutateAsync"
             :disabled="uploadFileMutation.isPending.value"
@@ -407,14 +417,6 @@ watchEffect(() => {
             class="w-full"
           >
             Guardar
-          </Button>
-          <Button
-            :disabled="uploadFileMutation.isPending.value"
-            @click="openModel = false"
-            type="button"
-            variant="outline"
-          >
-            Cancelar
           </Button>
         </DrawerFooter>
       </div>

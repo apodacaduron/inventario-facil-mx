@@ -227,13 +227,14 @@ watchEffect(() => {
       <form @submit="onSubmit">
         <ModalBody />
 
-        <SheetFooter>
-          <Button variant="outline" @click="openModel = false">
+        <SheetFooter class="flex flex-row gap-2">
+          <Button variant="outline" @click="openModel = false" class="w-full">
             Cancelar
           </Button>
           <Button
             :disabled="updateOrganizationMutation.isPending.value"
             type="submit"
+            class="w-full"
           >
             Actualizar
           </Button>

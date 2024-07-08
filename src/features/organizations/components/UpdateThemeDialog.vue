@@ -121,12 +121,15 @@ watchEffect(() => {
           </div>
         </div>
       </div>
-      <DialogFooter>
-        <Button variant="outline" @click="openModel = false"> Cancelar </Button>
+      <DialogFooter class="flex flex-row gap-2">
+        <Button variant="outline" @click="openModel = false" class="w-full">
+          Cancelar
+        </Button>
         <Button
           :disabled="updateOrganizationMutation.isPending.value"
           type="submit"
           @click="updateOrganizationMutation.mutate"
+          class="w-full"
         >
           Actualizar
         </Button>
@@ -165,14 +168,15 @@ watchEffect(() => {
             </div>
           </div>
         </div>
-        <DrawerFooter>
-          <Button variant="outline" @click="openModel = false">
+        <DrawerFooter class="flex flex-row gap-2">
+          <Button variant="outline" @click="openModel = false" class="w-full">
             Cancelar
           </Button>
           <Button
             :disabled="updateOrganizationMutation.isPending.value"
             type="submit"
             @click="updateOrganizationMutation.mutate"
+            class="w-full"
           >
             Actualizar
           </Button>

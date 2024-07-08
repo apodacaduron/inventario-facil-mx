@@ -68,7 +68,7 @@ async function createStripeCheckout() {
           tu suscripción a través de Stripe y mejorar tu experiencia al máximo.
         </SheetDescription>
       </SheetHeader>
-      <SheetFooter>
+      <SheetFooter class="flex flex-row gap-2">
         <Button
           :disabled="isSubscribeButtonDisabled"
           @click="createStripeCheckoutMutation.mutate()"

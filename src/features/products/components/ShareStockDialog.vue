@@ -31,13 +31,15 @@ import { useOrganizationServices } from "@/features/organizations";
 
 const openModel = defineModel<boolean>("open");
 
-
 const organizationStore = useOrganizationStore();
 const isPublicProductsPageEnabled = ref(
   organizationStore.currentUserOrganization?.i_organizations
-  ?.is_public_products_page_enabled ?? false
+    ?.is_public_products_page_enabled ?? false
 );
-const isPublicProductsPageEnabledRefDebounced = refDebounced(isPublicProductsPageEnabled, 400);
+const isPublicProductsPageEnabledRefDebounced = refDebounced(
+  isPublicProductsPageEnabled,
+  400
+);
 const productsPageQrCodeUrl = ref("");
 const showCurrentStock = ref(false);
 const hasBeenCopied = ref(false);
@@ -48,7 +50,9 @@ const isDesktop = useMediaQuery("(min-width: 768px)");
 const clipboard = useClipboard();
 const route = useRoute();
 const organizationServices = useOrganizationServices();
-const updateOrganizationMutation = useMutation({mutationFn: organizationServices.updateOrganization}) 
+const updateOrganizationMutation = useMutation({
+  mutationFn: organizationServices.updateOrganization,
+});
 
 const productsQuery = useProductsQuery({
   options: {
@@ -104,7 +108,7 @@ function downloadQrCode() {
 }
 
 function openLinkInNewTab(url: string) {
-  window.open(url, '_blank')
+  window.open(url, "_blank");
 }
 
 onMounted(async () => {
@@ -114,14 +118,17 @@ onMounted(async () => {
   );
 });
 
-watch(isPublicProductsPageEnabledRefDebounced, (nextIsPublicProductsPageEnabled) => {
-  updateOrganizationMutation.mutate({
-    organizationId: route.params.orgId.toString(),
-    values: {
-      is_public_products_page_enabled: nextIsPublicProductsPageEnabled
-    }
-  })
-})
+watch(
+  isPublicProductsPageEnabledRefDebounced,
+  (nextIsPublicProductsPageEnabled) => {
+    updateOrganizationMutation.mutate({
+      organizationId: route.params.orgId.toString(),
+      values: {
+        is_public_products_page_enabled: nextIsPublicProductsPageEnabled,
+      },
+    });
+  }
+);
 </script>
 
 <template>
@@ -161,7 +168,15 @@ watch(isPublicProductsPageEnabledRefDebounced, (nextIsPublicProductsPageEnabled)
           <Label for="show-current-stock">Mostrar stock actual</Label>
         </div>
       </div>
-      <div class="mt-5 sm:mt-6 flex flex-col gap-3">
+      <div class="mt-5 sm:mt-6 flex flex-row gap-2">
+        <Button
+          type="button"
+          class="w-full"
+          variant="outline"
+          @click="openModel = false"
+        >
+          Close
+        </Button>
         <Button
           :disabled="hasBeenCopied"
           type="button"
@@ -170,14 +185,6 @@ watch(isPublicProductsPageEnabledRefDebounced, (nextIsPublicProductsPageEnabled)
         >
           <CheckIcon v-if="hasBeenCopied" class="mr-2 w-4 h-4" />
           {{ hasBeenCopied ? "Copiado" : "Copiar" }}
-        </Button>
-        <Button
-          type="button"
-          class="w-full"
-          variant="outline"
-          @click="openModel = false"
-        >
-          Close
         </Button>
       </div>
     </div>

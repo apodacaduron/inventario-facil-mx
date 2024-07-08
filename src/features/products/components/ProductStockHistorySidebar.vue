@@ -99,7 +99,7 @@ const tableLoadingStates = useTableStates(productStockHistoryQuery, "");
         </div>
       </div>
 
-      <SheetFooter class="gap-4 sm:gap-0">
+      <SheetFooter class="flex flex-row gap-2">
         <Button
           class="w-full"
           @click="openModel = false"

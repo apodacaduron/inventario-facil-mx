@@ -52,22 +52,24 @@ const deleteSaleMutation = useMutation({
           deseas proceder con la eliminación?
         </DialogDescription>
       </DialogHeader>
-      <DialogFooter>
-        <Button
-          :disabled="deleteSaleMutation.isPending.value"
-          type="button"
-          variant="destructive"
-          @click="deleteSaleMutation.mutate"
-        >
-          Si, eliminar
-        </Button>
+      <DialogFooter class="flex flex-row gap-2">
         <Button
           :disabled="deleteSaleMutation.isPending.value"
           type="button"
           variant="secondary"
           @click="openModel = false"
+          class="w-full"
         >
           Cancelar
+        </Button>
+        <Button
+          :disabled="deleteSaleMutation.isPending.value"
+          type="button"
+          variant="destructive"
+          @click="deleteSaleMutation.mutate"
+          class="w-full"
+        >
+          Si, eliminar
         </Button>
       </DialogFooter>
     </DialogContent>
@@ -83,22 +85,24 @@ const deleteSaleMutation = useMutation({
             que deseas proceder con la eliminación?
           </DrawerDescription>
         </DrawerHeader>
-        <DrawerFooter>
-          <Button
-            :disabled="deleteSaleMutation.isPending.value"
-            type="button"
-            variant="destructive"
-            @click="deleteSaleMutation.mutate"
-          >
-            Si, eliminar
-          </Button>
+        <DrawerFooter class="flex flex-row gap-2">
           <Button
             :disabled="deleteSaleMutation.isPending.value"
             type="button"
             variant="secondary"
             @click="openModel = false"
+            class="w-full"
           >
             Cancelar
+          </Button>
+          <Button
+            :disabled="deleteSaleMutation.isPending.value"
+            type="button"
+            variant="destructive"
+            @click="deleteSaleMutation.mutate"
+            class="w-full"
+          >
+            Si, eliminar
           </Button>
         </DrawerFooter>
       </div>

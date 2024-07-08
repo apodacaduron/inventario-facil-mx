@@ -53,22 +53,24 @@ const deleteProductMutation = useMutation({
           que deseas proceder con la eliminación?
         </DialogDescription>
       </DialogHeader>
-      <DialogFooter>
-        <Button
-          :disabled="deleteProductMutation.isPending.value"
-          type="button"
-          variant="destructive"
-          @click="deleteProductMutation.mutate"
-        >
-          Si, eliminar
-        </Button>
+      <DialogFooter class="flex flex-row gap-2">
         <Button
           :disabled="deleteProductMutation.isPending.value"
           type="button"
           variant="secondary"
           @click="openModel = false"
+          class="w-full"
         >
           Cancelar
+        </Button>
+        <Button
+          :disabled="deleteProductMutation.isPending.value"
+          type="button"
+          variant="destructive"
+          @click="deleteProductMutation.mutate"
+          class="w-full"
+        >
+          Si, eliminar
         </Button>
       </DialogFooter>
     </DialogContent>
@@ -84,22 +86,24 @@ const deleteProductMutation = useMutation({
             que deseas proceder con la eliminación?
           </DrawerDescription>
         </DrawerHeader>
-        <DrawerFooter>
-          <Button
-            :disabled="deleteProductMutation.isPending.value"
-            type="button"
-            variant="destructive"
-            @click="deleteProductMutation.mutate"
-          >
-            Si, eliminar
-          </Button>
+        <DrawerFooter class="flex flex-row gap-2">
           <Button
             :disabled="deleteProductMutation.isPending.value"
             type="button"
             variant="secondary"
             @click="openModel = false"
+            class="w-full"
           >
             Cancelar
+          </Button>
+          <Button
+            :disabled="deleteProductMutation.isPending.value"
+            type="button"
+            variant="destructive"
+            @click="deleteProductMutation.mutate"
+            class="w-full"
+          >
+            Si, eliminar
           </Button>
         </DrawerFooter>
       </div>

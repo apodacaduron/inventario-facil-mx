@@ -269,7 +269,7 @@ function getMaxIncrementValue(product: Product | null) {
           </Card>
         </div>
 
-        <SheetFooter>
+        <SheetFooter class="flex flex-row gap-2">
           <Button @click="openModel = false" class="w-full" type="button">
             Aceptar
           </Button>

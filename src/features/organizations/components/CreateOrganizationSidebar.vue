@@ -109,12 +109,15 @@ watchEffect(() => {
           </div>
         </div>
       </div>
-      <SheetFooter class="gap-2">
-        <Button variant="outline" @click="openModel = false"> Cancelar </Button>
+      <SheetFooter class="flex flex-row gap-2">
+        <Button variant="outline" @click="openModel = false" class="w-full">
+          Cancelar
+        </Button>
         <Button
           :disabled="createOrganizationMutation.isPending.value"
           type="submit"
           @click="createOrganizationMutation.mutate(organizationName)"
+          class="w-full"
         >
           Crear
         </Button>

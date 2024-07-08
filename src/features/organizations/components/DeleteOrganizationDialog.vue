@@ -75,6 +75,15 @@ const deleteUserOrganizationMutation = useMutation({
 
       <DialogFooter>
         <Button
+          :disabled="deleteUserOrganizationMutation.isPending.value"
+          type="button"
+          variant="secondary"
+          @click="openModel = false"
+          class="w-full"
+        >
+          Cancelar
+        </Button>
+        <Button
           :disabled="
             deleteUserOrganizationMutation.isPending.value ||
             organizationName !== userOrganization?.i_organizations?.name
@@ -82,16 +91,9 @@ const deleteUserOrganizationMutation = useMutation({
           type="button"
           variant="destructive"
           @click="deleteUserOrganizationMutation.mutate"
+          class="w-full"
         >
           Si, eliminar
-        </Button>
-        <Button
-          :disabled="deleteUserOrganizationMutation.isPending.value"
-          type="button"
-          variant="secondary"
-          @click="openModel = false"
-        >
-          Cancelar
         </Button>
       </DialogFooter>
     </DialogContent>
@@ -111,16 +113,27 @@ const deleteUserOrganizationMutation = useMutation({
           </DrawerDescription>
         </DrawerHeader>
 
-        <Label class="leading-normal mb-2 block"
-          >Escribe el nombre de tu organización para poder eliminar:
-          <b>{{ userOrganization?.i_organizations?.name }}</b></Label
-        >
-        <Input
-          v-model="organizationName"
-          placeholder="Los nombres deben coincidir"
-        />
+        <div class="px-4">
+          <Label class="leading-normal mb-2 block"
+            >Escribe el nombre de tu organización para poder eliminar:
+            <b>{{ userOrganization?.i_organizations?.name }}</b></Label
+          >
+          <Input
+            v-model="organizationName"
+            placeholder="Los nombres deben coincidir"
+          />
+        </div>
 
-        <DrawerFooter>
+        <DrawerFooter class="flex flex-row gap-2">
+          <Button
+            :disabled="deleteUserOrganizationMutation.isPending.value"
+            type="button"
+            variant="secondary"
+            @click="openModel = false"
+            class="w-full"
+          >
+            Cancelar
+          </Button>
           <Button
             :disabled="
               deleteUserOrganizationMutation.isPending.value ||
@@ -129,16 +142,9 @@ const deleteUserOrganizationMutation = useMutation({
             type="button"
             variant="destructive"
             @click="deleteUserOrganizationMutation.mutate"
+            class="w-full"
           >
             Si, eliminar
-          </Button>
-          <Button
-            :disabled="deleteUserOrganizationMutation.isPending.value"
-            type="button"
-            variant="secondary"
-            @click="openModel = false"
-          >
-            Cancelar
           </Button>
         </DrawerFooter>
       </div>

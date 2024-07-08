@@ -115,19 +115,20 @@ watch(openModel, (nextOpenValue) => {
       <form @submit="onSubmit" class="flex flex-col gap-6 mt-6 mb-6">
         <SharedProductFormValues />
 
-        <SheetFooter class="gap-4 sm:gap-0">
-          <Button
-            :disabled="createProductMutation.isPending.value"
-            type="submit"
-            class="w-full"
-            >Guardar</Button
-          >
+        <SheetFooter class="flex flex-row gap-2">
           <Button
             :disabled="createProductMutation.isPending.value"
             @click="openModel = false"
             variant="outline"
             type="button"
+            class="w-full"
             >Cancelar</Button
+          >
+          <Button
+            :disabled="createProductMutation.isPending.value"
+            type="submit"
+            class="w-full"
+            >Guardar</Button
           >
         </SheetFooter>
       </form>
