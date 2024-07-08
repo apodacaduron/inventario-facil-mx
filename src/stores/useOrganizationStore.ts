@@ -42,6 +42,14 @@ export const useOrganizationStore = defineStore("organization", () => {
 
     return currentProducts < maxProducts;
   });
+  const canTriggerLowStockAlert = toRef(() => {
+    const lowStockThreshold =
+      currentUserOrganization.value?.i_organizations?.low_stock_threshold ?? 0;
+    const isLowStockAlertEnabled =
+      Boolean(currentUserOrganization.value?.i_organizations?.is_low_stock_alert_enabled);
+
+    return lowStockThreshold > 0 && isLowStockAlertEnabled && isPremium.value;
+  });
   const canAddCustomers = toRef(() => {
     const maxCustomers =
       currentUserOrganization.value?.i_organizations?.plans?.max_customers;
@@ -60,7 +68,7 @@ export const useOrganizationStore = defineStore("organization", () => {
     const currentOrganizations = authStore.authedUser?.current_organizations;
     if (!maxOrganizations || !currentOrganizations) return false;
 
-    return currentOrganizations < maxOrganizations;
+    return currentOrganizations < maxOrganizations && isPremium.value;
   });
 
   function setUserOrganizations(
@@ -112,6 +120,7 @@ export const useOrganizationStore = defineStore("organization", () => {
     canAddProducts,
     canAddCustomers,
     canAddOrganizations,
+    canTriggerLowStockAlert,
     setIsUserOrganizationsLoading,
     isUserOrganizationsLoading,
     redirectToOrganization,

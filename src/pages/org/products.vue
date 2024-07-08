@@ -35,6 +35,7 @@ import {
   Tooltip,
   TooltipTrigger,
   TooltipContent,
+  Badge,
 } from "@/components/ui";
 import {
   ChevronDownIcon,
@@ -130,6 +131,27 @@ function openUpdateProductSidebar(product: Product) {
 function openAddStockDialog(product: Product) {
   activeProduct.value = product;
   isAddStockDialogOpen.value = true;
+}
+
+function getProductStockBadgeProps(stock: number | null) {
+  if (Number(stock) <= 0) return { variant: "destructive" } as const;
+
+  const lowStockThreshold =
+    organizationStore.currentUserOrganization?.i_organizations
+      ?.low_stock_threshold ?? 0;
+
+  const isLowStockWarningEnabled =
+    organizationStore.canTriggerLowStockAlert &&
+    Number(stock) <= lowStockThreshold;
+
+  if (isLowStockWarningEnabled) {
+    return {
+      variant: "default",
+      class: "bg-yellow-500 hover:bg-yellow-400",
+    } as const;
+  }
+
+  return { variant: "default" } as const;
 }
 
 watchEffect(() => {
@@ -351,8 +373,13 @@ watchEffect(() => {
               </TableCell>
               <TableCell class="text-center">
                 <div class="flex items-center gap-4">
-                  {{ product.current_stock }}
+                  <Badge
+                    v-bind="getProductStockBadgeProps(product.current_stock)"
+                  >
+                    {{ product.current_stock }}
+                  </Badge>
                   <Button
+                    v-if="organizationStore.isPremium"
                     @click="
                       isProductStockHistorySidebarOpen = true;
                       activeProduct = product;
