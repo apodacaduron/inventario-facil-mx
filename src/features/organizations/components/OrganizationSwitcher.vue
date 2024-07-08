@@ -41,7 +41,7 @@ const organizationStore = useOrganizationStore();
         role="combobox"
         aria-expanded="open"
         aria-label="Select a team"
-        class="min-w-[200px] w-full justify-between"
+        class="min-w-[160px] w-full justify-between"
       >
         <Avatar class="mr-2 h-5 w-5">
           <AvatarFallback>{{
