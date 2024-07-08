@@ -40,7 +40,7 @@ const currencyFormatter = useCurrencyFormatter();
 
 <template>
   <Sheet v-model:open="openModel">
-    <SheetContent side="right" class="overflow-y-auto w-100">
+    <SheetContent side="right" class="overflow-y-auto w-full">
       <SheetHeader>
         <SheetTitle>
           Detalle de venta

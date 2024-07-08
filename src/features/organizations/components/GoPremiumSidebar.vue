@@ -58,7 +58,7 @@ async function createStripeCheckout() {
 
 <template>
   <Sheet v-model:open="openModel">
-    <SheetContent class="sm:max-w-[425px]">
+    <SheetContent class="overflow-y-auto w-full">
       <SheetHeader>
         <SheetTitle>¡Hazte Premium Hoy!</SheetTitle>
         <SheetDescription>

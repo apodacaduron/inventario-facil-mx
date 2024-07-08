@@ -104,7 +104,7 @@ const menuList = computed(() => ({
             :open="layerManager.currentLayer.value?.id === 'mobile-menu'"
             @update:open="(open) => open === false && layerManager.closeLayer()"
           >
-            <SheetContent side="left" class="overflow-y-auto">
+            <SheetContent side="left" class="overflow-y-auto w-full">
               <SheetHeader class="text-left">
                 <SheetTitle>Explora</SheetTitle>
                 <SheetDescription>

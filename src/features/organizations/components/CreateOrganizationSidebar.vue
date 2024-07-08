@@ -89,7 +89,7 @@ watchEffect(() => {
 
 <template>
   <Sheet v-model:open="openModel">
-    <SheetContent>
+    <SheetContent class="overflow-y-auto w-full">
       <SheetHeader>
         <SheetTitle>Crea una organización</SheetTitle>
         <SheetDescription>
