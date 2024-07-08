@@ -348,10 +348,6 @@ watchEffect(() => {
               >
                 <Avatar
                   class="cursor-pointer"
-                  @click="
-                    isProductImageDialogOpen = true;
-                    activeProduct = product;
-                  "
                 >
                   <AvatarImage
                     :src="product?.image_url ?? ''"
