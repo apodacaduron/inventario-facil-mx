@@ -139,14 +139,9 @@ function getProductStockBadgeProps(stock: number | null) {
   const lowStockThreshold =
     organizationStore.currentUserOrganization?.i_organizations
       ?.low_stock_threshold ?? 0;
-  const isLowStockAlertEnabled =
-    organizationStore.currentUserOrganization?.i_organizations
-      ?.is_low_stock_alert_enabled;
 
   const isLowStockWarningEnabled =
-    organizationStore.isPremium &&
-    isLowStockAlertEnabled &&
-    lowStockThreshold > 0 &&
+    organizationStore.canTriggerLowStockAlert &&
     Number(stock) <= lowStockThreshold;
 
   if (isLowStockWarningEnabled) {

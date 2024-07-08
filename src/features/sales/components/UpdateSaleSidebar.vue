@@ -30,7 +30,13 @@ import {
 } from "@/components/ui";
 import { computed, watch } from "vue";
 import { z } from "zod";
-import { SALE_STATUS, Sale, UpdateSale, useSaleServices } from "../composables";
+import {
+  SALE_STATUS,
+  Sale,
+  UpdateSale,
+  useSaleHelpers,
+  useSaleServices,
+} from "../composables";
 import { PlusCircleIcon } from "@heroicons/vue/24/outline";
 import { useCurrencyFormatter } from "@/features/products";
 import { toTypedSchema } from "@vee-validate/zod";
@@ -39,6 +45,7 @@ import { useMutation, useQueryClient } from "@tanstack/vue-query";
 import { notifyIfHasError, useLayerManager } from "@/features/global";
 import { analytics } from "@/config/analytics";
 import { useRoute } from "vue-router";
+import { useOrganizationStore } from "@/stores";
 
 type Props = {
   layerManager: ReturnType<typeof useLayerManager>;
@@ -92,6 +99,8 @@ const initialForm: UpdateSale = {
 
 const route = useRoute();
 const queryClient = useQueryClient();
+const saleHelpers = useSaleHelpers();
+const organizationStore = useOrganizationStore();
 const saleServices = useSaleServices();
 const currencyFormatter = useCurrencyFormatter();
 const updateSaleMutation = useMutation({
@@ -105,6 +114,16 @@ const updateSaleMutation = useMutation({
     notifyIfHasError(error);
     await queryClient.invalidateQueries({ queryKey: ["sales"] });
     await queryClient.invalidateQueries({ queryKey: ["products"] });
+
+    if (organizationStore.canTriggerLowStockAlert) {
+      await saleHelpers.notifyLowOnStockProducts(
+        route.params.orgId.toString(),
+        formValues,
+        organizationStore.currentUserOrganization?.i_organizations
+          ?.low_stock_threshold ?? 0
+      );
+    }
+
     openModel.value = false;
     analytics.event("update-sale", formValues);
   },

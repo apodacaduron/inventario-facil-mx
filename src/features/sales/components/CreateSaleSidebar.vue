@@ -26,7 +26,13 @@ import {
 } from "@/components/ui";
 import { computed, watch } from "vue";
 import { z } from "zod";
-import { CreateSale, SALE_STATUS, Sale, useSaleServices } from "../composables";
+import {
+  CreateSale,
+  SALE_STATUS,
+  Sale,
+  useSaleHelpers,
+  useSaleServices,
+} from "../composables";
 import { Customer } from "@/features/customers";
 import { PlusCircleIcon } from "@heroicons/vue/24/outline";
 import { useCurrencyFormatter } from "@/features/products";
@@ -66,6 +72,7 @@ const initialForm: CreateSale = {
 
 const route = useRoute();
 const queryClient = useQueryClient();
+const saleHelpers = useSaleHelpers();
 const saleServices = useSaleServices();
 const organizationStore = useOrganizationStore();
 const currencyFormatter = useCurrencyFormatter();
@@ -78,6 +85,16 @@ const createSaleMutation = useMutation({
     notifyIfHasError(error);
     await queryClient.invalidateQueries({ queryKey: ["sales"] });
     await queryClient.invalidateQueries({ queryKey: ["products"] });
+
+    if (organizationStore.canTriggerLowStockAlert) {
+      await saleHelpers.notifyLowOnStockProducts(
+        route.params.orgId.toString(),
+        formValues,
+        organizationStore.currentUserOrganization?.i_organizations
+          ?.low_stock_threshold ?? 0
+      );
+    }
+
     openModel.value = false;
     analytics.event("create-sale", formValues);
   },
