@@ -63,7 +63,7 @@ useInfiniteScroll(
 
 <template>
   <Sheet v-model:open="openModel">
-    <SheetContent side="right" class="overflow-y-auto w-100">
+    <SheetContent side="right" class="overflow-y-auto w-full">
       <div ref="customersRef">
         <SheetHeader class="mb-6">
           <SheetTitle>Selecciona cliente</SheetTitle>
