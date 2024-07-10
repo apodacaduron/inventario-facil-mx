@@ -5,9 +5,11 @@ import {
   DeleteProductDialog,
   Product,
   ProductImageDialog,
+  ProductImagesSidebar,
   ProductStockHistorySidebar,
   ShareStockDialog,
   UpdateProductSidebar,
+  UploadProductImagesSidebar,
   useCurrencyFormatter,
 } from "@/features/products";
 import { ref, toRef, watchEffect } from "vue";
@@ -51,12 +53,16 @@ import {
 import { refDebounced, useInfiniteScroll, useStorage } from "@vueuse/core";
 import { useOrganizationStore } from "@/stores";
 import { useProductsQuery } from "@/features/products/composables/useProductQueries";
-import { FeedbackCard, useTableOrder, useTableStates } from "@/features/global";
+import {
+  FeedbackCard,
+  useLayerManager,
+  useTableOrder,
+  useTableStates,
+} from "@/features/global";
 import { useRoute } from "vue-router";
-import { HistoryIcon } from "lucide-vue-next";
+import { HistoryIcon, ImageIcon } from "lucide-vue-next";
 
 const tableRef = ref<HTMLElement | null>(null);
-
 const productSearch = ref("");
 const productSearchDebounced = refDebounced(productSearch, 400);
 const tableFiltersRef = useStorage<{
@@ -70,6 +76,8 @@ const isAddStockDialogOpen = ref(false);
 const isProductImageDialogOpen = ref(false);
 const isProductStockHistorySidebarOpen = ref(false);
 const activeProduct = ref<Product | null>(null);
+
+const layerManager = useLayerManager();
 const productsTableOrder = useTableOrder({
   options: {
     initialOrder: ["created_at", "desc"],
@@ -126,6 +134,11 @@ function openDeleteProductDialog(product: Product) {
 function openUpdateProductSidebar(product: Product) {
   activeProduct.value = product;
   isUpdateProductSidebarOpen.value = true;
+}
+
+function openProductImagesSidebar(product: Product) {
+  activeProduct.value = product;
+  layerManager.openLayer("product-images");
 }
 
 function openAddStockDialog(product: Product) {
@@ -346,9 +359,7 @@ watchEffect(() => {
               <TableCell
                 class="flex items-center p-4 text-foreground whitespace-nowrap w-max"
               >
-                <Avatar
-                  class="cursor-pointer"
-                >
+                <Avatar class="cursor-pointer">
                   <AvatarImage
                     :src="product?.image_url ?? ''"
                     class="object-cover"
@@ -407,6 +418,22 @@ watchEffect(() => {
                     </TooltipTrigger>
                     <TooltipContent>
                       <p>Editar producto</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger as-child>
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        @click="openProductImagesSidebar(product)"
+                      >
+                        <ImageIcon class="w-4 h-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Imágenes de producto</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
@@ -505,6 +532,17 @@ watchEffect(() => {
       </FeedbackCard>
     </div>
 
+    <UploadProductImagesSidebar
+      :product="activeProduct"
+      :open="layerManager.currentLayer.value?.id === 'upload-product-images'"
+      @update:open="(open) => open === false && layerManager.closeLayer()"
+    />
+    <ProductImagesSidebar
+      :product="activeProduct"
+      :layerManager="layerManager"
+      :open="layerManager.currentLayer.value?.id === 'product-images'"
+      @update:open="(open) => open === false && layerManager.closeLayer()"
+    />
     <DeleteProductDialog
       v-model:open="isDeleteProductDialogOpen"
       :product="activeProduct"
