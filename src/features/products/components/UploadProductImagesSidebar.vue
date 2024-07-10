@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Dropzone } from "@/components";
+import { Dropzone, Spinner } from "@/components";
 import {
   Sheet,
   Button,
@@ -10,7 +10,7 @@ import {
   SheetFooter,
   useToast,
 } from "@/components/ui";
-import { ref, toRef } from "vue";
+import { ref, toRef, watchEffect } from "vue";
 import { Product, useProductServices } from "../composables";
 import imageCompression, { Options } from "browser-image-compression";
 import { useAssetServices } from "@/features/assets";
@@ -116,6 +116,11 @@ async function compressFile(imageFile: File) {
     });
   }
 }
+
+watchEffect(() => {
+  if (openModel.value) return;
+  acceptedFiles.value = [];
+})
 </script>
 
 <template>
@@ -133,6 +138,7 @@ async function compressFile(imageFile: File) {
           v-model:acceptedFiles="acceptedFiles"
           :supportedExtensions="['.jpg', '.png', '.jpeg']"
           :maxFiles="maxFiles"
+          :disabled="uploadFilesMutation.isPending.value"
         />
       </div>
 
@@ -151,8 +157,10 @@ async function compressFile(imageFile: File) {
           type="submit"
           class="w-full"
           @click="uploadFilesMutation.mutate"
-          >Subir</Button
         >
+          <Spinner v-if="uploadFilesMutation.isPending.value" class="mr-3" />
+          Subir
+        </Button>
       </SheetFooter>
     </SheetContent>
   </Sheet>

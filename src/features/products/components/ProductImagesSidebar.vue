@@ -14,16 +14,29 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui";
-import { useLayerManager } from "@/features/global";
+import {
+  FeedbackCard,
+  notifyIfHasError,
+  useLayerManager,
+  useTableStates,
+} from "@/features/global";
 import {
   EllipsisVerticalIcon,
   ImagePlusIcon,
+  ImagesIcon,
   SquareMousePointerIcon,
   TrashIcon,
 } from "lucide-vue-next";
-import { Product, useProductImagesQuery } from "../composables";
-import { toRef } from "vue";
+import {
+  Product,
+  useProductImagesQuery,
+  useProductServices,
+} from "../composables";
+import { computed, toRef } from "vue";
 import { useRoute } from "vue-router";
+import { useOrganizationStore } from "@/stores";
+import { useMutation, useQueryClient } from "@tanstack/vue-query";
+import { Tables } from "../../../../types_db";
 
 type Props = {
   layerManager: ReturnType<typeof useLayerManager>;
@@ -33,6 +46,9 @@ type Props = {
 const openModel = defineModel<boolean>("open");
 const props = defineProps<Props>();
 
+const queryClient = useQueryClient();
+const organizationStore = useOrganizationStore();
+const productServices = useProductServices();
 const route = useRoute();
 const productImagesQuery = useProductImagesQuery({
   options: {
@@ -48,31 +64,53 @@ const productImagesQuery = useProductImagesQuery({
     ]),
   },
 });
+const tableLoadingStates = useTableStates(productImagesQuery, "");
+
+const productImageCount = computed(
+  () => productImagesQuery.data.value?.pages.flatMap((page) => page.data).length
+);
+const maxFiles = toRef(() => {
+  const imagesCount = Number(productImageCount.value);
+
+  return organizationStore.maxProductImageUploads - imagesCount;
+});
 </script>
 
 <template>
   <Sheet v-model:open="openModel">
     <SheetContent side="right" class="overflow-y-auto w-full">
       <SheetHeader>
-        <SheetTitle> Actualizar producto </SheetTitle>
+        <SheetTitle> Imágenes del producto </SheetTitle>
         <SheetDescription>
-          Actualiza rápidamente un producto de tu inventario.
+          Gestiona y sube imágenes para este producto.
         </SheetDescription>
       </SheetHeader>
 
       <div class="my-6">
         <Button
+          v-if="maxFiles > 0"
           variant="outline"
           class="w-full mb-6"
           @click="
             layerManager.openLayer('upload-product-images', {
-              imagesCount: productImagesQuery.data.value?.pages.flatMap(
-                (page) => page.data
-              ).length,
+              imagesCount: productImageCount,
             })
           "
-          ><ImagePlusIcon class="size-4 mr-2" /> Upload more images</Button
+          ><ImagePlusIcon class="size-4 mr-2" /> Subir imagenes</Button
         >
+
+        <FeedbackCard
+          v-if="tableLoadingStates.showEmptyState.value"
+          class="my-24"
+        >
+          <template #icon>
+            <ImagesIcon class="size-10" />
+          </template>
+          <template #title>No hay imágenes del producto</template>
+          <template #description
+            >Añade una imagen para mostrar este producto.
+          </template>
+        </FeedbackCard>
 
         <div class="grid grid-cols-2 gap-4">
           <div
@@ -108,7 +146,14 @@ const productImagesQuery = useProductImagesQuery({
                     <SquareMousePointerIcon class="size-4 mr-2" />
                     Convertir en primaria
                   </DropdownMenuItem>
-                  <DropdownMenuItem class="text-red-500">
+                  <DropdownMenuItem
+                    @click="
+                      layerManager.openLayer('delete-product-image', {
+                        productImage,
+                      })
+                    "
+                    class="text-red-500"
+                  >
                     <TrashIcon class="size-4 mr-2" />
                     Eliminar
                   </DropdownMenuItem>

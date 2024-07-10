@@ -1,6 +1,7 @@
 import { supabase } from "@/config/supabase";
 import { LoadListOptions, useServiceHelpers } from "@/features/global";
 import { Tables } from "../../../../types_db";
+import { useAssetServices } from "@/features/assets";
 
 export type CreateProduct = {
   name: Product["name"];
@@ -16,7 +17,10 @@ export type UpdateProduct = {
 export type DeleteProduct = Product["id"];
 
 export type Product = Tables<"i_products">;
-export type CreateProductImage = Omit<Tables<'product_images'>, 'id' | 'created_at' | 'updated_at'>
+export type CreateProductImage = Omit<
+  Tables<"product_images">,
+  "id" | "created_at" | "updated_at"
+>;
 
 export const productServicesTypeguards = {
   isCreateProduct(
@@ -38,6 +42,7 @@ export const productServicesTypeguards = {
 
 export function useProductServices() {
   const serviceHelpers = useServiceHelpers();
+  const assetServices = useAssetServices();
 
   async function loadList(options: LoadListOptions & { orgId: string }) {
     if (!options.orgId)
@@ -60,7 +65,9 @@ export function useProductServices() {
     return await productQuery;
   }
 
-  async function loadProductImagesList(options: LoadListOptions & { orgId: string }) {
+  async function loadProductImagesList(
+    options: LoadListOptions & { orgId: string }
+  ) {
     if (!options.orgId)
       throw new Error("Organization is required to get product list");
 
@@ -102,7 +109,9 @@ export function useProductServices() {
     return await productQuery;
   }
 
-  async function loadProductStockHistory(options: LoadListOptions & { productId: string | undefined }) {
+  async function loadProductStockHistory(
+    options: LoadListOptions & { productId: string | undefined }
+  ) {
     if (!options.productId)
       throw new Error("Product is required to get product stock history");
 
@@ -199,12 +208,16 @@ export function useProductServices() {
     });
   }
 
-    async function createProductImage(asset: CreateProductImage) {
-    return await supabase.from('product_images').insert(asset);
+  async function createProductImage(asset: CreateProductImage) {
+    return await supabase.from("product_images").insert(asset);
   }
-  // async function deleteAsset(id: string) {
-  //   return await supabase.from('assets').delete().eq('id', id);
-  // }
+  async function deleteProductImage(data: {id: string, bucketPath: string}) {
+    await assetServices.deleteFile({
+      bucket: 'product-images',
+      path: data.bucketPath
+    })
+    return await supabase.from("product_images").delete().eq("id", data.id);
+  }
   // async function updateAsset(id: string, asset: UpdateAsset) {
   //   return await supabase.from('assets').update(asset).eq('id', id)
   // }
@@ -220,6 +233,7 @@ export function useProductServices() {
     getMostSoldProducts,
     loadProductStockHistory,
     loadProductImagesList,
-    createProductImage
+    createProductImage,
+    deleteProductImage,
   };
 }

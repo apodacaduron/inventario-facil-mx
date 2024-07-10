@@ -8,6 +8,7 @@ import { noop } from "@vueuse/core";
 type Props = {
   supportedExtensions?: string[];
   maxFiles?: number;
+  disabled?: boolean
 };
 
 const acceptedFilesModel = defineModel<File[]>("acceptedFiles", {
@@ -18,6 +19,7 @@ const props = defineProps<Props>();
 const { toast } = useToast();
 const { getRootProps, getInputProps, isDragActive } = useDropzone({
   onDrop,
+  disabled: props.disabled,
   accept: props.supportedExtensions?.join(","),
   maxFiles: props.maxFiles ?? 1,
   onDropRejected(rejectReasons) {
@@ -91,9 +93,9 @@ function formatBytes(bytes: number, decimals = 2) {
   <div class="dropzone">
     <div
       :class="['dropzone__area', { 'dropzone__area--hover': isDragActive }]"
-      v-bind="getRootProps()"
+      v-bind="props.disabled ? {} : getRootProps()"
     >
-      <input v-bind="getInputProps()" />
+      <input v-bind="props.disabled ? {} : getInputProps()" />
       <div class="border border-border rounded-lg p-2 shadow-sm">
         <CloudUploadIcon class="size-5" />
       </div>
@@ -126,6 +128,7 @@ function formatBytes(bytes: number, decimals = 2) {
         </div>
         <div>
           <Button
+            :disabled="disabled"
             @click="removeFromAcceptedFiles(index)"
             variant="ghost"
             size="icon"

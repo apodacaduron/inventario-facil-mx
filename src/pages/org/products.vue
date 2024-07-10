@@ -61,6 +61,7 @@ import {
 } from "@/features/global";
 import { useRoute } from "vue-router";
 import { HistoryIcon, ImageIcon } from "lucide-vue-next";
+import DeleteProductImageDialog from "@/features/products/components/DeleteProductImageDialog.vue";
 
 const tableRef = ref<HTMLElement | null>(null);
 const productSearch = ref("");
@@ -532,6 +533,11 @@ watchEffect(() => {
       </FeedbackCard>
     </div>
 
+    <DeleteProductImageDialog
+      :layerManager="layerManager"
+      :open="layerManager.currentLayer.value?.id === 'delete-product-image'"
+      @update:open="(open) => open === false && layerManager.closeLayer()"
+    />
     <UploadProductImagesSidebar
       :layerManager="layerManager"
       :product="activeProduct"
