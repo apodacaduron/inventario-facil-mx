@@ -9,63 +9,6 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      assets: {
-        Row: {
-          created_at: string
-          file_type: string | null
-          filename: string | null
-          id: string
-          is_external: boolean | null
-          org_id: string | null
-          path: string | null
-          related_id: string | null
-          updated_at: string | null
-          url: string | null
-          user_id: string | null
-        }
-        Insert: {
-          created_at?: string
-          file_type?: string | null
-          filename?: string | null
-          id?: string
-          is_external?: boolean | null
-          org_id?: string | null
-          path?: string | null
-          related_id?: string | null
-          updated_at?: string | null
-          url?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          created_at?: string
-          file_type?: string | null
-          filename?: string | null
-          id?: string
-          is_external?: boolean | null
-          org_id?: string | null
-          path?: string | null
-          related_id?: string | null
-          updated_at?: string | null
-          url?: string | null
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "assets_org_id_fkey"
-            columns: ["org_id"]
-            isOneToOne: false
-            referencedRelation: "i_organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "assets_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       i_customers: {
         Row: {
           address: string | null
@@ -522,6 +465,73 @@ export type Database = {
           stripe_product_id?: string | null
         }
         Relationships: []
+      }
+      product_images: {
+        Row: {
+          bucket_path: string | null
+          created_at: string
+          filename: string | null
+          id: string
+          is_external: boolean | null
+          is_primary: boolean | null
+          org_id: string | null
+          product_id: string | null
+          related_id: string | null
+          updated_at: string | null
+          url: string | null
+          user_id: string | null
+        }
+        Insert: {
+          bucket_path?: string | null
+          created_at?: string
+          filename?: string | null
+          id?: string
+          is_external?: boolean | null
+          is_primary?: boolean | null
+          org_id?: string | null
+          product_id?: string | null
+          related_id?: string | null
+          updated_at?: string | null
+          url?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          bucket_path?: string | null
+          created_at?: string
+          filename?: string | null
+          id?: string
+          is_external?: boolean | null
+          is_primary?: boolean | null
+          org_id?: string | null
+          product_id?: string | null
+          related_id?: string | null
+          updated_at?: string | null
+          url?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assets_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "i_organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assets_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_images_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "i_products"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       products_stock_history: {
         Row: {
