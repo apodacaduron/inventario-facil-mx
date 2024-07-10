@@ -41,13 +41,14 @@ const [ModalBodyTemplate, ModalBody] = createReusableTemplate();
 const isDesktop = useMediaQuery("(min-width: 768px)");
 const updateProductMutation = useMutation({
   mutationFn: async (formValues: UpdateProduct) => {
-    const productId = formValues.product_id;
-    if (!productId) throw new Error("Product id required to perform update");
-    const { error } = await productServices.updateProduct({
-      ...formValues,
-      product_id: productId,
-    });
-    notifyIfHasError(error);
+    if (!props.product?.id)
+      throw new Error("Product id required to perform update");
+
+    const response = await productServices.updateProduct(
+      props.product?.id,
+      formValues
+    );
+    notifyIfHasError(response.error);
     await queryClient.invalidateQueries({ queryKey: ["products"] });
     openModel.value = false;
     analytics.event("update-product-stock", formValues);
@@ -70,7 +71,6 @@ function saveStock() {
     throw new Error("Product id is required to add to stock");
   updateProductMutation.mutate({
     current_stock: stockAmount.value,
-    product_id: props.product.id,
   });
 }
 

@@ -11,16 +11,17 @@ export type CreateProduct = {
   unit_price: Product["unit_price"];
   image_url: Product["image_url"];
 };
-export type UpdateProduct = {
-  product_id: Product["id"];
-} & Partial<CreateProduct>;
+export type UpdateProduct = Partial<CreateProduct>;
 export type DeleteProduct = Product["id"];
 
 export type Product = Tables<"i_products">;
+export type ProductImage = 
+  Tables<"product_images">;
 export type CreateProductImage = Omit<
-  Tables<"product_images">,
+  ProductImage,
   "id" | "created_at" | "updated_at"
 >;
+export type UpdateProductImage = Partial<CreateProductImage>
 
 export const productServicesTypeguards = {
   isCreateProduct(
@@ -139,14 +140,13 @@ export function useProductServices() {
     ]);
   }
 
-  async function updateProduct(formValues: UpdateProduct) {
-    const { product_id, ...otherFormValues } = formValues;
+  async function updateProduct(id: string, formValues: UpdateProduct) {
     return await supabase
       .from("i_products")
       .update({
-        ...otherFormValues,
+        ...formValues,
       })
-      .eq("id", product_id);
+      .eq("id", id);
   }
 
   async function deleteProduct(productId: DeleteProduct) {
@@ -218,9 +218,9 @@ export function useProductServices() {
     })
     return await supabase.from("product_images").delete().eq("id", data.id);
   }
-  // async function updateAsset(id: string, asset: UpdateAsset) {
-  //   return await supabase.from('assets').update(asset).eq('id', id)
-  // }
+  async function updateProductImage(id: string, productImage: UpdateProductImage) {
+    return await supabase.from('product_images').update(productImage).eq('id', id)
+  }
 
   return {
     loadList,
@@ -235,5 +235,6 @@ export function useProductServices() {
     loadProductImagesList,
     createProductImage,
     deleteProductImage,
+    updateProductImage,
   };
 }
