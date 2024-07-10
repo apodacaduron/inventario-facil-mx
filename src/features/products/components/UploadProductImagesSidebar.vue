@@ -96,12 +96,6 @@ const maxFiles = toRef(() => {
     props.layerManager.currentLayer.value.state.imagesCount
   );
 
-  console.log(
-    "imagesCount",
-    organizationStore.maxProductImageUploads,
-    imagesCount
-  );
-
   return organizationStore.maxProductImageUploads - imagesCount;
 });
 
