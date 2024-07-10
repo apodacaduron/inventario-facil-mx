@@ -533,6 +533,7 @@ watchEffect(() => {
     </div>
 
     <UploadProductImagesSidebar
+      :layerManager="layerManager"
       :product="activeProduct"
       :open="layerManager.currentLayer.value?.id === 'upload-product-images'"
       @update:open="(open) => open === false && layerManager.closeLayer()"

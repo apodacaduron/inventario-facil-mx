@@ -16,6 +16,7 @@ export type UpdateProduct = {
 export type DeleteProduct = Product["id"];
 
 export type Product = Tables<"i_products">;
+export type CreateProductImage = Omit<Tables<'product_images'>, 'id' | 'created_at' | 'updated_at'>
 
 export const productServicesTypeguards = {
   isCreateProduct(
@@ -198,6 +199,16 @@ export function useProductServices() {
     });
   }
 
+    async function createProductImage(asset: CreateProductImage) {
+    return await supabase.from('product_images').insert(asset);
+  }
+  // async function deleteAsset(id: string) {
+  //   return await supabase.from('assets').delete().eq('id', id);
+  // }
+  // async function updateAsset(id: string, asset: UpdateAsset) {
+  //   return await supabase.from('assets').update(asset).eq('id', id)
+  // }
+
   return {
     loadList,
     loadPublicList,
@@ -209,5 +220,6 @@ export function useProductServices() {
     getMostSoldProducts,
     loadProductStockHistory,
     loadProductImagesList,
+    createProductImage
   };
 }

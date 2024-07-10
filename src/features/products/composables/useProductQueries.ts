@@ -55,7 +55,7 @@ export function useProductImagesQuery(context: {
 
   return useInfiniteQuery({
     queryKey: [
-      'products',
+      'product-images',
       context.options.search,
       context.options.filters,
       context.options.order,

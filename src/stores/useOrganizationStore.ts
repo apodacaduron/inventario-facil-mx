@@ -70,6 +70,9 @@ export const useOrganizationStore = defineStore("organization", () => {
 
     return currentOrganizations < maxOrganizations && isPremium.value;
   });
+  const maxProductImageUploads = toRef(() => {
+    return currentUserOrganization.value?.i_organizations?.plans?.max_product_image_uploads ?? 1
+  });
 
   function setUserOrganizations(
     nextUserOrganizations: UserOrganization[] | null
@@ -124,6 +127,7 @@ export const useOrganizationStore = defineStore("organization", () => {
     setIsUserOrganizationsLoading,
     isUserOrganizationsLoading,
     redirectToOrganization,
+    maxProductImageUploads,
     $reset,
   };
 });

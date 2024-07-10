@@ -7,6 +7,7 @@ import { noop } from "@vueuse/core";
 
 type Props = {
   supportedExtensions?: string[];
+  maxFiles?: number;
 };
 
 const acceptedFilesModel = defineModel<File[]>("acceptedFiles", {
@@ -18,6 +19,7 @@ const { toast } = useToast();
 const { getRootProps, getInputProps, isDragActive } = useDropzone({
   onDrop,
   accept: props.supportedExtensions?.join(","),
+  maxFiles: props.maxFiles ?? 1,
   onDropRejected(rejectReasons) {
     const rejectErrors = rejectReasons.flatMap(
       (rejectReason) => rejectReason.errors
@@ -44,6 +46,17 @@ const { getRootProps, getInputProps, isDragActive } = useDropzone({
 });
 
 function onDrop(acceptFiles: File[]) {
+  const filesLength = acceptFiles.length + acceptedFilesModel.value.length;
+  if (filesLength > (props.maxFiles ?? 1)) {
+    toast({
+      title: "Uh oh! Algo salió mal.",
+      description: "No puedes seleccionar mas imágenes para este producto",
+      variant: "destructive",
+      class: "whitespace-pre",
+    });
+    return;
+  }
+
   acceptedFilesModel.value?.push(...acceptFiles);
 }
 

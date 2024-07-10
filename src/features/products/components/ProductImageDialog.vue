@@ -281,7 +281,6 @@ function isValidHttpUrl(maybeUrl: string) {
 async function compressFile(imageFile: File) {
   const options: Options = {
     maxSizeMB: 1,
-    maxWidthOrHeight: 240,
     useWebWorker: true,
   };
   try {

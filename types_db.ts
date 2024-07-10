@@ -430,6 +430,7 @@ export type Database = {
           max_customers: number | null
           max_members: number | null
           max_organizations: number | null
+          max_product_image_uploads: number | null
           max_products: number | null
           name: string | null
           price: number | null
@@ -444,6 +445,7 @@ export type Database = {
           max_customers?: number | null
           max_members?: number | null
           max_organizations?: number | null
+          max_product_image_uploads?: number | null
           max_products?: number | null
           name?: string | null
           price?: number | null
@@ -458,6 +460,7 @@ export type Database = {
           max_customers?: number | null
           max_members?: number | null
           max_organizations?: number | null
+          max_product_image_uploads?: number | null
           max_products?: number | null
           name?: string | null
           price?: number | null
@@ -476,7 +479,6 @@ export type Database = {
           is_primary: boolean | null
           org_id: string | null
           product_id: string | null
-          related_id: string | null
           updated_at: string | null
           url: string | null
           user_id: string | null
@@ -490,7 +492,6 @@ export type Database = {
           is_primary?: boolean | null
           org_id?: string | null
           product_id?: string | null
-          related_id?: string | null
           updated_at?: string | null
           url?: string | null
           user_id?: string | null
@@ -504,7 +505,6 @@ export type Database = {
           is_primary?: boolean | null
           org_id?: string | null
           product_id?: string | null
-          related_id?: string | null
           updated_at?: string | null
           url?: string | null
           user_id?: string | null

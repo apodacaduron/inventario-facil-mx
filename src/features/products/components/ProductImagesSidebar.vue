@@ -9,10 +9,18 @@ import {
   SheetFooter,
   Avatar,
   AvatarImage,
-  AvatarFallback,
+  DropdownMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
 } from "@/components/ui";
 import { useLayerManager } from "@/features/global";
-import { ImagePlusIcon } from "lucide-vue-next";
+import {
+  EllipsisVerticalIcon,
+  ImagePlusIcon,
+  SquareMousePointerIcon,
+  TrashIcon,
+} from "lucide-vue-next";
 import { Product, useProductImagesQuery } from "../composables";
 import { toRef } from "vue";
 import { useRoute } from "vue-router";
@@ -56,27 +64,57 @@ const productImagesQuery = useProductImagesQuery({
         <Button
           variant="outline"
           class="w-full mb-6"
-          @click="layerManager.openLayer('upload-product-images')"
+          @click="
+            layerManager.openLayer('upload-product-images', {
+              imagesCount: productImagesQuery.data.value?.pages.flatMap(
+                (page) => page.data
+              ).length,
+            })
+          "
           ><ImagePlusIcon class="size-4 mr-2" /> Upload more images</Button
         >
 
-        <div>
+        <div class="grid grid-cols-2 gap-4">
           <div
-            class="grid grid-cols-2 gap-4"
             v-for="productImage in productImagesQuery.data.value?.pages.flatMap(
               (page) => page.data
             )"
           >
-            <Avatar class="rounded-md h-auto max-w-full w-full">
-              <AvatarImage
-                v-if="productImage?.url"
-                :src="productImage?.url"
-                class="object-cover"
-              />
-              <AvatarFallback>
-                {{ productImage?.filename || "Desconocido" }}
-              </AvatarFallback>
-            </Avatar>
+            <div
+              :class="[
+                'flex justify-center items-center rounded-md relative',
+                { 'ring-4 ring-primary': productImage?.is_primary },
+              ]"
+            >
+              <Avatar class="rounded-md h-auto max-w-full w-full aspect-square">
+                <AvatarImage
+                  :src="productImage?.url ?? 'unknown'"
+                  class="object-cover"
+                />
+              </Avatar>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger as-child>
+                  <Button
+                    class="absolute top-2 right-2"
+                    size="icon"
+                    variant="outline"
+                  >
+                    <EllipsisVerticalIcon class="size-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem>
+                    <SquareMousePointerIcon class="size-4 mr-2" />
+                    Convertir en primaria
+                  </DropdownMenuItem>
+                  <DropdownMenuItem class="text-red-500">
+                    <TrashIcon class="size-4 mr-2" />
+                    Eliminar
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
         </div>
       </div>
