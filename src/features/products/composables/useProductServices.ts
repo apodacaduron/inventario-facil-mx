@@ -59,6 +59,27 @@ export function useProductServices() {
     return await productQuery;
   }
 
+  async function loadProductImagesList(options: LoadListOptions & { orgId: string }) {
+    if (!options.orgId)
+      throw new Error("Organization is required to get product list");
+
+    const [from, to] = serviceHelpers.getPaginationRange(options?.offset);
+
+    let productQuery = supabase
+      .from("product_images")
+      .select("*")
+      .eq("org_id", options.orgId)
+      .range(from, to);
+
+    if (options?.search) {
+      productQuery = productQuery.ilike("name", `%${options.search}%`);
+    }
+
+    serviceHelpers.appendFiltersToQuery(productQuery, options);
+
+    return await productQuery;
+  }
+
   async function loadPublicList(options: LoadListOptions & { orgId: string }) {
     if (!options.orgId)
       throw new Error("Organization is required to get product list");
@@ -187,5 +208,6 @@ export function useProductServices() {
     getProductsInStockCount,
     getMostSoldProducts,
     loadProductStockHistory,
+    loadProductImagesList,
   };
 }
