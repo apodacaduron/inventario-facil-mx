@@ -405,72 +405,74 @@ watchEffect(() => {
               <TableCell class="text-center">
                 {{ currencyFormatter.parse(product.retail_price) ?? "-" }}
               </TableCell>
-              <TableCell class="text-center flex justify-center gap-2">
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger as-child>
-                      <Button
-                        size="icon"
-                        variant="outline"
-                        @click="openUpdateProductSidebar(product)"
-                      >
-                        <PencilIcon class="w-4 h-4" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Editar producto</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger as-child>
-                      <Button
-                        size="icon"
-                        variant="outline"
-                        @click="openProductImagesSidebar(product)"
-                      >
-                        <ImageIcon class="w-4 h-4" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Imágenes de producto</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger as-child>
-                      <Button
-                        size="icon"
-                        variant="outline"
-                        @click="openAddStockDialog(product)"
-                      >
-                        <InboxArrowDownIcon class="w-4 h-4" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Actualizar stock</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger as-child>
-                      <Button
-                        size="icon"
-                        variant="outline"
-                        class="text-red-500 dark:text-red-500"
-                        @click="openDeleteProductDialog(product)"
-                      >
-                        <TrashIcon class="w-4 h-4" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Eliminar producto</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+              <TableCell class="text-center">
+                <div class="flex justify-center gap-2">
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger as-child>
+                        <Button
+                          size="icon"
+                          variant="outline"
+                          @click="openUpdateProductSidebar(product)"
+                        >
+                          <PencilIcon class="w-4 h-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Editar producto</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger as-child>
+                        <Button
+                          size="icon"
+                          variant="outline"
+                          @click="openProductImagesSidebar(product)"
+                        >
+                          <ImageIcon class="w-4 h-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Imágenes de producto</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger as-child>
+                        <Button
+                          size="icon"
+                          variant="outline"
+                          @click="openAddStockDialog(product)"
+                        >
+                          <InboxArrowDownIcon class="w-4 h-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Actualizar stock</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger as-child>
+                        <Button
+                          size="icon"
+                          variant="outline"
+                          class="text-red-500 dark:text-red-500"
+                          @click="openDeleteProductDialog(product)"
+                        >
+                          <TrashIcon class="w-4 h-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Eliminar producto</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
               </TableCell>
             </TableRow>
           </template>

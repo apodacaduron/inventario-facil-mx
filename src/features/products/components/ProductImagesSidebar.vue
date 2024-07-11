@@ -71,10 +71,6 @@ const updatePrimaryImageMutation = useMutation({
   mutationFn: async (productImage: ProductImage | null) => {
     if (!productImage)
       throw new Error("Product image is required to update primary image");
-    if (!productImage.bucket_path)
-      throw new Error(
-        "Product image bucket path is required to update primary image"
-      );
     if (!props.product?.id)
       throw new Error("Product id is required to update primary image");
 
