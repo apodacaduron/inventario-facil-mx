@@ -32,19 +32,6 @@ export const SALE_STATUS = ['in_progress', 'completed', 'cancelled'] as const;
 export type SaleProductList = Sale['i_sale_products'];
 export type SaleProduct = Sale['i_sale_products'][number];
 
-export const saleServicesTypeguards = {
-  isCreateSale(maybeSale: CreateSale | UpdateSale): maybeSale is CreateSale {
-    return (
-      !('sale_id' in maybeSale && maybeSale.sale_id) &&
-      'sale_date' in maybeSale &&
-      'status' in maybeSale
-    );
-  },
-  isUpdateSale(maybeSale: CreateSale | UpdateSale): maybeSale is UpdateSale {
-    return !this.isCreateSale(maybeSale);
-  },
-};
-
 export function useSaleServices() {
   const serviceHelpers = useServiceHelpers();
 

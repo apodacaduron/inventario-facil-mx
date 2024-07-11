@@ -23,24 +23,6 @@ export type CreateProductImage = Omit<
 >;
 export type UpdateProductImage = Partial<CreateProductImage>
 
-export const productServicesTypeguards = {
-  isCreateProduct(
-    maybeProduct: CreateProduct | UpdateProduct
-  ): maybeProduct is CreateProduct {
-    return (
-      !("product_id" in maybeProduct && maybeProduct.product_id) &&
-      "name" in maybeProduct &&
-      "description" in maybeProduct &&
-      "current_stock" in maybeProduct
-    );
-  },
-  isUpdateProduct(
-    maybeProduct: CreateProduct | UpdateProduct
-  ): maybeProduct is UpdateProduct {
-    return !this.isCreateProduct(maybeProduct);
-  },
-};
-
 export function useProductServices() {
   const serviceHelpers = useServiceHelpers();
   const assetServices = useAssetServices();
