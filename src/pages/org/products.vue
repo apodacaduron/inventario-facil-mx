@@ -5,6 +5,7 @@ import {
   DeleteProductDialog,
   Product,
   ProductImageDialog,
+  ProductImagePreviewDialog,
   ProductImagesSidebar,
   ProductStockHistorySidebar,
   ShareStockDialog,
@@ -535,6 +536,11 @@ watchEffect(() => {
       </FeedbackCard>
     </div>
 
+    <ProductImagePreviewDialog
+      :layerManager="layerManager"
+      :open="layerManager.currentLayer.value?.id === 'product-image-preview'"
+      @update:open="(open) => open === false && layerManager.closeLayer()"
+    />
     <DeleteProductImageDialog
       :layerManager="layerManager"
       :open="layerManager.currentLayer.value?.id === 'delete-product-image'"

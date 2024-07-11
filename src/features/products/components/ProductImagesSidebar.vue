@@ -174,6 +174,11 @@ const maxFiles = toRef(() => {
               >
                 <Avatar
                   class="rounded-md h-auto max-w-full w-full aspect-square"
+                  @click="
+                    layerManager.openLayer('product-image-preview', {
+                      imageUrl: productImage?.url,
+                    })
+                  "
                 >
                   <AvatarImage
                     :src="productImage?.url ?? 'unknown'"
