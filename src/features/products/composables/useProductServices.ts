@@ -1,6 +1,7 @@
 import { supabase } from "@/config/supabase";
 import { LoadListOptions, useServiceHelpers } from "@/features/global";
 import { Tables } from "../../../../types_db";
+import { useAssetServices } from "@/features/assets";
 
 export type CreateProduct = {
   name: Product["name"];
@@ -10,33 +11,21 @@ export type CreateProduct = {
   unit_price: Product["unit_price"];
   image_url: Product["image_url"];
 };
-export type UpdateProduct = {
-  product_id: Product["id"];
-} & Partial<CreateProduct>;
+export type UpdateProduct = Partial<CreateProduct>;
 export type DeleteProduct = Product["id"];
 
 export type Product = Tables<"i_products">;
-
-export const productServicesTypeguards = {
-  isCreateProduct(
-    maybeProduct: CreateProduct | UpdateProduct
-  ): maybeProduct is CreateProduct {
-    return (
-      !("product_id" in maybeProduct && maybeProduct.product_id) &&
-      "name" in maybeProduct &&
-      "description" in maybeProduct &&
-      "current_stock" in maybeProduct
-    );
-  },
-  isUpdateProduct(
-    maybeProduct: CreateProduct | UpdateProduct
-  ): maybeProduct is UpdateProduct {
-    return !this.isCreateProduct(maybeProduct);
-  },
-};
+export type ProductImage = 
+  Tables<"product_images">;
+export type CreateProductImage = Omit<
+  ProductImage,
+  "id" | "created_at" | "updated_at"
+>;
+export type UpdateProductImage = Partial<CreateProductImage>
 
 export function useProductServices() {
   const serviceHelpers = useServiceHelpers();
+  const assetServices = useAssetServices();
 
   async function loadList(options: LoadListOptions & { orgId: string }) {
     if (!options.orgId)
@@ -46,6 +35,29 @@ export function useProductServices() {
 
     let productQuery = supabase
       .from("i_products")
+      .select("*")
+      .eq("org_id", options.orgId)
+      .range(from, to);
+
+    if (options?.search) {
+      productQuery = productQuery.ilike("name", `%${options.search}%`);
+    }
+
+    serviceHelpers.appendFiltersToQuery(productQuery, options);
+
+    return await productQuery;
+  }
+
+  async function loadProductImagesList(
+    options: LoadListOptions & { orgId: string }
+  ) {
+    if (!options.orgId)
+      throw new Error("Organization is required to get product list");
+
+    const [from, to] = serviceHelpers.getPaginationRange(options?.offset);
+
+    let productQuery = supabase
+      .from("product_images")
       .select("*")
       .eq("org_id", options.orgId)
       .range(from, to);
@@ -80,7 +92,9 @@ export function useProductServices() {
     return await productQuery;
   }
 
-  async function loadProductStockHistory(options: LoadListOptions & { productId: string | undefined }) {
+  async function loadProductStockHistory(
+    options: LoadListOptions & { productId: string | undefined }
+  ) {
     if (!options.productId)
       throw new Error("Product is required to get product stock history");
 
@@ -108,14 +122,13 @@ export function useProductServices() {
     ]);
   }
 
-  async function updateProduct(formValues: UpdateProduct) {
-    const { product_id, ...otherFormValues } = formValues;
+  async function updateProduct(id: string, formValues: UpdateProduct) {
     return await supabase
       .from("i_products")
       .update({
-        ...otherFormValues,
+        ...formValues,
       })
-      .eq("id", product_id);
+      .eq("id", id);
   }
 
   async function deleteProduct(productId: DeleteProduct) {
@@ -177,6 +190,20 @@ export function useProductServices() {
     });
   }
 
+  async function createProductImage(asset: CreateProductImage) {
+    return await supabase.from("product_images").insert(asset);
+  }
+  async function deleteProductImage(data: {id: string, bucketPath: string}) {
+    await assetServices.deleteFile({
+      bucket: 'product-images',
+      path: data.bucketPath
+    })
+    return await supabase.from("product_images").delete().eq("id", data.id);
+  }
+  async function updateProductImage(id: string, productImage: UpdateProductImage) {
+    return await supabase.from('product_images').update(productImage).eq('id', id)
+  }
+
   return {
     loadList,
     loadPublicList,
@@ -187,5 +214,9 @@ export function useProductServices() {
     getProductsInStockCount,
     getMostSoldProducts,
     loadProductStockHistory,
+    loadProductImagesList,
+    createProductImage,
+    deleteProductImage,
+    updateProductImage,
   };
 }

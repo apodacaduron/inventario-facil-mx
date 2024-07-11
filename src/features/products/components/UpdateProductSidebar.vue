@@ -33,7 +33,6 @@ const props = withDefaults(defineProps<UpdateProductSidebarProps>(), {
 });
 
 const initialForm: UpdateProduct = {
-  product_id: "",
   name: "",
   description: "",
   current_stock: null,
@@ -62,7 +61,6 @@ const formSchema = toTypedSchema(
         .positive({ message: "Ingrese un número positivo" })
         .finite()
         .safe(),
-      product_id: z.string().uuid(),
     })
     .refine((data) => data.unit_price < data.retail_price, {
       message: "Precio de venta debe de ser mayor al precio unitario",
@@ -74,12 +72,12 @@ const queryClient = useQueryClient();
 const productServices = useProductServices();
 const updateProductMutation = useMutation({
   mutationFn: async (formValues: UpdateProduct) => {
-    const productId = formValues.product_id;
-    if (!productId) throw new Error("Product id required to perform update");
-    const { error } = await productServices.updateProduct({
-      ...formValues,
-      product_id: productId,
-    });
+    if (!props.product?.id)
+      throw new Error("Product id required to perform update");
+    const { error } = await productServices.updateProduct(
+      props.product?.id,
+      formValues
+    );
     notifyIfHasError(error);
     await queryClient.invalidateQueries({ queryKey: ["products"] });
     openModel.value = false;
@@ -113,7 +111,6 @@ watch(openModel, (nextOpenValue) => {
         name: props.product.name ?? "",
         description: props.product.description ?? "",
         current_stock: props.product.current_stock ?? 0,
-        product_id: props.product.id,
         unit_price: currencyFormatter.parseRaw(props.product.unit_price) ?? 0,
         retail_price:
           currencyFormatter.parseRaw(props.product.retail_price) ?? 0,

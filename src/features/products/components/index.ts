@@ -3,5 +3,7 @@ export { default as UpdateProductSidebar } from "./UpdateProductSidebar.vue";
 export { default as AddStockDialog } from "./AddStockDialog.vue";
 export { default as DeleteProductDialog } from "./DeleteProductDialog.vue";
 export { default as ShareStockDialog } from "./ShareStockDialog.vue";
-export { default as ProductImageDialog } from "./ProductImageDialog.vue";
 export { default as ProductStockHistorySidebar } from "./ProductStockHistorySidebar.vue";
+export { default as ProductImagesSidebar } from "./ProductImagesSidebar.vue";
+export { default as UploadProductImagesSidebar } from "./UploadProductImagesSidebar.vue";
+export { default as ProductImagePreviewDialog } from "./ProductImagePreviewDialog.vue";

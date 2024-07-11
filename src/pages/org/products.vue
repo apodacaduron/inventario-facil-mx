@@ -4,10 +4,12 @@ import {
   CreateProductSidebar,
   DeleteProductDialog,
   Product,
-  ProductImageDialog,
+  ProductImagePreviewDialog,
+  ProductImagesSidebar,
   ProductStockHistorySidebar,
   ShareStockDialog,
   UpdateProductSidebar,
+  UploadProductImagesSidebar,
   useCurrencyFormatter,
 } from "@/features/products";
 import { ref, toRef, watchEffect } from "vue";
@@ -31,18 +33,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
-  TooltipProvider,
-  Tooltip,
-  TooltipTrigger,
-  TooltipContent,
   Badge,
+  DropdownMenuItem,
 } from "@/components/ui";
 import {
   ChevronDownIcon,
   ChevronUpIcon,
   FunnelIcon,
   InboxArrowDownIcon,
-  PencilIcon,
   PlusIcon,
   ShareIcon,
   ShoppingBagIcon,
@@ -51,12 +49,22 @@ import {
 import { refDebounced, useInfiniteScroll, useStorage } from "@vueuse/core";
 import { useOrganizationStore } from "@/stores";
 import { useProductsQuery } from "@/features/products/composables/useProductQueries";
-import { FeedbackCard, useTableOrder, useTableStates } from "@/features/global";
+import {
+  FeedbackCard,
+  useLayerManager,
+  useTableOrder,
+  useTableStates,
+} from "@/features/global";
 import { useRoute } from "vue-router";
-import { HistoryIcon } from "lucide-vue-next";
+import {
+  EditIcon,
+  EllipsisVerticalIcon,
+  HistoryIcon,
+  ImageIcon,
+} from "lucide-vue-next";
+import DeleteProductImageDialog from "@/features/products/components/DeleteProductImageDialog.vue";
 
 const tableRef = ref<HTMLElement | null>(null);
-
 const productSearch = ref("");
 const productSearchDebounced = refDebounced(productSearch, 400);
 const tableFiltersRef = useStorage<{
@@ -70,6 +78,8 @@ const isAddStockDialogOpen = ref(false);
 const isProductImageDialogOpen = ref(false);
 const isProductStockHistorySidebarOpen = ref(false);
 const activeProduct = ref<Product | null>(null);
+
+const layerManager = useLayerManager();
 const productsTableOrder = useTableOrder({
   options: {
     initialOrder: ["created_at", "desc"],
@@ -128,6 +138,11 @@ function openUpdateProductSidebar(product: Product) {
   isUpdateProductSidebarOpen.value = true;
 }
 
+function openProductImagesSidebar(product: Product) {
+  activeProduct.value = product;
+  layerManager.openLayer("product-images");
+}
+
 function openAddStockDialog(product: Product) {
   activeProduct.value = product;
   isAddStockDialogOpen.value = true;
@@ -161,6 +176,7 @@ watchEffect(() => {
   if (isUpdateProductSidebarOpen.value) return;
   if (isProductImageDialogOpen.value) return;
   if (isProductStockHistorySidebarOpen.value) return;
+  if (layerManager.hasAnyLayerOpen) return;
 
   activeProduct.value = null;
 });
@@ -346,9 +362,7 @@ watchEffect(() => {
               <TableCell
                 class="flex items-center p-4 text-foreground whitespace-nowrap w-max"
               >
-                <Avatar
-                  class="cursor-pointer"
-                >
+                <Avatar class="cursor-pointer">
                   <AvatarImage
                     :src="product?.image_url ?? ''"
                     class="object-cover"
@@ -393,56 +407,41 @@ watchEffect(() => {
               <TableCell class="text-center">
                 {{ currencyFormatter.parse(product.retail_price) ?? "-" }}
               </TableCell>
-              <TableCell class="text-center flex justify-center gap-2">
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger as-child>
-                      <Button
-                        size="icon"
-                        variant="outline"
+              <TableCell class="text-center">
+                <div class="flex justify-center gap-2">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger as-child>
+                      <Button size="icon" variant="outline">
+                        <EllipsisVerticalIcon class="size-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      <DropdownMenuItem
                         @click="openUpdateProductSidebar(product)"
                       >
-                        <PencilIcon class="w-4 h-4" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Editar producto</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger as-child>
-                      <Button
-                        size="icon"
-                        variant="outline"
-                        @click="openAddStockDialog(product)"
+                        <EditIcon class="size-4 mr-2" />
+                        Editar producto
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        @click="openProductImagesSidebar(product)"
                       >
-                        <InboxArrowDownIcon class="w-4 h-4" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Actualizar stock</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger as-child>
-                      <Button
-                        size="icon"
-                        variant="outline"
-                        class="text-red-500 dark:text-red-500"
+                        <ImageIcon class="size-4 mr-2" />
+                        Imágenes de producto
+                      </DropdownMenuItem>
+                      <DropdownMenuItem @click="openAddStockDialog(product)">
+                        <InboxArrowDownIcon class="size-4 mr-2" />
+                        Actualizar stock
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        class="text-red-500"
                         @click="openDeleteProductDialog(product)"
                       >
-                        <TrashIcon class="w-4 h-4" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Eliminar producto</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+                        <TrashIcon class="size-4 mr-2" />
+                        Eliminar producto
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
               </TableCell>
             </TableRow>
           </template>
@@ -505,6 +504,28 @@ watchEffect(() => {
       </FeedbackCard>
     </div>
 
+    <ProductImagePreviewDialog
+      :layerManager="layerManager"
+      :open="layerManager.currentLayer.value?.id === 'product-image-preview'"
+      @update:open="(open) => open === false && layerManager.closeLayer()"
+    />
+    <DeleteProductImageDialog
+      :layerManager="layerManager"
+      :open="layerManager.currentLayer.value?.id === 'delete-product-image'"
+      @update:open="(open) => open === false && layerManager.closeLayer()"
+    />
+    <UploadProductImagesSidebar
+      :layerManager="layerManager"
+      :product="activeProduct"
+      :open="layerManager.currentLayer.value?.id === 'upload-product-images'"
+      @update:open="(open) => open === false && layerManager.closeLayer()"
+    />
+    <ProductImagesSidebar
+      :product="activeProduct"
+      :layerManager="layerManager"
+      :open="layerManager.currentLayer.value?.id === 'product-images'"
+      @update:open="(open) => open === false && layerManager.closeLayer()"
+    />
     <DeleteProductDialog
       v-model:open="isDeleteProductDialogOpen"
       :product="activeProduct"
@@ -521,10 +542,6 @@ watchEffect(() => {
     />
     <AddStockDialog
       v-model:open="isAddStockDialogOpen"
-      :product="activeProduct"
-    />
-    <ProductImageDialog
-      v-model:open="isProductImageDialogOpen"
       :product="activeProduct"
     />
   </div>
