@@ -61,7 +61,6 @@ const formSchema = toTypedSchema(
         .positive({ message: "Ingrese un número positivo" })
         .finite()
         .safe(),
-      product_id: z.string().uuid(),
     })
     .refine((data) => data.unit_price < data.retail_price, {
       message: "Precio de venta debe de ser mayor al precio unitario",
