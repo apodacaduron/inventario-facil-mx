@@ -4,7 +4,6 @@ import {
   CreateProductSidebar,
   DeleteProductDialog,
   Product,
-  ProductImageDialog,
   ProductImagePreviewDialog,
   ProductImagesSidebar,
   ProductStockHistorySidebar,
@@ -34,18 +33,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
-  TooltipProvider,
-  Tooltip,
-  TooltipTrigger,
-  TooltipContent,
   Badge,
+  DropdownMenuItem,
 } from "@/components/ui";
 import {
   ChevronDownIcon,
   ChevronUpIcon,
   FunnelIcon,
   InboxArrowDownIcon,
-  PencilIcon,
   PlusIcon,
   ShareIcon,
   ShoppingBagIcon,
@@ -61,7 +56,12 @@ import {
   useTableStates,
 } from "@/features/global";
 import { useRoute } from "vue-router";
-import { HistoryIcon, ImageIcon } from "lucide-vue-next";
+import {
+  EditIcon,
+  EllipsisVerticalIcon,
+  HistoryIcon,
+  ImageIcon,
+} from "lucide-vue-next";
 import DeleteProductImageDialog from "@/features/products/components/DeleteProductImageDialog.vue";
 
 const tableRef = ref<HTMLElement | null>(null);
@@ -176,6 +176,7 @@ watchEffect(() => {
   if (isUpdateProductSidebarOpen.value) return;
   if (isProductImageDialogOpen.value) return;
   if (isProductStockHistorySidebarOpen.value) return;
+  if (layerManager.hasAnyLayerOpen) return;
 
   activeProduct.value = null;
 });
@@ -408,71 +409,38 @@ watchEffect(() => {
               </TableCell>
               <TableCell class="text-center">
                 <div class="flex justify-center gap-2">
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger as-child>
-                        <Button
-                          size="icon"
-                          variant="outline"
-                          @click="openUpdateProductSidebar(product)"
-                        >
-                          <PencilIcon class="w-4 h-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Editar producto</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger as-child>
-                        <Button
-                          size="icon"
-                          variant="outline"
-                          @click="openProductImagesSidebar(product)"
-                        >
-                          <ImageIcon class="w-4 h-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Imágenes de producto</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger as-child>
-                        <Button
-                          size="icon"
-                          variant="outline"
-                          @click="openAddStockDialog(product)"
-                        >
-                          <InboxArrowDownIcon class="w-4 h-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Actualizar stock</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger as-child>
-                        <Button
-                          size="icon"
-                          variant="outline"
-                          class="text-red-500 dark:text-red-500"
-                          @click="openDeleteProductDialog(product)"
-                        >
-                          <TrashIcon class="w-4 h-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Eliminar producto</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger as-child>
+                      <Button size="icon" variant="outline">
+                        <EllipsisVerticalIcon class="size-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      <DropdownMenuItem
+                        @click="openUpdateProductSidebar(product)"
+                      >
+                        <EditIcon class="size-4 mr-2" />
+                        Editar producto
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        @click="openProductImagesSidebar(product)"
+                      >
+                        <ImageIcon class="size-4 mr-2" />
+                        Imágenes de producto
+                      </DropdownMenuItem>
+                      <DropdownMenuItem @click="openAddStockDialog(product)">
+                        <InboxArrowDownIcon class="size-4 mr-2" />
+                        Actualizar stock
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        class="text-red-500"
+                        @click="openDeleteProductDialog(product)"
+                      >
+                        <TrashIcon class="size-4 mr-2" />
+                        Eliminar producto
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </TableCell>
             </TableRow>
@@ -574,10 +542,6 @@ watchEffect(() => {
     />
     <AddStockDialog
       v-model:open="isAddStockDialogOpen"
-      :product="activeProduct"
-    />
-    <ProductImageDialog
-      v-model:open="isProductImageDialogOpen"
       :product="activeProduct"
     />
   </div>
