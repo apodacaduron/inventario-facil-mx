@@ -1,3 +1,7 @@
+<script setup lang="ts">
+import { SUPPORT_EMAIL } from "@/config/constants";
+</script>
+
 <template>
   <div class="container my-12">
     <h1 class="text-4xl">Política de Privacidad</h1>
@@ -114,7 +118,7 @@
     </p>
     <p class="mt-2 mb-6">
       <strong>inventariofacil.mx</strong><br />
-      Correo Electrónico: inventariofacilmx@gmail.com
+      Correo Electrónico: {{ SUPPORT_EMAIL }}
     </p>
   </div>
 </template>

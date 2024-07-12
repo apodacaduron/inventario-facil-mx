@@ -39,12 +39,12 @@ import { refDebounced, useInfiniteScroll } from "@vueuse/core";
 import { useOrganizationStore } from "@/stores";
 import { useRoute } from "vue-router";
 import { useCurrencyFormatter } from "@/features/products";
+import { WHATSAPP_URL } from "@/config/constants";
 
 const LOCALE = {
   trusted: "Confiable",
   not_trusted: "No confiable",
 };
-const WHATSAPP_URL = import.meta.env.VITE_WHATSAPP_URL;
 const tableRef = ref<HTMLElement | null>(null);
 const customerSearch = ref("");
 const customerSearchDebounced = refDebounced(customerSearch, 400);
@@ -111,10 +111,7 @@ watchEffect(() => {
 </script>
 
 <template>
-  <div
-    ref="tableRef"
-    class="py-6 mt-[71px] md:px-6 h-[calc(100vh-71px)] overflow-y-auto"
-  >
+  <div ref="tableRef" class="py-6 md:px-6 h-[calc(100vh-71px)] overflow-y-auto">
     <div class="flex justify-between flex-col md:flex-row mx-4 md:mx-0">
       <div class="mb-6">
         <h2

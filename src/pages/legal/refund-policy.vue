@@ -1,3 +1,7 @@
+<script setup lang="ts">
+import { SUPPORT_EMAIL } from "@/config/constants";
+</script>
+
 <template>
   <div class="container my-12">
     <h1 class="text-4xl">Política de Reembolsos</h1>
@@ -23,9 +27,7 @@
     <ul class="mb-6">
       <li>
         Envíe un correo electrónico a
-        <a href="mailto:inventariofacilmx@gmail.com"
-          >inventariofacilmx@gmail.com</a
-        >
+        <a :href="`mailto:${SUPPORT_EMAIL}`">{{ SUPPORT_EMAIL }}</a>
         con el asunto "Solicitud de Reembolso".
       </li>
       <li>
@@ -60,9 +62,7 @@
     <p class="mt-2 mb-6">
       <strong>InventarioFácil.mx</strong><br />
       Correo Electrónico:
-      <a href="mailto:inventariofacilmx@gmail.com"
-        >inventariofacilmx@gmail.com</a
-      >
+      <a :href="`mailto:${SUPPORT_EMAIL}`">{{ SUPPORT_EMAIL }}</a>
     </p>
 
     <h2 class="text-xl">5. Cambios en la Política de Reembolsos</h2>
