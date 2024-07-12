@@ -17,6 +17,7 @@ import {
 import { FeedbackCard, notifyIfHasError } from "@/features/global";
 import { ref } from "vue";
 import { analytics } from "@/config/analytics";
+import { LockIcon } from "lucide-vue-next";
 
 const isSignUpSuccessful = ref(false);
 
@@ -30,7 +31,8 @@ async function signUp(formValues: {
   password: string;
 }) {
   const response = await supabase.auth.signUp({
-    ...formValues,
+    email: formValues.email,
+    password: formValues.password,
     options: {
       data: {
         full_name: formValues.full_name,
@@ -82,7 +84,7 @@ const onSubmit = handleSubmit(async (formValues) => {
 <template>
   <AuthLayout>
     <FeedbackCard class="mt-8" v-if="isSignUpSuccessful">
-      <template #icon><LockClosedIcon class="w-4 h-4" /> </template>
+      <template #icon><LockIcon class="size-4" /> </template>
       <template #title> Enviamos un correo para confirmar tu cuenta </template>
       <template #description>
         Revisa el correo que nos proporcionaste y haz click en el link para

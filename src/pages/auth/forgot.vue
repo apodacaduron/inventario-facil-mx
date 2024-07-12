@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { supabase } from "@/config/supabase";
 import { AuthLayout } from "@/features/auth";
-import { Input, Button, useToast } from "@/components/ui";
+import { Input, Button } from "@/components/ui";
 import { useMutation } from "@tanstack/vue-query";
 import { useRouter } from "vue-router";
 import z from "zod";
@@ -15,13 +15,12 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { ref } from "vue";
-import { FeedbackCard } from "@/features/global";
-import { LockClosedIcon } from "@heroicons/vue/24/outline";
+import { FeedbackCard, notifyIfHasError } from "@/features/global";
 import { analytics } from "@/config/analytics";
+import { LockIcon } from "lucide-vue-next";
 
 const isResetPasswordSuccessful = ref(false);
 
-const { toast } = useToast();
 const router = useRouter();
 const resetPasswordForEmailMutation = useMutation({
   mutationFn: resetPasswordForEmail,
@@ -46,17 +45,7 @@ const { handleSubmit } = useForm({
 
 const onSubmit = handleSubmit(async (formValues) => {
   const response = await resetPasswordForEmailMutation.mutateAsync(formValues);
-  const hasError = Boolean(response?.error);
-  if (hasError) {
-    toast({
-      title: "Uh oh! Algo salió mal.",
-      description:
-        response?.error?.message ?? "Hubo un problema con tu solicitud.",
-      variant: "destructive",
-    });
-    return;
-  }
-
+  notifyIfHasError(response.error);
   analytics.event("forgot-password", {
     event_category: "authentication",
     email: formValues.email,
@@ -71,7 +60,7 @@ const onSubmit = handleSubmit(async (formValues) => {
 <template>
   <AuthLayout>
     <FeedbackCard class="mt-8" v-if="isResetPasswordSuccessful">
-      <template #icon><LockClosedIcon class="w-4 h-4" /> </template>
+      <template #icon><LockIcon class="w-4 h-4" /> </template>
       <template #title>
         Enviamos un correo para restablecer tu contraseña
       </template>
