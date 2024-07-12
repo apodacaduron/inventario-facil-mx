@@ -18,7 +18,8 @@ import { useCurrencyFormatter } from "@/features/products";
 import { useRouter } from "vue-router";
 import { ref } from "vue";
 import { GoPremiumSidebar } from "@/features/organizations";
-import { SUPPORT_EMAIL } from "@/config/constants";
+import { SUPPORT_EMAIL, SUPPORT_WHATSAPP } from "@/config/constants";
+import { MailIcon, PhoneIcon } from "lucide-vue-next";
 
 const isGoPremiumSidebarOpen = ref(false);
 const router = useRouter();
@@ -221,9 +222,17 @@ function getCardDataFromPlan(plan: Tables<"plans">) {
         <p class="text-muted-foreground">Ponte en contacto con nosotros</p>
       </div>
 
-      <div class="mt-10 mb-14 flex justify-center">
+      <div class="mt-10 mb-14 flex justify-center gap-4">
         <a :href="`mailto:${SUPPORT_EMAIL}`">
-          <Button variant="outline" size="lg">Contactar</Button>
+          <Button variant="outline" size="lg">
+            <MailIcon class="size-4 mr-2" />
+            Contactar</Button
+          >
+        </a>
+        <a :href="SUPPORT_WHATSAPP">
+          <Button variant="outline" size="lg"
+            ><PhoneIcon class="size-4 mr-2" /> Whatsapp</Button
+          >
         </a>
       </div>
     </section>
