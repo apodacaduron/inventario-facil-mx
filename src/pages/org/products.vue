@@ -183,10 +183,7 @@ watchEffect(() => {
 </script>
 
 <template>
-  <div
-    ref="tableRef"
-    class="py-6 mt-[71px] md:px-6 h-[calc(100vh-71px)] overflow-y-auto"
-  >
+  <div ref="tableRef" class="py-6 md:px-6 h-[calc(100vh-71px)] overflow-y-auto">
     <div class="flex justify-between flex-col md:flex-row mx-4 md:mx-0">
       <div class="mb-6">
         <h2

@@ -69,7 +69,7 @@ const yearMonthlySalesData = computed(() => {
 </script>
 
 <template>
-  <div class="py-6 mt-[71px] md:px-6 h-[calc(100vh-71px)] overflow-y-auto">
+  <div class="py-6 md:px-6 h-[calc(100vh-71px)] overflow-y-auto">
     <div class="flex flex-col gap-8 mx-4 md:mx-0 mb-6">
       <div class="flex flex-col gap-5">
         <div class="text-slate-500 dark:text-slate-400 font-semibold">

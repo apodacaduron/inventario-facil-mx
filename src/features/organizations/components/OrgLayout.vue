@@ -27,7 +27,7 @@ import {
   MoonIcon,
   SunIcon,
 } from "@heroicons/vue/24/outline";
-import { CrownIcon, MenuIcon, SettingsIcon } from "lucide-vue-next";
+import { CrownIcon, MenuIcon, PhoneIcon, SettingsIcon } from "lucide-vue-next";
 import GoPremiumSidebar from "./GoPremiumSidebar.vue";
 import { computed } from "vue";
 import {
@@ -40,6 +40,7 @@ import OrganizationSwitcher from "./OrganizationSwitcher.vue";
 import UpdateOrganizationSidebar from "./UpdateOrganizationSidebar.vue";
 import { useLayerManager } from "@/features/global";
 import CreateOrganizationSidebar from "./CreateOrganizationSidebar.vue";
+import { SUPPORT_EMAIL, SUPPORT_WHATSAPP } from "@/config/constants";
 
 const layerManager = useLayerManager();
 const organizationStore = useOrganizationStore();
@@ -152,12 +153,21 @@ const menuList = computed(() => ({
               <SheetFooter class="flex flex-col gap-4">
                 <div class="shrink-0 bg-border h-px w-full" />
                 <a
-                  href="mailto:inventariofacilmx@gmail.com"
+                  :href="`mailto:${SUPPORT_EMAIL}`"
                   class="w-full inline-flex items-center whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground rounded-md h-10 px-3 text-md justify-start"
                   active-class="active-link"
                 >
                   <EnvelopeIcon class="size-5" />
-                  <span class="ms-2">Soporte</span>
+                  <span class="ms-2">Soporte correo</span>
+                </a>
+                <a
+                  :href="SUPPORT_WHATSAPP"
+                  target="_blank"
+                  class="w-full inline-flex items-center whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground rounded-md h-10 px-3 text-md justify-start"
+                  active-class="active-link"
+                >
+                  <PhoneIcon class="size-5" />
+                  <span class="ms-2">Soporte Whatsapp</span>
                 </a>
                 <Button
                   v-if="!organizationStore.isPremium"
@@ -276,12 +286,21 @@ const menuList = computed(() => ({
 
       <div class="w-full flex flex-col gap-4">
         <a
-          href="mailto:inventariofacilmx@gmail.com"
+          :href="`mailto:${SUPPORT_EMAIL}`"
           class="w-full inline-flex items-center whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground rounded-md h-10 px-3 text-md justify-start"
           active-class="active-link"
         >
           <EnvelopeIcon class="size-5" />
-          <span class="ms-2">Soporte</span>
+          <span class="ms-2">Soporte correo</span>
+        </a>
+        <a
+          :href="SUPPORT_WHATSAPP"
+          target="_blank"
+          class="w-full inline-flex items-center whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground rounded-md h-10 px-3 text-md justify-start"
+          active-class="active-link"
+        >
+          <PhoneIcon class="size-5" />
+          <span class="ms-2">Soporte Whatsapp</span>
         </a>
         <Button
           v-if="!organizationStore.isPremium"
@@ -295,6 +314,16 @@ const menuList = computed(() => ({
   </aside>
 
   <div class="sm:ml-64">
+    <div class="mt-[71px]">
+      <div
+        v-if="!organizationStore.isPremium"
+        class="banner"
+        @click="layerManager.openLayer('go-premium')"
+      >
+        <CrownIcon class="size-4" />
+        Obtener premium
+      </div>
+    </div>
     <router-view />
   </div>
 </template>
@@ -302,5 +331,11 @@ const menuList = computed(() => ({
 <style scoped lang="scss">
 .active-link {
   @apply bg-primary text-primary-foreground shadow hover:bg-primary/90;
+}
+.banner {
+  @apply bg-primary text-primary-foreground;
+  @apply flex justify-center items-center gap-2;
+  @apply p-2 select-none cursor-pointer;
+  @apply shadow-sm;
 }
 </style>

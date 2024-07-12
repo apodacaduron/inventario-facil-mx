@@ -61,13 +61,13 @@ import { useRoute } from "vue-router";
 import CustomerPickerSidebar from "@/features/sales/components/CustomerPickerSidebar.vue";
 import { CreateCustomerSidebar, Customer } from "@/features/customers";
 import ProductPickerSidebar from "@/features/sales/components/ProductPickerSidebar.vue";
+import { WHATSAPP_URL } from "@/config/constants";
 
 const LOCALE = {
   in_progress: "En progreso",
   cancelled: "Cancelada",
   completed: "Completada",
 };
-const WHATSAPP_URL = import.meta.env.VITE_WHATSAPP_URL;
 const tableFiltersRef = useStorage<{
   status: NonNullable<Tables<"i_sales">["status"]> | "all";
   period?: "daily" | "weekly" | "monthly";
@@ -192,10 +192,7 @@ watchEffect(() => {
 </script>
 
 <template>
-  <div
-    ref="tableRef"
-    class="py-6 mt-[71px] md:px-6 h-[calc(100vh-71px)] overflow-y-auto"
-  >
+  <div ref="tableRef" class="py-6 md:px-6 h-[calc(100vh-71px)] overflow-y-auto">
     <div class="flex justify-between flex-col md:flex-row mx-4 md:mx-0">
       <div class="mb-6">
         <h2

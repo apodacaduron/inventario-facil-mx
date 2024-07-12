@@ -1,3 +1,7 @@
+<script setup lang="ts">
+import { SUPPORT_EMAIL } from "@/config/constants";
+</script>
+
 <template>
   <div class="container my-12">
     <h1 class="text-4xl">Aviso Legal</h1>
@@ -19,7 +23,7 @@
     </p>
     <p class="mt-2 mb-6">
       <strong>inventariofacil.mx</strong><br />
-      Correo Electrónico: inventariofacilmx@gmail.com<br />
+      Correo Electrónico: {{ SUPPORT_EMAIL }}<br />
       Sitio Web:
       <a href="https://inventariofacil.mx">https://inventariofacil.mx</a>
     </p>
@@ -77,7 +81,7 @@
     </p>
     <p class="mt-2 mb-6">
       <strong>inventariofacil.mx</strong><br />
-      Correo Electrónico: inventariofacilmx@gmail.com
+      Correo Electrónico: {{ SUPPORT_EMAIL }}
     </p>
   </div>
 </template>

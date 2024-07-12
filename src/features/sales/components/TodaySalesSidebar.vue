@@ -25,6 +25,7 @@ import { useCurrencyFormatter } from "@/features/products";
 import { FeedbackCard, useTableStates } from "@/features/global";
 import { FaceFrownIcon } from "@heroicons/vue/24/outline";
 import { useRoute } from "vue-router";
+import { WHATSAPP_URL } from "@/config/constants";
 
 const openModel = defineModel<boolean>("open");
 
@@ -33,7 +34,6 @@ const LOCALE = {
   cancelled: "Cancelada",
   completed: "Completada",
 };
-const WHATSAPP_URL = import.meta.env.VITE_WHATSAPP_URL;
 const route = useRoute();
 const currencyFormatter = useCurrencyFormatter();
 const dashboardDates = useDashboardDates({

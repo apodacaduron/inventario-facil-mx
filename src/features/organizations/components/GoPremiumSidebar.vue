@@ -62,13 +62,16 @@ async function createStripeCheckout() {
       <SheetHeader>
         <SheetTitle>¡Hazte Premium Hoy!</SheetTitle>
         <SheetDescription>
-          Suscríbete ahora para disfrutar de todos los beneficios exclusivos de
-          nuestra membresía premium. Accede a contenido exclusivo, soporte
-          prioritario y mucho más. Haz clic en el botón de abajo para completar
-          tu suscripción a través de Stripe y mejorar tu experiencia al máximo.
+          <ul class="list-disc pl-4">
+            <li>Hasta 5000 clientes y 5000 productos</li>
+            <li>Hasta 3 organizaciones</li>
+            <li>Página pública para compartir inventario con clientes</li>
+            <li>Estadísticas avanzadas</li>
+            <li>Monedero electrónico para tus clientes</li>
+          </ul>
         </SheetDescription>
       </SheetHeader>
-      <SheetFooter class="flex flex-row gap-2">
+      <SheetFooter class="flex flex-row gap-2 mt-4">
         <Button
           :disabled="isSubscribeButtonDisabled"
           @click="createStripeCheckoutMutation.mutate()"

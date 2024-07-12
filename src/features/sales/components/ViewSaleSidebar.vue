@@ -18,6 +18,7 @@ import {
 } from "@/components/ui";
 import { Sale } from "../composables";
 import { useCurrencyFormatter } from "@/features/products";
+import { WHATSAPP_URL } from "@/config/constants";
 
 type ViewSaleSidebarProps = {
   sale?: Sale | null;
@@ -33,8 +34,6 @@ const LOCALE = {
   cancelled: "Cancelada",
   completed: "Completada",
 };
-const WHATSAPP_URL = import.meta.env.VITE_WHATSAPP_URL;
-
 const currencyFormatter = useCurrencyFormatter();
 </script>
 
