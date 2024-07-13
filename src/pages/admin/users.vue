@@ -91,7 +91,12 @@ useInfiniteScroll(
                 </template>
               </span>
             </TableHead>
+            <TableHead class="text-center"
+              >Cantidad de Organizaciones</TableHead
+            >
             <TableHead class="text-center">ID</TableHead>
+            <TableHead class="text-center">Stripe ID</TableHead>
+            <TableHead class="text-center">Creado en</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -119,9 +124,29 @@ useInfiniteScroll(
                   <div class="text-base font-semibold">
                     {{ user.full_name ?? "-" }}
                   </div>
+                  <div v-if="user.email" class="font-normal text-slate-500">
+                    {{ user.email }}
+                  </div>
                 </div>
               </TableCell>
-              <TableCell class="text-center">{{ user.id || "-" }}</TableCell>
+              <TableCell class="text-center">{{
+                user.current_organizations ?? "-"
+              }}</TableCell>
+              <TableCell class="text-center">{{ user.id ?? "-" }}</TableCell>
+              <TableCell class="text-center">{{
+                user.stripe_customer_id ?? "-"
+              }}</TableCell>
+              <TableCell class="text-center">{{
+                user.created_at
+                  ? new Date(user.created_at).toLocaleDateString("es-MX", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })
+                  : "-"
+              }}</TableCell>
             </TableRow>
           </template>
         </TableBody>
