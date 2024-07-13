@@ -359,7 +359,14 @@ watchEffect(() => {
               <TableCell
                 class="flex items-center p-4 text-foreground whitespace-nowrap w-max"
               >
-                <Avatar class="cursor-pointer">
+                <Avatar
+                  class="cursor-pointer"
+                  @click="
+                    layerManager.openLayer('product-image-preview', {
+                      imageUrl: product?.image_url,
+                    })
+                  "
+                >
                   <AvatarImage
                     :src="product?.image_url ?? ''"
                     class="object-cover"
