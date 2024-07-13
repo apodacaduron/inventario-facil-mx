@@ -1,4 +1,14 @@
 <script setup lang="ts">
+import {
+  Button,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui";
+import { SUPPORT_EMAIL, SUPPORT_WHATSAPP } from "@/config/constants";
+import { HelpCircleIcon, MailIcon, PhoneIcon } from "lucide-vue-next";
+
 const componentName = "auth-layout";
 </script>
 
@@ -12,6 +22,27 @@ const componentName = "auth-layout";
         >
       </router-link>
       <slot />
+      <DropdownMenu>
+        <DropdownMenuTrigger as-child>
+          <Button size="icon" variant="outline">
+            <HelpCircleIcon class="size-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <a :href="`mailto:${SUPPORT_EMAIL}`">
+            <DropdownMenuItem>
+              <MailIcon class="size-4 mr-3" />
+              <span>Soporte correo</span>
+            </DropdownMenuItem>
+          </a>
+          <a :href="SUPPORT_WHATSAPP" target="_blank">
+            <DropdownMenuItem>
+              <PhoneIcon class="size-4 mr-3" />
+              <span>Soporte Whatsapp</span>
+            </DropdownMenuItem>
+          </a>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </main>
     <aside :class="`${componentName}__aside`">
       <img :class="`${componentName}__bg`" src="/auth-bg.jpg" />
