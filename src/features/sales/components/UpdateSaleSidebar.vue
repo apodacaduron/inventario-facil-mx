@@ -154,7 +154,7 @@ const formSchema = toTypedSchema(
               .safe(),
             unit_price: z.coerce
               .number({ message: "Ingrese un número válido" })
-              .positive({ message: "Ingrese un número positivo" })
+              .nonnegative({ message: "Ingrese un número positivo" })
               .finite()
               .safe(),
             qty: z.coerce
