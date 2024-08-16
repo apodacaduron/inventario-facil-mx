@@ -90,31 +90,6 @@ const periodString = toRef(() => {
     <router-link :to="`/org/${route.params.orgId}/sales`">
       <Card>
         <CardHeader class="flex relative pb-2">
-          <CardTitle class="text-sm font-medium">
-            Cantidad de ventas
-          </CardTitle>
-          <Avatar
-            class="absolute top-2 right-4 bg-primary text-primary-foreground"
-          >
-            <AvatarFallback>
-              <ShoppingCartIcon class="size-4" />
-            </AvatarFallback>
-          </Avatar>
-        </CardHeader>
-        <CardContent>
-          <div class="text-2xl font-bold">
-            <template v-if="isDefined(salesCountQuery.data.value)">
-              {{ salesCountQuery.data.value }} / {{ periodString }}
-            </template>
-            <Skeleton class="h-[32px] w-[64px]" v-else :count="1" />
-          </div>
-        </CardContent>
-      </Card>
-    </router-link>
-
-    <router-link :to="`/org/${route.params.orgId}/sales`">
-      <Card>
-        <CardHeader class="flex relative pb-2">
           <CardTitle class="text-sm font-medium"> Total de ventas </CardTitle>
           <Avatar
             class="absolute top-2 right-4 bg-primary text-primary-foreground"
@@ -151,6 +126,31 @@ const periodString = toRef(() => {
             <template v-if="isDefined(salesTotalProfitQuery.data.value)"
               >{{ currencyFormatter.parse(salesTotalProfitQuery.data.value) }} /
               {{ periodString }}
+            </template>
+            <Skeleton class="h-[32px] w-[64px]" v-else :count="1" />
+          </div>
+        </CardContent>
+      </Card>
+    </router-link>
+
+    <router-link :to="`/org/${route.params.orgId}/sales`">
+      <Card>
+        <CardHeader class="flex relative pb-2">
+          <CardTitle class="text-sm font-medium">
+            Cantidad de ventas
+          </CardTitle>
+          <Avatar
+            class="absolute top-2 right-4 bg-primary text-primary-foreground"
+          >
+            <AvatarFallback>
+              <ShoppingCartIcon class="size-4" />
+            </AvatarFallback>
+          </Avatar>
+        </CardHeader>
+        <CardContent>
+          <div class="text-2xl font-bold">
+            <template v-if="isDefined(salesCountQuery.data.value)">
+              {{ salesCountQuery.data.value }} / {{ periodString }}
             </template>
             <Skeleton class="h-[32px] w-[64px]" v-else :count="1" />
           </div>
