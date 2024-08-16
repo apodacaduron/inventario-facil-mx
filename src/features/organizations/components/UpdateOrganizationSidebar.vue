@@ -227,21 +227,22 @@ watchEffect(() => {
           </FormField>
 
           <Separator class="my-6" />
-          <h4 class="text-base">Límite de stock bajo</h4>
-          <p class="text-[0.8rem] text-muted-foreground">
-            Especifica la cantidad mínima de este producto antes de que se dispare
-            una alerta de stock bajo.
-          </p>
-          <div class="space-y-2 py-2 pb-4">
-            <div class="space-y-1">
-              <Button type="button" :key="index" v-for="(color, index) in primaryColors" variant="ghost" class="px-2"
-                @click="themeColor = color">
-                <CheckIcon v-if="color === themeColor" class="size-4 absolute" />
-                <div class="size-6 rounded-full" :style="{ backgroundColor: `hsl(${color})` }" />
-              </Button>
-              <Button variant="ghost" type="button" @click="themeColor = null">
-                Reiniciar tema
-              </Button>
+          <div>
+            <h4 class="text-base">Actualizar tema de organización</h4>
+            <p class="text-[0.8rem] text-muted-foreground">
+              Refresca los colores de tu organización actualizando el tema. Cambia el color primario de los componentes para personalizar tu experiencia visual.
+            </p>
+            <div class="space-y-2 py-2 pb-4">
+              <div class="space-y-1">
+                <Button type="button" :key="index" v-for="(color, index) in primaryColors" variant="ghost" class="px-2"
+                  @click="themeColor = color">
+                  <CheckIcon v-if="color === themeColor" class="size-4 absolute" />
+                  <div class="size-6 rounded-full" :style="{ backgroundColor: `hsl(${color})` }" />
+                </Button>
+                <Button variant="ghost" type="button" @click="themeColor = null">
+                  Reiniciar tema
+                </Button>
+              </div>
             </div>
           </div>
         </template>
