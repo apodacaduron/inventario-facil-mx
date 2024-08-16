@@ -23,3 +23,5 @@ export * from "./toast";
 export * from "./number-field";
 export * from "./separator";
 export * from "./chart-area";
+export * from "./collapsible";
+export * from "./accordion";

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { watchEffect } from "vue";
+import { ref, watchEffect } from "vue";
 
 import {
   Button,
@@ -26,7 +26,7 @@ import { z } from "zod";
 import { toTypedSchema } from "@vee-validate/zod";
 import { UpdateOrganization, useOrganizationServices } from "../composables";
 import { useForm } from "vee-validate";
-import { PercentIcon } from "lucide-vue-next";
+import { CheckIcon, PercentIcon } from "lucide-vue-next";
 
 type Props = {
   userOrganization: UserOrganization | null | undefined;
@@ -35,6 +35,31 @@ type Props = {
 const openModel = defineModel<boolean>("open");
 const props = defineProps<Props>();
 
+const primaryColors = [
+  // Cool Colors
+  "197 71% 73%", // Sky Blue
+  "180 62% 50%", // Teal
+  "174 62% 56%", // Turquoise
+  "235 89% 41%", // Indigo
+  "259 67% 85%", // Lavender
+  "282 64% 58%", // Violet
+
+  // Neutral Colors
+  "219 44% 27%", // Navy
+  "6 93% 71%", // Salmon
+
+  // Warm Colors
+  "16 68% 60%", // Coral
+  "328 76% 52%", // Deep Pink
+  "348 83% 47%", // Crimson
+  "350 80% 70%", // Rose
+
+  // Yellowish Colors
+  "74 70% 55%", // Lime Green
+  "45 89% 60%", // Gold
+  "79 61% 43%", // Olive
+  "42 100% 50%", // Amber
+];
 const initialForm: UpdateOrganization = {
   name: "",
 };
@@ -58,6 +83,10 @@ const formSchema = toTypedSchema(
   })
 );
 
+const themeColor = ref(
+  props.userOrganization?.i_organizations?.theme_color ?? null
+);
+
 const [ModalBodyTemplate, ModalBody] = createReusableTemplate();
 const queryClient = useQueryClient();
 const organizationServices = useOrganizationServices();
@@ -68,8 +97,15 @@ const updateOrganizationMutation = useMutation({
 
     await organizationServices.updateOrganization({
       organizationId: props.userOrganization?.org_id,
-      values: formValues,
+      values: {
+        ...formValues,
+        theme_color: themeColor.value,
+      },
     });
+
+    if (themeColor.value === null && props.userOrganization.i_organizations?.theme_color) {
+      window.location.reload()
+    }
 
     await queryClient.invalidateQueries({ queryKey: ["organization"] });
 
@@ -88,6 +124,14 @@ const onSubmit = formInstance.handleSubmit(async (formValues) => {
 
 watchEffect(() => {
   if (!openModel.value) return;
+
+  if (openModel.value) {
+    themeColor.value =
+      props.userOrganization?.i_organizations?.theme_color ?? null;
+  } else {
+    themeColor.value = null;
+  }
+
   formInstance.setValues({
     name: props.userOrganization?.i_organizations?.name ?? "",
     cashback_percent:
@@ -112,23 +156,14 @@ watchEffect(() => {
           <FormItem v-auto-animate>
             <FormLabel>Nombre de organización</FormLabel>
             <FormControl>
-              <Input
-                type="text"
-                placeholder="Acme Inc."
-                v-bind="componentField"
-              />
+              <Input type="text" placeholder="Acme Inc." v-bind="componentField" />
             </FormControl>
             <FormMessage />
           </FormItem>
         </FormField>
-        <template
-          v-if="userOrganization?.i_organizations?.plans?.name === 'premium'"
-        >
+        <template v-if="userOrganization?.i_organizations?.plans?.name === 'premium'">
           <Separator class="my-6" />
-          <FormField
-            v-slot="{ value, handleChange }"
-            name="is_cashback_enabled"
-          >
+          <FormField v-slot="{ value, handleChange }" name="is_cashback_enabled">
             <FormItem class="flex flex-row items-center justify-between">
               <div class="space-y-0.5">
                 <FormLabel class="text-base">
@@ -144,22 +179,12 @@ watchEffect(() => {
             </FormItem>
           </FormField>
           <FormField v-slot="{ componentField }" name="cashback_percent">
-            <FormItem
-              v-if="formInstance.values.is_cashback_enabled"
-              v-auto-animate
-            >
+            <FormItem v-if="formInstance.values.is_cashback_enabled" v-auto-animate>
               <FormLabel>Porcentaje por compra</FormLabel>
               <FormControl>
                 <div class="relative w-full items-center">
-                  <Input
-                    type="text"
-                    placeholder="Ingresa un porcentaje"
-                    class="pr-10"
-                    v-bind="componentField"
-                  />
-                  <span
-                    class="absolute end-0 inset-y-0 flex items-center justify-center px-2"
-                  >
+                  <Input type="text" placeholder="Ingresa un porcentaje" class="pr-10" v-bind="componentField" />
+                  <span class="absolute end-0 inset-y-0 flex items-center justify-center px-2">
                     <PercentIcon class="size-4" />
                   </span>
                 </div>
@@ -167,11 +192,9 @@ watchEffect(() => {
               <FormMessage />
             </FormItem>
           </FormField>
+
           <Separator class="my-6" />
-          <FormField
-            v-slot="{ value, handleChange }"
-            name="is_low_stock_alert_enabled"
-          >
+          <FormField v-slot="{ value, handleChange }" name="is_low_stock_alert_enabled">
             <FormItem class="flex flex-row items-center justify-between">
               <div class="space-y-0.5">
                 <FormLabel class="text-base">
@@ -188,10 +211,7 @@ watchEffect(() => {
             </FormItem>
           </FormField>
           <FormField v-slot="{ componentField }" name="low_stock_threshold">
-            <FormItem
-              v-if="formInstance.values.is_low_stock_alert_enabled"
-              v-auto-animate
-            >
+            <FormItem v-if="formInstance.values.is_low_stock_alert_enabled" v-auto-animate>
               <div class="space-y-0.5">
                 <FormLabel class="text-base"> Límite de stock bajo </FormLabel>
                 <FormDescription>
@@ -200,16 +220,30 @@ watchEffect(() => {
                 </FormDescription>
               </div>
               <FormControl>
-                <Input
-                  type="text"
-                  placeholder="Ingresa un porcentaje"
-                  class="pr-10"
-                  v-bind="componentField"
-                />
+                <Input type="text" placeholder="Ingresa un porcentaje" class="pr-10" v-bind="componentField" />
               </FormControl>
               <FormMessage />
             </FormItem>
           </FormField>
+
+          <Separator class="my-6" />
+          <h4 class="text-base">Límite de stock bajo</h4>
+          <p class="text-[0.8rem] text-muted-foreground">
+            Especifica la cantidad mínima de este producto antes de que se dispare
+            una alerta de stock bajo.
+          </p>
+          <div class="space-y-2 py-2 pb-4">
+            <div class="space-y-1">
+              <Button type="button" :key="index" v-for="(color, index) in primaryColors" variant="ghost" class="px-2"
+                @click="themeColor = color">
+                <CheckIcon v-if="color === themeColor" class="size-4 absolute" />
+                <div class="size-6 rounded-full" :style="{ backgroundColor: `hsl(${color})` }" />
+              </Button>
+              <Button variant="ghost" type="button" @click="themeColor = null">
+                Reiniciar tema
+              </Button>
+            </div>
+          </div>
         </template>
       </div>
     </div>
@@ -231,11 +265,7 @@ watchEffect(() => {
           <Button variant="outline" @click="openModel = false" class="w-full">
             Cancelar
           </Button>
-          <Button
-            :disabled="updateOrganizationMutation.isPending.value"
-            type="submit"
-            class="w-full"
-          >
+          <Button :disabled="updateOrganizationMutation.isPending.value" type="submit" class="w-full">
             Actualizar
           </Button>
         </SheetFooter>
