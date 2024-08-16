@@ -191,7 +191,7 @@ export function useProductServices() {
   }
 
   async function createProductImage(asset: CreateProductImage) {
-    return await supabase.from("product_images").insert(asset);
+    return await supabase.from("product_images").insert(asset).select().single();
   }
   async function deleteProductImage(data: {id: string, bucketPath: string}) {
     await assetServices.deleteFile({

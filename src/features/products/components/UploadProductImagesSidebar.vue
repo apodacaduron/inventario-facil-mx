@@ -72,7 +72,10 @@ const uploadFilesMutation = useMutation({
           path: bucketPath,
         });
 
-        await productServices.createProductImage({
+        const imagesCount = Number(
+          props.layerManager.currentLayer.value.state.imagesCount
+        );
+        const responseCreateProductImage = await productServices.createProductImage({
           filename: nextFileName,
           is_external: false,
           org_id: orgId,
@@ -80,8 +83,20 @@ const uploadFilesMutation = useMutation({
           url: responsePublicUrl.data.publicUrl,
           product_id: productId,
           user_id: authStore.session?.user.id || null,
-          is_primary: false,
+          is_primary: imagesCount === 0,
         });
+
+
+        if (imagesCount === 0) {
+          const productImage = responseCreateProductImage.data
+          if (!productImage) return;
+
+          await productServices.updateProduct(productId, {
+            image_url: productImage.url,
+          });
+
+          await queryClient.invalidateQueries({ queryKey: ["products"] });
+        }
       })
     );
 
@@ -136,7 +151,7 @@ watchEffect(() => {
       <div class="my-6">
         <Dropzone
           v-model:acceptedFiles="acceptedFiles"
-          :supportedExtensions="['.jpg', '.png', '.jpeg']"
+          :supportedExtensions="['.jpg', '.png', '.jpeg', '.webp']"
           :maxFiles="maxFiles"
           :disabled="uploadFilesMutation.isPending.value"
         />
