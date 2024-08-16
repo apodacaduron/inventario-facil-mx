@@ -17,27 +17,27 @@ import {
   AvatarFallback,
   AvatarImage,
   Badge,
-} from "@/components/ui";
-import { Sale, useSalesQuery, useSalesTotalIncomeQuery } from "../composables";
-import { useDashboardDates } from "@/features/dashboard";
-import { toRef } from "vue";
-import { useCurrencyFormatter } from "@/features/products";
-import { FeedbackCard, useTableStates } from "@/features/global";
-import { FaceFrownIcon } from "@heroicons/vue/24/outline";
-import { useRoute } from "vue-router";
-import { WHATSAPP_URL } from "@/config/constants";
+} from '@/components/ui';
+import { Sale, useSalesQuery, useSalesTotalIncomeQuery } from '../composables';
+import { useDashboardDates } from '@/features/dashboard';
+import { toRef } from 'vue';
+import { useCurrencyFormatter } from '@/features/products';
+import { FeedbackCard, useTableStates } from '@/features/global';
+import { FaceFrownIcon } from '@heroicons/vue/24/outline';
+import { useRoute } from 'vue-router';
+import { WHATSAPP_URL } from '@/config/constants';
 
-const openModel = defineModel<boolean>("open");
+const openModel = defineModel<boolean>('open');
 
 const LOCALE = {
-  in_progress: "En progreso",
-  cancelled: "Cancelada",
-  completed: "Completada",
+  in_progress: 'En progreso',
+  cancelled: 'Cancelada',
+  completed: 'Completada',
 };
 const route = useRoute();
 const currencyFormatter = useCurrencyFormatter();
 const dashboardDates = useDashboardDates({
-  period: "daily",
+  period: 'daily',
 });
 
 const salesQuery = useSalesQuery({
@@ -47,54 +47,54 @@ const salesQuery = useSalesQuery({
     filters: toRef(() => {
       return [
         {
-          column: "and(completed_at",
-          operator: "gte",
+          column: 'and(completed_at',
+          operator: 'gte',
           value: dashboardDates.dateRangeFromPeriod.value?.from.toISOString(),
-          filterType: "or",
+          filterType: 'or',
         },
         {
-          column: "completed_at",
-          operator: "lte",
+          column: 'completed_at',
+          operator: 'lte',
           value: `${dashboardDates.dateRangeFromPeriod.value?.to.toISOString()})`,
-          filterType: "or",
+          filterType: 'or',
         },
         {
-          column: "and(created_at",
-          operator: "gte",
+          column: 'and(created_at',
+          operator: 'gte',
           value: dashboardDates.dateRangeFromPeriod.value?.from.toISOString(),
-          filterType: "or",
+          filterType: 'or',
         },
         {
-          column: "created_at",
-          operator: "lte",
+          column: 'created_at',
+          operator: 'lte',
           value: `${dashboardDates.dateRangeFromPeriod.value?.to.toISOString()})`,
-          filterType: "or",
+          filterType: 'or',
         },
       ];
     }),
   },
 });
-const tableLoadingStates = useTableStates(salesQuery, "");
+const tableLoadingStates = useTableStates(salesQuery, '');
 const salesTotalIncomeQuery = useSalesTotalIncomeQuery({
   options: {
     orgId: toRef(() => route.params.orgId.toString()),
     range: toRef(() => ({
-      from: dashboardDates.dateRangeFromPeriod.value?.from.toISOString() ?? "",
-      to: dashboardDates.dateRangeFromPeriod.value?.to.toISOString() ?? "",
+      from: dashboardDates.dateRangeFromPeriod.value?.from.toISOString() ?? '',
+      to: dashboardDates.dateRangeFromPeriod.value?.to.toISOString() ?? '',
     })),
   },
 });
 
-function getBadgeColorFromStatus(status: Sale["status"]) {
+function getBadgeColorFromStatus(status: Sale['status']) {
   switch (status) {
-    case "cancelled":
-      return "destructive";
-    case "in_progress":
-      return "outline";
-    case "completed":
-      return "default";
+    case 'cancelled':
+      return 'destructive';
+    case 'in_progress':
+      return 'outline';
+    case 'completed':
+      return 'default';
     default:
-      return "outline";
+      return 'outline';
   }
 }
 </script>
@@ -183,13 +183,13 @@ function getBadgeColorFromStatus(status: Sale["status"]) {
                     `${
                       sale.i_customers?.name
                         ?.substring(0, 1)
-                        .toLocaleUpperCase() ?? "?"
+                        .toLocaleUpperCase() ?? '?'
                     }`
                   }}</AvatarFallback>
                 </Avatar>
                 <div class="ps-3">
                   <div class="text-base font-semibold">
-                    {{ sale.i_customers?.name ?? sale.customer_name ?? "-" }}
+                    {{ sale.i_customers?.name ?? sale.customer_name ?? '-' }}
                   </div>
                   <div
                     v-if="sale.i_customers?.phone ?? sale.customer_phone"
@@ -240,15 +240,37 @@ function getBadgeColorFromStatus(status: Sale["status"]) {
                 )
               }}</TableCell>
               <TableCell class="text-center">
-                {{
-                  currencyFormatter.parse(
-                    sale.i_sale_products.reduce(
-                      (acc, saleProduct) =>
-                        acc + (saleProduct.qty ?? 0) * (saleProduct.price ?? 0),
-                      0
-                    )
-                  )
-                }}
+                <div v-if="sale.redeem_cashback">
+                  <span
+                    v-if="
+                      sale.cashback_redeemed ||
+                      sale.i_customers?.cashback_balance
+                    "
+                    class="line-through text-muted-foreground mr-2"
+                  >
+                    {{ currencyFormatter.parse(sale.total ?? 0) }}
+                  </span>
+                  <span
+                    v-if="
+                      (sale.total ?? 0) >
+                      ((sale.cashback_redeemed ||
+                        sale.i_customers?.cashback_balance) ??
+                        0)
+                    "
+                    >{{
+                      currencyFormatter.parse(
+                        (sale.total ?? 0) -
+                          ((sale.cashback_redeemed ||
+                            sale.i_customers?.cashback_balance) ??
+                            0)
+                      )
+                    }}</span
+                  >
+                  <span v-else>GRATIS</span>
+                </div>
+                <div v-else>
+                  {{ currencyFormatter.parse(sale.total ?? 0) }}
+                </div>
               </TableCell>
               <TableCell class="text-center">
                 {{ currencyFormatter.parse(sale.shipping_cost) }}
@@ -256,7 +278,7 @@ function getBadgeColorFromStatus(status: Sale["status"]) {
               <TableCell class="text-center">
                 <Badge :variant="getBadgeColorFromStatus(sale.status)"
                   >{{
-                    LOCALE[sale.status ?? "in_progress"]?.toLocaleUpperCase()
+                    LOCALE[sale.status ?? 'in_progress']?.toLocaleUpperCase()
                   }}
                 </Badge>
               </TableCell>
