@@ -23,7 +23,7 @@ export function useOrganizationServices() {
 
     let organizationQuery = supabase
       .from("i_organizations")
-      .select("*")
+      .select("*, plans(*)")
       .eq("id", options.organization_id).single();
 
     return await organizationQuery;

@@ -108,6 +108,8 @@ export const useOrganizationStore = defineStore("organization", () => {
     
     if (themeColor) {
       root?.style.setProperty("--primary", themeColor);
+    } else {
+      root?.style.removeProperty("--primary");
     }
   });
 

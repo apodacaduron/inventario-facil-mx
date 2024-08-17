@@ -2,6 +2,9 @@
 import { ref, watchEffect } from "vue";
 
 import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
   Button,
   FormControl,
   FormDescription,
@@ -26,9 +29,11 @@ import { z } from "zod";
 import { toTypedSchema } from "@vee-validate/zod";
 import { UpdateOrganization, useOrganizationServices } from "../composables";
 import { useForm } from "vee-validate";
-import { CheckIcon, PercentIcon } from "lucide-vue-next";
+import { CheckIcon, ImagePlusIcon, PercentIcon } from "lucide-vue-next";
+import { useLayerManager } from "@/features/global";
 
 type Props = {
+  layerManager: ReturnType<typeof useLayerManager>;
   userOrganization: UserOrganization | null | undefined;
 };
 
@@ -103,8 +108,11 @@ const updateOrganizationMutation = useMutation({
       },
     });
 
-    if (themeColor.value === null && props.userOrganization.i_organizations?.theme_color) {
-      window.location.reload()
+    if (
+      themeColor.value === null &&
+      props.userOrganization.i_organizations?.theme_color
+    ) {
+      window.location.reload();
     }
 
     await queryClient.invalidateQueries({ queryKey: ["organization"] });
@@ -152,18 +160,53 @@ watchEffect(() => {
   <ModalBodyTemplate>
     <div>
       <div class="space-y-4 pt-2 pb-8">
+        <template
+          v-if="userOrganization?.i_organizations?.plans?.name === 'premium'"
+        >
+          <div class="flex justify-center">
+            <Avatar class="w-32 h-32">
+              <AvatarImage
+                :src="userOrganization?.i_organizations?.logo ?? ''"
+                class="object-cover"
+              />
+              <AvatarFallback class="text-2xl">{{
+                `${userOrganization?.i_organizations?.name
+                  ?.substring(0, 1)
+                  .toLocaleUpperCase()}`
+              }}</AvatarFallback>
+            </Avatar>
+          </div>
+          <Button
+            variant="outline"
+            type="button"
+            class="w-full mb-6"
+            @click="layerManager.openLayer('upload-logo')"
+          >
+            <ImagePlusIcon class="size-4 mr-2" /> Subir logo
+          </Button>
+        </template>
+
         <FormField v-slot="{ componentField }" name="name">
           <FormItem v-auto-animate>
             <FormLabel>Nombre de organización</FormLabel>
             <FormControl>
-              <Input type="text" placeholder="Acme Inc." v-bind="componentField" />
+              <Input
+                type="text"
+                placeholder="Acme Inc."
+                v-bind="componentField"
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
         </FormField>
-        <template v-if="userOrganization?.i_organizations?.plans?.name === 'premium'">
+        <template
+          v-if="userOrganization?.i_organizations?.plans?.name === 'premium'"
+        >
           <Separator class="my-6" />
-          <FormField v-slot="{ value, handleChange }" name="is_cashback_enabled">
+          <FormField
+            v-slot="{ value, handleChange }"
+            name="is_cashback_enabled"
+          >
             <FormItem class="flex flex-row items-center justify-between">
               <div class="space-y-0.5">
                 <FormLabel class="text-base">
@@ -179,12 +222,22 @@ watchEffect(() => {
             </FormItem>
           </FormField>
           <FormField v-slot="{ componentField }" name="cashback_percent">
-            <FormItem v-if="formInstance.values.is_cashback_enabled" v-auto-animate>
+            <FormItem
+              v-if="formInstance.values.is_cashback_enabled"
+              v-auto-animate
+            >
               <FormLabel>Porcentaje por compra</FormLabel>
               <FormControl>
                 <div class="relative w-full items-center">
-                  <Input type="text" placeholder="Ingresa un porcentaje" class="pr-10" v-bind="componentField" />
-                  <span class="absolute end-0 inset-y-0 flex items-center justify-center px-2">
+                  <Input
+                    type="text"
+                    placeholder="Ingresa un porcentaje"
+                    class="pr-10"
+                    v-bind="componentField"
+                  />
+                  <span
+                    class="absolute end-0 inset-y-0 flex items-center justify-center px-2"
+                  >
                     <PercentIcon class="size-4" />
                   </span>
                 </div>
@@ -194,7 +247,10 @@ watchEffect(() => {
           </FormField>
 
           <Separator class="my-6" />
-          <FormField v-slot="{ value, handleChange }" name="is_low_stock_alert_enabled">
+          <FormField
+            v-slot="{ value, handleChange }"
+            name="is_low_stock_alert_enabled"
+          >
             <FormItem class="flex flex-row items-center justify-between">
               <div class="space-y-0.5">
                 <FormLabel class="text-base">
@@ -211,7 +267,10 @@ watchEffect(() => {
             </FormItem>
           </FormField>
           <FormField v-slot="{ componentField }" name="low_stock_threshold">
-            <FormItem v-if="formInstance.values.is_low_stock_alert_enabled" v-auto-animate>
+            <FormItem
+              v-if="formInstance.values.is_low_stock_alert_enabled"
+              v-auto-animate
+            >
               <div class="space-y-0.5">
                 <FormLabel class="text-base"> Límite de stock bajo </FormLabel>
                 <FormDescription>
@@ -220,7 +279,12 @@ watchEffect(() => {
                 </FormDescription>
               </div>
               <FormControl>
-                <Input type="text" placeholder="Ingresa un porcentaje" class="pr-10" v-bind="componentField" />
+                <Input
+                  type="text"
+                  placeholder="Ingresa un porcentaje"
+                  class="pr-10"
+                  v-bind="componentField"
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -230,16 +294,34 @@ watchEffect(() => {
           <div>
             <h4 class="text-base">Actualizar tema de organización</h4>
             <p class="text-[0.8rem] text-muted-foreground">
-              Refresca los colores de tu organización actualizando el tema. Cambia el color primario de los componentes para personalizar tu experiencia visual.
+              Refresca los colores de tu organización actualizando el tema.
+              Cambia el color primario de los componentes para personalizar tu
+              experiencia visual.
             </p>
             <div class="space-y-2 py-2 pb-4">
               <div class="space-y-1">
-                <Button type="button" :key="index" v-for="(color, index) in primaryColors" variant="ghost" class="px-2"
-                  @click="themeColor = color">
-                  <CheckIcon v-if="color === themeColor" class="size-4 absolute" />
-                  <div class="size-6 rounded-full" :style="{ backgroundColor: `hsl(${color})` }" />
+                <Button
+                  type="button"
+                  :key="index"
+                  v-for="(color, index) in primaryColors"
+                  variant="ghost"
+                  class="px-2"
+                  @click="themeColor = color"
+                >
+                  <CheckIcon
+                    v-if="color === themeColor"
+                    class="size-4 absolute"
+                  />
+                  <div
+                    class="size-6 rounded-full"
+                    :style="{ backgroundColor: `hsl(${color})` }"
+                  />
                 </Button>
-                <Button variant="ghost" type="button" @click="themeColor = null">
+                <Button
+                  variant="ghost"
+                  type="button"
+                  @click="themeColor = null"
+                >
                   Reiniciar tema
                 </Button>
               </div>
@@ -266,7 +348,11 @@ watchEffect(() => {
           <Button variant="outline" @click="openModel = false" class="w-full">
             Cancelar
           </Button>
-          <Button :disabled="updateOrganizationMutation.isPending.value" type="submit" class="w-full">
+          <Button
+            :disabled="updateOrganizationMutation.isPending.value"
+            type="submit"
+            class="w-full"
+          >
             Actualizar
           </Button>
         </SheetFooter>

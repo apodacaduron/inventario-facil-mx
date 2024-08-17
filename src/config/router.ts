@@ -248,7 +248,7 @@ const navigationGuards = {
         organization_id: to.params.orgId.toString(),
       });
 
-      if (!response.data?.is_public_products_page_enabled) {
+      if (!response.data?.is_public_products_page_enabled || response.data.plans?.name === 'freemium') {
         return "/unauthorized";
       }
     }

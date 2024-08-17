@@ -6,6 +6,7 @@ import {
   Card,
   CardContent,
 } from "@/components/ui";
+import { useOrganizationByIdQuery } from "@/features/organizations";
 import { usePublicPageProductsQuery } from "@/features/products";
 import { toRef } from "vue";
 import { useRoute } from "vue-router";
@@ -14,6 +15,12 @@ const route = useRoute();
 const uuidv4 =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
+const organizationQuery = useOrganizationByIdQuery({
+  options: {
+    enabled: toRef(() => uuidv4.test(route.params.orgId.toString())),
+    organization_id: route.params.orgId.toString(),
+  },
+});
 const productsQuery = usePublicPageProductsQuery({
   options: {
     enabled: toRef(() => uuidv4.test(route.params.orgId.toString())),
@@ -34,9 +41,28 @@ const productsQuery = usePublicPageProductsQuery({
 </script>
 
 <template>
-  <nav class="h-[56px] flex justify-center">
+  <nav class="h-[71px] px-3 py-3 flex justify-center">
     <router-link to="/" class="flex">
+      <Avatar
+        v-if="
+          organizationQuery.data.value?.data?.plans?.name === 'premium' &&
+          organizationQuery.data.value?.data?.logo
+        "
+        class="w-[190px] h-[46px] rounded-sm"
+      >
+        <AvatarImage
+          :src="organizationQuery.data.value?.data?.logo ?? ''"
+          class="object-cover"
+        />
+        <AvatarFallback>
+          <span
+            class="self-center text-xl sm:text-2xl whitespace-nowrap dark:text-white"
+            >inventariofacil.mx
+          </span>
+        </AvatarFallback>
+      </Avatar>
       <span
+        v-else
         class="self-center text-xl sm:text-2xl whitespace-nowrap dark:text-white"
         >inventariofacil.mx
       </span>

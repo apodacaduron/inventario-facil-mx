@@ -41,6 +41,7 @@ import UpdateOrganizationSidebar from "./UpdateOrganizationSidebar.vue";
 import { useLayerManager } from "@/features/global";
 import CreateOrganizationSidebar from "./CreateOrganizationSidebar.vue";
 import { SUPPORT_EMAIL, SUPPORT_WHATSAPP } from "@/config/constants";
+import UploadOrganizationLogoSidebar from "./UploadOrganizationLogoSidebar.vue";
 
 const layerManager = useLayerManager();
 const organizationStore = useOrganizationStore();
@@ -80,6 +81,12 @@ const menuList = computed(() => ({
   />
   <UpdateOrganizationSidebar
     :open="layerManager.currentLayer.value?.id === 'update-organization'"
+    @update:open="(open) => open === false && layerManager.closeLayer()"
+    :layerManager="layerManager"
+    :userOrganization="organizationStore.currentUserOrganization"
+  />
+  <UploadOrganizationLogoSidebar
+    :open="layerManager.currentLayer.value?.id === 'upload-logo'"
     @update:open="(open) => open === false && layerManager.closeLayer()"
     :userOrganization="organizationStore.currentUserOrganization"
   />
@@ -181,7 +188,29 @@ const menuList = computed(() => ({
           </Sheet>
 
           <router-link :to="menuList.dashboard.path" class="flex ms-2 sm:me-6">
+            <Avatar
+              v-if="
+                organizationStore.isPremium &&
+                organizationStore.currentUserOrganization?.i_organizations?.logo
+              "
+              class="w-[190px] h-[46px] rounded-sm"
+            >
+              <AvatarImage
+                :src="
+                  organizationStore.currentUserOrganization?.i_organizations
+                    ?.logo ?? ''
+                "
+                class="object-cover"
+              />
+              <AvatarFallback>
+                <span
+                  class="self-center text-xl sm:text-2xl whitespace-nowrap dark:text-white"
+                  >inventariofacil.mx
+                </span>
+              </AvatarFallback>
+            </Avatar>
             <span
+              v-else
               class="self-center text-xl sm:text-2xl whitespace-nowrap dark:text-white"
               >inventariofacil.mx
             </span>
@@ -332,6 +361,7 @@ const menuList = computed(() => ({
 .active-link {
   @apply bg-primary text-primary-foreground shadow hover:bg-primary/90;
 }
+
 .banner {
   @apply bg-primary text-primary-foreground;
   @apply flex justify-center items-center gap-2;

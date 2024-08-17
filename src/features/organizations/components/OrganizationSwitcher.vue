@@ -3,6 +3,7 @@ import { ref } from "vue";
 import {
   Avatar,
   AvatarFallback,
+  AvatarImage,
   Button,
   Command,
   CommandGroup,
@@ -44,6 +45,13 @@ const organizationStore = useOrganizationStore();
         class="min-w-[160px] w-full justify-between"
       >
         <Avatar class="mr-2 h-5 w-5">
+          <AvatarImage
+            :src="
+              organizationStore.currentUserOrganization?.i_organizations
+                ?.logo ?? ''
+            "
+            class="object-cover"
+          />
           <AvatarFallback>{{
             organizationStore.currentUserOrganization?.i_organizations?.name?.charAt(
               0
@@ -73,6 +81,10 @@ const organizationStore = useOrganizationStore();
               "
             >
               <Avatar class="mr-2 h-5 w-5">
+                <AvatarImage
+                  :src="organization.i_organizations?.logo ?? ''"
+                  class="object-cover"
+                />
                 <AvatarFallback>{{
                   organization.i_organizations?.name?.charAt(0) ?? "?"
                 }}</AvatarFallback>

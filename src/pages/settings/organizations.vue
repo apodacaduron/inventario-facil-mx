@@ -15,18 +15,21 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui";
+import { useLayerManager } from "@/features/global";
 import {
   DeleteOrganizationDialog,
   UpdateOrganizationSidebar,
 } from "@/features/organizations";
+import UploadOrganizationLogoSidebar from "@/features/organizations/components/UploadOrganizationLogoSidebar.vue";
 import { UserOrganization, useAuthStore, useOrganizationStore } from "@/stores";
-import { PaletteIcon, Pencil, TrashIcon } from "lucide-vue-next";
+import { Pencil, TrashIcon } from "lucide-vue-next";
 import { ref, watchEffect } from "vue";
 
 const activeOrganization = ref<UserOrganization | null>(null);
 const isDeleteDialogOpen = ref(false);
 const isUpdateDialogOpen = ref(false);
 
+const layerManager = useLayerManager()
 const organizationStore = useOrganizationStore();
 const authStore = useAuthStore();
 
@@ -150,7 +153,14 @@ watchEffect(() => {
     :userOrganization="activeOrganization"
   />
   <UpdateOrganizationSidebar
-    v-model:open="isUpdateDialogOpen"
+    :open="layerManager.currentLayer.value?.id === 'update-organization'"
+    @update:open="(open) => open === false && layerManager.closeLayer()"
+    :layerManager="layerManager"
+    :userOrganization="activeOrganization"
+  />
+  <UploadOrganizationLogoSidebar
+    :open="layerManager.currentLayer.value?.id === 'upload-logo'"
+    @update:open="(open) => open === false && layerManager.closeLayer()"
     :userOrganization="activeOrganization"
   />
 </template>

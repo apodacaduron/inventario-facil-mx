@@ -80,6 +80,7 @@ export type Database = {
           is_cashback_enabled: boolean | null
           is_low_stock_alert_enabled: boolean | null
           is_public_products_page_enabled: boolean
+          logo: string | null
           low_stock_threshold: number | null
           name: string | null
           plan_id: string | null
@@ -96,6 +97,7 @@ export type Database = {
           is_cashback_enabled?: boolean | null
           is_low_stock_alert_enabled?: boolean | null
           is_public_products_page_enabled?: boolean
+          logo?: string | null
           low_stock_threshold?: number | null
           name?: string | null
           plan_id?: string | null
@@ -112,6 +114,7 @@ export type Database = {
           is_cashback_enabled?: boolean | null
           is_low_stock_alert_enabled?: boolean | null
           is_public_products_page_enabled?: boolean
+          logo?: string | null
           low_stock_threshold?: number | null
           name?: string | null
           plan_id?: string | null
@@ -137,6 +140,7 @@ export type Database = {
       }
       i_products: {
         Row: {
+          category_id: string | null
           created_at: string
           current_stock: number | null
           description: string | null
@@ -150,6 +154,7 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          category_id?: string | null
           created_at?: string
           current_stock?: number | null
           description?: string | null
@@ -163,6 +168,7 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          category_id?: string | null
           created_at?: string
           current_stock?: number | null
           description?: string | null
@@ -176,6 +182,13 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "i_products_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "product_categories"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "i_products_org_id_fkey"
             columns: ["org_id"]
@@ -469,6 +482,48 @@ export type Database = {
         }
         Relationships: []
       }
+      product_categories: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string | null
+          org_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string | null
+          org_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string | null
+          org_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_categories_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "i_organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_categories_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       product_images: {
         Row: {
           bucket_path: string | null
@@ -641,6 +696,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      tutorials: {
+        Row: {
+          created_at: string
+          description: string | null
+          desktop_youtube_url: string | null
+          id: number
+          mobile_youtube_url: string | null
+          title: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          desktop_youtube_url?: string | null
+          id?: number
+          mobile_youtube_url?: string | null
+          title?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          desktop_youtube_url?: string | null
+          id?: number
+          mobile_youtube_url?: string | null
+          title?: string | null
+        }
+        Relationships: []
       }
       user_roles: {
         Row: {
