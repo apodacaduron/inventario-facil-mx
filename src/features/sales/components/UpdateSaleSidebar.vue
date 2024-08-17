@@ -28,7 +28,7 @@ import {
   SelectGroup,
   Separator,
 } from "@/components/ui";
-import { computed, watch } from "vue";
+import { computed, reactive, watch } from "vue";
 import { z } from "zod";
 import {
   SALE_STATUS,
@@ -46,6 +46,7 @@ import { notifyIfHasError, useLayerManager } from "@/features/global";
 import { analytics } from "@/config/analytics";
 import { useRoute } from "vue-router";
 import { useOrganizationStore } from "@/stores";
+import { BanknoteIcon, CreditCard } from "lucide-vue-next";
 
 type Props = {
   layerManager: ReturnType<typeof useLayerManager>;
@@ -96,6 +97,10 @@ const initialForm: UpdateSale = {
   notes: "",
   cancellation_notes: "",
 };
+const paymentMethods = reactive({
+  cash: false,
+  card: false,
+});
 
 const route = useRoute();
 const queryClient = useQueryClient();
@@ -129,6 +134,30 @@ const updateSaleMutation = useMutation({
   },
 });
 
+const calculatedChangeForCustomer = computed(() => {
+  const amountPaidByCustomer =
+    Number(formInstance.values.amount_paid_cash ?? 0) +
+    Number(formInstance.values.amount_paid_card ?? 0);
+  const amountPaidByCustomerToCents =
+    currencyFormatter.toCents(amountPaidByCustomer) ?? 0;
+  const cashbackBalance = props.sale?.i_customers?.cashback_balance ?? 0;
+
+  if (props.sale?.redeem_cashback && sumProductPrices.value <= cashbackBalance) {
+    return 0
+  }
+
+  const amountToBePaid = (() => {
+    if (props.sale?.redeem_cashback) {
+      return sumProductPrices.value - cashbackBalance
+    }
+    return sumProductPrices.value
+  })()
+
+  return currencyFormatter.parse(
+    amountPaidByCustomerToCents - amountToBePaid
+  );
+});
+
 const formSchema = toTypedSchema(
   z.object({
     sale_id: z.string().uuid(),
@@ -140,6 +169,20 @@ const formSchema = toTypedSchema(
       .nonnegative({ message: "Ingrese un número mayor o igual a cero" })
       .finite()
       .safe(),
+    amount_paid_cash: z.coerce
+      .number({ invalid_type_error: "Ingresa un número válido" })
+      .nonnegative({ message: "Ingrese un número mayor o igual a cero" })
+      .finite()
+      .safe()
+      .nullable()
+      .optional(),
+    amount_paid_card: z.coerce
+      .number({ invalid_type_error: "Ingresa un número válido" })
+      .nonnegative({ message: "Ingrese un número mayor o igual a cero" })
+      .finite()
+      .safe()
+      .nullable()
+      .optional(),
     notes: z.string().optional(),
     cancellation_notes: z.string().optional(),
     products: z
@@ -192,11 +235,12 @@ const onSubmit = formInstance.handleSubmit(async (formValues) => {
     ...formProduct,
     price: currencyFormatter.toCents(formProduct.price),
   }));
-  const nextShippingCost = currencyFormatter.toCents(formValues.shipping_cost);
 
   const modifiedFormValues = {
     ...formValues,
-    shipping_cost: nextShippingCost ?? 0,
+    shipping_cost: currencyFormatter.toCents(formValues.shipping_cost) ?? 0,
+    amount_paid_cash: currencyFormatter.toCents(formValues.amount_paid_cash) ?? undefined,
+    amount_paid_card: currencyFormatter.toCents(formValues.amount_paid_card) ?? undefined,
     products: (() => {
       if (formValues.status === "cancelled") {
         return props.sale?.i_sale_products ?? [];
@@ -258,6 +302,9 @@ watch(openModel, (nextOpenValue) => {
       },
       { force: true }
     );
+
+    paymentMethods.card = false;
+    paymentMethods.cash = false;
   }
 });
 </script>
@@ -452,7 +499,95 @@ watch(openModel, (nextOpenValue) => {
           vez que la venta se marque como completada
         </div>
 
-        <SheetFooter class="flex flex-row gap-2">
+        <template
+          v-if="
+            formInstance.values.status === 'completed' &&
+            sumProductPrices > (sale?.i_customers?.cashback_balance ?? 0)
+          "
+        >
+          <div>
+            <div class="text-sm tracking-tight font-medium mb-2">
+              Método de pago (opcional)
+            </div>
+            <div class="flex gap-2">
+              <Button
+                type="button"
+                class="w-full"
+                :variant="paymentMethods.cash ? 'default' : 'outline'"
+                @click="paymentMethods.cash = !paymentMethods.cash"
+              >
+                <BanknoteIcon class="size-4 mr-2" />
+                Efectivo
+              </Button>
+              <Button
+                type="button"
+                class="w-full"
+                :variant="paymentMethods.card ? 'default' : 'outline'"
+                @click="paymentMethods.card = !paymentMethods.card"
+              >
+                <CreditCard class="size-4 mr-2" />
+                Tarjeta
+              </Button>
+            </div>
+            <div class="text-muted-foreground text-xs mt-2">
+              El metodo de pago es meramente informativo no se tomara en cuenta
+              en tu dashboard
+            </div>
+          </div>
+
+          <div v-if="paymentMethods.cash || paymentMethods.card" class="flex gap-2">
+            <FormField
+              v-if="paymentMethods.cash"
+              v-slot="{ componentField }"
+              name="amount_paid_cash"
+            >
+              <FormItem v-auto-animate>
+                <FormLabel>Efectivo</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Cantidad en efectivo"
+                    inputmode="numeric"
+                    v-bind="componentField"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            </FormField>
+
+            <FormField
+              v-if="paymentMethods.card"
+              v-slot="{ componentField }"
+              name="amount_paid_card"
+            >
+              <FormItem v-auto-animate>
+                <FormLabel>Tarjeta</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Cantidad en tarjeta"
+                    inputmode="numeric"
+                    v-bind="componentField"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            </FormField>
+          </div>
+
+          <div v-if="paymentMethods.cash">
+            <label class="text-sm tracking-tight font-medium"
+              >Cambio calculado para cliente</label
+            >
+            <Input
+              class="mt-2"
+              placeholder="Cambio calculado para cliente"
+              readonly
+              :defaultValue="calculatedChangeForCustomer ?? ''"
+              :value="calculatedChangeForCustomer"
+            />
+          </div>
+        </template>
+
+        <SheetFooter class="flex flex-row gap-2 mt-2">
           <Button
             :disabled="updateSaleMutation.isPending.value"
             @click="openModel = false"

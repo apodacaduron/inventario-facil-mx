@@ -299,6 +299,8 @@ export type Database = {
       }
       i_sales: {
         Row: {
+          amount_paid_card: number | null
+          amount_paid_cash: number | null
           cancellation_notes: string | null
           cancelled_at: string | null
           cashback_redeemed: number | null
@@ -321,6 +323,8 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          amount_paid_card?: number | null
+          amount_paid_cash?: number | null
           cancellation_notes?: string | null
           cancelled_at?: string | null
           cashback_redeemed?: number | null
@@ -343,6 +347,8 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          amount_paid_card?: number | null
+          amount_paid_cash?: number | null
           cancellation_notes?: string | null
           cancelled_at?: string | null
           cashback_redeemed?: number | null
@@ -814,6 +820,8 @@ export type Database = {
           redeem_cashback?: boolean
           customer_id?: string
           cancellation_notes?: string
+          amount_paid_card?: number
+          amount_paid_cash?: number
         }
         Returns: string
       }
@@ -965,6 +973,8 @@ export type Database = {
           products_input: Json[]
           customer_id_input?: string
           cancellation_notes_input?: string
+          amount_paid_card_input?: number
+          amount_paid_cash_input?: number
         }
         Returns: string
       }

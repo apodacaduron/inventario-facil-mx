@@ -10,6 +10,8 @@ export type CreateSale = {
   notes: NonNullable<Sale['notes']>;
   cancellation_notes?: NonNullable<Sale['cancellation_notes']>;
   shipping_cost: NonNullable<Sale['shipping_cost']>;
+  amount_paid_cash?: NonNullable<Sale['amount_paid_cash']>;
+  amount_paid_card?: NonNullable<Sale['amount_paid_card']>;
   products: {
     product_id: SaleProduct['product_id'];
     price: SaleProduct['price'];
@@ -79,6 +81,8 @@ export function useSaleServices() {
       sale_date_input: formValues.sale_date,
       sale_id_input: formValues.sale_id,
       shipping_cost_input: formValues.shipping_cost,
+      amount_paid_card_input: formValues.amount_paid_card,
+      amount_paid_cash_input: formValues.amount_paid_cash,
       status_input: formValues.status,
       organization_id_input: orgId,
     });

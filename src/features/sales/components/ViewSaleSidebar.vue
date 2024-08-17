@@ -51,7 +51,7 @@ const currencyFormatter = useCurrencyFormatter();
       </SheetHeader>
 
       <div class="flex flex-col gap-6 mt-6">
-        <div>
+        <div v-if="sale?.i_customers?.name">
           <div class="font-medium text-sm tracking-tight text-foreground">
             Cliente
           </div>
