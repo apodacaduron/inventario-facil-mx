@@ -52,12 +52,12 @@ const onSubmit = handleSubmit(async (formValues) => {
 
 <template>
   <AuthLayout>
-    <div class="w-full max-w-md mx-auto px-6 py-3.5">
-      <h1 class="mt-4 mb-2 text-2xl lg:text-3xl">Bienvenido</h1>
+    <div class="w-full max-w-md mx-auto lg:px-6 py-3.5">
+      <h1 class="text-2xl lg:text-3xl">Bienvenido</h1>
       <span class="text-sm"> Inicia sesión con tu cuenta </span>
     </div>
-    <div class="divide-y w-full max-w-md mx-auto px-6 mb-12">
-      <div class="pb-4 my-4">
+    <div class="divide-y w-full max-w-md mx-auto lg:px-6 mb-12">
+      <div class="my-4">
         <Button
           @click="
             supabase.auth
@@ -78,7 +78,7 @@ const onSubmit = handleSubmit(async (formValues) => {
           Inicia sesión con Google
         </Button>
       </div>
-      <form @submit="onSubmit" class="pt-6 flex flex-col gap-6">
+      <form @submit="onSubmit" class="pt-4 flex flex-col gap-4">
         <FormField v-slot="{ componentField }" name="email">
           <FormItem v-auto-animate>
             <FormLabel>Correo electrónico</FormLabel>

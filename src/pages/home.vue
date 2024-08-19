@@ -115,19 +115,20 @@ function getCardDataFromPlan(plan: Tables<"plans">) {
 
 <template>
   <main>
-    <section class="pb-16">
+    <section class="pb-16 relative" :style="{ backgroundImage: isDark ? 'linear-gradient(135deg, #434343 0%, black 100%)' : 'linear-gradient(135deg, #fdfcfb 0%, #e2d1c3 100%)' }">
       <NavigationBar />
       <div class="text-center max-w-5xl mx-auto mt-[6vh]">
         <h1
-          class="mb-4 text-4xl leading-none tracking-tight md:text-5xl lg:text-8xl font-normal"
+          class="mb-4 text-4xl leading-none tracking-tighter md:text-5xl lg:text-8xl font-semibold"
         >
-          Inventario Fácil para Emprendedores
+          Inventario Fácil para <br />
+          Emprendedores
         </h1>
         <p
-          class="mb-10 text-md font-normal text-muted-foreground lg:text-xl sm:px-16 xl:px-48"
+          class="mb-10 text-md font-normal lg:text-xl sm:px-16 xl:px-48"
         >
-          Simplifica el control de tu inventario desde el primer día. Ideal para
-          nuevos negocios, ¡y puedes empezar gratis!
+          Simplifica el control de tu inventario desde el primer día. <br />
+          Ideal para nuevos negocios.
         </p>
 
         <router-link
@@ -158,14 +159,13 @@ function getCardDataFromPlan(plan: Tables<"plans">) {
         </div>
       </div>
 
-      <div
-        class="flex justify-center px-6 py-12 lg:py-20 bg-[radial-gradient(ellipse_70%_60%,_rgba(0,0,0,0.2)_0%,_rgba(255,255,255,0)_80%)] dark:bg-[radial-gradient(ellipse_70%_60%,_rgba(255,255,255,0.2)_0%,_rgba(0,0,0,0)_80%)]"
-      >
+      <div class="flex justify-center px-6 py-12 lg:py-20">
         <img
-          :src="`/screenshot-${isDark ? 'dark' : 'light'}.png`"
-          class="border-2 border-foreground rounded-lg lg:border-4 lg:rounded-3xl"
+          :src="`/screenshot-${isDark ? 'dark' : 'light'}.webp`"
+          class="border border-foreground rounded-lg lg:rounded-3xl shadow-xl"
           alt="Inventario Fácil screenshot"
         />
+        <div class="absolute bottom-0 w-full bg-gradient-to-t from-background h-[50vh] pointer-events-none" />
       </div>
     </section>
     <section class="mx-auto px-6 max-w-5xl pb-16">

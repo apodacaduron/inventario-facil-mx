@@ -70,14 +70,14 @@ const onSubmit = handleSubmit(async (formValues) => {
       </template>
     </FeedbackCard>
     <template v-else>
-      <div class="w-full max-w-md mx-auto px-6 py-3.5">
+      <div class="w-full max-w-md mx-auto lg:px-6 py-3.5">
         <h1 class="mt-8 mb-2 text-2xl lg:text-3xl">Recupera tu acceso</h1>
         <span class="text-sm">
           Restablece tu contraseña con facilidad y seguridad
         </span>
       </div>
-      <div class="divide-y w-full max-w-md mx-auto px-6">
-        <form @submit="onSubmit" class="pt-6 flex flex-col gap-6">
+      <div class="divide-y w-full max-w-md mx-auto lg:px-6">
+        <form @submit="onSubmit" class="pt-4 flex flex-col gap-4">
           <FormField v-slot="{ componentField }" name="email">
             <FormItem v-auto-animate>
               <FormLabel>Correo electrónico</FormLabel>

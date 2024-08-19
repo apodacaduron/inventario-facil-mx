@@ -15,12 +15,6 @@ const componentName = "auth-layout";
 <template>
   <div :class="componentName">
     <main :class="`${componentName}__form`">
-      <router-link to="/">
-        <span
-          class="self-center text-xl sm:text-2xl whitespace-nowrap mt-12 dark:text-white"
-          >inventariofacil.mx</span
-        >
-      </router-link>
       <slot />
       <DropdownMenu>
         <DropdownMenuTrigger as-child>
