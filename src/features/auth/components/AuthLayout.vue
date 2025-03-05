@@ -18,8 +18,9 @@ const componentName = "auth-layout";
       <slot />
       <DropdownMenu>
         <DropdownMenuTrigger as-child>
-          <Button size="icon" variant="outline">
-            <HelpCircleIcon class="size-4" />
+          <Button variant="outline">
+            <HelpCircleIcon class="size-4 mr-1" />
+            ¿Necesitas ayuda?
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
@@ -46,7 +47,7 @@ const componentName = "auth-layout";
 
 <style scoped lang="scss">
 .auth-layout {
-  @apply flex flex-1 min-h-screen;
+  @apply flex flex-1 h-screen flex-col lg:flex-row overflow-hidden;
   &__logo {
     @apply max-w-md w-64 mb-6;
   }
@@ -55,8 +56,8 @@ const componentName = "auth-layout";
     @apply px-5 pt-16 pb-8 border-r shadow-lg;
   }
   &__aside {
-    @apply flex-1 flex-shrink-0 hidden basis-1/4 xl:flex;
-    @apply h-screen;
+    @apply flex-1 flex-shrink-0 basis-1/4 xl:flex;
+    @apply h-full;
   }
   &__bg {
     @apply w-full h-full object-cover;

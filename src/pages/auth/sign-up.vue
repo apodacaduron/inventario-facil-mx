@@ -11,7 +11,7 @@ import { analytics } from "@/config/analytics";
       <h1 class="text-2xl lg:text-3xl">Crea una cuenta</h1>
       <span class="text-sm"> Crea tu cuenta gratis </span>
     </div>
-    <div class="divide-y w-full max-w-md mx-auto lg:px-6 mb-12">
+    <div class="divide-y w-full max-w-md mx-auto lg:px-6 mb-6">
       <div class="my-4">
         <Button
           @click="

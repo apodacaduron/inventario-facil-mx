@@ -1,24 +1,8 @@
 <script setup lang="ts">
 import { supabase } from "@/config/supabase";
 import { AuthLayout } from "@/features/auth";
-import { Input, Button } from "@/components/ui";
-import { useMutation } from "@tanstack/vue-query";
-import { useRouter } from "vue-router";
-import z from "zod";
-import { toTypedSchema } from "@vee-validate/zod";
-import { useForm } from "vee-validate";
-import {
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Button } from "@/components/ui";
 import { analytics } from "@/config/analytics";
-import { notifyIfHasError } from "@/features/global";
-
-const router = useRouter();
 </script>
 
 <template>
@@ -27,7 +11,7 @@ const router = useRouter();
       <h1 class="text-2xl lg:text-3xl">Bienvenido</h1>
       <span class="text-sm"> Inicia sesión con tu cuenta </span>
     </div>
-    <div class="divide-y w-full max-w-md mx-auto lg:px-6 mb-12">
+    <div class="divide-y w-full max-w-md mx-auto lg:px-6 mb-6">
       <div class="my-4">
         <Button
           @click="
