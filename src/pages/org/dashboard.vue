@@ -29,6 +29,7 @@ import { useYearMonthlySalesQuery } from "@/features/sales";
 import { useRoute } from "vue-router";
 import { useCurrencyFormatter } from "@/features/products";
 import { useOrganizationStore } from "@/stores";
+import { ProBadge } from "@/components";
 
 const locale = {
   DAILY: "Diario",
@@ -74,13 +75,21 @@ const yearMonthlySalesData = computed(() => {
       <div class="flex flex-col gap-5">
         <div class="text-slate-500 dark:text-slate-400 font-semibold">
           Estadísticas
-          <DropdownMenu v-if="organizationStore.isPremium">
-            <DropdownMenuTrigger as-child>
-              <Button variant="ghost">
-                <Badge variant="secondary">
-                  {{ locale[toUpperCase(statsFiltersRef.period)] }}
-                </Badge>
-              </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              :disabled="!organizationStore.isPremium"
+              as-child
+            >
+              <ProBadge :visible="!organizationStore.isPremium">
+                <Button
+                  :disabled="!organizationStore.isPremium"
+                  variant="ghost"
+                >
+                  <Badge variant="secondary">
+                    {{ locale[toUpperCase(statsFiltersRef.period)] }}
+                  </Badge>
+                </Button>
+              </ProBadge>
             </DropdownMenuTrigger>
             <DropdownMenuContent class="w-56">
               <DropdownMenuLabel>Periodo</DropdownMenuLabel>
@@ -102,16 +111,19 @@ const yearMonthlySalesData = computed(() => {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <DropdownMenu
-            v-if="
-              organizationStore.isPremium &&
-              statsFiltersRef.period === 'monthly'
-            "
-          >
-            <DropdownMenuTrigger as-child>
-              <Button variant="ghost">
-                <Badge>{{ dashboardDates.selectedMonthName.value }}</Badge>
-              </Button>
+          <DropdownMenu v-if="statsFiltersRef.period === 'monthly'">
+            <DropdownMenuTrigger
+              :disabled="!organizationStore.isPremium"
+              as-child
+            >
+              <ProBadge :visible="!organizationStore.isPremium">
+                <Button
+                  :disabled="!organizationStore.isPremium"
+                  variant="ghost"
+                >
+                  <Badge>{{ dashboardDates.selectedMonthName.value }}</Badge>
+                </Button>
+              </ProBadge>
             </DropdownMenuTrigger>
             <DropdownMenuContent class="w-[200px]">
               <DropdownMenuGroup>

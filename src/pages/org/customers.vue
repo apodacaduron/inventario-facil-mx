@@ -40,6 +40,7 @@ import { useOrganizationStore } from "@/stores";
 import { useRoute } from "vue-router";
 import { useCurrencyFormatter } from "@/features/products";
 import { WHATSAPP_URL } from "@/config/constants";
+import { ProBadge } from "@/components";
 
 const LOCALE = {
   trusted: "Confiable",
@@ -124,13 +125,15 @@ watchEffect(() => {
         </p>
       </div>
       <div class="hidden lg:flex gap-2">
-        <Button
-          :disabled="!organizationStore.canAddCustomers"
-          @click="isCreateSidebarOpen = true"
-          label=""
-        >
-          <PlusIcon class="w-5 h-5 stroke-[2px] mr-2" /> Crear cliente
-        </Button>
+        <ProBadge :visible="!organizationStore.canAddCustomers">
+          <Button
+            :disabled="!organizationStore.canAddCustomers"
+            @click="isCreateSidebarOpen = true"
+            label=""
+          >
+            <PlusIcon class="w-5 h-5 stroke-[2px] mr-2" /> Crear cliente
+          </Button>
+        </ProBadge>
       </div>
     </div>
 
@@ -143,14 +146,16 @@ watchEffect(() => {
       />
 
       <div class="flex lg:hidden gap-2">
-        <Button
-          :disabled="!organizationStore.canAddCustomers"
-          @click="isCreateSidebarOpen = true"
-          label=""
-          size="icon"
-        >
-          <PlusIcon class="w-5 h-5 stroke-[2px]" />
-        </Button>
+        <ProBadge :visible="!organizationStore.canAddCustomers">
+          <Button
+            :disabled="!organizationStore.canAddCustomers"
+            @click="isCreateSidebarOpen = true"
+            label=""
+            size="icon"
+          >
+            <PlusIcon class="w-5 h-5 stroke-[2px]" />
+          </Button>
+        </ProBadge>
       </div>
     </div>
 

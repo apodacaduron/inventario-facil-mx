@@ -62,6 +62,7 @@ import CustomerPickerSidebar from "@/features/sales/components/CustomerPickerSid
 import { CreateCustomerSidebar, Customer } from "@/features/customers";
 import ProductPickerSidebar from "@/features/sales/components/ProductPickerSidebar.vue";
 import { WHATSAPP_URL } from "@/config/constants";
+import { ProBadge } from "@/components";
 
 const LOCALE = {
   in_progress: "En progreso",
@@ -205,9 +206,15 @@ watchEffect(() => {
         </p>
       </div>
       <div class="hidden lg:flex gap-2">
-        <Button variant="outline" @click="isTodaySalesSidebarOpen = true">
-          <ShoppingBagIcon class="w-5 h-5 stroke-[2px] mr-2" /> Ventas de hoy
-        </Button>
+        <ProBadge :visible="!organizationStore.isPremium">
+          <Button
+            :disabled="!organizationStore.isPremium"
+            variant="outline"
+            @click="isTodaySalesSidebarOpen = true"
+          >
+            <ShoppingBagIcon class="w-5 h-5 stroke-[2px] mr-2" /> Ventas de hoy
+          </Button>
+        </ProBadge>
         <Button @click="layerManager.openLayer('create-sale')">
           <PlusIcon class="w-5 h-5 stroke-[2px] mr-2" /> Crear venta
         </Button>

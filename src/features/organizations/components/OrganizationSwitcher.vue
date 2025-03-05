@@ -22,6 +22,7 @@ import {
 import { useOrganizationStore } from "@/stores";
 import { useRoute } from "vue-router";
 import type { useLayerManager } from "@/features/global";
+import { ProBadge } from "@/components";
 
 type Props = {
   layerManager: ReturnType<typeof useLayerManager>;
@@ -102,12 +103,13 @@ const organizationStore = useOrganizationStore();
             </CommandItem>
           </CommandGroup>
         </CommandList>
-        <template v-if="organizationStore.canAddOrganizations">
-          <CommandSeparator />
-          <CommandList>
-            <CommandGroup>
+        <CommandSeparator />
+        <CommandList>
+          <CommandGroup>
+            <ProBadge :visible="!organizationStore.canAddOrganizations">
               <CommandItem
                 value="create-team"
+                :disabled="!organizationStore.canAddOrganizations"
                 @select="
                   () => {
                     open = false;
@@ -118,9 +120,9 @@ const organizationStore = useOrganizationStore();
                 <PlusCircle class="mr-2 size-5" />
                 Crear organización
               </CommandItem>
-            </CommandGroup>
-          </CommandList>
-        </template>
+            </ProBadge>
+          </CommandGroup>
+        </CommandList>
       </Command>
     </PopoverContent>
   </Popover>

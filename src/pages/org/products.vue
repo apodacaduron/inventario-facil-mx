@@ -63,6 +63,7 @@ import {
   ImageIcon,
 } from "lucide-vue-next";
 import DeleteProductImageDialog from "@/features/products/components/DeleteProductImageDialog.vue";
+import { ProBadge } from "@/components";
 
 const tableRef = ref<HTMLElement | null>(null);
 const productSearch = ref("");
@@ -392,17 +393,19 @@ watchEffect(() => {
                   >
                     {{ product.current_stock }}
                   </Badge>
-                  <Button
-                    v-if="organizationStore.isPremium"
-                    @click="
-                      isProductStockHistorySidebarOpen = true;
-                      activeProduct = product;
-                    "
-                    variant="outline"
-                    size="icon"
-                  >
-                    <HistoryIcon class="size-4" />
-                  </Button>
+                  <ProBadge :visible="!organizationStore.isPremium">
+                    <Button
+                      :disabled="!organizationStore.isPremium"
+                      @click="
+                        isProductStockHistorySidebarOpen = true;
+                        activeProduct = product;
+                      "
+                      variant="outline"
+                      size="icon"
+                    >
+                      <HistoryIcon class="size-4" />
+                    </Button>
+                  </ProBadge>
                 </div>
               </TableCell>
               <TableCell class="text-center">{{

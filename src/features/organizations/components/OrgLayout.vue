@@ -350,7 +350,7 @@ const menuList = computed(() => ({
         @click="layerManager.openLayer('go-premium')"
       >
         <CrownIcon class="size-4" />
-        Obtener premium
+        Obtener PRO
       </div>
     </div>
     <router-view />
