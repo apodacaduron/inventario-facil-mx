@@ -146,15 +146,6 @@ export const routes: RouteWithMeta[] = [
         meta: authMeta,
         component: () => import("@/pages/auth/sign-up.vue"),
       },
-      {
-        path: "forgot",
-        meta: authMeta,
-        component: () => import("@/pages/auth/forgot.vue"),
-      },
-      {
-        path: "update-password",
-        component: () => import("@/pages/auth/update-password.vue"),
-      },
     ],
   },
 ];
