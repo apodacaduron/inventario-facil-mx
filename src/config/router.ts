@@ -1,15 +1,17 @@
+import { storeToRefs } from "pinia";
+import {
+  createRouter,
+  createWebHistory,
+  RouteLocationNormalized,
+  RouteRecordRaw,
+} from "vue-router";
+
 import { useRoleServices } from "@/features/global/composables/useRoleServices";
 import { useOrganizationServices } from "@/features/organizations/composables/useOrganizationServices";
 import { useAuthStore } from "@/stores";
 import { useOrganizationStore } from "@/stores/useOrganizationStore";
 import { until } from "@vueuse/core";
-import { storeToRefs } from "pinia";
-import {
-  RouteLocationNormalized,
-  RouteRecordRaw,
-  createRouter,
-  createWebHistory,
-} from "vue-router";
+
 import { analytics } from "./analytics";
 
 type RouteWithMeta = RouteRecordRaw & {
@@ -248,7 +250,10 @@ const navigationGuards = {
         organization_id: to.params.orgId.toString(),
       });
 
-      if (!response.data?.is_public_products_page_enabled || response.data.plans?.name === 'freemium') {
+      if (
+        !response.data?.is_public_products_page_enabled ||
+        response.data.plans?.name === "freemium"
+      ) {
         return "/unauthorized";
       }
     }
