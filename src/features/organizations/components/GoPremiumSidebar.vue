@@ -12,7 +12,6 @@ import {
 import { supabase } from "@/config/supabase";
 import { useAuthStore } from "@/stores";
 import { useMutation, useQuery } from "@tanstack/vue-query";
-import { toRef } from "vue";
 
 const openModel = defineModel<boolean>("open");
 
@@ -30,12 +29,6 @@ const premiumPlanQuery = useQuery({
 const createStripeCheckoutMutation = useMutation({
   mutationFn: createStripeCheckout,
 });
-
-const isSubscribeButtonDisabled = toRef(
-  () =>
-    !authStore.authedUser?.stripe_customer_id ||
-    createStripeCheckoutMutation.isPending.value
-);
 
 async function createStripeCheckout() {
   const priceId = premiumPlanQuery.data.value?.data?.stripe_price_id;
@@ -86,7 +79,7 @@ async function createStripeCheckout() {
       </SheetHeader>
       <SheetFooter class="flex flex-row gap-2 mt-4">
         <Button
-          :disabled="isSubscribeButtonDisabled"
+          :disabled="createStripeCheckoutMutation.isPending.value"
           @click="createStripeCheckoutMutation.mutate()"
           type="button"
           class="w-full"
