@@ -38,7 +38,7 @@ function getCardDataFromPlan(plan: Tables<"plans">) {
   switch (plan.name) {
     case "premium":
       return {
-        title: "Plan Premium",
+        title: "Plan PRO",
         subtitle: "Para negocios en expansión y éxito garantizado",
         price: currencyFormatter.parse(plan.price, {
           maximumFractionDigits: 0,
@@ -46,8 +46,8 @@ function getCardDataFromPlan(plan: Tables<"plans">) {
         period: "/mes",
         description: `
           <ul>
-            <li>Hasta 5000 clientes y 5000 productos</li>  
-            <li>Hasta 3 organizaciones</li>  
+            <li>Hasta ${plan.max_customers} clientes y ${plan.max_products} productos</li>  
+            <li>Hasta ${plan.max_organizations} organizaciones</li>  
             <li>Página pública para compartir inventario con clientes</li>  
             <li>Estadísticas avanzadas</li>  
             <li>Monedero electrónico para tus clientes</li>
@@ -59,7 +59,7 @@ function getCardDataFromPlan(plan: Tables<"plans">) {
               return "Ya cuentas con este plan";
             }
 
-            return "Obtener Premium";
+            return "Obtener PRO";
           })(),
           isVisible: true,
           isDisabled: authStore.isPremiumAccount,
@@ -85,7 +85,7 @@ function getCardDataFromPlan(plan: Tables<"plans">) {
         period: "/mes",
         description: `
           <ul>
-            <li>Hasta 50 clientes y 50 productos</li>  
+            <li>Hasta ${plan.max_customers} clientes y ${plan.max_products} productos</li>  
             <li>Crear ventas y ver estadísticas</li>  
           </ul>
         `,
@@ -115,7 +115,14 @@ function getCardDataFromPlan(plan: Tables<"plans">) {
 
 <template>
   <main>
-    <section class="pb-16 relative" :style="{ backgroundImage: isDark ? 'linear-gradient(135deg, #434343 0%, black 100%)' : 'linear-gradient(135deg, #fdfcfb 0%, #e2d1c3 100%)' }">
+    <section
+      class="pb-16 relative"
+      :style="{
+        backgroundImage: isDark
+          ? 'linear-gradient(135deg, #434343 0%, black 100%)'
+          : 'linear-gradient(135deg, #fdfcfb 0%, #e2d1c3 100%)',
+      }"
+    >
       <NavigationBar />
       <div class="text-center max-w-5xl mx-auto mt-[6vh]">
         <h1
@@ -124,9 +131,7 @@ function getCardDataFromPlan(plan: Tables<"plans">) {
           Inventario Fácil para <br />
           Emprendedores
         </h1>
-        <p
-          class="mb-10 text-md font-normal lg:text-xl sm:px-16 xl:px-48"
-        >
+        <p class="mb-10 text-md font-normal lg:text-xl sm:px-16 xl:px-48">
           Simplifica el control de tu inventario desde el primer día. <br />
           Ideal para nuevos negocios.
         </p>
@@ -165,7 +170,9 @@ function getCardDataFromPlan(plan: Tables<"plans">) {
           class="border border-foreground rounded-lg lg:rounded-3xl shadow-xl"
           alt="Inventario Fácil screenshot"
         />
-        <div class="absolute bottom-0 w-full bg-gradient-to-t from-background h-[50vh] pointer-events-none" />
+        <div
+          class="absolute bottom-0 w-full bg-gradient-to-t from-background h-[50vh] pointer-events-none"
+        />
       </div>
     </section>
     <section class="mx-auto px-6 max-w-5xl pb-16">

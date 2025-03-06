@@ -2,6 +2,7 @@ import type { useOrganizationServices } from "@/features/organizations";
 import { defineStore } from "pinia";
 import { ref, toRef, watchEffect } from "vue";
 import { useRoute, useRouter } from "vue-router";
+
 import { useAuthStore } from "./useAuthStore";
 
 export type UserOrganization = NonNullable<
@@ -45,8 +46,9 @@ export const useOrganizationStore = defineStore("organization", () => {
   const canTriggerLowStockAlert = toRef(() => {
     const lowStockThreshold =
       currentUserOrganization.value?.i_organizations?.low_stock_threshold ?? 0;
-    const isLowStockAlertEnabled =
-      Boolean(currentUserOrganization.value?.i_organizations?.is_low_stock_alert_enabled);
+    const isLowStockAlertEnabled = Boolean(
+      currentUserOrganization.value?.i_organizations?.is_low_stock_alert_enabled
+    );
 
     return lowStockThreshold > 0 && isLowStockAlertEnabled && isPremium.value;
   });
@@ -71,7 +73,10 @@ export const useOrganizationStore = defineStore("organization", () => {
     return currentOrganizations < maxOrganizations && isPremium.value;
   });
   const maxProductImageUploads = toRef(() => {
-    return currentUserOrganization.value?.i_organizations?.plans?.max_product_image_uploads ?? 1
+    return (
+      currentUserOrganization.value?.i_organizations?.plans
+        ?.max_product_image_uploads ?? 1
+    );
   });
 
   function setUserOrganizations(
@@ -105,7 +110,7 @@ export const useOrganizationStore = defineStore("organization", () => {
     const themeColor =
       currentUserOrganization.value?.i_organizations?.theme_color ?? null;
     const root = document.querySelector(":root") as HTMLElement;
-    
+
     if (themeColor) {
       root?.style.setProperty("--primary", themeColor);
     } else {

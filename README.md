@@ -14,8 +14,8 @@ InventarioFacilMX es una aplicación diseñada para ayudar a pequeños vendedore
 
 InventarioFacilMX ofrece tres planes de suscripción:
 
-- **Gratis**: Limitado a 50 productos y 50 clientes.
-- **Premium**: Productos y clientes ilimitados, pagina publica de inventario.
+- **Gratis**: Limitado a 1500 productos y 1500 clientes.
+- **Premium**: Hasta 100,000 productos y 100,000 clientes, pagina publica de inventario.
 
 ## Requisitos
 
@@ -26,30 +26,33 @@ InventarioFacilMX ofrece tres planes de suscripción:
 ## Configuración
 
 1. **Clonar el repositorio**:
-    ```bash
-    git clone https://github.com/apodacaduron/inventario-facil-mx.git
-    cd inventario-facil-mx
-    ```
+
+   ```bash
+   git clone https://github.com/apodacaduron/inventario-facil-mx.git
+   cd inventario-facil-mx
+   ```
 
 2. **Instalar dependencias**:
-    ```bash
-    npm install
-    ```
+
+   ```bash
+   npm install
+   ```
 
 3. **Configurar las variables de entorno**:
-    Crea un archivo `.env` en la raíz del proyecto con las siguientes variables:
-    ```env
+   Crea un archivo `.env` en la raíz del proyecto con las siguientes variables:
+
+   ```env
    VITE_GOOGLE_MEASUREMENT_ID=YOUR_SUPABASE_URL
    VITE_SUPABASE_URL=YOUR_SUPABASE_URL
    VITE_SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY
    VITE_WHATSAPP_URL=https://wa.me
 
-    ```
+   ```
 
 4. **Ejecutar la aplicación**:
-    ```bash
-    npm run dev
-    ```
+   ```bash
+   npm run dev
+   ```
 
 ## Contribuciones
 
@@ -57,17 +60,17 @@ Las contribuciones son bienvenidas. Por favor, abre un issue para discutir cualq
 
 1. **Fork el repositorio**
 2. **Crea una rama feature**
-    ```bash
-    git checkout -b feature/nueva-feature
-    ```
+   ```bash
+   git checkout -b feature/nueva-feature
+   ```
 3. **Commit tus cambios**
-    ```bash
-    git commit -m 'Añadir nueva feature'
-    ```
+   ```bash
+   git commit -m 'Añadir nueva feature'
+   ```
 4. **Push a la rama**
-    ```bash
-    git push origin feature/nueva-feature
-    ```
+   ```bash
+   git push origin feature/nueva-feature
+   ```
 5. **Abre un Pull Request**
 
 ## Licencia

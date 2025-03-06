@@ -181,7 +181,7 @@ const menuList = computed(() => ({
                   class="w-full"
                   @click="layerManager.openLayer('go-premium')"
                 >
-                  <CrownIcon class="size-4 mr-2" /> Premium
+                  <CrownIcon class="size-4 mr-2" /> PRO
                 </Button>
               </SheetFooter>
             </SheetContent>
@@ -336,23 +336,14 @@ const menuList = computed(() => ({
           class="w-full"
           @click="layerManager.openLayer('go-premium')"
         >
-          <CrownIcon class="w-4 h-4 mr-2" /> Premium
+          <CrownIcon class="w-4 h-4 mr-2" /> PRO
         </Button>
       </div>
     </div>
   </aside>
 
   <div class="sm:ml-64">
-    <div class="mt-[71px]">
-      <div
-        v-if="!organizationStore.isPremium"
-        class="banner"
-        @click="layerManager.openLayer('go-premium')"
-      >
-        <CrownIcon class="size-4" />
-        Obtener PRO
-      </div>
-    </div>
+    <div class="mt-[71px]"></div>
     <router-view />
   </div>
 </template>
@@ -366,6 +357,6 @@ const menuList = computed(() => ({
   @apply bg-primary text-primary-foreground;
   @apply flex justify-center items-center gap-2;
   @apply p-2 select-none cursor-pointer;
-  @apply shadow-sm;
+  @apply shadow-sm absolute;
 }
 </style>

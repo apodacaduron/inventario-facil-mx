@@ -11,12 +11,22 @@ import {
 } from "@/components/ui";
 import { supabase } from "@/config/supabase";
 import { useAuthStore } from "@/stores";
-import { useMutation } from "@tanstack/vue-query";
+import { useMutation, useQuery } from "@tanstack/vue-query";
 import { toRef } from "vue";
 
 const openModel = defineModel<boolean>("open");
 
 const authStore = useAuthStore();
+const premiumPlanQuery = useQuery({
+  queryKey: ["premium-plan"],
+  async queryFn() {
+    return await supabase
+      .from("plans")
+      .select("*")
+      .eq("name", "premium")
+      .single();
+  },
+});
 const createStripeCheckoutMutation = useMutation({
   mutationFn: createStripeCheckout,
 });
@@ -28,13 +38,8 @@ const isSubscribeButtonDisabled = toRef(
 );
 
 async function createStripeCheckout() {
-  const premiumPlanResponse = await supabase
-    .from("plans")
-    .select("*")
-    .eq("name", "premium")
-    .single();
   const customerId = authStore.authedUser?.stripe_customer_id;
-  const priceId = premiumPlanResponse.data?.stripe_price_id;
+  const priceId = premiumPlanQuery.data.value?.data?.stripe_price_id;
   const email = authStore.authedUser?.email;
   if (!email || !priceId || !customerId)
     throw new Error("Unable to create stripe checkout session, missing params");
@@ -60,11 +65,21 @@ async function createStripeCheckout() {
   <Sheet v-model:open="openModel">
     <SheetContent class="overflow-y-auto w-full">
       <SheetHeader>
-        <SheetTitle>¡Hazte Premium Hoy!</SheetTitle>
+        <SheetTitle>¡Hazte PRO Hoy!</SheetTitle>
         <SheetDescription>
+          <img src="/user_computer.svg" class="w-48 h-48 mx-auto mb-4" />
+
           <ul class="list-disc pl-4">
-            <li>Hasta 5000 clientes y 5000 productos</li>
-            <li>Hasta 3 organizaciones</li>
+            <li>
+              Hasta
+              {{ premiumPlanQuery.data.value?.data?.max_customers }} clientes y
+              {{ premiumPlanQuery.data.value?.data?.max_products }} productos
+            </li>
+            <li>
+              Hasta
+              {{ premiumPlanQuery.data.value?.data?.max_organizations }}
+              organizaciones
+            </li>
             <li>Página pública para compartir inventario con clientes</li>
             <li>Estadísticas avanzadas</li>
             <li>Monedero electrónico para tus clientes</li>
