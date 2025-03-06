@@ -38,16 +38,14 @@ const isSubscribeButtonDisabled = toRef(
 );
 
 async function createStripeCheckout() {
-  const customerId = authStore.authedUser?.stripe_customer_id;
   const priceId = premiumPlanQuery.data.value?.data?.stripe_price_id;
   const email = authStore.authedUser?.email;
-  if (!email || !priceId || !customerId)
+  if (!email || !priceId)
     throw new Error("Unable to create stripe checkout session, missing params");
   const response = await supabase.functions.invoke(
     "create-stripe-checkout-session",
     {
       body: JSON.stringify({
-        customer_id: customerId,
         price_id: priceId,
         cancel_url: window.location.href,
         success_url: window.location.href,

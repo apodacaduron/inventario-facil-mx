@@ -1,24 +1,17 @@
 <script setup lang="ts">
 import { Button, Separator } from "@/components/ui";
 import { supabase } from "@/config/supabase";
-import { useAuthStore } from "@/stores";
 import { useMutation } from "@tanstack/vue-query";
 
-const authStore = useAuthStore();
 const stripeCustomerPortalMutation = useMutation({
   mutationFn: openStripeCustomerPortal,
 });
 
 async function openStripeCustomerPortal() {
-  const stripeCustomerId = authStore.authedUser?.stripe_customer_id;
-  if (!stripeCustomerId)
-    throw new Error("Cannot create customer portal, customer id is required");
-
   const response = await supabase.functions.invoke(
     "create-stripe-customer-portal-session",
     {
       body: JSON.stringify({
-        customer_id: authStore.authedUser?.stripe_customer_id,
         return_url: window.location.href,
       }),
     }

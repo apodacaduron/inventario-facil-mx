@@ -1,5 +1,5 @@
-import Stripe from "npm:stripe@^11.16";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import Stripe from "npm:stripe@^11.16";
 
 const stripe = new Stripe(Deno.env.get("STRIPE_API_KEY") as string, {
   apiVersion: "2024-04-10",
@@ -12,7 +12,7 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 const cryptoProvider = Stripe.createSubtleCryptoProvider();
 
-Deno.serve(async (request) => {
+Deno.serve(async (request: Request) => {
   const signature = request.headers.get("Stripe-Signature");
   const body = await request.text();
   let receivedEvent;
@@ -52,26 +52,40 @@ Deno.serve(async (request) => {
       await supabase.from("subscriptions").insert({
         user_id: user.data.id,
         plan_id: planResponse.data.id,
-        start_date: new Date(subscription.current_period_start * 1000).toISOString(),
-        end_date: new Date(subscription.current_period_end * 1000).toISOString(),
+        start_date: new Date(
+          subscription.current_period_start * 1000
+        ).toISOString(),
+        end_date: new Date(
+          subscription.current_period_end * 1000
+        ).toISOString(),
         status: subscription.status,
         stripe_subscription_id: subscription.id,
       });
 
-      await supabase.from("i_organizations").update({
-        plan_id: planResponse.data.id,
-      }).eq("user_id", user.data.id);
+      await supabase
+        .from("i_organizations")
+        .update({
+          plan_id: planResponse.data.id,
+        })
+        .eq("user_id", user.data.id);
 
       break;
     }
     case "customer.subscription.updated": {
       const subscription = receivedEvent.data.object;
 
-      await supabase.from("subscriptions").update({
-        start_date: new Date(subscription.current_period_start * 1000).toISOString(),
-        end_date: new Date(subscription.current_period_end * 1000).toISOString(),
-        status: subscription.status,
-      }).eq("stripe_subscription_id", subscription.id);
+      await supabase
+        .from("subscriptions")
+        .update({
+          start_date: new Date(
+            subscription.current_period_start * 1000
+          ).toISOString(),
+          end_date: new Date(
+            subscription.current_period_end * 1000
+          ).toISOString(),
+          status: subscription.status,
+        })
+        .eq("stripe_subscription_id", subscription.id);
 
       break;
     }
@@ -89,17 +103,23 @@ Deno.serve(async (request) => {
         .eq("name", "freemium")
         .single();
 
-      await supabase.from("subscriptions").update({
-        plan_id: freemiumPlanResponse.data.id,
-        start_date: new Date().toISOString(),
-        end_date: null,
-        status: "canceled",
-        stripe_subscription_id: null,
-      }).eq("user_id", user.data.id);
+      await supabase
+        .from("subscriptions")
+        .update({
+          plan_id: freemiumPlanResponse.data.id,
+          start_date: new Date().toISOString(),
+          end_date: null,
+          status: "canceled",
+          stripe_subscription_id: null,
+        })
+        .eq("user_id", user.data.id);
 
-      await supabase.from("i_organizations").update({
-        plan_id: freemiumPlanResponse.data.id,
-      }).eq("user_id", user.data.id);
+      await supabase
+        .from("i_organizations")
+        .update({
+          plan_id: freemiumPlanResponse.data.id,
+        })
+        .eq("user_id", user.data.id);
 
       break;
     }
@@ -116,9 +136,12 @@ Deno.serve(async (request) => {
         .eq("stripe_customer_id", invoice.customer)
         .single();
 
-      await supabase.from("subscriptions").update({
-        status: subscription.status,
-      }).eq("user_id", user.data.id);
+      await supabase
+        .from("subscriptions")
+        .update({
+          status: subscription.status,
+        })
+        .eq("user_id", user.data.id);
 
       // Optional: Notify the user or take any action on payment success
 

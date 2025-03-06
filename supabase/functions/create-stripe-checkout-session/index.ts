@@ -1,9 +1,16 @@
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import Stripe from "npm:stripe@^11.16";
+
+import { createStripeCustomerIfNotExists } from "./utils/createStripeCustomerIfNotExists.ts";
 
 const stripe = new Stripe(Deno.env.get("STRIPE_API_KEY") as string, {
   apiVersion: "2024-04-10",
   httpClient: Stripe.createFetchHttpClient(),
 });
+
+const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -11,7 +18,7 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-Deno.serve(async (request) => {
+Deno.serve(async (request: Request) => {
   if (request.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
@@ -22,10 +29,15 @@ Deno.serve(async (request) => {
     });
   }
 
-  const { customer_id, price_id, cancel_url, success_url } =
-    await request.json();
+  const { customer } = await createStripeCustomerIfNotExists(
+    request,
+    supabase,
+    stripe
+  );
 
-  if (!customer_id || !price_id || !cancel_url || !success_url) {
+  const { price_id, cancel_url, success_url } = await request.json();
+
+  if (!price_id || !cancel_url || !success_url) {
     return new Response("Bad Request", { status: 400, headers: corsHeaders });
   }
 
@@ -41,7 +53,7 @@ Deno.serve(async (request) => {
           quantity: 1,
         },
       ],
-      customer: customer_id,
+      customer: customer.id,
       // {CHECKOUT_SESSION_ID} is a string literal; do not change it!
       // the actual Session ID is returned in the query parameter when your customer
       // is redirected to the success page.

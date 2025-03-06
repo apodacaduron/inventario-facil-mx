@@ -21,7 +21,7 @@ const userOrganizationsQuery = useUserOrganizationsQuery({
     enabled: toRef(() => authStore.isLoggedIn),
     userId: toRef(() => authStore.session?.user.id),
   },
-})
+});
 
 onMounted(() => {
   supabase.auth.getSession().then(({ data }) => {
@@ -47,23 +47,6 @@ watchEffect(() => {
   organizationStore.setIsUserOrganizationsLoading(
     userOrganizationsQuery.isLoading.value
   );
-});
-watchEffect(async () => {
-  const stripeCustomerId = authStore.authedUser?.stripe_customer_id;
-  if (!authStore.authedUser) return;
-  if (stripeCustomerId) return;
-
-  const response = await supabase.functions.invoke("create-stripe-customer", {
-    body: JSON.stringify({
-      user_id: authStore.authedUser.id,
-      email: authStore.authedUser.email,
-    }),
-  });
-  if (!response?.data?.customer_id) return;
-  authStore.setAuthedUserData({
-    ...authStore.authedUser,
-    stripe_customer_id: response.data.customer_id,
-  });
 });
 </script>
 
