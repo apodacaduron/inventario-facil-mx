@@ -9,7 +9,7 @@ defineProps<Props>();
 </script>
 
 <template>
-  <div v-if="visible" class="relative w-fit inline-block">
+  <div v-if="visible" class="relative">
     <slot />
     <Badge class="absolute -top-2 -right-2 text-[8px] px-1 py-1 leading-none"
       >PRO</Badge

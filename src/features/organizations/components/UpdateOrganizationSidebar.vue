@@ -23,7 +23,7 @@ import {
   Switch,
 } from "@/components/ui";
 import { createReusableTemplate } from "@vueuse/core";
-import { UserOrganization } from "@/stores";
+import { useOrganizationStore, UserOrganization } from "@/stores";
 import { useMutation, useQueryClient } from "@tanstack/vue-query";
 import { z } from "zod";
 import { toTypedSchema } from "@vee-validate/zod";
@@ -31,6 +31,7 @@ import { UpdateOrganization, useOrganizationServices } from "../composables";
 import { useForm } from "vee-validate";
 import { CheckIcon, ImagePlusIcon, PercentIcon } from "lucide-vue-next";
 import { useLayerManager } from "@/features/global";
+import { ProBadge } from "@/components";
 
 type Props = {
   layerManager: ReturnType<typeof useLayerManager>;
@@ -95,6 +96,7 @@ const themeColor = ref(
 const [ModalBodyTemplate, ModalBody] = createReusableTemplate();
 const queryClient = useQueryClient();
 const organizationServices = useOrganizationServices();
+const organizationStore = useOrganizationStore();
 const updateOrganizationMutation = useMutation({
   mutationFn: async (formValues: UpdateOrganization) => {
     if (!props.userOrganization?.org_id)
@@ -160,23 +162,22 @@ watchEffect(() => {
   <ModalBodyTemplate>
     <div>
       <div class="space-y-4 pt-2 pb-8">
-        <template
-          v-if="userOrganization?.i_organizations?.plans?.name === 'premium'"
-        >
-          <div class="flex justify-center">
-            <Avatar class="w-32 h-32">
-              <AvatarImage
-                :src="userOrganization?.i_organizations?.logo ?? ''"
-                class="object-cover"
-              />
-              <AvatarFallback class="text-2xl">{{
-                `${userOrganization?.i_organizations?.name
-                  ?.substring(0, 1)
-                  .toLocaleUpperCase()}`
-              }}</AvatarFallback>
-            </Avatar>
-          </div>
+        <div class="flex justify-center">
+          <Avatar class="w-32 h-32">
+            <AvatarImage
+              :src="userOrganization?.i_organizations?.logo ?? ''"
+              class="object-cover"
+            />
+            <AvatarFallback class="text-2xl">{{
+              `${userOrganization?.i_organizations?.name
+                ?.substring(0, 1)
+                .toLocaleUpperCase()}`
+            }}</AvatarFallback>
+          </Avatar>
+        </div>
+        <ProBadge :visible="!organizationStore.isPremium">
           <Button
+            :disabled="!organizationStore.isPremium"
             variant="outline"
             type="button"
             class="w-full mb-6"
@@ -184,7 +185,7 @@ watchEffect(() => {
           >
             <ImagePlusIcon class="size-4 mr-2" /> Subir logo
           </Button>
-        </template>
+        </ProBadge>
 
         <FormField v-slot="{ componentField }" name="name">
           <FormItem v-auto-animate>
@@ -199,25 +200,37 @@ watchEffect(() => {
             <FormMessage />
           </FormItem>
         </FormField>
-        <template
-          v-if="userOrganization?.i_organizations?.plans?.name === 'premium'"
-        >
-          <Separator class="my-6" />
+        <!-- <template v-if="organizationStore.isPremium"> -->
+        <Separator class="my-6" />
+        <ProBadge :visible="!organizationStore.isPremium">
           <FormField
             v-slot="{ value, handleChange }"
             name="is_cashback_enabled"
           >
             <FormItem class="flex flex-row items-center justify-between">
               <div class="space-y-0.5">
-                <FormLabel class="text-base">
+                <FormLabel
+                  :class="[
+                    'text-base',
+                    { 'text-muted-foreground': !organizationStore.isPremium },
+                  ]"
+                >
                   Habilitar monedero electrónico
                 </FormLabel>
-                <FormDescription>
+                <FormDescription
+                  :class="{
+                    'text-muted-foreground': !organizationStore.isPremium,
+                  }"
+                >
                   Tus clientes acumulan un porcentaje por cada compra.
                 </FormDescription>
               </div>
               <FormControl>
-                <Switch :checked="value" @update:checked="handleChange" />
+                <Switch
+                  :disabled="!organizationStore.isPremium"
+                  :checked="value"
+                  @update:checked="handleChange"
+                />
               </FormControl>
             </FormItem>
           </FormField>
@@ -226,10 +239,11 @@ watchEffect(() => {
               v-if="formInstance.values.is_cashback_enabled"
               v-auto-animate
             >
-              <FormLabel>Porcentaje por compra</FormLabel>
+              <FormLabel class="text-sm mt-1">Porcentaje por compra</FormLabel>
               <FormControl>
                 <div class="relative w-full items-center">
                   <Input
+                    :disabled="!organizationStore.isPremium"
                     type="text"
                     placeholder="Ingresa un porcentaje"
                     class="pr-10"
@@ -245,8 +259,11 @@ watchEffect(() => {
               <FormMessage />
             </FormItem>
           </FormField>
+        </ProBadge>
 
-          <Separator class="my-6" />
+        <Separator class="my-6" />
+
+        <ProBadge :visible="!organizationStore.isPremium">
           <FormField
             v-slot="{ value, handleChange }"
             name="is_low_stock_alert_enabled"
@@ -262,7 +279,11 @@ watchEffect(() => {
                 </FormDescription>
               </div>
               <FormControl>
-                <Switch :checked="value" @update:checked="handleChange" />
+                <Switch
+                  :disabled="!organizationStore.isPremium"
+                  :checked="value"
+                  @update:checked="handleChange"
+                />
               </FormControl>
             </FormItem>
           </FormField>
@@ -272,7 +293,9 @@ watchEffect(() => {
               v-auto-animate
             >
               <div class="space-y-0.5">
-                <FormLabel class="text-base"> Límite de stock bajo </FormLabel>
+                <FormLabel class="text-sm mt-1">
+                  Límite de stock bajo
+                </FormLabel>
                 <FormDescription>
                   Especifica la cantidad mínima de este producto antes de que se
                   dispare una alerta de stock bajo.
@@ -280,6 +303,7 @@ watchEffect(() => {
               </div>
               <FormControl>
                 <Input
+                  :disabled="!organizationStore.isPremium"
                   type="text"
                   placeholder="Ingresa un porcentaje"
                   class="pr-10"
@@ -289,8 +313,11 @@ watchEffect(() => {
               <FormMessage />
             </FormItem>
           </FormField>
+        </ProBadge>
 
-          <Separator class="my-6" />
+        <Separator class="my-6" />
+
+        <ProBadge :visible="!organizationStore.isPremium">
           <div>
             <h4 class="text-base">Actualizar tema de organización</h4>
             <p class="text-[0.8rem] text-muted-foreground">
@@ -301,6 +328,7 @@ watchEffect(() => {
             <div class="space-y-2 py-2 pb-4">
               <div class="space-y-1">
                 <Button
+                  :disabled="!organizationStore.isPremium"
                   type="button"
                   :key="index"
                   v-for="(color, index) in primaryColors"
@@ -318,6 +346,7 @@ watchEffect(() => {
                   />
                 </Button>
                 <Button
+                  :disabled="!organizationStore.isPremium"
                   variant="ghost"
                   type="button"
                   @click="themeColor = null"
@@ -327,7 +356,8 @@ watchEffect(() => {
               </div>
             </div>
           </div>
-        </template>
+        </ProBadge>
+        <!-- </template> -->
       </div>
     </div>
   </ModalBodyTemplate>

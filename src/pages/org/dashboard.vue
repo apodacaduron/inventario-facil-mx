@@ -80,7 +80,10 @@ const yearMonthlySalesData = computed(() => {
               :disabled="!organizationStore.isPremium"
               as-child
             >
-              <ProBadge :visible="!organizationStore.isPremium">
+              <ProBadge
+                :visible="!organizationStore.isPremium"
+                class="w-fit inline-block"
+              >
                 <Button
                   :disabled="!organizationStore.isPremium"
                   variant="ghost"
@@ -116,7 +119,10 @@ const yearMonthlySalesData = computed(() => {
               :disabled="!organizationStore.isPremium"
               as-child
             >
-              <ProBadge :visible="!organizationStore.isPremium">
+              <ProBadge
+                :visible="!organizationStore.isPremium"
+                class="w-fit inline-block"
+              >
                 <Button
                   :disabled="!organizationStore.isPremium"
                   variant="ghost"
