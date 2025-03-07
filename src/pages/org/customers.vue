@@ -14,9 +14,7 @@ import {
   Avatar,
   AvatarFallback,
   Table,
-  TableHeader,
   TableRow,
-  TableHead,
   TableBody,
   TableCell,
   Skeleton,
@@ -32,8 +30,6 @@ import {
   CardFooter,
 } from "@/components/ui";
 import {
-  ChevronDownIcon,
-  ChevronUpIcon,
   MapIcon,
   PencilIcon,
   PlusIcon,
