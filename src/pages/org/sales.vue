@@ -410,10 +410,11 @@ watchEffect(() => {
                         :src="saleProduct.image_url ?? ''"
                         class="object-cover"
                       />
-                      <AvatarFallback
-                        >{ `${saleProduct.name?.substring(0,
-                        1).toLocaleUpperCase()}` }</AvatarFallback
-                      >
+                      <AvatarFallback>{{
+                        `${saleProduct.name
+                          ?.substring(0, 1)
+                          .toLocaleUpperCase()}`
+                      }}</AvatarFallback>
                     </Avatar>
                     <div
                       v-if="sale.i_sale_products.length > 3"
