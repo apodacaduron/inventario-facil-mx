@@ -394,7 +394,7 @@ watchEffect(() => {
               </CardTitle>
             </CardHeader>
             <CardContent class="text-sm">
-              <div class="flex justify-between">
+              <div class="flex justify-between gap-2 flex-wrap">
                 <div>
                   <p><strong>Productos</strong></p>
                   <div
@@ -470,7 +470,7 @@ watchEffect(() => {
                   </div>
                 </div>
 
-                <p>
+                <p v-if="Number(sale.shipping_cost)">
                   <strong>Costo de envío</strong><br />
                   {{ currencyFormatter.parse(sale.shipping_cost) }}
                 </p>

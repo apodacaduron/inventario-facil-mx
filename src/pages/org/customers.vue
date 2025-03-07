@@ -268,7 +268,6 @@ watchEffect(() => {
                 </div>
                 <div
                   v-if="
-                    true ||
                     organizationStore.currentUserOrganization?.i_organizations
                       ?.is_cashback_enabled
                   "

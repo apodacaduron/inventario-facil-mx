@@ -346,7 +346,7 @@ watchEffect(() => {
               </CardTitle>
             </CardHeader>
             <CardContent class="text-sm">
-              <div class="flex justify-between">
+              <div class="flex justify-between gap-2 flex-wrap">
                 <div>
                   <p><strong>Cantidad</strong></p>
                   <div class="flex items-center gap-4">
