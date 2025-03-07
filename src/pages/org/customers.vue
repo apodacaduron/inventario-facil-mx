@@ -295,45 +295,6 @@ watchEffect(() => {
       </div>
 
       <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead
-              @click="customersTableOrder.toggleTableOrder('name')"
-              class="cursor-pointer pl-4"
-            >
-              <span class="flex items-center gap-2">
-                Nombre
-                <template
-                  v-if="customersTableOrder.tableOrder.value[0] === 'name'"
-                >
-                  <ChevronUpIcon
-                    v-if="customersTableOrder.tableOrder.value[1] === 'desc'"
-                    class="h-4 w-4"
-                  />
-                  <ChevronDownIcon
-                    v-if="customersTableOrder.tableOrder.value[1] === 'asc'"
-                    class="h-4 w-4"
-                  />
-                </template>
-              </span>
-            </TableHead>
-            <TableHead class="text-center">Notas</TableHead>
-            <TableHead class="text-center">Teléfono</TableHead>
-            <TableHead class="text-center"> Dirección </TableHead>
-            <TableHead class="text-center"> Mapa </TableHead>
-            <TableHead class="text-center"> Estado de confianza </TableHead>
-            <TableHead
-              v-if="
-                organizationStore.currentUserOrganization?.i_organizations
-                  ?.is_cashback_enabled
-              "
-              class="text-center"
-            >
-              Monedero
-            </TableHead>
-            <TableHead class="text-center"> - </TableHead>
-          </TableRow>
-        </TableHeader>
         <TableBody v-if="tableLoadingStates.showLoadingState.value">
           <TableRow
             v-for="(_, index) in Array.from({ length: 15 })"
