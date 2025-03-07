@@ -51,33 +51,39 @@ const currencyFormatter = useCurrencyFormatter();
       </SheetHeader>
 
       <div class="flex flex-col gap-6 mt-6">
-        <div v-if="sale?.i_customers?.name">
+        <div v-if="sale?.i_customers?.name ?? sale?.customer_name">
           <div class="font-medium text-sm tracking-tight text-foreground">
             Cliente
           </div>
           <div class="flex items-center text-slate-900 dark:text-white">
             <Avatar>
               <AvatarFallback>{{
-                `${sale?.i_customers?.name
-                  ?.substring(0, 1)
-                  .toLocaleUpperCase()}`
+                `${
+                  sale?.i_customers?.name
+                    ?.substring(0, 1)
+                    .toLocaleUpperCase() ??
+                  sale?.customer_name?.substring(0, 1).toLocaleUpperCase()
+                }`
               }}</AvatarFallback>
             </Avatar>
             <div class="ps-3">
               <div class="text-base font-semibold">
-                {{ sale?.i_customers?.name }}
+                {{ sale?.i_customers?.name ?? sale?.customer_name }}
+                <span v-if="!sale?.i_customers">(Deleted)</span>
               </div>
               <div
                 v-if="sale?.i_customers?.phone"
                 class="font-normal text-slate-500"
               >
                 <a
-                  :href="`${WHATSAPP_URL}/${sale.i_customers.phone}`"
+                  :href="`${WHATSAPP_URL}/${
+                    sale.i_customers.phone ?? sale?.customer_phone
+                  }`"
                   target="_blank"
                   rel="noopener noreferrer"
                   class="block"
                 >
-                  {{ sale.i_customers.phone }}
+                  {{ sale?.i_customers?.phone ?? sale?.customer_phone }}
                 </a>
               </div>
             </div>
