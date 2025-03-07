@@ -90,7 +90,7 @@ const deleteUserOrganizationMutation = useMutation({
           "
           type="button"
           variant="destructive"
-          @click="deleteUserOrganizationMutation.mutate"
+          @click="deleteUserOrganizationMutation.mutate()"
           class="w-full"
         >
           Si, eliminar
@@ -141,7 +141,7 @@ const deleteUserOrganizationMutation = useMutation({
             "
             type="button"
             variant="destructive"
-            @click="deleteUserOrganizationMutation.mutate"
+            @click="deleteUserOrganizationMutation.mutate()"
             class="w-full"
           >
             Si, eliminar

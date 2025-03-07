@@ -58,7 +58,7 @@ const deleteCustomerMutation = useMutation({
           :disabled="deleteCustomerMutation.isPending.value"
           type="button"
           variant="destructive"
-          @click="deleteCustomerMutation.mutate"
+          @click="deleteCustomerMutation.mutate()"
         >
           Si, eliminar
         </Button>
@@ -89,7 +89,7 @@ const deleteCustomerMutation = useMutation({
             :disabled="deleteCustomerMutation.isPending.value"
             type="button"
             variant="destructive"
-            @click="deleteCustomerMutation.mutate"
+            @click="deleteCustomerMutation.mutate()"
           >
             Si, eliminar
           </Button>

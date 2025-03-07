@@ -37,13 +37,8 @@ const deleteProductImageMutation = useMutation({
       .productImage as Tables<"product_images"> | null;
     if (!productImage)
       throw new Error("Product image is required to delete image");
-    if (!productImage.bucket_path)
-      throw new Error("Product image bucket path is required to delete image");
 
-    const response = await productServices.deleteProductImage({
-      id: productImage.id,
-      bucketPath: productImage.bucket_path,
-    });
+    const response = await productServices.deleteProductImage(productImage);
     notifyIfHasError(response.error);
     await queryClient.invalidateQueries({ queryKey: ["product-images"] });
     openModel.value = false;
@@ -75,7 +70,7 @@ const deleteProductImageMutation = useMutation({
           :disabled="deleteProductImageMutation.isPending.value"
           type="button"
           variant="destructive"
-          @click="deleteProductImageMutation.mutate"
+          @click="deleteProductImageMutation.mutate()"
           class="w-full"
         >
           <Spinner
@@ -112,7 +107,7 @@ const deleteProductImageMutation = useMutation({
             :disabled="deleteProductImageMutation.isPending.value"
             type="button"
             variant="destructive"
-            @click="deleteProductImageMutation.mutate"
+            @click="deleteProductImageMutation.mutate()"
             class="w-full"
           >
             <Spinner

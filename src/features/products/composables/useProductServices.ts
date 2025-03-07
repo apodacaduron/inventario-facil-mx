@@ -1,7 +1,8 @@
 import { supabase } from "@/config/supabase";
-import { LoadListOptions, useServiceHelpers } from "@/features/global";
-import { Tables } from "../../../../types_db";
 import { useAssetServices } from "@/features/assets";
+import { LoadListOptions, useServiceHelpers } from "@/features/global";
+
+import { Tables } from "../../../../types_db";
 
 export type CreateProduct = {
   name: Product["name"];
@@ -15,13 +16,12 @@ export type UpdateProduct = Partial<CreateProduct>;
 export type DeleteProduct = Product["id"];
 
 export type Product = Tables<"i_products">;
-export type ProductImage = 
-  Tables<"product_images">;
+export type ProductImage = Tables<"product_images">;
 export type CreateProductImage = Omit<
   ProductImage,
   "id" | "created_at" | "updated_at"
 >;
-export type UpdateProductImage = Partial<CreateProductImage>
+export type UpdateProductImage = Partial<CreateProductImage>;
 
 export function useProductServices() {
   const serviceHelpers = useServiceHelpers();
@@ -191,17 +191,45 @@ export function useProductServices() {
   }
 
   async function createProductImage(asset: CreateProductImage) {
-    return await supabase.from("product_images").insert(asset).select().single();
+    return await supabase
+      .from("product_images")
+      .insert(asset)
+      .select()
+      .single();
   }
-  async function deleteProductImage(data: {id: string, bucketPath: string}) {
-    await assetServices.deleteFile({
-      bucket: 'product-images',
-      path: data.bucketPath
-    })
-    return await supabase.from("product_images").delete().eq("id", data.id);
+  async function deleteProductImage(productImage: Tables<"product_images">) {
+    if (productImage?.bucket_path) {
+      await assetServices.deleteFile({
+        bucket: "product-images",
+        path: productImage.bucket_path,
+      });
+    }
+    if (productImage?.product_id) {
+      const product = await supabase
+        .from("i_products")
+        .select()
+        .eq("id", productImage.product_id)
+        .single();
+      if (product.data?.image_url === productImage.url) {
+        await supabase
+          .from("i_products")
+          .update({ image_url: null })
+          .eq("id", productImage.product_id);
+      }
+    }
+    return await supabase
+      .from("product_images")
+      .delete()
+      .eq("id", productImage.id);
   }
-  async function updateProductImage(id: string, productImage: UpdateProductImage) {
-    return await supabase.from('product_images').update(productImage).eq('id', id)
+  async function updateProductImage(
+    id: string,
+    productImage: UpdateProductImage
+  ) {
+    return await supabase
+      .from("product_images")
+      .update(productImage)
+      .eq("id", id);
   }
 
   return {

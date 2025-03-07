@@ -67,7 +67,7 @@ const deleteProductMutation = useMutation({
           :disabled="deleteProductMutation.isPending.value"
           type="button"
           variant="destructive"
-          @click="deleteProductMutation.mutate"
+          @click="deleteProductMutation.mutate()"
           class="w-full"
         >
           Si, eliminar
@@ -100,7 +100,7 @@ const deleteProductMutation = useMutation({
             :disabled="deleteProductMutation.isPending.value"
             type="button"
             variant="destructive"
-            @click="deleteProductMutation.mutate"
+            @click="deleteProductMutation.mutate()"
             class="w-full"
           >
             Si, eliminar
