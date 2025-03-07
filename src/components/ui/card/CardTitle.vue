@@ -1,16 +1,18 @@
 <script setup lang="ts">
-import { cn } from "@/config/shadcn";
+import type { HTMLAttributes } from 'vue'
+import { cn } from '@/lib/utils'
 
-const props = defineProps({
-  class: {
-    type: String,
-    default: "",
-  },
-});
+const props = defineProps<{
+  class?: HTMLAttributes['class']
+}>()
 </script>
 
 <template>
-  <h3 :class="cn('font-semibold leading-none tracking-tight', props.class)">
+  <h3
+    :class="
+      cn('font-semibold leading-none tracking-tight', props.class)
+    "
+  >
     <slot />
   </h3>
 </template>

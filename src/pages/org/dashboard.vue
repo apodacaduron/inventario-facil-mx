@@ -188,7 +188,7 @@ const yearMonthlySalesData = computed(() => {
             </CardTitle>
           </CardHeader>
           <CardContent class="overflow-x-auto">
-            <div class="min-w-[1580px]">
+            <div>
               <AreaChart
                 v-if="yearMonthlySalesData?.length"
                 :data="yearMonthlySalesData"
