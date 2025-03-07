@@ -375,48 +375,6 @@ watchEffect(() => {
             </TableCell>
           </TableRow>
         </TableBody>
-        <TableBody>
-          <!-- @vue-ignore -->
-          <template
-            v-for="(page, index) in customersQuery.data.value?.pages"
-            :key="index"
-          >
-            <TableRow v-for="customer in page.data" :key="customer.id">
-              <TableCell class="text-center">
-                <a
-                  v-if="customer.map_url"
-                  :href="customer.map_url"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="block w-fit mx-auto"
-                >
-                  <MapIcon class="w-6 h-6 stroke-[2px]" />
-                </a>
-                <template v-else>-</template>
-              </TableCell>
-              <TableCell class="text-center">
-                <Badge
-                  :variant="getBadgeColorFromStatus(customer.trust_status)"
-                >
-                  {{
-                    LOCALE[
-                      customer.trust_status ?? "trusted"
-                    ]?.toLocaleUpperCase()
-                  }}
-                </Badge>
-              </TableCell>
-              <TableCell
-                v-if="
-                  organizationStore.currentUserOrganization?.i_organizations
-                    ?.is_cashback_enabled
-                "
-                class="text-center"
-              >
-                {{ currencyFormatter.parse(customer.cashback_balance) ?? "-" }}
-              </TableCell>
-            </TableRow>
-          </template>
-        </TableBody>
       </Table>
       <div
         v-if="customersQuery.isFetchingNextPage.value"
