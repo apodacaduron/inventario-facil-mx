@@ -17,6 +17,7 @@
     "@stripe/stripe-js": "^4.1.0",
     "@supabase/supabase-js": "^2.44.2",
     "@tanstack/vue-query": "^5.50.1",
+    "@tanstack/vue-table": "^8.21.2",
     "@unovis/ts": "^1.5.1",
     "@unovis/vue": "^1.5.1",
     "@vee-validate/zod": "^4.13.2",
