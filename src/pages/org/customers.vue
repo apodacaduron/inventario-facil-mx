@@ -25,6 +25,11 @@ import {
   TooltipTrigger,
   TooltipContent,
   Badge,
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardFooter,
 } from "@/components/ui";
 import {
   ChevronDownIcon,
@@ -160,6 +165,136 @@ watchEffect(() => {
     </div>
 
     <div class="overflow-x-auto">
+      <div
+        class="grid gap-4 mt-6 mx-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 md:mx-0"
+      >
+        <template
+          v-for="(page, index) in customersQuery.data.value?.pages"
+          :key="index"
+        >
+          <Card v-for="customer in page.data" :key="customer.id">
+            <CardHeader>
+              <CardTitle class="flex justify-between">
+                <div
+                  class="flex items-center text-foreground whitespace-nowrap w-max"
+                >
+                  <Avatar>
+                    <AvatarFallback>{{
+                      `${customer?.name?.substring(0, 1).toLocaleUpperCase()}`
+                    }}</AvatarFallback>
+                  </Avatar>
+                  <div class="ps-3">
+                    <div class="text-base font-semibold">
+                      {{ customer.name }}
+                    </div>
+                    <div
+                      class="flex gap-2 text-xs font-normal text-muted-foreground"
+                    >
+                      <div v-if="customer.email">
+                        {{ customer.email }}
+                      </div>
+                      <a
+                        v-if="customer.phone"
+                        :href="`${WHATSAPP_URL}/${customer.phone}`"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="block"
+                      >
+                        {{ customer.phone }}
+                      </a>
+                    </div>
+                  </div>
+                </div>
+                <div class="flex justify-center gap-2">
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger as-child>
+                        <Button
+                          size="icon"
+                          variant="outline"
+                          @click="openUpdateCustomerSidebar(customer)"
+                        >
+                          <PencilIcon class="w-4 h4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Editar cliente</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger as-child>
+                        <Button
+                          v-if="customer.trust_status === 'not_trusted'"
+                          size="icon"
+                          variant="outline"
+                          class="text-red-500 dark:text-red-500"
+                          @click="openDeleteCustomerDialog(customer)"
+                        >
+                          <TrashIcon class="w-4 h4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Eliminar cliente</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
+              </CardTitle>
+            </CardHeader>
+            <CardContent class="text-sm">
+              <div class="flex justify-between flex-wrap gap-2">
+                <div>
+                  <p><strong>Notes</strong></p>
+                  {{ customer.notes || "-" }}
+                </div>
+                <div>
+                  <p><strong>Address</strong></p>
+                  {{ customer.address || "-" }}
+                </div>
+                <div>
+                  <p><strong>Map URL</strong></p>
+                  <a
+                    v-if="customer.map_url"
+                    :href="customer.map_url"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="block w-fit mx-auto"
+                  >
+                    <MapIcon class="w-6 h-6 stroke-[2px]" />
+                  </a>
+                  <template v-else>-</template>
+                </div>
+                <div
+                  v-if="
+                    true ||
+                    organizationStore.currentUserOrganization?.i_organizations
+                      ?.is_cashback_enabled
+                  "
+                >
+                  <p><strong>Monedero</strong></p>
+                  <div class="text-center">
+                    {{
+                      currencyFormatter.parse(customer.cashback_balance) ?? "-"
+                    }}
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+            <CardFooter>
+              <Badge :variant="getBadgeColorFromStatus(customer.trust_status)">
+                {{
+                  LOCALE[
+                    customer.trust_status ?? "trusted"
+                  ]?.toLocaleUpperCase()
+                }}
+              </Badge>
+            </CardFooter>
+          </Card>
+        </template>
+      </div>
+
       <Table>
         <TableHeader>
           <TableRow>
@@ -248,37 +383,6 @@ watchEffect(() => {
             :key="index"
           >
             <TableRow v-for="customer in page.data" :key="customer.id">
-              <TableCell
-                class="flex items-center p-4 text-foreground whitespace-nowrap w-max"
-              >
-                <Avatar>
-                  <AvatarFallback>{{
-                    `${customer?.name?.substring(0, 1).toLocaleUpperCase()}`
-                  }}</AvatarFallback>
-                </Avatar>
-                <div class="ps-3">
-                  <div class="text-base font-semibold">{{ customer.name }}</div>
-                  <div v-if="customer.email" class="font-normal text-slate-500">
-                    {{ customer.email }}
-                  </div>
-                </div>
-              </TableCell>
-              <TableCell class="text-center">{{
-                customer.notes || "-"
-              }}</TableCell>
-              <TableCell class="text-center"
-                ><a
-                  :href="`${WHATSAPP_URL}/${customer.phone}`"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="block"
-                >
-                  {{ customer.phone }}
-                </a></TableCell
-              >
-              <TableCell class="text-center">
-                {{ customer.address || "-" }}
-              </TableCell>
               <TableCell class="text-center">
                 <a
                   v-if="customer.map_url"
@@ -310,42 +414,6 @@ watchEffect(() => {
                 class="text-center"
               >
                 {{ currencyFormatter.parse(customer.cashback_balance) ?? "-" }}
-              </TableCell>
-              <TableCell class="text-center flex justify-center gap-2">
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger as-child>
-                      <Button
-                        size="icon"
-                        variant="outline"
-                        @click="openUpdateCustomerSidebar(customer)"
-                      >
-                        <PencilIcon class="w-4 h4" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Editar cliente</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger as-child>
-                      <Button
-                        v-if="customer.trust_status === 'not_trusted'"
-                        size="icon"
-                        variant="outline"
-                        class="text-red-500 dark:text-red-500"
-                        @click="openDeleteCustomerDialog(customer)"
-                      >
-                        <TrashIcon class="w-4 h4" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Eliminar cliente</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
               </TableCell>
             </TableRow>
           </template>

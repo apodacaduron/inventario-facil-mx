@@ -20,9 +20,7 @@ import {
   AvatarImage,
   AvatarFallback,
   Table,
-  TableHeader,
   TableRow,
-  TableHead,
   TableBody,
   TableCell,
   Skeleton,
@@ -35,10 +33,12 @@ import {
   DropdownMenuRadioItem,
   Badge,
   DropdownMenuItem,
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
 } from "@/components/ui";
 import {
-  ChevronDownIcon,
-  ChevronUpIcon,
   FunnelIcon,
   InboxArrowDownIcon,
   PlusIcon,
@@ -268,153 +268,47 @@ watchEffect(() => {
     </div>
 
     <div ref="tableRef" class="overflow-x-auto">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead
-              @click="productsTableOrder.toggleTableOrder('name')"
-              class="cursor-pointer pl-4"
-            >
-              <span class="flex items-center gap-2">
-                Nombre
-                <template
-                  v-if="productsTableOrder.tableOrder.value[0] === 'name'"
+      <div
+        class="grid gap-4 mt-6 mx-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 md:mx-0"
+      >
+        <template
+          v-for="(page, index) in productsQuery.data.value?.pages"
+          :key="index"
+        >
+          <Card v-for="product in page.data" :key="product.id">
+            <CardHeader>
+              <CardTitle class="flex justify-between">
+                <div
+                  class="flex items-center text-foreground whitespace-nowrap w-max"
                 >
-                  <ChevronUpIcon
-                    v-if="productsTableOrder.tableOrder.value[1] === 'desc'"
-                    class="h-4 w-4"
-                  />
-                  <ChevronDownIcon
-                    v-if="productsTableOrder.tableOrder.value[1] === 'asc'"
-                    class="h-4 w-4"
-                  />
-                </template>
-              </span>
-            </TableHead>
-            <TableHead
-              @click="productsTableOrder.toggleTableOrder('current_stock')"
-              class="text-center cursor-pointer"
-            >
-              <span class="flex items-center gap-2">
-                Cantidad
-                <template
-                  v-if="
-                    productsTableOrder.tableOrder.value[0] === 'current_stock'
-                  "
-                >
-                  <ChevronUpIcon
-                    v-if="productsTableOrder.tableOrder.value[1] === 'desc'"
-                    class="h-4 w-4"
-                  />
-                  <ChevronDownIcon
-                    v-if="productsTableOrder.tableOrder.value[1] === 'asc'"
-                    class="h-4 w-4"
-                  />
-                </template>
-              </span>
-            </TableHead>
-            <TableHead class="text-center">Precio unitario</TableHead>
-            <TableHead class="text-center"> Precio de venta </TableHead>
-            <TableHead class="text-center"> - </TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody v-if="tableLoadingStates.showLoadingState.value">
-          <TableRow
-            v-for="(_, index) in Array.from({ length: 15 })"
-            :key="index"
-          >
-            <TableCell
-              class="flex items-center p-4 text-foreground whitespace-nowrap w-max"
-            >
-              <Skeleton class="w-[40px] h-[40px] rounded-full" />
-              <div class="ps-3 flex flex-col gap-1">
-                <div class="text-base font-semibold">
-                  <Skeleton class="h-[20px] w-[180px]" />
-                </div>
-                <div class="font-normal text-slate-500">
-                  <Skeleton class="h-4 w-[160px]" />
-                </div>
-              </div>
-            </TableCell>
-            <TableCell class="text-center items-center">
-              <Skeleton class="h-4 w-[180px]" />
-            </TableCell>
-            <TableCell class="text-center items-center">
-              <Skeleton class="h-4 w-[180px]" />
-            </TableCell>
-            <TableCell class="text-center">
-              <Skeleton class="h-4 w-[180px]" />
-            </TableCell>
-            <TableCell class="text-center">
-              <Skeleton class="w-[54px] h-[36px]" />
-            </TableCell>
-          </TableRow>
-        </TableBody>
-        <TableBody>
-          <!-- @vue-ignore -->
-          <template
-            v-for="(page, index) in productsQuery.data.value?.pages"
-            :key="index"
-          >
-            <TableRow v-for="product in page.data" :key="product.id">
-              <TableCell
-                class="flex items-center p-4 text-foreground whitespace-nowrap w-max"
-              >
-                <Avatar
-                  class="cursor-pointer"
-                  @click="
-                    layerManager.openLayer('product-image-preview', {
-                      imageUrl: product?.image_url,
-                    })
-                  "
-                >
-                  <AvatarImage
-                    :src="product?.image_url ?? ''"
-                    class="object-cover"
-                  />
-                  <AvatarFallback>{{
-                    `${product?.name?.substring(0, 1).toLocaleUpperCase()}`
-                  }}</AvatarFallback>
-                </Avatar>
-                <div class="ps-3">
-                  <div class="text-base font-semibold">{{ product.name }}</div>
-                  <div
-                    v-if="product.description"
-                    class="font-normal text-slate-500"
+                  <Avatar
+                    class="cursor-pointer"
+                    @click="
+                      layerManager.openLayer('product-image-preview', {
+                        imageUrl: product?.image_url,
+                      })
+                    "
                   >
-                    {{ product.description }}
+                    <AvatarImage
+                      :src="product?.image_url ?? ''"
+                      class="object-cover"
+                    />
+                    <AvatarFallback>{{
+                      `${product?.name?.substring(0, 1).toLocaleUpperCase()}`
+                    }}</AvatarFallback>
+                  </Avatar>
+                  <div class="ps-3">
+                    <div class="text-base font-semibold">
+                      {{ product.name }}
+                    </div>
+                    <div
+                      v-if="product.description"
+                      class="font-normal text-slate-500"
+                    >
+                      {{ product.description }}
+                    </div>
                   </div>
                 </div>
-              </TableCell>
-              <TableCell class="text-center">
-                <div class="flex items-center gap-4">
-                  <Badge
-                    v-bind="getProductStockBadgeProps(product.current_stock)"
-                  >
-                    {{ product.current_stock }}
-                  </Badge>
-                  <ProBadge :visible="!organizationStore.isPremium">
-                    <Button
-                      :disabled="!organizationStore.isPremium"
-                      @click="
-                        isProductStockHistorySidebarOpen = true;
-                        activeProduct = product;
-                      "
-                      variant="outline"
-                      size="icon"
-                    >
-                      <HistoryIcon class="size-4" />
-                    </Button>
-                  </ProBadge>
-                </div>
-              </TableCell>
-              <TableCell class="text-center">{{
-                currencyFormatter.parse(product.unit_price) ?? "-"
-              }}</TableCell>
-              <TableCell class="text-center">
-                {{ currencyFormatter.parse(product.retail_price) ?? "-" }}
-              </TableCell>
-              <TableCell class="text-center">
                 <div class="flex justify-center gap-2">
                   <DropdownMenu>
                     <DropdownMenuTrigger as-child>
@@ -449,9 +343,79 @@ watchEffect(() => {
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
-              </TableCell>
-            </TableRow>
-          </template>
+              </CardTitle>
+            </CardHeader>
+            <CardContent class="text-sm">
+              <div class="flex justify-between">
+                <div>
+                  <p><strong>Cantidad</strong></p>
+                  <div class="flex items-center gap-4">
+                    <Badge
+                      v-bind="getProductStockBadgeProps(product.current_stock)"
+                    >
+                      {{ product.current_stock }}
+                    </Badge>
+                    <ProBadge :visible="!organizationStore.isPremium">
+                      <Button
+                        :disabled="!organizationStore.isPremium"
+                        @click="
+                          isProductStockHistorySidebarOpen = true;
+                          activeProduct = product;
+                        "
+                        variant="outline"
+                        size="icon"
+                      >
+                        <HistoryIcon class="size-4" />
+                      </Button>
+                    </ProBadge>
+                  </div>
+                </div>
+                <div>
+                  <p><strong>Precio unitario</strong></p>
+                  {{ currencyFormatter.parse(product.unit_price) ?? "-" }}
+                </div>
+                <div>
+                  <p><strong>Precio de venta</strong></p>
+                  {{ currencyFormatter.parse(product.retail_price) ?? "-" }}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </template>
+      </div>
+
+      <Table>
+        <TableBody v-if="tableLoadingStates.showLoadingState.value">
+          <TableRow
+            v-for="(_, index) in Array.from({ length: 15 })"
+            :key="index"
+          >
+            <TableCell
+              class="flex items-center p-4 text-foreground whitespace-nowrap w-max"
+            >
+              <Skeleton class="w-[40px] h-[40px] rounded-full" />
+              <div class="ps-3 flex flex-col gap-1">
+                <div class="text-base font-semibold">
+                  <Skeleton class="h-[20px] w-[180px]" />
+                </div>
+                <div class="font-normal text-slate-500">
+                  <Skeleton class="h-4 w-[160px]" />
+                </div>
+              </div>
+            </TableCell>
+            <TableCell class="text-center items-center">
+              <Skeleton class="h-4 w-[180px]" />
+            </TableCell>
+            <TableCell class="text-center items-center">
+              <Skeleton class="h-4 w-[180px]" />
+            </TableCell>
+            <TableCell class="text-center">
+              <Skeleton class="h-4 w-[180px]" />
+            </TableCell>
+            <TableCell class="text-center">
+              <Skeleton class="w-[54px] h-[36px]" />
+            </TableCell>
+          </TableRow>
         </TableBody>
       </Table>
       <div

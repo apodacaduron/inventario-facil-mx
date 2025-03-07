@@ -14,9 +14,7 @@ import {
   Avatar,
   AvatarFallback,
   Table,
-  TableHeader,
   TableRow,
-  TableHead,
   TableBody,
   TableCell,
   AvatarImage,
@@ -33,6 +31,11 @@ import {
   TooltipTrigger,
   TooltipContent,
   Badge,
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardFooter,
 } from "@/components/ui";
 import {
   BanknotesIcon,
@@ -292,18 +295,197 @@ watchEffect(() => {
     </div>
 
     <div ref="tableRef" class="overflow-x-auto">
+      <div
+        class="grid gap-4 mt-6 mx-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 md:mx-0"
+      >
+        <template
+          v-for="(page, index) in salesQuery.data.value?.pages"
+          :key="index"
+        >
+          <Card
+            v-for="sale in page.data"
+            :key="sale.id"
+            @click.stop="openViewSaleSidebar(sale)"
+          >
+            <CardHeader>
+              <CardTitle class="flex justify-between">
+                <div class="flex">
+                  <Avatar>
+                    <AvatarFallback>{{
+                      (sale.i_customers?.name ?? sale.customer_name)
+                        ?.substring(0, 1)
+                        .toLocaleUpperCase() ?? "?"
+                    }}</AvatarFallback>
+                  </Avatar>
+                  <div class="ps-3">
+                    <div class="text-base font-semibold">
+                      {{ sale.i_customers?.name ?? sale.customer_name ?? "-" }}
+                    </div>
+                    <div
+                      v-if="sale.i_customers?.phone || sale.customer_phone"
+                      class="font-normal text-slate-500"
+                    >
+                      <a
+                        :href="`${WHATSAPP_URL}/${
+                          sale.i_customers?.phone ?? sale.customer_phone
+                        }`"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="block"
+                      >
+                        {{ sale.i_customers?.phone ?? sale.customer_phone }}
+                      </a>
+                    </div>
+                  </div>
+                </div>
+                <div class="flex gap-2">
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger as-child>
+                        <Button
+                          size="icon"
+                          variant="outline"
+                          @click.stop="openViewSaleSidebar(sale)"
+                        >
+                          <EyeIcon class="w-4 h-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Ver detalles</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger as-child>
+                        <Button
+                          size="icon"
+                          variant="outline"
+                          v-if="sale.status === 'in_progress'"
+                          @click.stop="openUpdateSaleSidebar(sale)"
+                        >
+                          <PencilIcon class="w-4 h-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Editar venta</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger as-child>
+                        <Button
+                          size="icon"
+                          variant="outline"
+                          v-if="sale.status === 'cancelled'"
+                          class="text-red-500 dark:text-red-500"
+                          @click.stop="openDeleteSaleDialog(sale)"
+                        >
+                          <TrashIcon class="w-4 h-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Eliminar venta</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
+              </CardTitle>
+            </CardHeader>
+            <CardContent class="text-sm">
+              <div class="flex justify-between">
+                <div>
+                  <p><strong>Productos</strong></p>
+                  <div
+                    class="flex -space-x-4 rtl:space-x-reverse w-fit cursor-pointer"
+                    @click="openViewSaleSidebar(sale)"
+                  >
+                    <Avatar
+                      v-for="saleProduct in sale.i_sale_products.slice(0, 3)"
+                      :key="saleProduct.id"
+                      class="border-muted border-2"
+                    >
+                      <AvatarImage
+                        :src="saleProduct.image_url ?? ''"
+                        class="object-cover"
+                      />
+                      <AvatarFallback
+                        >{ `${saleProduct.name?.substring(0,
+                        1).toLocaleUpperCase()}` }</AvatarFallback
+                      >
+                    </Avatar>
+                    <div
+                      v-if="sale.i_sale_products.length > 3"
+                      class="flex items-center justify-center w-10 h-10 text-xs font-medium border-2 rounded-full bg-background border-muted"
+                    >
+                      {{ sale.i_sale_products.length - 3 }}
+                    </div>
+                  </div>
+                </div>
+
+                <p>
+                  <strong>Cantidad</strong><br />
+                  {{
+                    sale.i_sale_products.reduce(
+                      (acc, saleProduct) => acc + (saleProduct.qty ?? 0),
+                      0
+                    )
+                  }}
+                </p>
+
+                <div>
+                  <p><strong>Total</strong></p>
+                  <div v-if="sale.redeem_cashback">
+                    <span
+                      v-if="
+                        sale.cashback_redeemed ||
+                        sale.i_customers?.cashback_balance
+                      "
+                      class="line-through text-muted-foreground mr-2"
+                    >
+                      {{ currencyFormatter.parse(sale.total ?? 0) }}
+                    </span>
+                    <span
+                      v-if="
+                        (sale.total ?? 0) >
+                        ((sale.cashback_redeemed ||
+                          sale.i_customers?.cashback_balance) ??
+                          0)
+                      "
+                    >
+                      {{
+                        currencyFormatter.parse(
+                          (sale.total ?? 0) -
+                            ((sale.cashback_redeemed ||
+                              sale.i_customers?.cashback_balance) ??
+                              0)
+                        )
+                      }}
+                    </span>
+                    <span v-else>GRATIS</span>
+                  </div>
+                  <div v-else>
+                    {{ currencyFormatter.parse(sale.total ?? 0) }}
+                  </div>
+                </div>
+
+                <p>
+                  <strong>Costo de envío</strong><br />
+                  {{ currencyFormatter.parse(sale.shipping_cost) }}
+                </p>
+              </div>
+            </CardContent>
+            <CardFooter>
+              <Badge :variant="getBadgeColorFromStatus(sale.status)"
+                >{{ LOCALE[sale.status ?? "in_progress"]?.toLocaleUpperCase() }}
+              </Badge>
+            </CardFooter>
+          </Card>
+        </template>
+      </div>
+
       <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead class="pl-4"> Nombre </TableHead>
-            <TableHead class="text-center">Productos</TableHead>
-            <TableHead class="text-center">Cantidad</TableHead>
-            <TableHead class="text-center"> Total </TableHead>
-            <TableHead class="text-center"> Costo de envío </TableHead>
-            <TableHead class="text-center"> Estatus</TableHead>
-            <TableHead class="text-center"> - </TableHead>
-          </TableRow>
-        </TableHeader>
         <TableBody v-if="tableLoadingStates.showLoadingState.value">
           <TableRow
             v-for="(_, index) in Array.from({ length: 15 })"
@@ -344,180 +526,6 @@ watchEffect(() => {
               <Skeleton class="w-[54px] h-[36px]" />
             </TableCell>
           </TableRow>
-        </TableBody>
-        <TableBody>
-          <!-- @vue-ignore -->
-          <template
-            v-for="(page, index) in salesQuery.data.value?.pages"
-            :key="index"
-          >
-            <TableRow v-for="sale in page.data" :key="sale.id">
-              <TableCell
-                class="flex items-center p-4 text-foreground whitespace-nowrap w-max"
-                @click="openViewSaleSidebar(sale)"
-              >
-                <Avatar>
-                  <AvatarFallback>{{
-                    (sale.i_customers?.name ?? sale.customer_name)
-                      ?.substring(0, 1)
-                      .toLocaleUpperCase() ?? "?"
-                  }}</AvatarFallback>
-                </Avatar>
-                <div class="ps-3">
-                  <div class="text-base font-semibold">
-                    {{ sale.i_customers?.name ?? sale.customer_name ?? "-" }}
-                  </div>
-                  <div
-                    v-if="sale.i_customers?.phone || sale.customer_phone"
-                    class="font-normal text-slate-500"
-                  >
-                    <a
-                      :href="`${WHATSAPP_URL}/${
-                        sale.i_customers?.phone ?? sale.customer_phone
-                      }`"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      class="block"
-                    >
-                      {{ sale.i_customers?.phone ?? sale.customer_phone }}
-                    </a>
-                  </div>
-                </div>
-              </TableCell>
-              <TableCell class="text-center"
-                ><div
-                  class="flex -space-x-4 rtl:space-x-reverse w-fit mx-auto cursor-pointer"
-                  @click="openViewSaleSidebar(sale)"
-                >
-                  <Avatar
-                    v-for="saleProduct in sale.i_sale_products.slice(0, 3)"
-                    :key="saleProduct.id"
-                    class="border-muted border-2"
-                  >
-                    <AvatarImage
-                      :src="saleProduct.image_url ?? ''"
-                      class="object-cover"
-                    />
-                    <AvatarFallback>{{
-                      `${saleProduct.name?.substring(0, 1).toLocaleUpperCase()}`
-                    }}</AvatarFallback>
-                  </Avatar>
-                  <div
-                    v-if="sale.i_sale_products.length > 3"
-                    class="flex items-center justify-center w-10 h-10 text-xs font-medium border-2 rounded-full bg-background border-muted"
-                  >
-                    {{ sale.i_sale_products.length - 3 }}
-                  </div>
-                </div></TableCell
-              >
-              <TableCell
-                @click="openViewSaleSidebar(sale)"
-                class="text-center"
-                >{{
-                  sale.i_sale_products.reduce(
-                    (acc, saleProduct) => acc + (saleProduct.qty ?? 0),
-                    0
-                  )
-                }}</TableCell
-              >
-              <TableCell @click="openViewSaleSidebar(sale)" class="text-center">
-                <div v-if="sale.redeem_cashback">
-                  <span
-                    v-if="
-                      sale.cashback_redeemed ||
-                      sale.i_customers?.cashback_balance
-                    "
-                    class="line-through text-muted-foreground mr-2"
-                  >
-                    {{ currencyFormatter.parse(sale.total ?? 0) }}
-                  </span>
-                  <span
-                    v-if="
-                      (sale.total ?? 0) >
-                      ((sale.cashback_redeemed ||
-                        sale.i_customers?.cashback_balance) ??
-                        0)
-                    "
-                    >{{
-                      currencyFormatter.parse(
-                        (sale.total ?? 0) -
-                          ((sale.cashback_redeemed ||
-                            sale.i_customers?.cashback_balance) ??
-                            0)
-                      )
-                    }}</span
-                  >
-                  <span v-else>GRATIS</span>
-                </div>
-                <div v-else>
-                  {{ currencyFormatter.parse(sale.total ?? 0) }}
-                </div>
-              </TableCell>
-              <TableCell @click="openViewSaleSidebar(sale)" class="text-center">
-                {{ currencyFormatter.parse(sale.shipping_cost) }}
-              </TableCell>
-              <TableCell @click="openViewSaleSidebar(sale)" class="text-center">
-                <Badge :variant="getBadgeColorFromStatus(sale.status)"
-                  >{{
-                    LOCALE[sale.status ?? "in_progress"]?.toLocaleUpperCase()
-                  }}
-                </Badge>
-              </TableCell>
-              <TableCell class="text-center flex justify-center gap-2">
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger as-child>
-                      <Button
-                        size="icon"
-                        variant="outline"
-                        @click="openViewSaleSidebar(sale)"
-                      >
-                        <EyeIcon class="w-4 h-4" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Ver detalles</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger as-child>
-                      <Button
-                        size="icon"
-                        variant="outline"
-                        v-if="sale.status === 'in_progress'"
-                        @click="openUpdateSaleSidebar(sale)"
-                      >
-                        <PencilIcon class="w-4 h-4" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Editar venta</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger as-child>
-                      <Button
-                        size="icon"
-                        variant="outline"
-                        v-if="sale.status === 'cancelled'"
-                        class="text-red-500 dark:text-red-500"
-                        @click="openDeleteSaleDialog(sale)"
-                      >
-                        <TrashIcon class="w-4 h-4" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Eliminar venta</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </TableCell>
-            </TableRow>
-          </template>
         </TableBody>
       </Table>
       <div
