@@ -263,11 +263,11 @@ function getCardDataFromPlan(plan: Tables<"plans">) {
             Contactar</Button
           >
         </a>
-        <a :href="SUPPORT_WHATSAPP">
+        <!-- <a :href="SUPPORT_WHATSAPP">
           <Button variant="outline" size="lg"
             ><PhoneIcon class="size-4 mr-2" /> Whatsapp</Button
           >
-        </a>
+        </a> -->
       </div>
     </section>
     <footer class="mx-auto max-w-7xl">

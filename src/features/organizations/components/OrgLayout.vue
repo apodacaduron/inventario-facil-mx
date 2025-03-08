@@ -167,7 +167,7 @@ const menuList = computed(() => ({
                   <EnvelopeIcon class="size-5" />
                   <span class="ms-2">Soporte correo</span>
                 </a>
-                <a
+                <!-- <a
                   :href="SUPPORT_WHATSAPP"
                   target="_blank"
                   class="w-full inline-flex items-center whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground rounded-md h-10 px-3 text-md justify-start"
@@ -175,7 +175,7 @@ const menuList = computed(() => ({
                 >
                   <PhoneIcon class="size-5" />
                   <span class="ms-2">Soporte Whatsapp</span>
-                </a>
+                </a> -->
                 <Button
                   v-if="!organizationStore.isPremium"
                   class="w-full"
@@ -322,7 +322,7 @@ const menuList = computed(() => ({
           <EnvelopeIcon class="size-5" />
           <span class="ms-2">Soporte correo</span>
         </a>
-        <a
+        <!-- <a
           :href="SUPPORT_WHATSAPP"
           target="_blank"
           class="w-full inline-flex items-center whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground rounded-md h-10 px-3 text-md justify-start"
@@ -330,7 +330,7 @@ const menuList = computed(() => ({
         >
           <PhoneIcon class="size-5" />
           <span class="ms-2">Soporte Whatsapp</span>
-        </a>
+        </a> -->
         <Button
           v-if="!organizationStore.isPremium"
           class="w-full"

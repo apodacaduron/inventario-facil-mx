@@ -30,12 +30,12 @@ const componentName = "auth-layout";
               <span>Soporte correo</span>
             </DropdownMenuItem>
           </a>
-          <a :href="SUPPORT_WHATSAPP" target="_blank">
+          <!-- <a :href="SUPPORT_WHATSAPP" target="_blank">
             <DropdownMenuItem>
               <PhoneIcon class="size-4 mr-3" />
               <span>Soporte Whatsapp</span>
             </DropdownMenuItem>
-          </a>
+          </a> -->
         </DropdownMenuContent>
       </DropdownMenu>
     </main>
