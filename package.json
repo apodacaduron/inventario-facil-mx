@@ -13,6 +13,7 @@
     "@formkit/auto-animate": "^0.8.2",
     "@heroicons/vue": "^2.1.4",
     "@radix-icons/vue": "^1.0.0",
+    "@sentry/vite-plugin": "^3.2.2",
     "@sentry/vue": "^8.17.0",
     "@stripe/stripe-js": "^4.1.0",
     "@supabase/supabase-js": "^2.44.2",

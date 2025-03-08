@@ -3,6 +3,7 @@ import { defineConfig } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
 import Sitemap from "vite-plugin-sitemap";
 
+import { sentryVitePlugin } from "@sentry/vite-plugin";
 import vue from "@vitejs/plugin-vue";
 
 // https://vitejs.dev/config/
@@ -39,6 +40,10 @@ export default defineConfig({
           },
         ],
       },
+    }),
+    sentryVitePlugin({
+      org: "inventariofacilmx",
+      project: "inventariofacilmx",
     }),
   ],
   resolve: {
