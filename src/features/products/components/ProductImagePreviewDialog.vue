@@ -13,7 +13,7 @@ const props = defineProps<Props>();
 
 const [ModalBodyTemplate, ModalBody] = createReusableTemplate();
 const imageUrl = toRef(
-  () => props.layerManager.currentLayer.value.state.imageUrl as string
+  () => props.layerManager.currentLayer.value.state?.imageUrl as string
 );
 </script>
 

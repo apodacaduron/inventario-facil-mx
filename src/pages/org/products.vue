@@ -284,9 +284,11 @@ watchEffect(() => {
                   <Avatar
                     class="cursor-pointer"
                     @click="
-                      layerManager.openLayer('product-image-preview', {
-                        imageUrl: product?.image_url,
-                      })
+                      product?.image_url
+                        ? layerManager.openLayer('product-image-preview', {
+                            imageUrl: product?.image_url,
+                          })
+                        : openProductImagesSidebar(product)
                     "
                   >
                     <AvatarImage

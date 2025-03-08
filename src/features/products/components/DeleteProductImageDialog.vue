@@ -41,6 +41,7 @@ const deleteProductImageMutation = useMutation({
     const response = await productServices.deleteProductImage(productImage);
     notifyIfHasError(response.error);
     await queryClient.invalidateQueries({ queryKey: ["product-images"] });
+    await queryClient.invalidateQueries({ queryKey: ["products"] });
     openModel.value = false;
   },
 });
