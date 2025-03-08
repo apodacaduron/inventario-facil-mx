@@ -179,6 +179,33 @@ function getCardDataFromPlan(plan: Tables<"plans">) {
       <GoPremiumSidebar v-model:open="isGoPremiumSidebarOpen" />
 
       <div class="flex flex-col justify-center text-center">
+        <h2 class="text-4xl lg:text-5xl mb-3">
+          ¿Cómo utilizar inventariofacil.mx?
+        </h2>
+        <p class="text-muted-foreground">
+          Una muestra basica del funcionamiento de la plataforma
+        </p>
+      </div>
+
+      <div class="my-14">
+        <div class="w-full aspect-video">
+          <iframe
+            class="w-full h-full"
+            src="https://www.youtube.com/embed/4frFBUy_yd8?si=mu0SzXhTO8SmTC11"
+            title="YouTube video player"
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerpolicy="strict-origin-when-cross-origin"
+            allowfullscreen
+          >
+          </iframe>
+        </div>
+      </div>
+    </section>
+    <section class="mx-auto px-6 max-w-5xl pb-16">
+      <GoPremiumSidebar v-model:open="isGoPremiumSidebarOpen" />
+
+      <div class="flex flex-col justify-center text-center">
         <h2 class="text-4xl lg:text-5xl mb-3">Planes y Precios</h2>
         <p class="text-muted-foreground">
           Elige el plan perfecto para tu negocio
