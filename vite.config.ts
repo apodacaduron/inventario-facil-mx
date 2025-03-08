@@ -1,11 +1,15 @@
 import { fileURLToPath, URL } from "url";
 import { defineConfig } from "vite";
-import vue from "@vitejs/plugin-vue";
 import { VitePWA } from "vite-plugin-pwa";
-import Sitemap from 'vite-plugin-sitemap';
+import Sitemap from "vite-plugin-sitemap";
+
+import vue from "@vitejs/plugin-vue";
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  build: {
+    sourcemap: true,
+  },
   plugins: [
     vue(),
     Sitemap(),
