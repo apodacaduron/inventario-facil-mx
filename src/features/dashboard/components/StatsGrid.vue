@@ -87,6 +87,14 @@ const periodString = toRef(() => {
 
 <template>
   <div class="grid grid-cols-1 gap-5 xl:grid-cols-2 2xl:grid-cols-4">
+    <a href="https://www.youtube.com/watch?v=4frFBUy_yd8" target="_blank">
+      <Card
+        class="h-[110px] flex justify-center items-center text-xl bg-primary text-primary-foreground"
+      >
+        ¿Cómo utilizar inventariofacil.mx?
+      </Card>
+    </a>
+
     <router-link :to="`/org/${route.params.orgId}/sales`">
       <Card>
         <CardHeader class="flex relative pb-2">
