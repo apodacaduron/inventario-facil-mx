@@ -10,14 +10,12 @@ export function useLayerManager(context?: {
     initialState?: LayerState[];
   };
   handlers?: {
-    onRequestNextLayer?(): void
+    onRequestNextLayer?(): void;
   };
 }) {
   const layers = ref<LayerState[]>(context?.options?.initialState ?? []);
 
-  const currentLayer = computed(
-    () => layers.value[layers.value.length - 1]
-  );
+  const currentLayer = computed(() => layers.value[layers.value.length - 1]);
   const hasAnyLayerOpen = computed(() => layers.value.length);
 
   function openLayer(layerId: string, state?: LayerState["state"]) {

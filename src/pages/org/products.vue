@@ -286,7 +286,7 @@ watchEffect(() => {
                     @click="
                       product?.image_url
                         ? layerManager.openLayer('product-image-preview', {
-                            imageUrl: product?.image_url,
+                            product,
                           })
                         : openProductImagesSidebar(product)
                     "
