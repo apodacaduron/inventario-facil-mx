@@ -18,8 +18,8 @@ import { useCurrencyFormatter } from "@/features/products";
 import { useRouter } from "vue-router";
 import { ref } from "vue";
 import { GoPremiumSidebar } from "@/features/organizations";
-import { SUPPORT_EMAIL, SUPPORT_WHATSAPP } from "@/config/constants";
-import { MailIcon, PhoneIcon } from "lucide-vue-next";
+import { SUPPORT_EMAIL } from "@/config/constants";
+import { MailIcon } from "lucide-vue-next";
 
 const isGoPremiumSidebarOpen = ref(false);
 const router = useRouter();

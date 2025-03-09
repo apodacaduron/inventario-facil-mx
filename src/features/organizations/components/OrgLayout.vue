@@ -27,7 +27,7 @@ import {
   MoonIcon,
   SunIcon,
 } from "@heroicons/vue/24/outline";
-import { CrownIcon, MenuIcon, PhoneIcon, SettingsIcon } from "lucide-vue-next";
+import { CrownIcon, MenuIcon, SettingsIcon } from "lucide-vue-next";
 import GoPremiumSidebar from "./GoPremiumSidebar.vue";
 import { computed } from "vue";
 import {
@@ -40,7 +40,7 @@ import OrganizationSwitcher from "./OrganizationSwitcher.vue";
 import UpdateOrganizationSidebar from "./UpdateOrganizationSidebar.vue";
 import { useLayerManager } from "@/features/global";
 import CreateOrganizationSidebar from "./CreateOrganizationSidebar.vue";
-import { SUPPORT_EMAIL, SUPPORT_WHATSAPP } from "@/config/constants";
+import { SUPPORT_EMAIL } from "@/config/constants";
 import UploadOrganizationLogoSidebar from "./UploadOrganizationLogoSidebar.vue";
 
 const layerManager = useLayerManager();

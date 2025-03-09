@@ -6,8 +6,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui";
-import { SUPPORT_EMAIL, SUPPORT_WHATSAPP } from "@/config/constants";
-import { HelpCircleIcon, MailIcon, PhoneIcon } from "lucide-vue-next";
+import { SUPPORT_EMAIL } from "@/config/constants";
+import { HelpCircleIcon, MailIcon } from "lucide-vue-next";
 
 const componentName = "auth-layout";
 </script>
