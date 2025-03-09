@@ -181,28 +181,30 @@ const yearMonthlySalesData = computed(() => {
           :to="dashboardDates.dateRangeFromPeriod.value!.to.toISOString()"
         />
 
-        <Card>
-          <CardHeader>
-            <CardTitle class="font-medium">
-              Total de ventas del año en curso
-            </CardTitle>
-          </CardHeader>
-          <CardContent class="overflow-x-auto">
-            <div>
-              <AreaChart
-                v-if="yearMonthlySalesData?.length"
-                :data="yearMonthlySalesData"
-                :yFormatter="
-                  (tick) =>
-                    currencyFormatter.parse(Number(tick) * 100) ??
-                    tick.toString()
-                "
-                index="name"
-                :categories="['total']"
-              />
-            </div>
-          </CardContent>
-        </Card>
+        <ProBadge :visible="!organizationStore.isPremium">
+          <Card>
+            <CardHeader>
+              <CardTitle class="font-medium">
+                Total de ventas del año en curso
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div :class="{ 'filter blur-sm': !organizationStore.isPremium }">
+                <AreaChart
+                  v-if="yearMonthlySalesData?.length"
+                  :data="yearMonthlySalesData"
+                  :yFormatter="
+                    (tick) =>
+                      currencyFormatter.parse(Number(tick) * 100) ??
+                      tick.toString()
+                  "
+                  index="name"
+                  :categories="['total']"
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </ProBadge>
       </div>
     </div>
   </div>

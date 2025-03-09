@@ -36,6 +36,8 @@ import {
   TrendingUpIcon,
   UsersIcon,
 } from "lucide-vue-next";
+import { ProBadge } from "@/components";
+import { useOrganizationStore } from "@/stores";
 
 const props = defineProps<{
   from: string;
@@ -45,6 +47,7 @@ const props = defineProps<{
 
 const route = useRoute();
 const currencyFormatter = useCurrencyFormatter();
+const organizationStore = useOrganizationStore();
 
 const queryOptions = {
   options: {
@@ -117,36 +120,43 @@ const periodString = toRef(() => {
       </Card>
     </router-link>
 
-    <router-link :to="`/org/${route.params.orgId}/sales`">
-      <Card>
-        <CardHeader class="flex relative pb-2">
-          <CardTitle class="text-sm font-medium">
-            Ganancia de ventas
-          </CardTitle>
-          <Avatar
-            class="absolute top-2 right-4 bg-primary text-primary-foreground"
-          >
-            <AvatarFallback> <TrendingUpIcon class="size-4" /> </AvatarFallback
-          ></Avatar>
-        </CardHeader>
-        <CardContent>
-          <div class="text-2xl font-bold">
-            <template v-if="isDefined(salesTotalProfitQuery.data.value)"
-              >{{ currencyFormatter.parse(salesTotalProfitQuery.data.value) }} /
-              {{ periodString }}
-            </template>
-            <Skeleton class="h-[32px] w-[64px]" v-else :count="1" />
-          </div>
-        </CardContent>
-      </Card>
-    </router-link>
+    <ProBadge :visible="!organizationStore.isPremium">
+      <router-link :to="`/org/${route.params.orgId}/sales`">
+        <Card>
+          <CardHeader class="flex relative pb-2">
+            <CardTitle class="text-sm font-medium">
+              Ganancia de ventas
+            </CardTitle>
+            <Avatar
+              class="absolute top-2 right-4 bg-primary text-primary-foreground"
+            >
+              <AvatarFallback>
+                <TrendingUpIcon class="size-4" /> </AvatarFallback
+            ></Avatar>
+          </CardHeader>
+          <CardContent>
+            <div
+              :class="[
+                'text-2xl font-bold',
+                { 'filter blur-md': !organizationStore.isPremium },
+              ]"
+            >
+              <template v-if="isDefined(salesTotalProfitQuery.data.value)"
+                >{{ currencyFormatter.parse(salesTotalProfitQuery.data.value) }}
+                /
+                {{ periodString }}
+              </template>
+              <Skeleton class="h-[32px] w-[64px]" v-else :count="1" />
+            </div>
+          </CardContent>
+        </Card>
+      </router-link>
+    </ProBadge>
 
     <router-link :to="`/org/${route.params.orgId}/sales`">
       <Card>
         <CardHeader class="flex relative pb-2">
-          <CardTitle class="text-sm font-medium">
-            Cantidad de ventas
-          </CardTitle>
+          <CardTitle class="text-sm font-medium"> Número de ventas </CardTitle>
           <Avatar
             class="absolute top-2 right-4 bg-primary text-primary-foreground"
           >
@@ -189,77 +199,91 @@ const periodString = toRef(() => {
       </Card>
     </router-link>
 
-    <router-link :to="`/org/${route.params.orgId}/sales`">
-      <Card>
-        <CardHeader class="flex relative pb-2">
-          <CardTitle class="text-sm font-medium"
-            >Los productos mas vendidos</CardTitle
-          >
-          <Avatar
-            class="absolute top-2 right-4 bg-primary text-primary-foreground"
-          >
-            <AvatarFallback> <StarIcon class="size-4" /> </AvatarFallback
-          ></Avatar>
-        </CardHeader>
-        <CardContent>
-          <div class="text-2xl font-bold h-[32px] flex flex-row">
-            <template v-if="isDefined(mostSoldProductsQuery.data.value)">
-              <div
-                class="relative"
-                v-for="product in mostSoldProductsQuery.data.value"
-                :key="product.product_id"
-              >
-                <Avatar :class="`border-muted border-2`">
-                  <AvatarImage
-                    :src="product?.image_url ?? ''"
-                    class="object-cover"
-                  />
-                  <AvatarFallback>
-                    {{
-                      `${product?.name?.substring(0, 1).toLocaleUpperCase()}`
-                    }}
-                  </AvatarFallback>
-                </Avatar>
-              </div>
-              <span class="ml-2">/ {{ periodString }}</span>
-            </template>
-            <Skeleton class="h-[32px] w-[64px]" v-else :count="1" />
-          </div>
-        </CardContent>
-      </Card>
-    </router-link>
+    <ProBadge :visible="!organizationStore.isPremium">
+      <router-link :to="`/org/${route.params.orgId}/sales`">
+        <Card>
+          <CardHeader class="flex relative pb-2">
+            <CardTitle class="text-sm font-medium"
+              >Los productos mas vendidos</CardTitle
+            >
+            <Avatar
+              class="absolute top-2 right-4 bg-primary text-primary-foreground"
+            >
+              <AvatarFallback> <StarIcon class="size-4" /> </AvatarFallback
+            ></Avatar>
+          </CardHeader>
+          <CardContent>
+            <div
+              :class="[
+                'text-2xl font-bold h-[32px] flex flex-row',
+                { 'filter blur-md': !organizationStore.isPremium },
+              ]"
+            >
+              <template v-if="isDefined(mostSoldProductsQuery.data.value)">
+                <div
+                  class="relative"
+                  v-for="product in mostSoldProductsQuery.data.value"
+                  :key="product.product_id"
+                >
+                  <Avatar :class="`border-muted border-2`">
+                    <AvatarImage
+                      :src="product?.image_url ?? ''"
+                      class="object-cover"
+                    />
+                    <AvatarFallback>
+                      {{
+                        `${product?.name?.substring(0, 1).toLocaleUpperCase()}`
+                      }}
+                    </AvatarFallback>
+                  </Avatar>
+                </div>
+                <span class="ml-2">/ {{ periodString }}</span>
+              </template>
+              <Skeleton class="h-[32px] w-[64px]" v-else :count="1" />
+            </div>
+          </CardContent>
+        </Card>
+      </router-link>
+    </ProBadge>
 
-    <router-link :to="`/org/${route.params.orgId}/customers`">
-      <Card>
-        <CardHeader class="flex relative pb-2">
-          <CardTitle class="text-sm font-medium"
-            >Los mejores clientes</CardTitle
-          >
-          <Avatar
-            class="absolute top-2 right-4 bg-primary text-primary-foreground"
-          >
-            <AvatarFallback> <AwardIcon class="size-4" /> </AvatarFallback
-          ></Avatar>
-        </CardHeader>
-        <CardContent>
-          <div class="text-2xl font-bold flex flex-row gap-2 lg:h-[32px]">
-            <template v-if="isDefined(bestCustomersQuery.data.value)">
-              <div
-                class="relative"
-                v-for="customer in bestCustomersQuery.data.value"
-                :key="customer.customer_id"
-              >
-                <Badge>
-                  {{ customer.name }}
-                </Badge>
-              </div>
-              / {{ periodString }}
-            </template>
-            <Skeleton class="h-[32px] w-[64px]" v-else :count="1" />
-          </div>
-        </CardContent>
-      </Card>
-    </router-link>
+    <ProBadge :visible="!organizationStore.isPremium">
+      <router-link :to="`/org/${route.params.orgId}/customers`">
+        <Card>
+          <CardHeader class="flex relative pb-2">
+            <CardTitle class="text-sm font-medium"
+              >Los mejores clientes</CardTitle
+            >
+            <Avatar
+              class="absolute top-2 right-4 bg-primary text-primary-foreground"
+            >
+              <AvatarFallback> <AwardIcon class="size-4" /> </AvatarFallback
+            ></Avatar>
+          </CardHeader>
+          <CardContent>
+            <div
+              :class="[
+                'text-2xl font-bold flex flex-row gap-2 lg:h-[32px]',
+                { 'filter blur-md': !organizationStore.isPremium },
+              ]"
+            >
+              <template v-if="isDefined(bestCustomersQuery.data.value)">
+                <div
+                  class="relative"
+                  v-for="customer in bestCustomersQuery.data.value"
+                  :key="customer.customer_id"
+                >
+                  <Badge>
+                    {{ customer.name }}
+                  </Badge>
+                </div>
+                / {{ periodString }}
+              </template>
+              <Skeleton class="h-[32px] w-[64px]" v-else :count="1" />
+            </div>
+          </CardContent>
+        </Card>
+      </router-link>
+    </ProBadge>
 
     <router-link :to="`/org/${route.params.orgId}/products`">
       <Card>
