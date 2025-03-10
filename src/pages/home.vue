@@ -1,116 +1,15 @@
 <script setup lang="ts">
 import { useAuthStore, useOrganizationStore } from "@/stores";
-import {
-  Button,
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-  Separator,
-} from "@/components/ui";
+import { Button, Separator } from "@/components/ui";
 import { NavigationBar } from "@/features/home";
 import { useDark } from "@vueuse/core";
-import { usePlansQuery } from "@/features/subscriptions";
-import { Tables } from "../../types_db";
-import { useCurrencyFormatter } from "@/features/products";
-import { useRouter } from "vue-router";
-import { ref } from "vue";
-import { GoPremiumSidebar } from "@/features/organizations";
 import { SUPPORT_EMAIL } from "@/config/constants";
 import { MailIcon } from "lucide-vue-next";
+import PricingGrid from "@/features/home/components/PricingGrid.vue";
 
-const isGoPremiumSidebarOpen = ref(false);
-const router = useRouter();
 const authStore = useAuthStore();
 const organizationStore = useOrganizationStore();
 const isDark = useDark();
-const currencyFormatter = useCurrencyFormatter();
-
-const plansQuery = usePlansQuery({
-  options: {
-    enabled: true,
-  },
-});
-
-function getCardDataFromPlan(plan: Tables<"plans">) {
-  switch (plan.name) {
-    case "premium":
-      return {
-        title: "Plan PRO",
-        subtitle: "Para negocios en expansión y éxito garantizado",
-        price: currencyFormatter.parse(plan.price, {
-          maximumFractionDigits: 0,
-        }),
-        period: "/mes",
-        description: `
-          <ul>
-            <li>Hasta ${plan.max_customers} clientes y ${plan.max_products} productos</li>  
-            <li>Hasta ${plan.max_organizations} organizaciones</li>  
-            <li>Página pública para compartir inventario con clientes</li>  
-            <li>Estadísticas avanzadas</li>  
-            <li>Monedero electrónico para tus clientes</li>
-          </ul>
-        `,
-        action: {
-          label: (() => {
-            if (authStore.isLoggedIn && authStore.isPremiumAccount) {
-              return "Ya cuentas con este plan";
-            }
-
-            return "Obtener PRO";
-          })(),
-          isVisible: true,
-          isDisabled: authStore.isPremiumAccount,
-          callback() {
-            if (!authStore.isLoggedIn) {
-              router.push("/auth/sign-up");
-              return;
-            }
-            if (!authStore.isPremiumAccount) {
-              isGoPremiumSidebarOpen.value = true;
-              return;
-            }
-          },
-        },
-      };
-    case "freemium":
-      return {
-        title: "Plan Gratuito",
-        subtitle: "Para emprendedores que están comenzando",
-        price: currencyFormatter.parse(plan.price, {
-          maximumFractionDigits: 0,
-        }),
-        period: "/mes",
-        description: `
-          <ul>
-            <li>Hasta ${plan.max_customers} clientes y ${plan.max_products} productos</li>  
-            <li>Crear ventas y ver estadísticas</li>  
-          </ul>
-        `,
-        action: {
-          label: (() => {
-            if (authStore.isLoggedIn && !authStore.isPremiumAccount) {
-              return "Ya cuentas con este plan";
-            }
-
-            return "Empieza Gratis";
-          })(),
-          isVisible: !authStore.isPremiumAccount,
-          isDisabled: false,
-          callback() {
-            if (!authStore.isLoggedIn) {
-              router.push("/auth/sign-up");
-            }
-          },
-        },
-      };
-
-    default:
-      break;
-  }
-}
 </script>
 
 <template>
@@ -149,7 +48,6 @@ function getCardDataFromPlan(plan: Tables<"plans">) {
           <Button
             size="lg"
             class="px-8 py-3 text-base"
-            :loading="!organizationStore.hasUserOrganizations"
             :disabled="!organizationStore.hasUserOrganizations"
           >
             Dashboard
@@ -176,8 +74,6 @@ function getCardDataFromPlan(plan: Tables<"plans">) {
       </div>
     </section>
     <section class="mx-auto px-6 max-w-5xl pb-16">
-      <GoPremiumSidebar v-model:open="isGoPremiumSidebarOpen" />
-
       <div class="flex flex-col justify-center text-center">
         <h2 class="text-4xl lg:text-5xl mb-3">
           ¿Cómo utilizar inventariofacil.mx?
@@ -203,8 +99,6 @@ function getCardDataFromPlan(plan: Tables<"plans">) {
       </div>
     </section>
     <section class="mx-auto px-6 max-w-5xl pb-16">
-      <GoPremiumSidebar v-model:open="isGoPremiumSidebarOpen" />
-
       <div class="flex flex-col justify-center text-center">
         <h2 class="text-4xl lg:text-5xl mb-3">Planes y Precios</h2>
         <p class="text-muted-foreground">
@@ -213,41 +107,7 @@ function getCardDataFromPlan(plan: Tables<"plans">) {
       </div>
 
       <div class="my-14">
-        <div
-          class="grid grid-cols-1 lg:grid-cols-2 gap-6"
-          v-for="page in plansQuery.data.value?.pages"
-        >
-          <Card v-for="plan in page.data">
-            <CardHeader>
-              <CardTitle>{{ getCardDataFromPlan(plan)?.title }}</CardTitle>
-              <CardDescription>{{
-                getCardDataFromPlan(plan)?.subtitle
-              }}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Separator />
-              <div class="flex items-center gap-2 my-6">
-                <div class="text-4xl">
-                  {{ getCardDataFromPlan(plan)?.price }}
-                </div>
-                <div>{{ getCardDataFromPlan(plan)?.period }}</div>
-              </div>
-              <p
-                class="text-muted-foreground"
-                v-html="getCardDataFromPlan(plan)?.description"
-              />
-            </CardContent>
-            <CardFooter v-if="getCardDataFromPlan(plan)?.action.isVisible">
-              <Button
-                :disabled="getCardDataFromPlan(plan)?.action.isDisabled"
-                @click="getCardDataFromPlan(plan)?.action.callback()"
-                class="w-full"
-              >
-                {{ getCardDataFromPlan(plan)?.action.label }}
-              </Button>
-            </CardFooter>
-          </Card>
-        </div>
+        <PricingGrid />
       </div>
     </section>
     <section class="mx-auto px-6 max-w-5xl pb-16">

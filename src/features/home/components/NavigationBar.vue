@@ -41,7 +41,6 @@ const HOME_URL = window.location.origin;
       <div v-if="authStore.isLoggedIn" class="flex gap-4">
         <Button
           variant="outline"
-          :loading="!organizationStore.hasUserOrganizations"
           :disabled="!organizationStore.hasUserOrganizations"
           @click="authStore.signOut"
         >

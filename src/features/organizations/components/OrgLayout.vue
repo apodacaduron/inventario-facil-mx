@@ -42,6 +42,7 @@ import { useLayerManager } from "@/features/global";
 import CreateOrganizationSidebar from "./CreateOrganizationSidebar.vue";
 import { SUPPORT_EMAIL } from "@/config/constants";
 import UploadOrganizationLogoSidebar from "./UploadOrganizationLogoSidebar.vue";
+import { GoogleAd } from "@/features/adsense";
 
 const layerManager = useLayerManager();
 const organizationStore = useOrganizationStore();
@@ -159,6 +160,7 @@ const menuList = computed(() => ({
               </div>
               <SheetFooter class="flex flex-col gap-4">
                 <div class="shrink-0 bg-border h-px w-full" />
+                <GoogleAd />
                 <a
                   :href="`mailto:${SUPPORT_EMAIL}`"
                   class="w-full inline-flex items-center whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground rounded-md h-10 px-3 text-md justify-start"
@@ -314,6 +316,7 @@ const menuList = computed(() => ({
       </ul>
 
       <div class="w-full flex flex-col gap-4">
+        <GoogleAd />
         <a
           :href="`mailto:${SUPPORT_EMAIL}`"
           class="w-full inline-flex items-center whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground rounded-md h-10 px-3 text-md justify-start"

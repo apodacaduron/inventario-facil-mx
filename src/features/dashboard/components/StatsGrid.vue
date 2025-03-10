@@ -179,7 +179,7 @@ const periodString = toRef(() => {
     <router-link :to="`/org/${route.params.orgId}/customers`">
       <Card>
         <CardHeader class="flex relative pb-2">
-          <CardTitle class="text-sm font-medium"> Total de clientes</CardTitle>
+          <CardTitle class="text-sm font-medium"> Número de clientes</CardTitle>
           <Avatar
             class="absolute top-2 right-4 bg-primary text-primary-foreground"
           >

@@ -7,7 +7,9 @@ import Toaster from "@/components/ui/toast/Toaster.vue";
 import { useOnline } from "@vueuse/core";
 import { OfflineBanner } from "./features/global";
 import { useAuthedUserDataQuery } from "./features/admin";
+import { useAdsense } from "./features/adsense/composables/useAdsense";
 
+useAdsense();
 const authStore = useAuthStore();
 const organizationStore = useOrganizationStore();
 const authedUserDataQuery = useAuthedUserDataQuery({

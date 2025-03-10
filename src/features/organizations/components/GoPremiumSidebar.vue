@@ -4,12 +4,12 @@ import {
   Button,
   Sheet,
   SheetContent,
-  SheetDescription,
   SheetFooter,
   SheetHeader,
   SheetTitle,
 } from "@/components/ui";
 import { supabase } from "@/config/supabase";
+import PricingGrid from "@/features/home/components/PricingGrid.vue";
 import { useAuthStore } from "@/stores";
 import { useMutation, useQuery } from "@tanstack/vue-query";
 
@@ -57,26 +57,8 @@ async function createStripeCheckout() {
     <SheetContent class="overflow-y-auto w-full">
       <SheetHeader>
         <SheetTitle>¡Hazte PRO Hoy!</SheetTitle>
-        <SheetDescription>
-          <img src="/user_computer.svg" class="w-48 h-48 mx-auto mb-4" />
-
-          <ul class="list-disc pl-4">
-            <li>
-              Hasta
-              {{ premiumPlanQuery.data.value?.data?.max_customers }} clientes y
-              {{ premiumPlanQuery.data.value?.data?.max_products }} productos
-            </li>
-            <li>
-              Hasta
-              {{ premiumPlanQuery.data.value?.data?.max_organizations }}
-              organizaciones
-            </li>
-            <li>Página pública para compartir inventario con clientes</li>
-            <li>Estadísticas avanzadas</li>
-            <li>Monedero electrónico para tus clientes</li>
-          </ul>
-        </SheetDescription>
       </SheetHeader>
+      <PricingGrid />
       <SheetFooter class="flex flex-row gap-2 mt-4">
         <Button
           :disabled="createStripeCheckoutMutation.isPending.value"
